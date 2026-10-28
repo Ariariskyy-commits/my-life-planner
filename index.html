@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Y2K Playful Life Planner - รายรับรายจ่าย แพลนเนอร์ & น้องป๋อง</title>
+    <title>Y2K Playful Life Planner - รายรับรายจ่าย แพลนเนอร์ & สัตว์เลี้ยงส่วนตัว</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Prompt & Fredoka -->
@@ -48,7 +48,6 @@
             overflow-x: hidden;
             transition: background 0.3s ease, color 0.3s ease;
         }
-        /* Theme Definitions */
         body.theme-y2k { --bg-color: #F9F9FB; --card-bg: #FFFFFF; --text-color: #1A1A1A; --primary: #0055FF; --accent: #CCFF00; }
         body.theme-pastel { --bg-color: #FFF0F5; --card-bg: #FFFFFF; --text-color: #4A4045; --primary: #FFB6C1; --accent: #E6E6FA; }
         body.theme-dark { --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0; --primary: #BB86FC; --accent: #03DAC6; }
@@ -60,7 +59,6 @@
         .sticker-item { cursor: grab; user-select: none; transition: transform 0.1s ease; }
         .sticker-item:active { cursor: grabbing; transform: scale(1.1); }
         
-        /* Device Viewport Wrapper */
         .device-container {
             width: 100%;
             transition: all 0.3s ease;
@@ -85,26 +83,35 @@
         </div>
         <div class="pr-2">
             <div class="flex items-center gap-1">
-                <span class="text-xs font-extrabold text-darkText">น้องป๋อง (การเงิน)</span>
+                <span id="floatingPetName" class="text-xs font-extrabold text-darkText">สัตว์เลี้ยงการเงิน</span>
                 <span id="petMoodIcon" class="text-xs">✨</span>
             </div>
             <p id="petSpeechBubble" class="text-xs font-bold text-hotPink bg-white px-2 py-0.5 rounded-xl border border-darkText mt-0.5">
-                เย้! เงินเข้าแล้ว สู้ๆ นะคะ! 💰
+                ยินดีต้อนรับนะงับ! 💰
             </p>
         </div>
     </div>
 
     <!-- DEVICE VIEWPORT & THEME CONTROLS BAR -->
     <div class="bg-darkText text-white px-4 py-2 flex flex-wrap items-center justify-between gap-2 z-50 text-xs font-bold">
-        <div class="flex items-center gap-2">
-            <span>🎨 เลือกธีม:</span>
+        <div class="flex items-center gap-2 flex-wrap">
+            <span>🎨 ธีม:</span>
             <button onclick="setTheme('y2k')" class="px-2.5 py-1 rounded-lg bg-popBlue text-white border border-white">Y2K</button>
             <button onclick="setTheme('pastel')" class="px-2.5 py-1 rounded-lg bg-pink-400 text-white border border-white">พาสเทล</button>
             <button onclick="setTheme('dark')" class="px-2.5 py-1 rounded-lg bg-gray-800 text-white border border-white">ดาร์กโหมด</button>
             <button onclick="setTheme('minimal')" class="px-2.5 py-1 rounded-lg bg-gray-300 text-darkText border border-white">มินิมอล</button>
         </div>
-        <div class="flex items-center gap-2">
-            <span>📱 มุมมองหน้าจอ:</span>
+        
+        <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="exportData()" class="px-2.5 py-1 rounded-lg bg-sunnyYellow text-darkText border border-white hover:scale-105 transition-all flex items-center gap-1">
+                <i class="fa-solid fa-file-export"></i> 📤 Export ข้อมูล
+            </button>
+            <label class="px-2.5 py-1 rounded-lg bg-hotPink text-white border border-white hover:scale-105 transition-all cursor-pointer flex items-center gap-1">
+                <i class="fa-solid fa-file-import"></i> 📥 Import ข้อมูล
+                <input type="file" id="importFileInput" accept=".json" onchange="importData(event)" class="hidden">
+            </label>
+
+            <span class="ml-2">📱 มุมมอง:</span>
             <button onclick="setDeviceMode('desktop')" id="btnDesktop" class="px-3 py-1 rounded-lg bg-limeGreen text-darkText border border-white">💻 คอมพิวเตอร์</button>
             <button onclick="setDeviceMode('ipad')" id="btnIpad" class="px-3 py-1 rounded-lg bg-gray-700 text-white border border-white">📟 ไอแพด (Tablet)</button>
         </div>
@@ -117,14 +124,12 @@
         <header class="bg-popBlue border-b-4 border-darkText text-white sticky top-0 z-50 px-4 py-3 shadow-[0_4px_0px_#1A1A1A]">
             <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
                 
-                <!-- Logo & Title -->
                 <div class="flex items-center space-x-3">
                     <div class="bg-limeGreen text-darkText font-cute font-bold text-2xl px-3 py-1 rounded-xl border-2 border-darkText shadow-brutal-sm transform -rotate-2">
                         ✨ Y2K PLANNER
                     </div>
                 </div>
 
-                <!-- Navigation Tabs -->
                 <nav class="flex flex-wrap items-center justify-center gap-1.5 bg-white/10 p-1.5 rounded-2xl border-2 border-darkText shadow-brutal-sm">
                     <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-limeGreen text-darkText border-2 border-darkText shadow-brutal-sm transition-all flex items-center gap-1">
                         <i class="fa-solid fa-chart-pie"></i> แดชบอร์ด
@@ -145,14 +150,13 @@
                         <i class="fa-solid fa-calculator"></i> เครื่องคิดเลข
                     </button>
                     <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm text-white hover:bg-white/20 transition-all flex items-center gap-1">
-                        <i class="fa-solid fa-cat"></i> น้องป๋อง 🐾
+                        <i class="fa-solid fa-paw"></i> สัตว์เลี้ยง 🐾
                     </button>
                     <button onclick="switchTab('decorate')" id="nav-decorate" class="tab-btn px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm text-white hover:bg-white/20 transition-all flex items-center gap-1">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> สติ๊กเกอร์
                     </button>
                 </nav>
 
-                <!-- Quick Action Button -->
                 <div class="flex items-center gap-2">
                     <button onclick="openModal('quickAddModal')" class="bg-hotPink text-white font-bold px-4 py-2 rounded-xl border-2 border-darkText shadow-brutal-sm hover:translate-y-[-2px] transition-all flex items-center gap-2 text-sm">
                         <i class="fa-solid fa-plus"></i> เพิ่มด่วน
@@ -164,7 +168,6 @@
         <!-- MAIN CONTAINER -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 relative">
 
-            <!-- DECORATIVE STICKER CANVAS LAYER -->
             <div id="stickerCanvasArea" class="absolute inset-0 pointer-events-none overflow-hidden z-10"></div>
 
             <!-- ================= TAB 1: DASHBOARD ================= -->
@@ -179,7 +182,7 @@
                             จัดการชีวิต เงินทอง & แพลนวันนี้ให้ปังปุริเย่ 🌟
                         </h1>
                         <p class="font-medium text-sm md:text-base">
-                            ภาพรวมสถานะการเงิน บิลเตรียมจ่าย ตารางงาน และน้องป๋องสัตว์เลี้ยงคู่ใจ
+                            ภาพรวมสถานะการเงิน บิลเตรียมจ่าย ตารางงาน และสัตว์เลี้ยงคู่ใจ
                         </p>
                     </div>
                     <div class="bg-white p-4 rounded-2xl border-3 border-darkText shadow-brutal-sm text-center z-20">
@@ -188,7 +191,6 @@
                     </div>
                 </div>
 
-                <!-- Stats Grid Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-white text-darkText p-5 rounded-2xl border-3 border-darkText shadow-brutal flex items-center justify-between">
                         <div>
@@ -228,7 +230,6 @@
                     </div>
                 </div>
 
-                <!-- Charts & Quick Lists -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal lg:col-span-2 flex flex-col">
                         <div class="flex items-center justify-between mb-4">
@@ -464,45 +465,77 @@
 
             <!-- ================= TAB 7: TAMAGOTCHI PET ================= -->
             <section id="tab-pet" class="tab-content hidden space-y-6">
-                <div class="bg-gradient-to-r from-sunnyYellow to-limeGreen p-8 rounded-3xl border-4 border-darkText shadow-brutal flex flex-col md:flex-row items-center justify-between gap-6 text-darkText">
-                    <div class="space-y-3 z-20 text-center md:text-left">
-                        <div class="inline-block bg-hotPink text-white font-bold text-xs px-3 py-1 rounded-full border-2 border-darkText">🐾 สัตว์เลี้ยงนำโชค</div>
-                        <h2 class="text-3xl md:text-4xl font-extrabold font-cute">น้องป๋อง (Tamagotchi Pet)</h2>
-                        <p class="font-medium text-sm md:text-base max-w-xl">สัตว์เลี้ยงที่จะเติบโต ร่าเริง หรือผอมตามสถานะการเงิน ยิ่งเงินเก็บเยอะ ยิ่งอ้วนปุ๊กน่ารัก!</p>
+                <!-- PET HEADER BANNER -->
+                <div class="bg-gradient-to-r from-sunnyYellow to-limeGreen p-6 rounded-3xl border-4 border-darkText shadow-brutal flex flex-col md:flex-row items-center justify-between gap-6 text-darkText">
+                    <div class="space-y-2 z-20 text-center md:text-left">
+                        <div class="inline-block bg-hotPink text-white font-bold text-xs px-3 py-1 rounded-full border-2 border-darkText">🐾 สัตว์เลี้ยงนำโชคการเงิน</div>
+                        <h2 id="petHeaderTitle" class="text-3xl md:text-4xl font-extrabold font-cute">สัตว์เลี้ยงการเงิน (Tamagotchi)</h2>
+                        <p class="font-medium text-sm md:text-base max-w-xl">สัตว์เลี้ยงจะตอบสนองต่อยอดเงินของคุณแบบเรียลไทม์! ยิ่งมีเงินเก็บเยอะ ยิ่งอ้วนปุ๊กน่ารัก แต่ถ้าเงินหมด น้องจะหงอยนะงับ 🥺</p>
                     </div>
                     <div class="bg-white p-6 rounded-3xl border-3 border-darkText shadow-brutal text-center z-25 min-w-[220px]">
                         <div id="petBigAvatar" class="text-6xl mb-2 animate-bounce">🐱</div>
-                        <h3 id="petBigName" class="font-cute font-bold text-xl">น้องป๋อง (สมบูรณ์)</h3>
-                        <p id="petBigStatusText" class="text-xs font-bold text-popBlue mt-1">เงินเก็บดีเยี่ยม!</p>
+                        <h3 id="petBigName" class="font-cute font-bold text-xl">สัตว์เลี้ยงของคุณ</h3>
+                        <p id="petBigStatusText" class="text-xs font-bold text-popBlue mt-1">กำลังคำนวณสถานะ...</p>
                     </div>
                 </div>
+
+                <!-- SETTINGS & CONTROLS GRID -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- BOX 1: EDIT PET PROFILE -->
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-4">
                         <h3 class="font-cute font-bold text-xl flex items-center gap-2 border-b-2 border-darkText pb-3">
-                            <i class="fa-solid fa-heart-pulse text-hotPink"></i> ค่าสถานะน้องป๋อง
+                            <i class="fa-solid fa-sliders text-popBlue"></i> ตั้งค่าสัตว์เลี้ยงของคุณ
                         </h3>
                         <div class="space-y-3">
                             <div>
-                                <div class="flex justify-between text-xs font-bold mb-1"><span>ความอิ่มเอม</span><span id="petHungerVal">85%</span></div>
-                                <div class="w-full bg-offWhite h-4 rounded-full border-2 border-darkText overflow-hidden"><div id="petHungerBar" class="bg-limeGreen h-full w-[85%]"></div></div>
+                                <label class="block text-xs font-bold mb-1">ชื่อสัตว์เลี้ยง</label>
+                                <input type="text" id="petNameInput" onchange="updatePetSettings()" placeholder="ตั้งชื่อตามใจชอบ..." class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 text-sm font-bold outline-none">
                             </div>
                             <div>
-                                <div class="flex justify-between text-xs font-bold mb-1"><span>ความสุข</span><span id="petHappyVal">90%</span></div>
-                                <div class="w-full bg-offWhite h-4 rounded-full border-2 border-darkText overflow-hidden"><div id="petHappyBar" class="bg-sunnyYellow h-full w-[90%]"></div></div>
+                                <label class="block text-xs font-bold mb-1">เลือกประเภทสัตว์เลี้ยง</label>
+                                <select id="petAvatarSelect" onchange="updatePetSettings()" class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 text-sm font-bold outline-none">
+                                    <option value="🐱">🐱 แมวน้อย (Cat)</option>
+                                    <option value="🐶">🐶 เจ้าหมา (Dog)</option>
+                                    <option value="🐰">🐰 กระต่าย (Rabbit)</option>
+                                    <option value="🐹">🐹 แฮมสเตอร์ (Hamster)</option>
+                                    <option value="🐻">🐻 หมีน้อย (Bear)</option>
+                                    <option value="🦆">🦆 เป็ดก๊าบ (Duck)</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="pt-4 border-t-2 border-darkText">
-                            <button onclick="feedPet()" class="w-full bg-limeGreen text-darkText font-bold py-3 rounded-2xl border-3 border-darkText shadow-brutal-sm flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-fish"></i> ให้อาหารน้องป๋อง
+                    </div>
+
+                    <!-- BOX 2: PET STATUS BARS -->
+                    <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-4">
+                        <h3 class="font-cute font-bold text-xl flex items-center gap-2 border-b-2 border-darkText pb-3">
+                            <i class="fa-solid fa-heart-pulse text-hotPink"></i> ค่าสถานะปัจจุบัน
+                        </h3>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1"><span>ความอิ่มเอม</span><span id="petHungerVal">0%</span></div>
+                                <div class="w-full bg-offWhite h-4 rounded-full border-2 border-darkText overflow-hidden"><div id="petHungerBar" class="bg-limeGreen h-full w-[0%] transition-all"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1"><span>ความสุข</span><span id="petHappyVal">0%</span></div>
+                                <div class="w-full bg-offWhite h-4 rounded-full border-2 border-darkText overflow-hidden"><div id="petHappyBar" class="bg-sunnyYellow h-full w-[0%] transition-all"></div></div>
+                            </div>
+                        </div>
+                        <div class="pt-2">
+                            <button onclick="feedPet()" class="w-full bg-limeGreen text-darkText font-bold py-3 rounded-2xl border-3 border-darkText shadow-brutal-sm flex items-center justify-center gap-2 hover:scale-102 transition-all">
+                                <i class="fa-solid fa-fish"></i> ให้อาหารสัตว์เลี้ยง
                             </button>
                         </div>
                     </div>
-                    <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal lg:col-span-2 space-y-4 flex flex-col">
+
+                    <!-- BOX 3: SPEECH HISTORY -->
+                    <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-4 flex flex-col">
                         <h3 class="font-cute font-bold text-xl flex items-center gap-2 border-b-2 border-darkText pb-3">
-                            <i class="fa-solid fa-comment-dots text-popBlue"></i> คำพูดของน้องป๋อง
+                            <i class="fa-solid fa-comment-dots text-popBlue"></i> ประวัติคำพูด
                         </h3>
-                        <div id="petSpeechHistory" class="space-y-3 overflow-y-auto max-h-[250px] flex-1 pr-1"></div>
+                        <div id="petSpeechHistory" class="space-y-3 overflow-y-auto max-h-[220px] flex-1 pr-1"></div>
                     </div>
+
                 </div>
             </section>
 
@@ -657,7 +690,7 @@
             </div>
             <form id="eventForm" onsubmit="handleSaveEvent(event)" class="space-y-4">
                 <div><label class="block text-sm font-bold mb-1">วันที่</label><input type="date" id="eventDate" required class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 outline-none"></div>
-                <div><label class="block text-sm font-bold mb-1">หัวข้อไดอารี่ / วันสำคัญ</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้ไปคาเฟ่แมวมา 🐾" required class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 outline-none"></div>
+                <div><label class="block text-sm font-bold mb-1">หัวข้อไดอารี่ / วันสำคัญ</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้ไปคาเฟ่มา 🐾" required class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 outline-none"></div>
                 <div>
                     <label class="block text-sm font-bold mb-1">แนบรูปภาพความทรงจำ (URL รูปภาพ)</label>
                     <input type="url" id="eventPhoto" placeholder="https://images.unsplash.com/photo-..." class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 outline-none text-xs">
@@ -683,29 +716,22 @@
         let state = {
             theme: localStorage.getItem('y2k_theme') || 'y2k',
             deviceMode: localStorage.getItem('y2k_device') || 'desktop',
-            transactions: JSON.parse(localStorage.getItem('y2k_transactions')) || [
-                { id: '1', date: '2026-06-01', title: 'เงินเดือนออก', category: 'เงินเดือน/รายรับ', amount: 25000, type: 'income' },
-                { id: '2', date: '2026-06-02', title: 'ค่ากาแฟส้มยูซุ', category: 'อาหาร/เครื่องดื่ม', amount: 120, type: 'expense' }
-            ],
-            bills: JSON.parse(localStorage.getItem('y2k_bills')) || [
-                { id: 'b1', date: '2026-06-25', title: 'ค่าหอพักเดือนนี้', amount: 4500, paid: false }
-            ],
-            tasks: JSON.parse(localStorage.getItem('y2k_tasks')) || [
-                { id: 't1', title: 'เคลียร์บัญชีการเงิน', date: '2026-06-05', status: 'todo', desc: 'ตรวจสอบยอด' }
-            ],
-            events: JSON.parse(localStorage.getItem('y2k_events')) || [
-                { id: 'e1', date: '2026-06-15', title: 'ไปคาเฟ่กับเพื่อน', photo: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=300' }
-            ],
+            transactions: JSON.parse(localStorage.getItem('y2k_transactions')) || [],
+            bills: JSON.parse(localStorage.getItem('y2k_bills')) || [],
+            tasks: JSON.parse(localStorage.getItem('y2k_tasks')) || [],
+            events: JSON.parse(localStorage.getItem('y2k_events')) || [],
             calcHistory: JSON.parse(localStorage.getItem('y2k_calchistory')) || [],
             stickers: JSON.parse(localStorage.getItem('y2k_stickers')) || [{ id: 's1', emoji: '⭐', x: 50, y: 120 }],
             pet: JSON.parse(localStorage.getItem('y2k_pet')) || {
-                hunger: 80, happiness: 90,
-                speech: 'เย้! เงินเข้าแล้ว สู้ๆ นะคะคุณเจ้า',
-                speechHistory: [{ time: 'เพิ่งตอนนี้', text: 'เย้! เงินเข้าแล้ว สู้ๆ นะคะคุณเจ้า' }]
+                name: 'น้องสัตว์เลี้ยง',
+                avatar: '🐱',
+                feedBonus: 0,
+                speech: 'ยินดีต้อนรับนะงับ! บันทึกเงินกันเถอะ',
+                speechHistory: [{ time: 'เริ่มต้น', text: 'ยินดีต้อนรับนะงับ! บันทึกเงินกันเถอะ' }]
             }
         };
 
-        let currentCalendarDate = new Date(2026, 5, 1);
+        let currentCalendarDate = new Date(2026, 9, 28);
         let expenseChartInstance = null;
         let currentCalcExpression = "0";
         let lastCalcResult = 0;
@@ -714,6 +740,11 @@
             setTheme(state.theme, false);
             setDeviceMode(state.deviceMode, false);
             setDefaultDates();
+            
+            // Sync Pet Inputs
+            document.getElementById('petNameInput').value = state.pet.name || 'น้องสัตว์เลี้ยง';
+            document.getElementById('petAvatarSelect').value = state.pet.avatar || '🐱';
+
             renderDashboard();
             renderTransactions();
             renderBills();
@@ -721,8 +752,7 @@
             renderCalendar();
             renderEventsList();
             renderStickers();
-            updatePetWidget();
-            renderPetPage();
+            updatePetStatus();
             renderCalcHistory();
         };
 
@@ -736,6 +766,134 @@
             localStorage.setItem('y2k_pet', JSON.stringify(state.pet));
             localStorage.setItem('y2k_theme', state.theme);
             localStorage.setItem('y2k_device', state.deviceMode);
+        }
+
+        // ================= DYNAMIC PET LOGIC =================
+        function updatePetSettings() {
+            state.pet.name = document.getElementById('petNameInput').value.trim() || 'สัตว์เลี้ยง';
+            state.pet.avatar = document.getElementById('petAvatarSelect').value;
+            saveData();
+            updatePetStatus();
+            showToast('อัปเดตข้อมูลสัตว์เลี้ยงเรียบร้อย! ✨');
+        }
+
+        function updatePetStatus() {
+            let totalIncome = 0, totalExpense = 0;
+            state.transactions.forEach(t => t.type === 'income' ? totalIncome += t.amount : totalExpense += t.amount);
+            let netBalance = totalIncome - totalExpense;
+
+            // Compute dynamic hunger and happiness from real balance
+            let hunger = 0;
+            let happiness = 0;
+            let moodAvatar = state.pet.avatar || '🐱';
+            let moodText = '';
+
+            if (state.transactions.length === 0) {
+                hunger = 50 + (state.pet.feedBonus || 0);
+                happiness = 50 + (state.pet.feedBonus || 0);
+                moodText = 'กำลังรอยอดเงินแรกงับ!';
+            } else if (netBalance <= 0) {
+                // Low / Negative balance -> Sad / Hungry
+                hunger = Math.max(10, 20 + (state.pet.feedBonus || 0));
+                happiness = Math.max(10, 15 + (state.pet.feedBonus || 0));
+                
+                // Sad expression
+                if (state.pet.avatar === '🐱') moodAvatar = '😿';
+                else if (state.pet.avatar === '🐶') moodAvatar = '🥺';
+                else if (state.pet.avatar === '🐰') moodAvatar = '😭';
+                else moodAvatar = state.pet.avatar;
+
+                moodText = 'งบหมดแล้ว/ติดลบ ช่วยด้วยงับ! 🥺';
+            } else {
+                // Positive balance -> Fat & Happy
+                let bonus = Math.min(40, Math.floor(netBalance / 500));
+                hunger = Math.min(100, 60 + bonus + (state.pet.feedBonus || 0));
+                happiness = Math.min(100, 65 + bonus + (state.pet.feedBonus || 0));
+
+                if (state.pet.avatar === '🐱') moodAvatar = '😺';
+                moodText = 'อ้วนปุ๊ก สมบูรณ์พุงกาง 💖';
+            }
+
+            state.pet.hunger = Math.min(100, hunger);
+            state.pet.happiness = Math.min(100, happiness);
+
+            const pName = state.pet.name || 'สัตว์เลี้ยง';
+            document.getElementById('floatingPetName').innerText = `${pName} (การเงิน)`;
+            document.getElementById('petHeaderTitle').innerText = `${pName} (Tamagotchi Pet)`;
+            document.getElementById('petAvatar').innerText = moodAvatar;
+            document.getElementById('petBigAvatar').innerText = moodAvatar;
+            document.getElementById('petBigName').innerText = `${pName} (${moodText})`;
+            document.getElementById('petBigStatusText').innerText = netBalance <= 0 ? 'เงินหมดแล้วน้า 🥺' : `เงินเก็บสุทธิ ฿${netBalance.toLocaleString()}`;
+            
+            document.getElementById('petHungerVal').innerText = state.pet.hunger + '%';
+            document.getElementById('petHungerBar').style.width = state.pet.hunger + '%';
+            document.getElementById('petHappyVal').innerText = state.pet.happiness + '%';
+            document.getElementById('petHappyBar').style.width = state.pet.happiness + '%';
+            document.getElementById('petSpeechBubble').innerText = state.pet.speech;
+
+            renderPetSpeechHistory();
+        }
+
+        function feedPet() {
+            state.pet.feedBonus = (state.pet.feedBonus || 0) + 10;
+            triggerPetSpeech(`งั่มๆ อร่อยจัง ขอบคุณคุณเจ้าของมากๆ ค่า! 🐾`);
+            saveData();
+            updatePetStatus();
+            showToast(`ให้อาหาร ${state.pet.name || 'สัตว์เลี้ยง'} เรียบร้อย!`);
+        }
+
+        function triggerPetSpeech(text) {
+            state.pet.speech = text;
+            state.pet.speechHistory.unshift({ time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), text: text });
+            if(state.pet.speechHistory.length > 10) state.pet.speechHistory.pop();
+            saveData();
+        }
+
+        function renderPetSpeechHistory() {
+            const hist = document.getElementById('petSpeechHistory');
+            if(!hist) return;
+            hist.innerHTML = state.pet.speechHistory.map(h => `
+                <div class="bg-offWhite p-3 rounded-2xl border-2 border-darkText text-sm flex items-center gap-3">
+                    <span class="text-xl">${state.pet.avatar || '🐾'}</span>
+                    <div><span class="text-[10px] text-gray-400 block">${h.time}</span><p class="font-bold text-hotPink">"${h.text}"</p></div>
+                </div>
+            `).join('');
+        }
+        // =====================================================
+
+        // EXPORT & IMPORT SYSTEM
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const dlAnchorElem = document.createElement('a');
+            const today = new Date().toISOString().split('T')[0];
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `y2k_planner_backup_${today}.json`);
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            dlAnchorElem.remove();
+            showToast('ส่งออกไฟล์ข้อมูลสำเร็จ! 📤');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedState = JSON.parse(e.target.result);
+                    if (importedState && typeof importedState === 'object') {
+                        state = importedState;
+                        saveData();
+                        showToast('ดึงข้อมูลเข้าสำเร็จเรียบร้อย! 📥');
+                        setTimeout(() => location.reload(), 800);
+                    } else {
+                        alert('รูปแบบไฟล์ไม่ถูกต้อง');
+                    }
+                } catch (err) {
+                    alert('เกิดข้อผิดพลาดในการนำเข้าไฟล์ข้อมูล');
+                }
+            };
+            reader.readAsText(file);
         }
 
         function setTheme(themeName, save=true) {
@@ -783,7 +941,7 @@
             if(tabId === 'bills') renderBills();
             if(tabId === 'planner') renderTasks();
             if(tabId === 'calendar') renderCalendar();
-            if(tabId === 'pet') renderPetPage();
+            if(tabId === 'pet') updatePetStatus();
         }
 
         function showToast(message) {
@@ -795,45 +953,6 @@
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        // Pet logic
-        function triggerPetSpeech(text) {
-            state.pet.speech = text;
-            state.pet.speechHistory.unshift({ time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), text: text });
-            if(state.pet.speechHistory.length > 10) state.pet.speechHistory.pop();
-            saveData();
-            updatePetWidget();
-        }
-
-        function updatePetWidget() {
-            document.getElementById('petSpeechBubble').innerText = state.pet.speech;
-            let avatar = state.pet.hunger < 40 ? '😿' : (state.pet.happiness > 80 ? '😺' : '🐱');
-            document.getElementById('petAvatar').innerText = avatar;
-        }
-
-        function feedPet() {
-            state.pet.hunger = Math.min(100, state.pet.hunger + 15);
-            state.pet.happiness = Math.min(100, state.pet.happiness + 10);
-            triggerPetSpeech('งั่มๆ อร่อยจัง ขอบคุณคุณเจ้าของมากค่า! 🐾');
-            saveData();
-            renderPetPage();
-            showToast('ให้น้องป๋องอิ่มแล้ว!');
-        }
-
-        function renderPetPage() {
-            document.getElementById('petHungerVal').innerText = state.pet.hunger + '%';
-            document.getElementById('petHungerBar').style.width = state.pet.hunger + '%';
-            document.getElementById('petHappyVal').innerText = state.pet.happiness + '%';
-            document.getElementById('petHappyBar').style.width = state.pet.happiness + '%';
-            document.getElementById('petBigAvatar').innerText = state.pet.hunger < 40 ? '😿' : '🐱';
-            const hist = document.getElementById('petSpeechHistory');
-            hist.innerHTML = state.pet.speechHistory.map(h => `
-                <div class="bg-offWhite p-3 rounded-2xl border-2 border-darkText text-sm flex items-center gap-3">
-                    <span class="text-xl">🐱</span>
-                    <div><span class="text-[10px] text-gray-400 block">${h.time}</span><p class="font-bold text-hotPink">"${h.text}"</p></div>
-                </div>
-            `).join('');
-        }
 
         // Transactions logic
         function openTransactionModal(type) {
@@ -856,27 +975,32 @@
                 category: document.getElementById('txCategory').value,
                 amount: amount, type: type
             });
+
+            const pName = state.pet.name || 'สัตว์เลี้ยง';
             if(type === 'income') {
-                state.pet.hunger = Math.min(100, state.pet.hunger + 10);
-                triggerPetSpeech(`เย้! เงินเข้าแล้ว +฿${amount.toLocaleString()} รวยๆ เฮงๆ! 🎉`);
+                triggerPetSpeech(`เย้! เงินเข้าแล้ว +฿${amount.toLocaleString()} ${pName} ดีใจมากกก! 🎉`);
             } else {
-                state.pet.hunger = Math.max(10, state.pet.hunger - 8);
-                triggerPetSpeech(`อุ๊ย! รายจ่าย -฿${amount.toLocaleString()} น้องป๋องเริ่มผอมแล้วนะงับ! 🥲`);
+                triggerPetSpeech(`อุ๊ย! รายจ่าย -฿${amount.toLocaleString()} ${pName} เริ่มหงอยแล้วนะงับ! 🥺`);
             }
+            
             saveData();
             closeModal('transactionModal');
             renderDashboard();
             renderTransactions();
-            renderPetPage();
+            updatePetStatus();
             showToast('บันทึกสำเร็จ!');
         }
 
         function deleteTransaction(id) {
             state.transactions = state.transactions.filter(t => t.id !== id);
+            // Deduct feed bonus on transaction deletion to reflect immediate money loss
+            state.pet.feedBonus = Math.max(0, (state.pet.feedBonus || 0) - 15);
+            triggerPetSpeech(`โอ๊ะ! รายการเงินถูกลบไปแล้ว สภาพการเงินเปลี่ยนเลยงับ 🥺`);
             saveData();
             renderDashboard();
             renderTransactions();
-            showToast('ลบสำเร็จ');
+            updatePetStatus();
+            showToast('ลบรายการเงินแล้ว!');
         }
 
         function renderTransactions() {
@@ -1030,7 +1154,7 @@
         }
         function saveCalcAsExpense(type) {
             state.transactions.unshift({ id: 'tx_' + Date.now(), date: new Date().toISOString().split('T')[0], title: 'จากเครื่องคิดเลข', category: type === 'expense' ? 'อื่นๆ' : 'เงินเดือน/รายรับ', amount: lastCalcResult, type: type });
-            saveData(); renderDashboard(); renderTransactions(); showToast('บันทึกรายการเงินแล้ว!');
+            saveData(); renderDashboard(); renderTransactions(); updatePetStatus(); showToast('บันทึกรายการเงินแล้ว!');
         }
 
         // Dashboard & Charts

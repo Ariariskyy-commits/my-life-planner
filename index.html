@@ -56,8 +56,6 @@
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #eee; border-left: 2px solid #1A1A1A; }
         ::-webkit-scrollbar-thumb { background: #0055FF; border: 2px solid #1A1A1A; border-radius: 4px; }
-        .sticker-item { cursor: grab; user-select: none; transition: transform 0.1s ease; }
-        .sticker-item:active { cursor: grabbing; transform: scale(1.1); }
         
         .device-container {
             width: 100%;
@@ -152,9 +150,6 @@
                     <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm text-white hover:bg-white/20 transition-all flex items-center gap-1">
                         <i class="fa-solid fa-paw"></i> สัตว์เลี้ยง 🐾
                     </button>
-                    <button onclick="switchTab('decorate')" id="nav-decorate" class="tab-btn px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm text-white hover:bg-white/20 transition-all flex items-center gap-1">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> สติ๊กเกอร์
-                    </button>
                 </nav>
 
                 <div class="flex items-center gap-2">
@@ -167,8 +162,6 @@
 
         <!-- MAIN CONTAINER -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 relative">
-
-            <div id="stickerCanvasArea" class="absolute inset-0 pointer-events-none overflow-hidden z-10"></div>
 
             <!-- ================= TAB 1: DASHBOARD ================= -->
             <section id="tab-dashboard" class="tab-content space-y-6">
@@ -374,23 +367,24 @@
                 </div>
             </section>
 
-            <!-- ================= TAB 5: CALENDAR & PHOTO DIARY ================= -->
+            <!-- ================= TAB 5: CALENDAR & PHOTO DIARY (INTERACTIVE CLICK DATE) ================= -->
             <section id="tab-calendar" class="tab-content hidden space-y-6">
                 <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal flex flex-col md:flex-row justify-between items-center gap-4">
                     <div>
                         <h2 class="text-2xl font-extrabold font-cute flex items-center gap-2">
                             <i class="fa-solid fa-calendar-days text-popBlue"></i> ปฏิทิน & ไดอารี่ภาพถ่าย
                         </h2>
-                        <p class="text-sm text-gray-500 font-medium">บันทึกวันสำคัญและไดอารี่พร้อมแนบรูปภาพความทรงจำ</p>
+                        <p class="text-sm text-gray-500 font-medium">👈 จิ้มเลือกวันที่บนช่องปฏิทินเพื่อดูหรือบันทึกโน้ตย้อนหลังได้เลย!</p>
                     </div>
                     <button onclick="openEventModal()" class="bg-retroPurple text-white font-bold px-4 py-2.5 rounded-2xl border-3 border-darkText shadow-brutal-sm flex items-center gap-2">
-                        <i class="fa-solid fa-star"></i> เพิ่มไดอารี่ / วันสำคัญ
+                        <i class="fa-solid fa-camera"></i> + เพิ่มโน้ตใหม่
                     </button>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- CALENDAR GRID -->
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal lg:col-span-2 space-y-4">
                         <div class="flex items-center justify-between">
-                            <h3 id="calMonthYearLabel" class="font-cute font-extrabold text-2xl">มกราคม 2026</h3>
+                            <h3 id="calMonthYearLabel" class="font-cute font-extrabold text-2xl">ตุลาคม 2026</h3>
                             <div class="flex gap-2">
                                 <button onclick="changeMonth(-1)" class="w-10 h-10 bg-offWhite border-2 border-darkText rounded-xl font-bold flex items-center justify-center shadow-brutal-sm"><i class="fa-solid fa-chevron-left"></i></button>
                                 <button onclick="changeMonth(1)" class="w-10 h-10 bg-offWhite border-2 border-darkText rounded-xl font-bold flex items-center justify-center shadow-brutal-sm"><i class="fa-solid fa-chevron-right"></i></button>
@@ -401,10 +395,15 @@
                         </div>
                         <div id="calendarGrid" class="grid grid-cols-7 gap-2 min-h-[350px]"></div>
                     </div>
+
+                    <!-- SIDEBAR DIARY LIST FOR SELECTED DATE -->
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-4 flex flex-col">
-                        <h3 class="font-cute font-bold text-xl flex items-center gap-2 border-b-2 border-darkText pb-3">
-                            <i class="fa-solid fa-book-open text-hotPink"></i> ไดอารี่ & วันสำคัญทั้งหมด
-                        </h3>
+                        <div class="flex justify-between items-center border-b-2 border-darkText pb-3">
+                            <h3 id="diarySidebarTitle" class="font-cute font-bold text-lg flex items-center gap-2">
+                                <i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด
+                            </h3>
+                            <button id="resetDateFilterBtn" onclick="selectCalendarDate(null)" class="hidden text-xs font-bold bg-gray-200 px-2 py-1 rounded-lg border border-darkText">แสดงทั้งหมด</button>
+                        </div>
                         <div id="eventsListSidebar" class="space-y-3 overflow-y-auto max-h-[400px] flex-1 pr-1"></div>
                     </div>
                 </div>
@@ -465,7 +464,6 @@
 
             <!-- ================= TAB 7: TAMAGOTCHI PET ================= -->
             <section id="tab-pet" class="tab-content hidden space-y-6">
-                <!-- PET HEADER BANNER -->
                 <div class="bg-gradient-to-r from-sunnyYellow to-limeGreen p-6 rounded-3xl border-4 border-darkText shadow-brutal flex flex-col md:flex-row items-center justify-between gap-6 text-darkText">
                     <div class="space-y-2 z-20 text-center md:text-left">
                         <div class="inline-block bg-hotPink text-white font-bold text-xs px-3 py-1 rounded-full border-2 border-darkText">🐾 สัตว์เลี้ยงนำโชคการเงิน</div>
@@ -479,10 +477,7 @@
                     </div>
                 </div>
 
-                <!-- SETTINGS & CONTROLS GRID -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    
-                    <!-- BOX 1: EDIT PET PROFILE -->
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-4">
                         <h3 class="font-cute font-bold text-xl flex items-center gap-2 border-b-2 border-darkText pb-3">
                             <i class="fa-solid fa-sliders text-popBlue"></i> ตั้งค่าสัตว์เลี้ยงของคุณ
@@ -506,7 +501,6 @@
                         </div>
                     </div>
 
-                    <!-- BOX 2: PET STATUS BARS -->
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-4">
                         <h3 class="font-cute font-bold text-xl flex items-center gap-2 border-b-2 border-darkText pb-3">
                             <i class="fa-solid fa-heart-pulse text-hotPink"></i> ค่าสถานะปัจจุบัน
@@ -528,44 +522,11 @@
                         </div>
                     </div>
 
-                    <!-- BOX 3: SPEECH HISTORY -->
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-4 flex flex-col">
                         <h3 class="font-cute font-bold text-xl flex items-center gap-2 border-b-2 border-darkText pb-3">
                             <i class="fa-solid fa-comment-dots text-popBlue"></i> ประวัติคำพูด
                         </h3>
                         <div id="petSpeechHistory" class="space-y-3 overflow-y-auto max-h-[220px] flex-1 pr-1"></div>
-                    </div>
-
-                </div>
-            </section>
-
-            <!-- ================= TAB 8: DECORATE STICKERS ================= -->
-            <section id="tab-decorate" class="tab-content hidden space-y-6">
-                <div class="bg-gradient-to-r from-popBlue to-retroPurple text-white p-6 rounded-3xl border-3 border-darkText shadow-brutal flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div class="space-y-2">
-                        <div class="inline-block bg-limeGreen text-darkText font-bold text-xs px-3 py-1 rounded-full border border-darkText">🎨 โหมดตกแต่ง</div>
-                        <h2 class="text-3xl font-extrabold font-cute">แต่งหน้าจอและสติ๊กเกอร์ตามใจชอบ</h2>
-                        <p class="text-white/80 text-sm">เลือกสติ๊กเกอร์มาแปะบนหน้าจอหลักได้ทันที</p>
-                    </div>
-                    <button onclick="clearAllStickers()" class="bg-hotPink text-white font-bold px-4 py-2.5 rounded-2xl border-3 border-darkText shadow-brutal-sm flex items-center gap-2">
-                        <i class="fa-solid fa-trash-can"></i> ลบสติ๊กเกอร์ทั้งหมด
-                    </button>
-                </div>
-                <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-4">
-                    <h3 class="font-cute font-bold text-xl flex items-center gap-2">
-                        <i class="fa-solid fa-face-smile text-sunnyYellow"></i> เลือกสติ๊กเกอร์ (คลิกเพื่อวาง)
-                    </h3>
-                    <div class="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-12 gap-3 p-4 bg-offWhite rounded-2xl border-2 border-dashed border-darkText text-darkText">
-                        <button onclick="spawnSticker('⭐')" class="text-3xl p-3 bg-white border-2 border-darkText rounded-xl hover:scale-110 shadow-brutal-sm">⭐</button>
-                        <button onclick="spawnSticker('💖')" class="text-3xl p-3 bg-white border-2 border-darkText rounded-xl hover:scale-110 shadow-brutal-sm">💖</button>
-                        <button onclick="spawnSticker('🌸')" class="text-3xl p-3 bg-white border-2 border-darkText rounded-xl hover:scale-110 shadow-brutal-sm">🌸</button>
-                        <button onclick="spawnSticker('🎀')" class="text-3xl p-3 bg-white border-2 border-darkText rounded-xl hover:scale-110 shadow-brutal-sm">🎀</button>
-                        <button onclick="spawnSticker('🐱')" class="text-3xl p-3 bg-white border-2 border-darkText rounded-xl hover:scale-110 shadow-brutal-sm">🐱</button>
-                        <button onclick="spawnSticker('🍀')" class="text-3xl p-3 bg-white border-2 border-darkText rounded-xl hover:scale-110 shadow-brutal-sm">🍀</button>
-                        <button onclick="spawnSticker('🎧')" class="text-3xl p-3 bg-white border-2 border-darkText rounded-xl hover:scale-110 shadow-brutal-sm">🎧</button>
-                        <button onclick="spawnSticker('🍒')" class="text-3xl p-3 bg-white border-2 border-darkText rounded-xl hover:scale-110 shadow-brutal-sm">🍒</button>
-                        <button onclick="spawnSticker('🍩')" class="text-3xl p-3 bg-white border-2 border-darkText rounded-xl hover:scale-110 shadow-brutal-sm">🍩</button>
-                        <button onclick="spawnSticker('⚡')" class="text-3xl p-3 bg-white border-2 border-darkText rounded-xl hover:scale-110 shadow-brutal-sm">⚡</button>
                     </div>
                 </div>
             </section>
@@ -681,25 +642,57 @@
         </div>
     </div>
 
-    <!-- Modal: Calendar Event & Photo Diary -->
+    <!-- Modal: Calendar Add Event & Photo Diary -->
     <div id="eventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
-                <h3 class="font-cute font-bold text-2xl">📸 บันทึกไดอารี่ & วันสำคัญ</h3>
+                <h3 class="font-cute font-bold text-2xl">📸 บันทึกไดอารี่ & รูปภาพ</h3>
                 <button onclick="closeModal('eventModal')" class="w-8 h-8 bg-offWhite border-2 border-darkText rounded-xl font-bold flex items-center justify-center">✕</button>
             </div>
             <form id="eventForm" onsubmit="handleSaveEvent(event)" class="space-y-4">
                 <div><label class="block text-sm font-bold mb-1">วันที่</label><input type="date" id="eventDate" required class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 outline-none"></div>
-                <div><label class="block text-sm font-bold mb-1">หัวข้อไดอารี่ / วันสำคัญ</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้ไปคาเฟ่มา 🐾" required class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 outline-none"></div>
+                <div><label class="block text-sm font-bold mb-1">หัวข้อไดอารี่ / วันสำคัญ</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้ไปทานอาหารอร่อยมาก 🌸" required class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 outline-none"></div>
+                
                 <div>
-                    <label class="block text-sm font-bold mb-1">แนบรูปภาพความทรงจำ (URL รูปภาพ)</label>
-                    <input type="url" id="eventPhoto" placeholder="https://images.unsplash.com/photo-..." class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 outline-none text-xs">
+                    <label class="block text-sm font-bold mb-1">แนบรูปภาพ (เลือกไฟล์ หรือ ถ่ายภาพสด)</label>
+                    <label class="flex flex-col items-center justify-center w-full p-4 bg-offWhite border-2 border-dashed border-darkText rounded-2xl cursor-pointer hover:bg-gray-100 transition-all text-center">
+                        <i class="fa-solid fa-camera text-3xl text-popBlue mb-1"></i>
+                        <span class="text-xs font-bold text-gray-600">กดตรงนี้เพื่อถ่ายรูป หรือ เลือกรูปในอัลบั้ม</span>
+                        <input type="file" id="eventPhotoInput" accept="image/*" onchange="handlePhotoSelection(event)" class="hidden">
+                    </label>
+                    <div id="photoPreviewArea" class="hidden relative mt-2">
+                        <img id="eventPhotoPreview" class="w-full h-40 object-cover rounded-xl border-2 border-darkText">
+                        <button type="button" onclick="removeSelectedPhoto()" class="absolute top-2 right-2 bg-hotPink text-white w-7 h-7 rounded-full border-2 border-darkText flex items-center justify-center font-bold text-xs shadow-brutal-sm">✕</button>
+                    </div>
                 </div>
+
                 <div class="pt-2 flex gap-3">
                     <button type="button" onclick="closeModal('eventModal')" class="flex-1 bg-gray-200 font-bold py-2.5 rounded-xl border-2 border-darkText">ยกเลิก</button>
                     <button type="submit" class="flex-1 bg-retroPurple text-white font-bold py-2.5 rounded-xl border-2 border-darkText shadow-brutal-sm">บันทึก</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal: View Event Detail (NEW DETAILED VIEWER) -->
+    <div id="viewEventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
+            <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
+                <span id="viewEventDate" class="text-xs font-bold bg-sunnyYellow px-2.5 py-1 rounded-xl border border-darkText">วันที่</span>
+                <button onclick="closeModal('viewEventModal')" class="w-8 h-8 bg-offWhite border-2 border-darkText rounded-xl font-bold flex items-center justify-center">✕</button>
+            </div>
+            
+            <h3 id="viewEventTitle" class="font-cute font-extrabold text-2xl text-popBlue">หัวข้อไดอารี่</h3>
+            
+            <div id="viewEventPhotoContainer" class="hidden">
+                <img id="viewEventPhoto" class="w-full max-h-72 object-cover rounded-2xl border-3 border-darkText shadow-brutal-sm">
+            </div>
+
+            <div class="pt-4 border-t-2 border-darkText flex justify-between gap-3">
+                <button id="deleteEventBtn" class="w-full bg-hotPink text-white font-bold py-2.5 rounded-xl border-2 border-darkText shadow-brutal-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-trash-can"></i> ลบโน้ตนี้
+                </button>
+            </div>
         </div>
     </div>
 
@@ -721,7 +714,6 @@
             tasks: JSON.parse(localStorage.getItem('y2k_tasks')) || [],
             events: JSON.parse(localStorage.getItem('y2k_events')) || [],
             calcHistory: JSON.parse(localStorage.getItem('y2k_calchistory')) || [],
-            stickers: JSON.parse(localStorage.getItem('y2k_stickers')) || [{ id: 's1', emoji: '⭐', x: 50, y: 120 }],
             pet: JSON.parse(localStorage.getItem('y2k_pet')) || {
                 name: 'น้องสัตว์เลี้ยง',
                 avatar: '🐱',
@@ -731,17 +723,18 @@
             }
         };
 
-        let currentCalendarDate = new Date(2026, 9, 28);
+        let currentCalendarDate = new Date();
+        let selectedCalendarDate = null;
         let expenseChartInstance = null;
         let currentCalcExpression = "0";
         let lastCalcResult = 0;
+        let currentUploadedPhotoBase64 = '';
 
         window.onload = function() {
             setTheme(state.theme, false);
             setDeviceMode(state.deviceMode, false);
             setDefaultDates();
             
-            // Sync Pet Inputs
             document.getElementById('petNameInput').value = state.pet.name || 'น้องสัตว์เลี้ยง';
             document.getElementById('petAvatarSelect').value = state.pet.avatar || '🐱';
 
@@ -751,7 +744,6 @@
             renderTasks();
             renderCalendar();
             renderEventsList();
-            renderStickers();
             updatePetStatus();
             renderCalcHistory();
         };
@@ -762,10 +754,48 @@
             localStorage.setItem('y2k_tasks', JSON.stringify(state.tasks));
             localStorage.setItem('y2k_events', JSON.stringify(state.events));
             localStorage.setItem('y2k_calchistory', JSON.stringify(state.calcHistory));
-            localStorage.setItem('y2k_stickers', JSON.stringify(state.stickers));
             localStorage.setItem('y2k_pet', JSON.stringify(state.pet));
             localStorage.setItem('y2k_theme', state.theme);
             localStorage.setItem('y2k_device', state.deviceMode);
+        }
+
+        // ================= DYNAMIC PHOTO COMPRESSION SYSTEM =================
+        function handlePhotoSelection(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxW = 600;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxW) {
+                        h = Math.round((h * maxW) / w);
+                        w = maxW;
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    
+                    currentUploadedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    const prev = document.getElementById('eventPhotoPreview');
+                    prev.src = currentUploadedPhotoBase64;
+                    document.getElementById('photoPreviewArea').classList.remove('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeSelectedPhoto() {
+            currentUploadedPhotoBase64 = '';
+            document.getElementById('eventPhotoInput').value = '';
+            document.getElementById('photoPreviewArea').classList.add('hidden');
         }
 
         // ================= DYNAMIC PET LOGIC =================
@@ -782,7 +812,6 @@
             state.transactions.forEach(t => t.type === 'income' ? totalIncome += t.amount : totalExpense += t.amount);
             let netBalance = totalIncome - totalExpense;
 
-            // Compute dynamic hunger and happiness from real balance
             let hunger = 0;
             let happiness = 0;
             let moodAvatar = state.pet.avatar || '🐱';
@@ -793,11 +822,9 @@
                 happiness = 50 + (state.pet.feedBonus || 0);
                 moodText = 'กำลังรอยอดเงินแรกงับ!';
             } else if (netBalance <= 0) {
-                // Low / Negative balance -> Sad / Hungry
                 hunger = Math.max(10, 20 + (state.pet.feedBonus || 0));
                 happiness = Math.max(10, 15 + (state.pet.feedBonus || 0));
                 
-                // Sad expression
                 if (state.pet.avatar === '🐱') moodAvatar = '😿';
                 else if (state.pet.avatar === '🐶') moodAvatar = '🥺';
                 else if (state.pet.avatar === '🐰') moodAvatar = '😭';
@@ -805,7 +832,6 @@
 
                 moodText = 'งบหมดแล้ว/ติดลบ ช่วยด้วยงับ! 🥺';
             } else {
-                // Positive balance -> Fat & Happy
                 let bonus = Math.min(40, Math.floor(netBalance / 500));
                 hunger = Math.min(100, 60 + bonus + (state.pet.feedBonus || 0));
                 happiness = Math.min(100, 65 + bonus + (state.pet.feedBonus || 0));
@@ -859,7 +885,6 @@
                 </div>
             `).join('');
         }
-        // =====================================================
 
         // EXPORT & IMPORT SYSTEM
         function exportData() {
@@ -993,7 +1018,6 @@
 
         function deleteTransaction(id) {
             state.transactions = state.transactions.filter(t => t.id !== id);
-            // Deduct feed bonus on transaction deletion to reflect immediate money loss
             state.pet.feedBonus = Math.max(0, (state.pet.feedBonus || 0) - 15);
             triggerPetSpeech(`โอ๊ะ! รายการเงินถูกลบไปแล้ว สภาพการเงินเปลี่ยนเลยงับ 🥺`);
             saveData();
@@ -1081,15 +1105,77 @@
             document.getElementById('dashPendingTasks').innerText = state.tasks.filter(t => t.status !== 'done').length + ' รายการ';
         }
 
-        // Calendar & Photo Diary
-        function openEventModal() { document.getElementById('eventForm').reset(); setDefaultDates(); openModal('eventModal'); }
+        // ================= IMPROVED CALENDAR & INTERACTIVE DATE SELECTION =================
+        function openEventModal(presetDate) { 
+            document.getElementById('eventForm').reset(); 
+            setDefaultDates(); 
+            if(presetDate) {
+                document.getElementById('eventDate').value = presetDate;
+            } else if (selectedCalendarDate) {
+                document.getElementById('eventDate').value = selectedCalendarDate;
+            }
+            removeSelectedPhoto();
+            openModal('eventModal'); 
+        }
+
         function handleSaveEvent(e) {
             e.preventDefault();
-            state.events.unshift({ id: 'ev_' + Date.now(), date: document.getElementById('eventDate').value, title: document.getElementById('eventTitle').value, photo: document.getElementById('eventPhoto').value });
-            saveData(); closeModal('eventModal'); renderCalendar(); renderEventsList(); showToast('บันทึกไดอารี่สำเร็จ!');
+            const targetDate = document.getElementById('eventDate').value;
+            state.events.unshift({ 
+                id: 'ev_' + Date.now(), 
+                date: targetDate, 
+                title: document.getElementById('eventTitle').value, 
+                photo: currentUploadedPhotoBase64 
+            });
+            saveData(); 
+            closeModal('eventModal'); 
+            selectCalendarDate(targetDate);
+            showToast('บันทึกโน้ตเรียบร้อย!');
         }
-        function deleteEvent(id) { state.events = state.events.filter(x => x.id !== id); saveData(); renderCalendar(); renderEventsList(); showToast('ลบแล้ว'); }
-        function changeMonth(dir) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir); renderCalendar(); }
+
+        function selectCalendarDate(dateKey) {
+            selectedCalendarDate = dateKey;
+            renderCalendar();
+            renderEventsList();
+        }
+
+        function viewEventDetails(eventId) {
+            const ev = state.events.find(e => e.id === eventId);
+            if (!ev) return;
+
+            document.getElementById('viewEventDate').innerText = ev.date;
+            document.getElementById('viewEventTitle').innerText = ev.title;
+            
+            const imgContainer = document.getElementById('viewEventPhotoContainer');
+            const imgEl = document.getElementById('viewEventPhoto');
+            if (ev.photo) {
+                imgEl.src = ev.photo;
+                imgContainer.classList.remove('hidden');
+            } else {
+                imgContainer.classList.add('hidden');
+            }
+
+            document.getElementById('deleteEventBtn').onclick = function() {
+                deleteEvent(ev.id);
+                closeModal('viewEventModal');
+            };
+
+            openModal('viewEventModal');
+        }
+
+        function deleteEvent(id) { 
+            state.events = state.events.filter(x => x.id !== id); 
+            saveData(); 
+            renderCalendar(); 
+            renderEventsList(); 
+            showToast('ลบโน้ตแล้ว'); 
+        }
+
+        function changeMonth(dir) { 
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir); 
+            renderCalendar(); 
+        }
+
         function renderCalendar() {
             const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
             const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
@@ -1098,15 +1184,33 @@
             let html = '';
             for(let i=0; i<firstDay; i++) html += `<div></div>`;
             const todayStr = new Date().toISOString().split('T')[0];
+
             for(let day=1; day<=totalDays; day++) {
                 const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                 const evs = state.events.filter(e => e.date === dateKey);
+                const isSelected = selectedCalendarDate === dateKey;
+                const isToday = dateKey === todayStr;
+
+                let borderStyle = "border-darkText";
+                let bgStyle = "bg-offWhite";
+
+                if (isSelected) {
+                    borderStyle = "border-limeGreen ring-4 ring-limeGreen/50 z-10";
+                    bgStyle = "bg-sunnyYellow/20";
+                } else if (isToday) {
+                    borderStyle = "border-popBlue";
+                    bgStyle = "bg-popBlue/10";
+                }
+
                 html += `
-                    <div class="bg-offWhite text-darkText p-2 rounded-xl border-2 ${dateKey === todayStr ? 'border-popBlue bg-popBlue/10' : 'border-darkText'} min-h-[90px] flex flex-col justify-between">
-                        <span class="text-xs font-bold">${day}</span>
-                        <div class="space-y-1 overflow-y-auto max-h-[60px]">
+                    <div onclick="selectCalendarDate('${dateKey}')" class="${bgStyle} text-darkText p-2 rounded-2xl border-2 ${borderStyle} min-h-[95px] flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 transition-all select-none relative">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold ${isToday ? 'bg-popBlue text-white px-1.5 py-0.5 rounded-full' : ''}">${day}</span>
+                            ${evs.length > 0 ? `<span class="text-[10px] bg-hotPink text-white px-1.5 py-0.2 rounded-full font-bold">${evs.length}</span>` : ''}
+                        </div>
+                        <div class="space-y-1 overflow-y-auto max-h-[60px] mt-1">
                             ${evs.map(ev => `
-                                <div onclick="deleteEvent('${ev.id}')" title="คลิกเพื่อลบ" class="text-[10px] bg-white px-1 rounded border border-darkText truncate cursor-pointer hover:bg-hotPink hover:text-white">
+                                <div onclick="event.stopPropagation(); viewEventDetails('${ev.id}')" title="คลิกเพื่อดูโน้ต" class="text-[10px] bg-white px-1.5 py-0.5 rounded-lg border border-darkText truncate cursor-pointer hover:bg-sunnyYellow transition-all font-bold">
                                     ${ev.photo ? '📸 ' : ''}${ev.title}
                                 </div>
                             `).join('')}
@@ -1116,16 +1220,46 @@
             }
             document.getElementById('calendarGrid').innerHTML = html;
         }
+
         function renderEventsList() {
             const sb = document.getElementById('eventsListSidebar');
-            if(!state.events.length) { sb.innerHTML = `<div class="text-center py-10 text-gray-400 text-xs">ยังไม่มีไดอารี่</div>`; return; }
-            sb.innerHTML = state.events.map(ev => `
-                <div class="bg-offWhite text-darkText p-3 rounded-2xl border-2 border-darkText space-y-2">
-                    <div class="flex justify-between items-center"><span class="text-xs font-bold bg-sunnyYellow px-2 py-0.5 rounded">${ev.date}</span><button onclick="deleteEvent('${ev.id}')" class="text-hotPink">✕</button></div>
-                    <h4 class="font-bold text-sm">${ev.title}</h4>
-                    ${ev.photo ? `<img src="${ev.photo}" class="w-full h-32 object-cover rounded-xl border border-darkText" onerror="this.src='https://placehold.co/300x200/eee/333?text=Image'">` : ''}
-                </div>
-            `).join('');
+            const titleEl = document.getElementById('diarySidebarTitle');
+            const resetBtn = document.getElementById('resetDateFilterBtn');
+
+            let filteredEvents = state.events;
+
+            if (selectedCalendarDate) {
+                filteredEvents = state.events.filter(e => e.date === selectedCalendarDate);
+                titleEl.innerHTML = `<i class="fa-solid fa-calendar-day text-hotPink"></i> โน้ตวัน ${selectedCalendarDate}`;
+                resetBtn.classList.remove('hidden');
+            } else {
+                titleEl.innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด`;
+                resetBtn.classList.add('hidden');
+            }
+
+            if(!filteredEvents.length) { 
+                sb.innerHTML = `
+                    <div class="text-center py-10 text-gray-400 text-xs space-y-2">
+                        <p>ไม่มีโน้ตในวันที่เลือก 📝</p>
+                        ${selectedCalendarDate ? `<button onclick="openEventModal('${selectedCalendarDate}')" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border border-darkText text-xs shadow-brutal-sm">+ เพิ่มโน้ตของวันนี้</button>` : ''}
+                    </div>
+                `; 
+                return; 
+            }
+
+            sb.innerHTML = `
+                ${selectedCalendarDate ? `<button onclick="openEventModal('${selectedCalendarDate}')" class="w-full bg-limeGreen text-darkText font-bold py-2 rounded-xl border-2 border-darkText text-xs shadow-brutal-sm mb-2 flex items-center justify-center gap-1"><i class="fa-solid fa-plus"></i> เพิ่มโน้ตของวันที่ ${selectedCalendarDate}</button>` : ''}
+                ${filteredEvents.map(ev => `
+                    <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite text-darkText p-3 rounded-2xl border-2 border-darkText space-y-2 hover:bg-white cursor-pointer transition-all shadow-brutal-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold bg-sunnyYellow px-2 py-0.5 rounded-lg border border-darkText">${ev.date}</span>
+                            <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-popBlue">${ev.title}</h4>
+                        ${ev.photo ? `<img src="${ev.photo}" class="w-full h-32 object-cover rounded-xl border-2 border-darkText">` : ''}
+                    </div>
+                `).join('')}
+            `;
         }
 
         // Calculator
@@ -1180,19 +1314,6 @@
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
-
-        // Stickers
-        function spawnSticker(emoji) {
-            state.stickers.push({ id: 'stk_' + Date.now(), emoji, x: Math.random() * (window.innerWidth - 100), y: Math.random() * 400 + 50 });
-            saveData(); renderStickers(); showToast('แปะสติ๊กเกอร์แล้ว!');
-        }
-        function clearAllStickers() { state.stickers = []; saveData(); renderStickers(); showToast('ลบสติ๊กเกอร์แล้ว'); }
-        function renderStickers() {
-            document.getElementById('stickerCanvasArea').innerHTML = state.stickers.map(s => `
-                <div id="${s.id}" class="sticker-item absolute text-4xl pointer-events-auto cursor-pointer" style="left:${s.x}px;top:${s.y}px;" onclick="removeSticker('${s.id}')">${s.emoji}</div>
-            `).join('');
-        }
-        function removeSticker(id) { state.stickers = state.stickers.filter(s => s.id !== id); saveData(); renderStickers(); }
     </script>
 </body>
 </html>

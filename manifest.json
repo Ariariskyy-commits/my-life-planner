@@ -1,15 +1,21 @@
 {
   "name": "Y2K Playful Life Planner",
   "short_name": "Y2K Planner",
-  "start_url": "./index.html",
+  "description": "แอปวางแผนชีวิตและจัดการรายรับรายจ่ายสไตล์ Y2K",
+  "start_url": "/my-life-planner/",
   "display": "standalone",
-  "background_color": "#F9F9FB",
-  "theme_color": "#0055FF",
+  "background_color": "#ffffff",
+  "theme_color": "#ff69b4",
   "icons": [
     {
-      "src": "./icon.jpg",
+      "src": "https://via.placeholder.com/192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512.png",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/png"
     }
   ]
 }

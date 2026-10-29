@@ -78,10 +78,10 @@
         }
     </style>
 </head>
-<body class="theme-y2k min-h-screen flex flex-col relative">
+<body class="theme-y2k min-h-screen flex flex-col relative pb-20">
 
-    <!-- FLOATING TAMAGOTCHI PET WIDGET -->
-    <div id="floatingPet" class="fixed bottom-6 right-6 z-45 bg-sunnyYellow border-3 border-darkText rounded-3xl p-3 shadow-brutal flex items-center gap-3 animate-bounce cursor-pointer select-none" onclick="switchTab('pet')">
+    <!-- FLOATING TAMAGOTCHI PET WIDGET (FIXED Z-INDEX TO PREVENT OVERLAP) -->
+    <div id="floatingPet" class="fixed bottom-6 right-6 z-[9999] bg-sunnyYellow border-3 border-darkText rounded-3xl p-3 shadow-brutal flex items-center gap-3 animate-bounce cursor-pointer select-none hover:scale-105 transition-all" onclick="switchTab('pet')">
         <div id="petAvatar" class="text-3xl bg-white w-12 h-12 rounded-2xl border-2 border-darkText flex items-center justify-center shadow-brutal-sm">
             🐱
         </div>
@@ -405,7 +405,7 @@
                     <!-- CALENDAR GRID -->
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal lg:col-span-2 space-y-4">
                         <div class="flex items-center justify-between">
-                            <h3 id="calMonthYearLabel" class="font-cute font-extrabold text-2xl">ตุลาคม 2026</h3>
+                            <h3 id="calMonthYearLabel" class="font-cute font-extrabold text-2xl">ตุลาคม 2569</h3>
                             <div class="flex gap-2">
                                 <button onclick="changeMonth(-1)" class="w-10 h-10 bg-offWhite border-2 border-darkText rounded-xl font-bold flex items-center justify-center shadow-brutal-sm"><i class="fa-solid fa-chevron-left"></i></button>
                                 <button onclick="changeMonth(1)" class="w-10 h-10 bg-offWhite border-2 border-darkText rounded-xl font-bold flex items-center justify-center shadow-brutal-sm"><i class="fa-solid fa-chevron-right"></i></button>
@@ -483,7 +483,7 @@
                 </div>
             </section>
 
-            <!-- ================= TAB 7: TAMAGOTCHI PET ================= -->
+            <!-- ================= TAB 7: TAMAGOTCHI PET (CLEAN WITHOUT FEED BUTTON) ================= -->
             <section id="tab-pet" class="tab-content hidden space-y-6">
                 <div class="bg-gradient-to-r from-sunnyYellow to-limeGreen p-6 rounded-3xl border-4 border-darkText shadow-brutal flex flex-col md:flex-row items-center justify-between gap-6 text-darkText">
                     <div class="space-y-2 z-20 text-center md:text-left">
@@ -522,11 +522,12 @@
                         </div>
                     </div>
 
-                    <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-4">
+                    <!-- REAL BALANCE STATUS CARD (NO FEED BUTTON) -->
+                    <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-6">
                         <h3 class="font-cute font-bold text-xl flex items-center gap-2 border-b-2 border-darkText pb-3">
                             <i class="fa-solid fa-heart-pulse text-hotPink"></i> สถานะตามยอดเงินจริง
                         </h3>
-                        <div class="space-y-3">
+                        <div class="space-y-4">
                             <div>
                                 <div class="flex justify-between text-xs font-bold mb-1"><span>ความอิ่มเอม (ตามเงินเก็บ)</span><span id="petHungerVal">0%</span></div>
                                 <div class="w-full bg-offWhite h-4 rounded-full border-2 border-darkText overflow-hidden"><div id="petHungerBar" class="bg-limeGreen h-full w-[0%] transition-all"></div></div>
@@ -559,7 +560,7 @@
     <!-- ================= MODALS ================= -->
 
     <!-- Modal: Quick Add -->
-    <div id="quickAddModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="quickAddModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
                 <h3 class="font-cute font-bold text-2xl">⚡ เพิ่มรายการด่วน</h3>
@@ -575,7 +576,7 @@
     </div>
 
     <!-- Modal: Transaction -->
-    <div id="transactionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="transactionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
                 <h3 id="txModalTitle" class="font-cute font-bold text-2xl">เพิ่มรายการเงิน</h3>
@@ -609,7 +610,7 @@
     </div>
 
     <!-- Modal: Upcoming Bill -->
-    <div id="billModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="billModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
                 <h3 class="font-cute font-bold text-2xl">💡 เพิ่มรายการเตรียมจ่าย</h3>
@@ -630,7 +631,7 @@
     </div>
 
     <!-- Modal: Task -->
-    <div id="taskModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="taskModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
                 <h3 class="font-cute font-bold text-2xl">เพิ่มแพลนงานใหม่</h3>
@@ -659,7 +660,7 @@
     </div>
 
     <!-- Modal: Calendar Add Event & Photo Diary (WITH MOOD PICKER) -->
-    <div id="eventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="eventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
                 <h3 class="font-cute font-bold text-2xl">📸 บันทึกไดอารี่ & อารมณ์วันนี้</h3>
@@ -704,7 +705,7 @@
     </div>
 
     <!-- Modal: View Event Detail -->
-    <div id="viewEventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="viewEventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
                 <div class="flex items-center gap-2">
@@ -729,7 +730,7 @@
     </div>
 
     <!-- TOAST -->
-    <div id="toastNotification" class="fixed bottom-6 left-6 z-50 transform -translate-y-32 opacity-0 transition-all duration-300 pointer-events-none">
+    <div id="toastNotification" class="fixed bottom-6 left-6 z-[10000] transform -translate-y-32 opacity-0 transition-all duration-300 pointer-events-none">
         <div class="bg-limeGreen text-darkText font-bold px-5 py-3 rounded-2xl border-3 border-darkText shadow-brutal flex items-center gap-3">
             <i class="fa-solid fa-circle-check text-xl"></i>
             <span id="toastMessage">สำเร็จ!</span>
@@ -956,7 +957,7 @@
 
         function setTheme(themeName, save=true) {
             state.theme = themeName;
-            document.body.className = `theme-${themeName} min-h-screen flex flex-col relative`;
+            document.body.className = `theme-${themeName} min-h-screen flex flex-col relative pb-20`;
             if(save) saveData();
         }
 

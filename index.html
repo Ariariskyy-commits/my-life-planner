@@ -483,7 +483,7 @@
                 </div>
             </section>
 
-            <!-- ================= TAB 7: TAMAGOTCHI PET (CLEAN WITHOUT FEED BUTTON) ================= -->
+            <!-- ================= TAB 7: TAMAGOTCHI PET (STRICTLY REAL BALANCE LOGIC) ================= -->
             <section id="tab-pet" class="tab-content hidden space-y-6">
                 <div class="bg-gradient-to-r from-sunnyYellow to-limeGreen p-6 rounded-3xl border-4 border-darkText shadow-brutal flex flex-col md:flex-row items-center justify-between gap-6 text-darkText">
                     <div class="space-y-2 z-20 text-center md:text-left">
@@ -522,7 +522,7 @@
                         </div>
                     </div>
 
-                    <!-- REAL BALANCE STATUS CARD (NO FEED BUTTON) -->
+                    <!-- REAL BALANCE STATUS CARD -->
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-6">
                         <h3 class="font-cute font-bold text-xl flex items-center gap-2 border-b-2 border-darkText pb-3">
                             <i class="fa-solid fa-heart-pulse text-hotPink"></i> สถานะตามยอดเงินจริง
@@ -750,9 +750,18 @@
             pet: JSON.parse(localStorage.getItem('y2k_pet')) || {
                 name: 'น้องสัตว์เลี้ยง',
                 avatar: '🐱',
-                speech: 'ยินดีต้อนรับนะงับ! บันทึกเงินกันเถอะ',
-                speechHistory: [{ time: 'เริ่มต้น', text: 'ยินดีต้อนรับนะงับ! บันทึกเงินกันเถอะ' }]
+                speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭',
+                speechHistory: [{ time: 'เริ่มต้น', text: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭' }]
             }
+        };
+
+        const PET_MOOD_FACES = {
+            '🐱': { sad: '😿', low: '😾', good: '😺', rich: '😻' },
+            '🐶': { sad: '🥺', low: '🐕', good: '🐶', rich: '🐶✨' },
+            '🐰': { sad: '😭', low: '🐰', good: '🐰✨', rich: '🐇💖' },
+            '🐹': { sad: '🥺', low: '🐹', good: '🐹✨', rich: '🐹👑' },
+            '🐻': { sad: '🐻‍❄️', low: '🐻', good: '🧸', rich: '🐻✨' },
+            '🦆': { sad: '😭', low: '🦆', good: '🦆✨', rich: '🐣🌟' }
         };
 
         let currentCalendarDate = new Date();
@@ -855,34 +864,45 @@
 
             let hunger = 0;
             let happiness = 0;
-            let moodAvatar = state.pet.avatar || '🐱';
+            let selectedPetType = state.pet.avatar || '🐱';
+            let petFaces = PET_MOOD_FACES[selectedPetType] || PET_MOOD_FACES['🐱'];
+            
+            let moodAvatar = petFaces.sad;
             let moodText = '';
+            let defaultSpeech = '';
 
-            if (state.transactions.length === 0) {
-                hunger = 50;
-                happiness = 50;
-                moodText = 'กำลังรอยอดเงินแรกงับ!';
-            } else if (netBalance <= 0) {
-                hunger = 15;
-                happiness = 10;
-                
-                if (state.pet.avatar === '🐱') moodAvatar = '😿';
-                else if (state.pet.avatar === '🐶') moodAvatar = '🥺';
-                else if (state.pet.avatar === '🐰') moodAvatar = '😭';
-                else moodAvatar = state.pet.avatar;
-
-                moodText = 'งบหมดแล้ว/ติดลบ ช่วยด้วยงับ! 🥺';
+            if (netBalance <= 0) {
+                hunger = 0;
+                happiness = 0;
+                moodAvatar = petFaces.sad;
+                moodText = 'ไม่มีเงินเก็บ / งบหมดหิวม๊าก 🥺';
+                defaultSpeech = 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭';
+            } else if (netBalance < 1000) {
+                hunger = Math.floor((netBalance / 1000) * 40);
+                happiness = Math.floor((netBalance / 1000) * 40);
+                moodAvatar = petFaces.low;
+                moodText = 'พอประทังชีวิตแบบประหยัด...';
+                defaultSpeech = 'เงินเริ่มมีบ้างแล้ว แต่ประหยัดไว้ก่อนน้า 💸';
+            } else if (netBalance < 5000) {
+                hunger = 40 + Math.floor(((netBalance - 1000) / 4000) * 45);
+                happiness = 40 + Math.floor(((netBalance - 1000) / 4000) * 45);
+                moodAvatar = petFaces.good;
+                moodText = 'อิ่มสบายกาย อารมณ์ดีขึ้นเยอะ! 😊';
+                defaultSpeech = 'การเงินมั่นคง สบายใจขึ้นเยอะเลยงับ 🌟';
             } else {
-                let bonus = Math.min(40, Math.floor(netBalance / 500));
-                hunger = Math.min(100, 60 + bonus);
-                happiness = Math.min(100, 65 + bonus);
-
-                if (state.pet.avatar === '🐱') moodAvatar = '😺';
-                moodText = 'อ้วนปุ๊ก สมบูรณ์พุงกาง 💖';
+                hunger = 100;
+                happiness = 100;
+                moodAvatar = petFaces.rich;
+                moodText = 'เศรษฐีตัวจริง รวยอู้ฟู่พุงกาง! 🤑';
+                defaultSpeech = 'รวยมากๆๆๆ สุขกายสบายใจที่สุดในโลก! 👑💖';
             }
 
-            state.pet.hunger = Math.min(100, hunger);
-            state.pet.happiness = Math.min(100, happiness);
+            state.pet.hunger = hunger;
+            state.pet.happiness = happiness;
+
+            if(!state.pet.speech || state.pet.speech.includes('ยินดีต้อนรับ') || state.pet.speech.includes('อร่อยจัง')) {
+                state.pet.speech = defaultSpeech;
+            }
 
             const pName = state.pet.name || 'สัตว์เลี้ยง';
             document.getElementById('floatingPetName').innerText = `${pName} (การเงิน)`;
@@ -891,7 +911,7 @@
             document.getElementById('petBigAvatar').innerText = moodAvatar;
             document.getElementById('calPetAvatar').innerText = moodAvatar;
             document.getElementById('petBigName').innerText = `${pName} (${moodText})`;
-            document.getElementById('petBigStatusText').innerText = netBalance <= 0 ? 'เงินหมดแล้วน้า 🥺' : `เงินเก็บสุทธิ ฿${netBalance.toLocaleString()}`;
+            document.getElementById('petBigStatusText').innerText = netBalance <= 0 ? 'เงินเป็น 0 บาท / ติดลบ 🥺' : `เงินเก็บสุทธิ ฿${netBalance.toLocaleString()}`;
             
             document.getElementById('petHungerVal').innerText = state.pet.hunger + '%';
             document.getElementById('petHungerBar').style.width = state.pet.hunger + '%';
@@ -1240,7 +1260,6 @@
                     bgStyle = "bg-popBlue/10";
                 }
 
-                // Top mood emoji for the day
                 const topMood = evs.length > 0 ? (evs[0].mood || '😊') : '';
 
                 html += `
@@ -1261,7 +1280,6 @@
             }
             document.getElementById('calendarGrid').innerHTML = html;
             
-            // Calculate & Render Monthly Mood Summary
             renderMonthlyMoodSummary(year, month);
         }
 
@@ -1282,7 +1300,6 @@
                 counts[m] = (counts[m] || 0) + 1;
             });
 
-            // Find dominant mood
             let topMood = '😊';
             let maxCount = -1;
             for (let m in counts) {
@@ -1321,7 +1338,6 @@
                 titleEl.innerHTML = `<i class="fa-solid fa-calendar-day text-hotPink"></i> โน้ตวัน ${selectedCalendarDate}`;
                 resetBtn.classList.remove('hidden');
 
-                // Dynamic Pet Commentary for Selected Date
                 if (filteredEvents.length > 0) {
                     const m = filteredEvents[0].mood || '😊';
                     const pName = state.pet.name || 'น้องสัตว์เลี้ยง';

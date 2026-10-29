@@ -22,17 +22,10 @@
   "screenshots": [
     {
       "src": "screenshot-desktop.png",
-      "sizes": "1280x720",
+      "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Y2K Planner Desktop View"
-    },
-    {
-      "src": "screenshot-mobile.png",
-      "sizes": "540x960",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Y2K Planner Mobile View"
+      "label": "Y2K Planner Dashboard"
     }
   ]
 }

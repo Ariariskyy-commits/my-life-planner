@@ -5,23 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Y2K Playful Life Planner - รายรับรายจ่าย แพลนเนอร์ & สัตว์เลี้ยงส่วนตัว</title>
     
-    <!-- PWA Settings for Mobile / iOS / Android -->
+    <!-- PWA Settings & App Icon -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0055FF">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/616/616408.png">
+    <link rel="apple-touch-icon" href="./icon.jpg">
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS & Fonts & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Prompt & Fredoka -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
     <script>
+        // =========================================================
+        // 🔑 FIREBASE CONFIG (หากมีคีย์ค่อยนำมาวางแทนที่ตรงนี้ครับ)
+        // =========================================================
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        let auth = null;
+        let db = null;
+        let isFirebaseActive = false;
+
+        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+                isFirebaseActive = true;
+            } catch(e) {
+                console.warn("Firebase Init bypassed:", e);
+            }
+        }
+
         tailwind.config = {
             theme: {
                 extend: {
@@ -42,7 +71,6 @@
                         'brutal': '4px 4px 0px #1A1A1A',
                         'brutal-sm': '2px 2px 0px #1A1A1A',
                         'brutal-blue': '4px 4px 0px #0055FF',
-                        'brutal-lime': '4px 4px 0px #CCFF00',
                     }
                 }
             }
@@ -56,28 +84,14 @@
             overflow-x: hidden;
             transition: background 0.3s ease, color 0.3s ease;
         }
-        body.theme-y2k { --bg-color: #F9F9FB; --card-bg: #FFFFFF; --text-color: #1A1A1A; --primary: #0055FF; --accent: #CCFF00; }
-        body.theme-pastel { --bg-color: #FFF0F5; --card-bg: #FFFFFF; --text-color: #4A4045; --primary: #FFB6C1; --accent: #E6E6FA; }
-        body.theme-dark { --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0; --primary: #BB86FC; --accent: #03DAC6; }
-        body.theme-minimal { --bg-color: #F4F4F0; --card-bg: #FFFFFF; --text-color: #2C2C2C; --primary: #4A5568; --accent: #CBD5E0; }
+        body.theme-y2k { --bg-color: #F9F9FB; --card-bg: #FFFFFF; --text-color: #1A1A1A; }
+        body.theme-pastel { --bg-color: #FFF0F5; --card-bg: #FFFFFF; --text-color: #4A4045; }
+        body.theme-dark { --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0; }
+        body.theme-minimal { --bg-color: #F4F4F0; --card-bg: #FFFFFF; --text-color: #2C2C2C; }
 
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #eee; border-left: 2px solid #1A1A1A; }
         ::-webkit-scrollbar-thumb { background: #0055FF; border: 2px solid #1A1A1A; border-radius: 4px; }
-        
-        .device-container {
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-        .device-container.ipad-mode {
-            max-width: 820px;
-            margin: 20px auto;
-            border: 12px solid #1A1A1A;
-            border-radius: 40px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            background-color: var(--bg-color, #F9F9FB);
-        }
 
         .mood-btn-selected {
             border-color: #FF007F !important;
@@ -88,7 +102,7 @@
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative pb-20">
 
-    <!-- FLOATING TAMAGOTCHI PET WIDGET (FIXED Z-INDEX) -->
+    <!-- FLOATING TAMAGOTCHI PET WIDGET -->
     <div id="floatingPet" class="fixed bottom-6 right-6 z-[9999] bg-sunnyYellow border-3 border-darkText rounded-3xl p-3 shadow-brutal flex items-center gap-3 animate-bounce cursor-pointer select-none hover:scale-105 transition-all" onclick="switchTab('pet')">
         <div id="petAvatar" class="text-3xl bg-white w-12 h-12 rounded-2xl border-2 border-darkText flex items-center justify-center shadow-brutal-sm">
             🐱
@@ -114,18 +128,18 @@
             <button onclick="setTheme('minimal')" class="px-2.5 py-1 rounded-lg bg-gray-300 text-darkText border border-white">มินิมอล</button>
         </div>
         
+        <!-- GOOGLE LOGIN BUTTON & PROFILE AREA -->
         <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="exportData()" class="px-2.5 py-1 rounded-lg bg-sunnyYellow text-darkText border border-white hover:scale-105 transition-all flex items-center gap-1">
-                <i class="fa-solid fa-file-export"></i> 📤 Export ข้อมูล
-            </button>
-            <label class="px-2.5 py-1 rounded-lg bg-hotPink text-white border border-white hover:scale-105 transition-all cursor-pointer flex items-center gap-1">
-                <i class="fa-solid fa-file-import"></i> 📥 Import ข้อมูล
-                <input type="file" id="importFileInput" accept=".json" onchange="importData(event)" class="hidden">
-            </label>
-
-            <span class="ml-2">📱 มุมมอง:</span>
-            <button onclick="setDeviceMode('desktop')" id="btnDesktop" class="px-3 py-1 rounded-lg bg-limeGreen text-darkText border border-white">💻 คอมพิวเตอร์</button>
-            <button onclick="setDeviceMode('ipad')" id="btnIpad" class="px-3 py-1 rounded-lg bg-gray-700 text-white border border-white">📟 ไอแพด (Tablet)</button>
+            <div id="authContainer">
+                <button id="googleLoginBtn" onclick="loginWithGoogle()" class="px-3 py-1 rounded-lg bg-white text-darkText border border-darkText hover:bg-sunnyYellow transition-all flex items-center gap-1.5 font-extrabold">
+                    <i class="fa-brands fa-google text-red-500"></i> ล็อกอิน Gmail เพื่อซิงค์ข้อมูล
+                </button>
+                <div id="userProfileArea" class="hidden flex items-center gap-2 bg-white/20 px-3 py-1 rounded-xl border border-white">
+                    <img id="userAvatarImg" class="w-6 h-6 rounded-full border border-white" src="" alt="User">
+                    <span id="userNameText" class="text-xs font-bold text-limeGreen"></span>
+                    <button onclick="logoutGoogle()" class="text-[10px] bg-hotPink text-white px-2 py-0.5 rounded border border-white hover:opacity-80">ออกจากระบบ</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -177,10 +191,9 @@
         <!-- MAIN CONTAINER -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 relative">
 
-            <!-- ================= TAB 1: DASHBOARD ================= -->
+            <!-- TAB 1: DASHBOARD -->
             <section id="tab-dashboard" class="tab-content space-y-6">
                 <div class="bg-gradient-to-r from-limeGreen to-sunnyYellow p-6 rounded-3xl border-4 border-darkText shadow-brutal relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-6 text-darkText">
-                    <div class="absolute -right-6 -bottom-10 text-9xl opacity-10 font-cute">✨</div>
                     <div class="space-y-2 z-20">
                         <div class="inline-block bg-hotPink text-white font-bold text-xs px-3 py-1 rounded-full border-2 border-darkText">
                             👋 ยินดีต้อนรับกลับมานะคนเก่ง!
@@ -263,7 +276,7 @@
                 </div>
             </section>
 
-            <!-- ================= TAB 2: FINANCE ================= -->
+            <!-- TAB 2: FINANCE -->
             <section id="tab-finance" class="tab-content hidden space-y-6">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal">
                     <div>
@@ -327,7 +340,7 @@
                 </div>
             </section>
 
-            <!-- ================= TAB 3: UPCOMING BILLS ================= -->
+            <!-- TAB 3: UPCOMING BILLS -->
             <section id="tab-bills" class="tab-content hidden space-y-6">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal">
                     <div>
@@ -343,7 +356,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="billsGrid"></div>
             </section>
 
-            <!-- ================= TAB 4: PLANNER ================= -->
+            <!-- TAB 4: PLANNER -->
             <section id="tab-planner" class="tab-content hidden space-y-6">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal">
                     <div>
@@ -381,9 +394,8 @@
                 </div>
             </section>
 
-            <!-- ================= TAB 5: CALENDAR, MOOD TRACKER & DIARY ================= -->
+            <!-- TAB 5: CALENDAR, MOOD TRACKER & DIARY -->
             <section id="tab-calendar" class="tab-content hidden space-y-6">
-                <!-- TOP MOOD & PET SUMMARY BANNER -->
                 <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-6 rounded-3xl border-4 border-darkText shadow-brutal flex flex-col md:flex-row items-center justify-between gap-6 text-darkText">
                     <div class="space-y-2 z-20 flex-1">
                         <div class="inline-block bg-hotPink text-white font-bold text-xs px-3 py-1 rounded-full border-2 border-darkText">
@@ -395,7 +407,6 @@
                         </p>
                     </div>
 
-                    <!-- PET SPEECH BUBBLE FOR SELECTED DATE MOOD -->
                     <div class="bg-white p-4 rounded-3xl border-3 border-darkText shadow-brutal flex items-center gap-3 min-w-[280px]">
                         <div id="calPetAvatar" class="text-4xl bg-sunnyYellow/30 w-14 h-14 rounded-2xl border-2 border-darkText flex items-center justify-center shadow-brutal-sm">
                             🐱
@@ -410,7 +421,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- CALENDAR GRID -->
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal lg:col-span-2 space-y-4">
                         <div class="flex items-center justify-between">
                             <h3 id="calMonthYearLabel" class="font-cute font-extrabold text-2xl">ตุลาคม 2569</h3>
@@ -425,7 +435,6 @@
                         <div id="calendarGrid" class="grid grid-cols-7 gap-2 min-h-[350px]"></div>
                     </div>
 
-                    <!-- SIDEBAR DIARY LIST FOR SELECTED DATE -->
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-4 flex flex-col">
                         <div class="flex justify-between items-center border-b-2 border-darkText pb-3">
                             <h3 id="diarySidebarTitle" class="font-cute font-bold text-lg flex items-center gap-2">
@@ -438,7 +447,7 @@
                 </div>
             </section>
 
-            <!-- ================= TAB 6: CALCULATOR ================= -->
+            <!-- TAB 6: CALCULATOR -->
             <section id="tab-calculator" class="tab-content hidden space-y-6">
                 <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal">
                     <h2 class="text-2xl font-extrabold font-cute flex items-center gap-2 mb-1">
@@ -491,7 +500,7 @@
                 </div>
             </section>
 
-            <!-- ================= TAB 7: TAMAGOTCHI PET (STRICTLY REAL BALANCE LOGIC) ================= -->
+            <!-- TAB 7: TAMAGOTCHI PET -->
             <section id="tab-pet" class="tab-content hidden space-y-6">
                 <div class="bg-gradient-to-r from-sunnyYellow to-limeGreen p-6 rounded-3xl border-4 border-darkText shadow-brutal flex flex-col md:flex-row items-center justify-between gap-6 text-darkText">
                     <div class="space-y-2 z-20 text-center md:text-left">
@@ -530,7 +539,6 @@
                         </div>
                     </div>
 
-                    <!-- REAL BALANCE STATUS CARD -->
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-6">
                         <h3 class="font-cute font-bold text-xl flex items-center gap-2 border-b-2 border-darkText pb-3">
                             <i class="fa-solid fa-heart-pulse text-hotPink"></i> สถานะตามยอดเงินจริง
@@ -558,16 +566,13 @@
 
         </main>
 
-        <!-- FOOTER -->
         <footer class="bg-darkText text-white py-6 px-4 mt-12 border-t-4 border-darkText text-center font-medium text-sm">
-            <p>✨ Y2K Playful Life Planner — All-in-One App with Tamagotchi Pet & Mood Tracker 🚀</p>
+            <p>✨ Y2K Playful Life Planner — Cloud Synced with Google Login 🚀</p>
         </footer>
 
     </div>
 
-    <!-- ================= MODALS ================= -->
-
-    <!-- Modal: Quick Add -->
+    <!-- MODALS -->
     <div id="quickAddModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
@@ -583,7 +588,6 @@
         </div>
     </div>
 
-    <!-- Modal: Transaction -->
     <div id="transactionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
@@ -617,7 +621,6 @@
         </div>
     </div>
 
-    <!-- Modal: Upcoming Bill -->
     <div id="billModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
@@ -638,7 +641,6 @@
         </div>
     </div>
 
-    <!-- Modal: Task -->
     <div id="taskModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
@@ -667,7 +669,6 @@
         </div>
     </div>
 
-    <!-- Modal: Calendar Add Event & Photo Diary -->
     <div id="eventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
@@ -677,7 +678,6 @@
             <form id="eventForm" onsubmit="handleSaveEvent(event)" class="space-y-4">
                 <div><label class="block text-sm font-bold mb-1">วันที่</label><input type="date" id="eventDate" required class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 outline-none"></div>
                 
-                <!-- MOOD PICKER -->
                 <div>
                     <label class="block text-sm font-bold mb-1">เลือกอารมณ์วันนี้</label>
                     <div class="flex justify-between gap-2 bg-offWhite p-2 rounded-2xl border-2 border-darkText">
@@ -712,7 +712,6 @@
         </div>
     </div>
 
-    <!-- Modal: View Event Detail -->
     <div id="viewEventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
@@ -737,7 +736,6 @@
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
     <div id="toastNotification" class="fixed bottom-6 left-6 z-[10000] transform -translate-y-32 opacity-0 transition-all duration-300 pointer-events-none">
         <div class="bg-limeGreen text-darkText font-bold px-5 py-3 rounded-2xl border-3 border-darkText shadow-brutal flex items-center gap-3">
             <i class="fa-solid fa-circle-check text-xl"></i>
@@ -745,20 +743,18 @@
         </div>
     </div>
 
-    <!-- MAIN APP SCRIPT -->
     <script>
-        // PWA SERVICE WORKER REGISTRATION
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('PWA Service Worker Ready!'))
-                    .catch(err => console.log('SW registration failed: ', err));
+                    .then(reg => console.log('PWA Ready!'))
+                    .catch(err => console.log('SW error:', err));
             });
         }
 
+        let currentUser = null;
         let state = {
             theme: localStorage.getItem('y2k_theme') || 'y2k',
-            deviceMode: localStorage.getItem('y2k_device') || 'desktop',
             transactions: JSON.parse(localStorage.getItem('y2k_transactions')) || [],
             bills: JSON.parse(localStorage.getItem('y2k_bills')) || [],
             tasks: JSON.parse(localStorage.getItem('y2k_tasks')) || [],
@@ -789,14 +785,86 @@
         let lastCalcResult = 0;
         let currentUploadedPhotoBase64 = '';
 
-        window.onload = function() {
+        if (isFirebaseActive && auth) {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('googleLoginBtn').classList.add('hidden');
+                    document.getElementById('userProfileArea').classList.remove('hidden');
+                    document.getElementById('userAvatarImg').src = user.photoURL || 'https://via.placeholder.com/150';
+                    document.getElementById('userNameText').innerText = user.displayName || user.email;
+
+                    showToast('ซิงค์ข้อมูลกับบัญชี Google แล้ว ☁️');
+                    loadUserDataFromCloud();
+                } else {
+                    currentUser = null;
+                    document.getElementById('googleLoginBtn').classList.remove('hidden');
+                    document.getElementById('userProfileArea').classList.add('hidden');
+                }
+            });
+        }
+
+        function loginWithGoogle() {
+            if (!isFirebaseActive) {
+                showToast('ใช้งานโหมดออฟไลน์บันทึกในเครื่องทันที! 📱');
+                return;
+            }
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(err => {
+                alert('การล็อกอินล้มเหลว: ' + err.message);
+            });
+        }
+
+        function logoutGoogle() {
+            if (auth) {
+                auth.signOut().then(() => {
+                    showToast('ออกจากระบบเรียบร้อย');
+                    setTimeout(() => location.reload(), 500);
+                });
+            }
+        }
+
+        function loadUserDataFromCloud() {
+            if (!currentUser || !db) return;
+            const docRef = db.collection('user_planners').doc(currentUser.uid);
+            docRef.get().then(doc => {
+                if (doc.exists) {
+                    const cloudData = doc.data();
+                    if (cloudData && cloudData.state) {
+                        state = cloudData.state;
+                        saveDataLocal();
+                        refreshUI();
+                    }
+                } else {
+                    saveData();
+                }
+            }).catch(err => console.error("Cloud load error:", err));
+        }
+
+        function saveData() {
+            saveDataLocal();
+            if (currentUser && db) {
+                db.collection('user_planners').doc(currentUser.uid).set({
+                    state: state,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }).catch(err => console.error("Cloud save error:", err));
+            }
+        }
+
+        function saveDataLocal() {
+            localStorage.setItem('y2k_transactions', JSON.stringify(state.transactions));
+            localStorage.setItem('y2k_bills', JSON.stringify(state.bills));
+            localStorage.setItem('y2k_tasks', JSON.stringify(state.tasks));
+            localStorage.setItem('y2k_events', JSON.stringify(state.events));
+            localStorage.setItem('y2k_calchistory', JSON.stringify(state.calcHistory));
+            localStorage.setItem('y2k_pet', JSON.stringify(state.pet));
+            localStorage.setItem('y2k_theme', state.theme);
+        }
+
+        function refreshUI() {
             setTheme(state.theme, false);
-            setDeviceMode(state.deviceMode, false);
-            setDefaultDates();
-            
             document.getElementById('petNameInput').value = state.pet.name || 'น้องสัตว์เลี้ยง';
             document.getElementById('petAvatarSelect').value = state.pet.avatar || '🐱';
-
             renderDashboard();
             renderTransactions();
             renderBills();
@@ -805,18 +873,12 @@
             renderEventsList();
             updatePetStatus();
             renderCalcHistory();
-        };
-
-        function saveData() {
-            localStorage.setItem('y2k_transactions', JSON.stringify(state.transactions));
-            localStorage.setItem('y2k_bills', JSON.stringify(state.bills));
-            localStorage.setItem('y2k_tasks', JSON.stringify(state.tasks));
-            localStorage.setItem('y2k_events', JSON.stringify(state.events));
-            localStorage.setItem('y2k_calchistory', JSON.stringify(state.calcHistory));
-            localStorage.setItem('y2k_pet', JSON.stringify(state.pet));
-            localStorage.setItem('y2k_theme', state.theme);
-            localStorage.setItem('y2k_device', state.deviceMode);
         }
+
+        window.onload = function() {
+            setDefaultDates();
+            refreshUI();
+        };
 
         function selectMoodEmoji(emoji) {
             selectedMood = emoji;
@@ -835,21 +897,13 @@
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
                     const maxW = 600;
-                    let w = img.width;
-                    let h = img.height;
-                    if (w > maxW) {
-                        h = Math.round((h * maxW) / w);
-                        w = maxW;
-                    }
-                    canvas.width = w;
-                    canvas.height = h;
+                    let w = img.width, h = img.height;
+                    if (w > maxW) { h = Math.round((h * maxW) / w); w = maxW; }
+                    canvas.width = w; canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    
                     currentUploadedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                    
-                    const prev = document.getElementById('eventPhotoPreview');
-                    prev.src = currentUploadedPhotoBase64;
+                    document.getElementById('eventPhotoPreview').src = currentUploadedPhotoBase64;
                     document.getElementById('photoPreviewArea').classList.remove('hidden');
                 };
                 img.src = e.target.result;
@@ -876,44 +930,33 @@
             state.transactions.forEach(t => t.type === 'income' ? totalIncome += t.amount : totalExpense += t.amount);
             let netBalance = totalIncome - totalExpense;
 
-            let hunger = 0;
-            let happiness = 0;
+            let hunger = 0, happiness = 0;
             let selectedPetType = state.pet.avatar || '🐱';
             let petFaces = PET_MOOD_FACES[selectedPetType] || PET_MOOD_FACES['🐱'];
             
-            let moodAvatar = petFaces.sad;
-            let moodText = '';
-            let defaultSpeech = '';
+            let moodAvatar = petFaces.sad, moodText = '', defaultSpeech = '';
 
             if (netBalance <= 0) {
-                hunger = 0;
-                happiness = 0;
-                moodAvatar = petFaces.sad;
+                hunger = 0; happiness = 0; moodAvatar = petFaces.sad;
                 moodText = 'ไม่มีเงินเก็บ / งบหมดหิวม๊าก 🥺';
                 defaultSpeech = 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭';
             } else if (netBalance < 1000) {
                 hunger = Math.floor((netBalance / 1000) * 40);
                 happiness = Math.floor((netBalance / 1000) * 40);
-                moodAvatar = petFaces.low;
-                moodText = 'พอประทังชีวิตแบบประหยัด...';
+                moodAvatar = petFaces.low; moodText = 'พอประทังชีวิตแบบประหยัด...';
                 defaultSpeech = 'เงินเริ่มมีบ้างแล้ว แต่ประหยัดไว้ก่อนน้า 💸';
             } else if (netBalance < 5000) {
                 hunger = 40 + Math.floor(((netBalance - 1000) / 4000) * 45);
                 happiness = 40 + Math.floor(((netBalance - 1000) / 4000) * 45);
-                moodAvatar = petFaces.good;
-                moodText = 'อิ่มสบายกาย อารมณ์ดีขึ้นเยอะ! 😊';
+                moodAvatar = petFaces.good; moodText = 'อิ่มสบายกาย อารมณ์ดีขึ้นเยอะ! 😊';
                 defaultSpeech = 'การเงินมั่นคง สบายใจขึ้นเยอะเลยงับ 🌟';
             } else {
-                hunger = 100;
-                happiness = 100;
-                moodAvatar = petFaces.rich;
+                hunger = 100; happiness = 100; moodAvatar = petFaces.rich;
                 moodText = 'เศรษฐีตัวจริง รวยอู้ฟู่พุงกาง! 🤑';
                 defaultSpeech = 'รวยมากๆๆๆ สุขกายสบายใจที่สุดในโลก! 👑💖';
             }
 
-            state.pet.hunger = hunger;
-            state.pet.happiness = happiness;
-
+            state.pet.hunger = hunger; state.pet.happiness = happiness;
             if(!state.pet.speech || state.pet.speech.includes('ยินดีต้อนรับ') || state.pet.speech.includes('อร่อยจัง')) {
                 state.pet.speech = defaultSpeech;
             }
@@ -954,58 +997,9 @@
             `).join('');
         }
 
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
-            const dlAnchorElem = document.createElement('a');
-            const today = new Date().toISOString().split('T')[0];
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", `y2k_planner_backup_${today}.json`);
-            document.body.appendChild(dlAnchorElem);
-            dlAnchorElem.click();
-            dlAnchorElem.remove();
-            showToast('ส่งออกไฟล์ข้อมูลสำเร็จ! 📤');
-        }
-
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedState = JSON.parse(e.target.result);
-                    if (importedState && typeof importedState === 'object') {
-                        state = importedState;
-                        saveData();
-                        showToast('ดึงข้อมูลเข้าสำเร็จเรียบร้อย! 📥');
-                        setTimeout(() => location.reload(), 800);
-                    } else {
-                        alert('รูปแบบไฟล์ไม่ถูกต้อง');
-                    }
-                } catch (err) {
-                    alert('เกิดข้อผิดพลาดในการนำเข้าไฟล์ข้อมูล');
-                }
-            };
-            reader.readAsText(file);
-        }
-
         function setTheme(themeName, save=true) {
             state.theme = themeName;
             document.body.className = `theme-${themeName} min-h-screen flex flex-col relative pb-20`;
-            if(save) saveData();
-        }
-
-        function setDeviceMode(mode, save=true) {
-            state.deviceMode = mode;
-            const container = document.getElementById('deviceWrapper');
-            if(mode === 'ipad') {
-                container.classList.add('ipad-mode');
-                document.getElementById('btnIpad').className = 'px-3 py-1 rounded-lg bg-limeGreen text-darkText border border-white';
-                document.getElementById('btnDesktop').className = 'px-3 py-1 rounded-lg bg-gray-700 text-white border border-white';
-            } else {
-                container.classList.remove('ipad-mode');
-                document.getElementById('btnDesktop').className = 'px-3 py-1 rounded-lg bg-limeGreen text-darkText border border-white';
-                document.getElementById('btnIpad').className = 'px-3 py-1 rounded-lg bg-gray-700 text-white border border-white';
-            }
             if(save) saveData();
         }
 
@@ -1074,22 +1068,13 @@
                 triggerPetSpeech(`อุ๊ย! รายจ่าย -฿${amount.toLocaleString()} ${pName} เริ่มหงอยแล้วนะงับ! 🥺`);
             }
             
-            saveData();
-            closeModal('transactionModal');
-            renderDashboard();
-            renderTransactions();
-            updatePetStatus();
-            showToast('บันทึกสำเร็จ!');
+            saveData(); closeModal('transactionModal'); renderDashboard(); renderTransactions(); updatePetStatus(); showToast('บันทึกสำเร็จ!');
         }
 
         function deleteTransaction(id) {
             state.transactions = state.transactions.filter(t => t.id !== id);
             triggerPetSpeech(`โอ๊ะ! รายการเงินถูกลบไปแล้ว สภาพการเงินเปลี่ยนเลยงับ 🥺`);
-            saveData();
-            renderDashboard();
-            renderTransactions();
-            updatePetStatus();
-            showToast('ลบรายการเงินแล้ว!');
+            saveData(); renderDashboard(); renderTransactions(); updatePetStatus(); showToast('ลบรายการเงินแล้ว!');
         }
 
         function renderTransactions() {
@@ -1169,77 +1154,37 @@
         }
 
         function openEventModal(presetDate) { 
-            document.getElementById('eventForm').reset(); 
-            setDefaultDates(); 
-            selectMoodEmoji('😊');
-            if(presetDate) {
-                document.getElementById('eventDate').value = presetDate;
-            } else if (selectedCalendarDate) {
-                document.getElementById('eventDate').value = selectedCalendarDate;
-            }
-            removeSelectedPhoto();
-            openModal('eventModal'); 
+            document.getElementById('eventForm').reset(); setDefaultDates(); selectMoodEmoji('😊');
+            if(presetDate) document.getElementById('eventDate').value = presetDate;
+            else if (selectedCalendarDate) document.getElementById('eventDate').value = selectedCalendarDate;
+            removeSelectedPhoto(); openModal('eventModal'); 
         }
 
         function handleSaveEvent(e) {
             e.preventDefault();
             const targetDate = document.getElementById('eventDate').value;
-            state.events.unshift({ 
-                id: 'ev_' + Date.now(), 
-                date: targetDate, 
-                mood: selectedMood,
-                title: document.getElementById('eventTitle').value, 
-                photo: currentUploadedPhotoBase64 
-            });
-            saveData(); 
-            closeModal('eventModal'); 
-            selectCalendarDate(targetDate);
-            showToast('บันทึกโน้ตเรียบร้อย!');
+            state.events.unshift({ id: 'ev_' + Date.now(), date: targetDate, mood: selectedMood, title: document.getElementById('eventTitle').value, photo: currentUploadedPhotoBase64 });
+            saveData(); closeModal('eventModal'); selectCalendarDate(targetDate); showToast('บันทึกโน้ตเรียบร้อย!');
         }
 
-        function selectCalendarDate(dateKey) {
-            selectedCalendarDate = dateKey;
-            renderCalendar();
-            renderEventsList();
-        }
+        function selectCalendarDate(dateKey) { selectedCalendarDate = dateKey; renderCalendar(); renderEventsList(); }
 
         function viewEventDetails(eventId) {
             const ev = state.events.find(e => e.id === eventId);
             if (!ev) return;
-
             document.getElementById('viewEventMood').innerText = ev.mood || '😊';
             document.getElementById('viewEventDate').innerText = ev.date;
             document.getElementById('viewEventTitle').innerText = ev.title;
-            
             const imgContainer = document.getElementById('viewEventPhotoContainer');
             const imgEl = document.getElementById('viewEventPhoto');
-            if (ev.photo) {
-                imgEl.src = ev.photo;
-                imgContainer.classList.remove('hidden');
-            } else {
-                imgContainer.classList.add('hidden');
-            }
-
-            document.getElementById('deleteEventBtn').onclick = function() {
-                deleteEvent(ev.id);
-                closeModal('viewEventModal');
-            };
-
+            if (ev.photo) { imgEl.src = ev.photo; imgContainer.classList.remove('hidden'); }
+            else { imgContainer.classList.add('hidden'); }
+            document.getElementById('deleteEventBtn').onclick = function() { deleteEvent(ev.id); closeModal('viewEventModal'); };
             openModal('viewEventModal');
         }
 
-        function deleteEvent(id) { 
-            state.events = state.events.filter(x => x.id !== id); 
-            saveData(); 
-            renderCalendar(); 
-            renderEventsList(); 
-            showToast('ลบโน้ตแล้ว'); 
-        }
-
-        function changeMonth(dir) { 
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir); 
-            renderCalendar(); 
-        }
+        function deleteEvent(id) { state.events = state.events.filter(x => x.id !== id); saveData(); renderCalendar(); renderEventsList(); showToast('ลบโน้ตแล้ว'); }
+        function changeMonth(dir) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir); renderCalendar(); }
 
         function renderCalendar() {
             const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
@@ -1258,16 +1203,9 @@
                 const isSelected = selectedCalendarDate === dateKey;
                 const isToday = dateKey === todayStr;
 
-                let borderStyle = "border-darkText";
-                let bgStyle = "bg-offWhite";
-
-                if (isSelected) {
-                    borderStyle = "border-limeGreen ring-4 ring-limeGreen/50 z-10";
-                    bgStyle = "bg-sunnyYellow/20";
-                } else if (isToday) {
-                    borderStyle = "border-popBlue";
-                    bgStyle = "bg-popBlue/10";
-                }
+                let borderStyle = "border-darkText", bgStyle = "bg-offWhite";
+                if (isSelected) { borderStyle = "border-limeGreen ring-4 ring-limeGreen/50 z-10"; bgStyle = "bg-sunnyYellow/20"; }
+                else if (isToday) { borderStyle = "border-popBlue"; bgStyle = "bg-popBlue/10"; }
 
                 const topMood = evs.length > 0 ? (evs[0].mood || '😊') : '';
 
@@ -1288,50 +1226,25 @@
                 `;
             }
             document.getElementById('calendarGrid').innerHTML = html;
-            
             renderMonthlyMoodSummary(year, month);
         }
 
         function renderMonthlyMoodSummary(year, month) {
             const prefix = `${year}-${String(month+1).padStart(2,'0')}`;
             const monthEvents = state.events.filter(e => e.date && e.date.startsWith(prefix));
-            
             const summaryEl = document.getElementById('calendarMonthMoodSummary');
-            
-            if (monthEvents.length === 0) {
-                summaryEl.innerText = "ยังไม่มีบันทึกอารมณ์ในเดือนนี้เลย มาบันทึกกันเถอะงับ 📝";
-                return;
-            }
-
+            if (monthEvents.length === 0) { summaryEl.innerText = "ยังไม่มีบันทึกอารมณ์ในเดือนนี้เลย มาบันทึกกันเถอะงับ 📝"; return; }
             const counts = { '😊': 0, '🥰': 0, '😴': 0, '😭': 0, '😡': 0 };
-            monthEvents.forEach(ev => {
-                const m = ev.mood || '😊';
-                counts[m] = (counts[m] || 0) + 1;
-            });
-
-            let topMood = '😊';
-            let maxCount = -1;
-            for (let m in counts) {
-                if (counts[m] > maxCount) {
-                    maxCount = counts[m];
-                    topMood = m;
-                }
-            }
-
+            monthEvents.forEach(ev => { const m = ev.mood || '😊'; counts[m] = (counts[m] || 0) + 1; });
+            let topMood = '😊', maxCount = -1;
+            for (let m in counts) { if (counts[m] > maxCount) { maxCount = counts[m]; topMood = m; } }
             const pName = state.pet.name || 'สัตว์เลี้ยง';
             let msg = '';
-            if (topMood === '😡') {
-                msg = `เดือนนี้ ${pName} สังเกตว่าหัวร้อน/อารมณ์เสียบ่อยน้า (${counts['😡']} วัน) พักผ่อนบ้างนะงับคนเก่ง 🥺💖`;
-            } else if (topMood === '😭') {
-                msg = `เดือนนี้ดูลอยๆ เศร้า/น้อยใจบ่อยจัง (${counts['😭']} วัน) กอดๆ น้า ${pName} อยู่ข้างๆ เสมอ! 🤗✨`;
-            } else if (topMood === '😴') {
-                msg = `เดือนนี้ดูเหนื่อยง่วงบ่อยน้า (${counts['😴']} วัน) แอบแวบไปงีบพักบ้างนะงับ 💤`;
-            } else if (topMood === '🥰') {
-                msg = `เดือนนี้แฮปปี้คลั่งรักสุดๆ ไปเลย! (${counts['🥰']} วัน) ยิ้มหวานๆ แบบนี้ดีมากเลยน้า 🌸✨`;
-            } else {
-                msg = `เดือนนี้มีความสุข สดใสสุดๆ ไปเลยงับ! (${counts['😊']} วัน) ลุยต่อแบบปังๆ 🌟`;
-            }
-
+            if (topMood === '😡') msg = `เดือนนี้ ${pName} สังเกตว่าหัวร้อน/อารมณ์เสียบ่อยน้า (${counts['😡']} วัน) พักผ่อนบ้างนะงับ 🥺💖`;
+            else if (topMood === '😭') msg = `เดือนนี้ดูลอยๆ เศร้า/น้อยใจบ่อยจัง (${counts['😭']} วัน) กอดๆ น้า ${pName} อยู่ข้างๆ เสมอ! 🤗✨`;
+            else if (topMood === '😴') msg = `เดือนนี้ดูเหนื่อยง่วงบ่อยน้า (${counts['😴']} วัน) แอบแวบไปงีบพักบ้างนะงับ 💤`;
+            else if (topMood === '🥰') msg = `เดือนนี้แฮปปี้คลั่งรักสุดๆ ไปเลย! (${counts['🥰']} วัน) ยิ้มหวานๆ แบบนี้ดีมากเลยน้า 🌸✨`;
+            else msg = `เดือนนี้มีความสุข สดใสสุดๆ ไปเลยงับ! (${counts['😊']} วัน) ลุยต่อแบบปังๆ 🌟`;
             summaryEl.innerText = msg;
         }
 
@@ -1339,43 +1252,33 @@
             const sb = document.getElementById('eventsListSidebar');
             const titleEl = document.getElementById('diarySidebarTitle');
             const resetBtn = document.getElementById('resetDateFilterBtn');
-
             let filteredEvents = state.events;
 
             if (selectedCalendarDate) {
                 filteredEvents = state.events.filter(e => e.date === selectedCalendarDate);
                 titleEl.innerHTML = `<i class="fa-solid fa-calendar-day text-hotPink"></i> โน้ตวัน ${selectedCalendarDate}`;
                 resetBtn.classList.remove('hidden');
-
                 if (filteredEvents.length > 0) {
-                    const m = filteredEvents[0].mood || '😊';
-                    const pName = state.pet.name || 'น้องสัตว์เลี้ยง';
+                    const m = filteredEvents[0].mood || '😊', pName = state.pet.name || 'น้องสัตว์เลี้ยง';
                     let petComment = '';
                     if (m === '😡') petComment = `"${selectedCalendarDate} ดูหัวร้อนจัง ${pName} ส่งใจให้เย็นลงน้า ✨"`;
                     else if (m === '😭') petComment = `"${selectedCalendarDate} ซึมๆ หรอเค้ากอดๆ น้า 🥺"`;
                     else if (m === '😴') petComment = `"${selectedCalendarDate} ดูเหนื่อยๆ ไปนอนพักกันงับ 💤"`;
                     else if (m === '🥰') petComment = `"${selectedCalendarDate} แฮปปี้จังเลย อิจฉาแล้วน้า! 🥰"`;
                     else petComment = `"${selectedCalendarDate} ยิ้มเยอะๆ สดใสที่สุดเลยงับ! 💖"`;
-
                     document.getElementById('calPetSpeechText').innerText = petComment;
                 } else {
                     document.getElementById('calPetSpeechText').innerText = `"วัน ${selectedCalendarDate} ยังไม่มีโน้ตเลย กดเพิ่มสิครับ!"`;
                 }
-
             } else {
                 titleEl.innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด`;
                 resetBtn.classList.add('hidden');
                 document.getElementById('calPetSpeechText').innerText = `"จิ้มเลือกวันที่บนปฏิทินเพื่อดูอารมณ์วันนั้นๆ ได้เลยงับ!"`;
             }
 
-            if(!filteredEvents.length) { 
-                sb.innerHTML = `
-                    <div class="text-center py-10 text-gray-400 text-xs space-y-2">
-                        <p>ไม่มีโน้ตในวันที่เลือก 📝</p>
-                        ${selectedCalendarDate ? `<button onclick="openEventModal('${selectedCalendarDate}')" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border border-darkText text-xs shadow-brutal-sm">+ เพิ่มโน้ตของวันนี้</button>` : ''}
-                    </div>
-                `; 
-                return; 
+            if(!filteredEvents.length) {
+                sb.innerHTML = `<div class="text-center py-10 text-gray-400 text-xs space-y-2"><p>ไม่มีโน้ตในวันที่เลือก 📝</p>${selectedCalendarDate ? `<button onclick="openEventModal('${selectedCalendarDate}')" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border border-darkText text-xs shadow-brutal-sm">+ เพิ่มโน้ตของวันนี้</button>` : ''}</div>`;
+                return;
             }
 
             sb.innerHTML = `
@@ -1432,6 +1335,7 @@
             document.getElementById('dashTotalExpense').innerText = '฿ ' + exp.toLocaleString();
             renderExpenseChart();
         }
+
         function renderExpenseChart() {
             const ctx = document.getElementById('expenseCategoryChart').getContext('2d');
             const map = {};

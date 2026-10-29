@@ -24,9 +24,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
     <script>
-        // =========================================================
-        // 🔑 FIREBASE CONFIG (หากมีคีย์ค่อยนำมาวางแทนที่ตรงนี้ครับ)
-        // =========================================================
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -77,7 +74,6 @@
         }
     </script>
     <style>
-        /* บังคับสเกลหน้าจอให้เต็มมือถือพอดี ไม่ล้นและไม่มีช่องว่าง */
         html, body {
             width: 100% !important;
             min-height: 100vh !important;
@@ -87,11 +83,6 @@
             font-family: 'Prompt', sans-serif;
             background-color: var(--bg-color, #F9F9FB);
             color: var(--text-color, #1A1A1A);
-            transition: background 0.3s ease, color 0.3s ease;
-            box-sizing: border-box !important;
-        }
-
-        body > *, .container, .main-wrapper, div[class*="container"] {
             box-sizing: border-box !important;
         }
 
@@ -111,19 +102,18 @@
         }
     </style>
 </head>
-<body class="theme-y2k min-h-screen flex flex-col relative pb-20">
+<body class="theme-y2k min-h-screen flex flex-col relative pb-24">
 
-    <!-- FLOATING TAMAGOTCHI PET WIDGET -->
-    <div id="floatingPet" class="fixed bottom-6 right-6 z-[9999] bg-sunnyYellow border-3 border-darkText rounded-3xl p-3 shadow-brutal flex items-center gap-3 animate-bounce cursor-pointer select-none hover:scale-105 transition-all" onclick="switchTab('pet')">
-        <div id="petAvatar" class="text-3xl bg-white w-12 h-12 rounded-2xl border-2 border-darkText flex items-center justify-center shadow-brutal-sm">
+    <!-- FLOATING TAMAGOTCHI PET WIDGET (ปรับขนาดให้กะทัดรัด ไม่เกะกะ) -->
+    <div id="floatingPet" class="fixed bottom-3 right-3 z-[9999] bg-sunnyYellow border-2 border-darkText rounded-2xl px-2.5 py-1.5 shadow-brutal-sm flex items-center gap-2 animate-bounce cursor-pointer select-none hover:scale-105 transition-all max-w-[220px]" onclick="switchTab('pet')">
+        <div id="petAvatar" class="text-2xl bg-white w-9 h-9 rounded-xl border-2 border-darkText flex items-center justify-center shadow-sm shrink-0">
             🐱
         </div>
-        <div class="pr-2">
+        <div class="overflow-hidden">
             <div class="flex items-center gap-1">
-                <span id="floatingPetName" class="text-xs font-extrabold text-darkText">สัตว์เลี้ยงการเงิน</span>
-                <span id="petMoodIcon" class="text-xs">✨</span>
+                <span id="floatingPetName" class-[10px] font-extrabold text-darkText truncate">สัตว์เลี้ยง</span>
             </div>
-            <p id="petSpeechBubble" class="text-xs font-bold text-hotPink bg-white px-2 py-0.5 rounded-xl border border-darkText mt-0.5">
+            <p id="petSpeechBubble" class="text-[10px] font-bold text-hotPink bg-white px-1.5 py-0.5 rounded-lg border border-darkText truncate mt-0.5">
                 ยินดีต้อนรับนะงับ! 💰
             </p>
         </div>
@@ -139,7 +129,6 @@
             <button onclick="setTheme('minimal')" class="px-2.5 py-1 rounded-lg bg-gray-300 text-darkText border border-white">มินิมอล</button>
         </div>
         
-        <!-- GOOGLE LOGIN BUTTON & PROFILE AREA -->
         <div class="flex items-center gap-2 flex-wrap">
             <div id="authContainer">
                 <button id="googleLoginBtn" onclick="loginWithGoogle()" class="px-3 py-1 rounded-lg bg-white text-darkText border border-darkText hover:bg-sunnyYellow transition-all flex items-center gap-1.5 font-extrabold">
@@ -157,8 +146,8 @@
     <!-- MAIN DEVICE WRAPPER -->
     <div id="deviceWrapper" class="device-container flex-1 flex flex-col w-full">
 
-        <!-- TOP HEADER NAVBAR -->
-        <header class="bg-popBlue border-b-4 border-darkText text-white sticky top-0 z-50 px-4 py-3 shadow-[0_4px_0px_#1A1A1A] w-full">
+        <!-- TOP HEADER NAVBAR (แก้จาก sticky เป็น relative ให้เลื่อนตามหน้าจอ ไม่ติดค้าง) -->
+        <header class="bg-popBlue border-b-4 border-darkText text-white px-4 py-3 shadow-[0_4px_0px_#1A1A1A] w-full">
             <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
                 
                 <div class="flex items-center space-x-3">

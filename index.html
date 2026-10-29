@@ -70,6 +70,12 @@
             overflow: hidden;
             background-color: var(--bg-color, #F9F9FB);
         }
+
+        .mood-btn-selected {
+            border-color: #FF007F !important;
+            background-color: #FFDD00 !important;
+            transform: scale(1.15);
+        }
     </style>
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
@@ -367,19 +373,34 @@
                 </div>
             </section>
 
-            <!-- ================= TAB 5: CALENDAR & PHOTO DIARY (INTERACTIVE CLICK DATE) ================= -->
+            <!-- ================= TAB 5: CALENDAR, MOOD TRACKER & DIARY ================= -->
             <section id="tab-calendar" class="tab-content hidden space-y-6">
-                <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div>
-                        <h2 class="text-2xl font-extrabold font-cute flex items-center gap-2">
-                            <i class="fa-solid fa-calendar-days text-popBlue"></i> ปฏิทิน & ไดอารี่ภาพถ่าย
-                        </h2>
-                        <p class="text-sm text-gray-500 font-medium">👈 จิ้มเลือกวันที่บนช่องปฏิทินเพื่อดูหรือบันทึกโน้ตย้อนหลังได้เลย!</p>
+                <!-- TOP MOOD & PET SUMMARY BANNER -->
+                <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-6 rounded-3xl border-4 border-darkText shadow-brutal flex flex-col md:flex-row items-center justify-between gap-6 text-darkText">
+                    <div class="space-y-2 z-20 flex-1">
+                        <div class="inline-block bg-hotPink text-white font-bold text-xs px-3 py-1 rounded-full border-2 border-darkText">
+                            📊 สรุปอารมณ์ประจำเดือน
+                        </div>
+                        <h2 id="calendarMonthMoodTitle" class="text-2xl md:text-3xl font-extrabold font-cute">อารมณ์ประจำเดือนนี้</h2>
+                        <p id="calendarMonthMoodSummary" class="font-bold text-sm md:text-base text-darkText/90 bg-white/80 p-3 rounded-2xl border-2 border-darkText inline-block">
+                            กำลังประมวลผลอารมณ์เดือนนี้...
+                        </p>
                     </div>
-                    <button onclick="openEventModal()" class="bg-retroPurple text-white font-bold px-4 py-2.5 rounded-2xl border-3 border-darkText shadow-brutal-sm flex items-center gap-2">
-                        <i class="fa-solid fa-camera"></i> + เพิ่มโน้ตใหม่
-                    </button>
+
+                    <!-- PET SPEECH BUBBLE FOR SELECTED DATE MOOD -->
+                    <div class="bg-white p-4 rounded-3xl border-3 border-darkText shadow-brutal flex items-center gap-3 min-w-[280px]">
+                        <div id="calPetAvatar" class="text-4xl bg-sunnyYellow/30 w-14 h-14 rounded-2xl border-2 border-darkText flex items-center justify-center shadow-brutal-sm">
+                            🐱
+                        </div>
+                        <div>
+                            <span id="calPetMoodTitle" class="text-xs font-extrabold text-popBlue block">คำทักทายวันนี้ 🐾</span>
+                            <p id="calPetSpeechText" class="text-xs font-bold text-hotPink mt-0.5">
+                                "จิ้มเลือกวันที่เพื่อดูอารมณ์วันนั้นๆ ได้เลยงับ!"
+                            </p>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- CALENDAR GRID -->
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal lg:col-span-2 space-y-4">
@@ -503,22 +524,17 @@
 
                     <div class="bg-white text-darkText p-6 rounded-3xl border-3 border-darkText shadow-brutal space-y-4">
                         <h3 class="font-cute font-bold text-xl flex items-center gap-2 border-b-2 border-darkText pb-3">
-                            <i class="fa-solid fa-heart-pulse text-hotPink"></i> ค่าสถานะปัจจุบัน
+                            <i class="fa-solid fa-heart-pulse text-hotPink"></i> สถานะตามยอดเงินจริง
                         </h3>
                         <div class="space-y-3">
                             <div>
-                                <div class="flex justify-between text-xs font-bold mb-1"><span>ความอิ่มเอม</span><span id="petHungerVal">0%</span></div>
+                                <div class="flex justify-between text-xs font-bold mb-1"><span>ความอิ่มเอม (ตามเงินเก็บ)</span><span id="petHungerVal">0%</span></div>
                                 <div class="w-full bg-offWhite h-4 rounded-full border-2 border-darkText overflow-hidden"><div id="petHungerBar" class="bg-limeGreen h-full w-[0%] transition-all"></div></div>
                             </div>
                             <div>
-                                <div class="flex justify-between text-xs font-bold mb-1"><span>ความสุข</span><span id="petHappyVal">0%</span></div>
+                                <div class="flex justify-between text-xs font-bold mb-1"><span>ความสุข (ตามเงินเก็บ)</span><span id="petHappyVal">0%</span></div>
                                 <div class="w-full bg-offWhite h-4 rounded-full border-2 border-darkText overflow-hidden"><div id="petHappyBar" class="bg-sunnyYellow h-full w-[0%] transition-all"></div></div>
                             </div>
-                        </div>
-                        <div class="pt-2">
-                            <button onclick="feedPet()" class="w-full bg-limeGreen text-darkText font-bold py-3 rounded-2xl border-3 border-darkText shadow-brutal-sm flex items-center justify-center gap-2 hover:scale-102 transition-all">
-                                <i class="fa-solid fa-fish"></i> ให้อาหารสัตว์เลี้ยง
-                            </button>
                         </div>
                     </div>
 
@@ -535,7 +551,7 @@
 
         <!-- FOOTER -->
         <footer class="bg-darkText text-white py-6 px-4 mt-12 border-t-4 border-darkText text-center font-medium text-sm">
-            <p>✨ Y2K Playful Life Planner — All-in-One App with Tamagotchi Pet & Calculator 🚀</p>
+            <p>✨ Y2K Playful Life Planner — All-in-One App with Tamagotchi Pet & Mood Tracker 🚀</p>
         </footer>
 
     </div>
@@ -642,16 +658,29 @@
         </div>
     </div>
 
-    <!-- Modal: Calendar Add Event & Photo Diary -->
+    <!-- Modal: Calendar Add Event & Photo Diary (WITH MOOD PICKER) -->
     <div id="eventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
-                <h3 class="font-cute font-bold text-2xl">📸 บันทึกไดอารี่ & รูปภาพ</h3>
+                <h3 class="font-cute font-bold text-2xl">📸 บันทึกไดอารี่ & อารมณ์วันนี้</h3>
                 <button onclick="closeModal('eventModal')" class="w-8 h-8 bg-offWhite border-2 border-darkText rounded-xl font-bold flex items-center justify-center">✕</button>
             </div>
             <form id="eventForm" onsubmit="handleSaveEvent(event)" class="space-y-4">
                 <div><label class="block text-sm font-bold mb-1">วันที่</label><input type="date" id="eventDate" required class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 outline-none"></div>
-                <div><label class="block text-sm font-bold mb-1">หัวข้อไดอารี่ / วันสำคัญ</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้ไปทานอาหารอร่อยมาก 🌸" required class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 outline-none"></div>
+                
+                <!-- MOOD PICKER -->
+                <div>
+                    <label class="block text-sm font-bold mb-1">เลือกอารมณ์วันนี้</label>
+                    <div class="flex justify-between gap-2 bg-offWhite p-2 rounded-2xl border-2 border-darkText">
+                        <button type="button" onclick="selectMoodEmoji('😊')" class="mood-btn text-2xl p-2 rounded-xl border-2 border-transparent transition-all hover:scale-110" id="mood-😊">😊</button>
+                        <button type="button" onclick="selectMoodEmoji('🥰')" class="mood-btn text-2xl p-2 rounded-xl border-2 border-transparent transition-all hover:scale-110" id="mood-🥰">🥰</button>
+                        <button type="button" onclick="selectMoodEmoji('😴')" class="mood-btn text-2xl p-2 rounded-xl border-2 border-transparent transition-all hover:scale-110" id="mood-😴">😴</button>
+                        <button type="button" onclick="selectMoodEmoji('😭')" class="mood-btn text-2xl p-2 rounded-xl border-2 border-transparent transition-all hover:scale-110" id="mood-😭">😭</button>
+                        <button type="button" onclick="selectMoodEmoji('😡')" class="mood-btn text-2xl p-2 rounded-xl border-2 border-transparent transition-all hover:scale-110" id="mood-😡">😡</button>
+                    </div>
+                </div>
+
+                <div><label class="block text-sm font-bold mb-1">หัวข้อไดอารี่ / บันทึกสำคัญ</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้ไปทานอาหารอร่อยมาก 🌸" required class="w-full bg-offWhite border-2 border-darkText rounded-xl px-3 py-2 outline-none"></div>
                 
                 <div>
                     <label class="block text-sm font-bold mb-1">แนบรูปภาพ (เลือกไฟล์ หรือ ถ่ายภาพสด)</label>
@@ -674,11 +703,14 @@
         </div>
     </div>
 
-    <!-- Modal: View Event Detail (NEW DETAILED VIEWER) -->
+    <!-- Modal: View Event Detail -->
     <div id="viewEventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
-                <span id="viewEventDate" class="text-xs font-bold bg-sunnyYellow px-2.5 py-1 rounded-xl border border-darkText">วันที่</span>
+                <div class="flex items-center gap-2">
+                    <span id="viewEventMood" class="text-2xl">😊</span>
+                    <span id="viewEventDate" class="text-xs font-bold bg-sunnyYellow px-2.5 py-1 rounded-xl border border-darkText">วันที่</span>
+                </div>
                 <button onclick="closeModal('viewEventModal')" class="w-8 h-8 bg-offWhite border-2 border-darkText rounded-xl font-bold flex items-center justify-center">✕</button>
             </div>
             
@@ -717,7 +749,6 @@
             pet: JSON.parse(localStorage.getItem('y2k_pet')) || {
                 name: 'น้องสัตว์เลี้ยง',
                 avatar: '🐱',
-                feedBonus: 0,
                 speech: 'ยินดีต้อนรับนะงับ! บันทึกเงินกันเถอะ',
                 speechHistory: [{ time: 'เริ่มต้น', text: 'ยินดีต้อนรับนะงับ! บันทึกเงินกันเถอะ' }]
             }
@@ -725,6 +756,7 @@
 
         let currentCalendarDate = new Date();
         let selectedCalendarDate = null;
+        let selectedMood = '😊';
         let expenseChartInstance = null;
         let currentCalcExpression = "0";
         let lastCalcResult = 0;
@@ -757,6 +789,14 @@
             localStorage.setItem('y2k_pet', JSON.stringify(state.pet));
             localStorage.setItem('y2k_theme', state.theme);
             localStorage.setItem('y2k_device', state.deviceMode);
+        }
+
+        // ================= MOOD EMOJI SELECTION =================
+        function selectMoodEmoji(emoji) {
+            selectedMood = emoji;
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('mood-btn-selected'));
+            const activeBtn = document.getElementById('mood-' + emoji);
+            if(activeBtn) activeBtn.classList.add('mood-btn-selected');
         }
 
         // ================= DYNAMIC PHOTO COMPRESSION SYSTEM =================
@@ -798,7 +838,7 @@
             document.getElementById('photoPreviewArea').classList.add('hidden');
         }
 
-        // ================= DYNAMIC PET LOGIC =================
+        // ================= DYNAMIC PET LOGIC (STRICTLY REAL BALANCE) =================
         function updatePetSettings() {
             state.pet.name = document.getElementById('petNameInput').value.trim() || 'สัตว์เลี้ยง';
             state.pet.avatar = document.getElementById('petAvatarSelect').value;
@@ -818,12 +858,12 @@
             let moodText = '';
 
             if (state.transactions.length === 0) {
-                hunger = 50 + (state.pet.feedBonus || 0);
-                happiness = 50 + (state.pet.feedBonus || 0);
+                hunger = 50;
+                happiness = 50;
                 moodText = 'กำลังรอยอดเงินแรกงับ!';
             } else if (netBalance <= 0) {
-                hunger = Math.max(10, 20 + (state.pet.feedBonus || 0));
-                happiness = Math.max(10, 15 + (state.pet.feedBonus || 0));
+                hunger = 15;
+                happiness = 10;
                 
                 if (state.pet.avatar === '🐱') moodAvatar = '😿';
                 else if (state.pet.avatar === '🐶') moodAvatar = '🥺';
@@ -833,8 +873,8 @@
                 moodText = 'งบหมดแล้ว/ติดลบ ช่วยด้วยงับ! 🥺';
             } else {
                 let bonus = Math.min(40, Math.floor(netBalance / 500));
-                hunger = Math.min(100, 60 + bonus + (state.pet.feedBonus || 0));
-                happiness = Math.min(100, 65 + bonus + (state.pet.feedBonus || 0));
+                hunger = Math.min(100, 60 + bonus);
+                happiness = Math.min(100, 65 + bonus);
 
                 if (state.pet.avatar === '🐱') moodAvatar = '😺';
                 moodText = 'อ้วนปุ๊ก สมบูรณ์พุงกาง 💖';
@@ -848,6 +888,7 @@
             document.getElementById('petHeaderTitle').innerText = `${pName} (Tamagotchi Pet)`;
             document.getElementById('petAvatar').innerText = moodAvatar;
             document.getElementById('petBigAvatar').innerText = moodAvatar;
+            document.getElementById('calPetAvatar').innerText = moodAvatar;
             document.getElementById('petBigName').innerText = `${pName} (${moodText})`;
             document.getElementById('petBigStatusText').innerText = netBalance <= 0 ? 'เงินหมดแล้วน้า 🥺' : `เงินเก็บสุทธิ ฿${netBalance.toLocaleString()}`;
             
@@ -858,14 +899,6 @@
             document.getElementById('petSpeechBubble').innerText = state.pet.speech;
 
             renderPetSpeechHistory();
-        }
-
-        function feedPet() {
-            state.pet.feedBonus = (state.pet.feedBonus || 0) + 10;
-            triggerPetSpeech(`งั่มๆ อร่อยจัง ขอบคุณคุณเจ้าของมากๆ ค่า! 🐾`);
-            saveData();
-            updatePetStatus();
-            showToast(`ให้อาหาร ${state.pet.name || 'สัตว์เลี้ยง'} เรียบร้อย!`);
         }
 
         function triggerPetSpeech(text) {
@@ -1018,7 +1051,6 @@
 
         function deleteTransaction(id) {
             state.transactions = state.transactions.filter(t => t.id !== id);
-            state.pet.feedBonus = Math.max(0, (state.pet.feedBonus || 0) - 15);
             triggerPetSpeech(`โอ๊ะ! รายการเงินถูกลบไปแล้ว สภาพการเงินเปลี่ยนเลยงับ 🥺`);
             saveData();
             renderDashboard();
@@ -1105,10 +1137,11 @@
             document.getElementById('dashPendingTasks').innerText = state.tasks.filter(t => t.status !== 'done').length + ' รายการ';
         }
 
-        // ================= IMPROVED CALENDAR & INTERACTIVE DATE SELECTION =================
+        // ================= CALENDAR, MOOD ANALYTICS & PET COMMENTARY =================
         function openEventModal(presetDate) { 
             document.getElementById('eventForm').reset(); 
             setDefaultDates(); 
+            selectMoodEmoji('😊');
             if(presetDate) {
                 document.getElementById('eventDate').value = presetDate;
             } else if (selectedCalendarDate) {
@@ -1124,6 +1157,7 @@
             state.events.unshift({ 
                 id: 'ev_' + Date.now(), 
                 date: targetDate, 
+                mood: selectedMood,
                 title: document.getElementById('eventTitle').value, 
                 photo: currentUploadedPhotoBase64 
             });
@@ -1143,6 +1177,7 @@
             const ev = state.events.find(e => e.id === eventId);
             if (!ev) return;
 
+            document.getElementById('viewEventMood').innerText = ev.mood || '😊';
             document.getElementById('viewEventDate').innerText = ev.date;
             document.getElementById('viewEventTitle').innerText = ev.title;
             
@@ -1180,6 +1215,8 @@
             const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
             const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
             document.getElementById('calMonthYearLabel').innerText = `${thaiMonths[month]} ${year + 543}`;
+            document.getElementById('calendarMonthMoodTitle').innerText = `อารมณ์ประจำเดือน ${thaiMonths[month]} ${year + 543}`;
+
             const firstDay = new Date(year, month, 1).getDay(), totalDays = new Date(year, month + 1, 0).getDate();
             let html = '';
             for(let i=0; i<firstDay; i++) html += `<div></div>`;
@@ -1202,16 +1239,19 @@
                     bgStyle = "bg-popBlue/10";
                 }
 
+                // Top mood emoji for the day
+                const topMood = evs.length > 0 ? (evs[0].mood || '😊') : '';
+
                 html += `
                     <div onclick="selectCalendarDate('${dateKey}')" class="${bgStyle} text-darkText p-2 rounded-2xl border-2 ${borderStyle} min-h-[95px] flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 transition-all select-none relative">
                         <div class="flex justify-between items-center">
                             <span class="text-xs font-bold ${isToday ? 'bg-popBlue text-white px-1.5 py-0.5 rounded-full' : ''}">${day}</span>
-                            ${evs.length > 0 ? `<span class="text-[10px] bg-hotPink text-white px-1.5 py-0.2 rounded-full font-bold">${evs.length}</span>` : ''}
+                            ${topMood ? `<span class="text-sm animate-bounce">${topMood}</span>` : ''}
                         </div>
                         <div class="space-y-1 overflow-y-auto max-h-[60px] mt-1">
                             ${evs.map(ev => `
                                 <div onclick="event.stopPropagation(); viewEventDetails('${ev.id}')" title="คลิกเพื่อดูโน้ต" class="text-[10px] bg-white px-1.5 py-0.5 rounded-lg border border-darkText truncate cursor-pointer hover:bg-sunnyYellow transition-all font-bold">
-                                    ${ev.photo ? '📸 ' : ''}${ev.title}
+                                    ${ev.mood ? ev.mood + ' ' : ''}${ev.photo ? '📸 ' : ''}${ev.title}
                                 </div>
                             `).join('')}
                         </div>
@@ -1219,6 +1259,53 @@
                 `;
             }
             document.getElementById('calendarGrid').innerHTML = html;
+            
+            // Calculate & Render Monthly Mood Summary
+            renderMonthlyMoodSummary(year, month);
+        }
+
+        function renderMonthlyMoodSummary(year, month) {
+            const prefix = `${year}-${String(month+1).padStart(2,'0')}`;
+            const monthEvents = state.events.filter(e => e.date && e.date.startsWith(prefix));
+            
+            const summaryEl = document.getElementById('calendarMonthMoodSummary');
+            
+            if (monthEvents.length === 0) {
+                summaryEl.innerText = "ยังไม่มีบันทึกอารมณ์ในเดือนนี้เลย มาบันทึกกันเถอะงับ 📝";
+                return;
+            }
+
+            const counts = { '😊': 0, '🥰': 0, '😴': 0, '😭': 0, '😡': 0 };
+            monthEvents.forEach(ev => {
+                const m = ev.mood || '😊';
+                counts[m] = (counts[m] || 0) + 1;
+            });
+
+            // Find dominant mood
+            let topMood = '😊';
+            let maxCount = -1;
+            for (let m in counts) {
+                if (counts[m] > maxCount) {
+                    maxCount = counts[m];
+                    topMood = m;
+                }
+            }
+
+            const pName = state.pet.name || 'สัตว์เลี้ยง';
+            let msg = '';
+            if (topMood === '😡') {
+                msg = `เดือนนี้ ${pName} สังเกตว่าหัวร้อน/อารมณ์เสียบ่อยน้า (${counts['😡']} วัน) พักผ่อนบ้างนะงับคนเก่ง 🥺💖`;
+            } else if (topMood === '😭') {
+                msg = `เดือนนี้ดูลอยๆ เศร้า/น้อยใจบ่อยจัง (${counts['😭']} วัน) กอดๆ น้า ${pName} อยู่ข้างๆ เสมอ! 🤗✨`;
+            } else if (topMood === '😴') {
+                msg = `เดือนนี้ดูเหนื่อยง่วงบ่อยน้า (${counts['😴']} วัน) แอบแวบไปงีบพักบ้างนะงับ 💤`;
+            } else if (topMood === '🥰') {
+                msg = `เดือนนี้แฮปปี้คลั่งรักสุดๆ ไปเลย! (${counts['🥰']} วัน) ยิ้มหวานๆ แบบนี้ดีมากเลยน้า 🌸✨`;
+            } else {
+                msg = `เดือนนี้มีความสุข สดใสสุดๆ ไปเลยงับ! (${counts['😊']} วัน) ลุยต่อแบบปังๆ 🌟`;
+            }
+
+            summaryEl.innerText = msg;
         }
 
         function renderEventsList() {
@@ -1232,9 +1319,27 @@
                 filteredEvents = state.events.filter(e => e.date === selectedCalendarDate);
                 titleEl.innerHTML = `<i class="fa-solid fa-calendar-day text-hotPink"></i> โน้ตวัน ${selectedCalendarDate}`;
                 resetBtn.classList.remove('hidden');
+
+                // Dynamic Pet Commentary for Selected Date
+                if (filteredEvents.length > 0) {
+                    const m = filteredEvents[0].mood || '😊';
+                    const pName = state.pet.name || 'น้องสัตว์เลี้ยง';
+                    let petComment = '';
+                    if (m === '😡') petComment = `"${selectedCalendarDate} ดูหัวร้อนจัง ${pName} ส่งใจให้เย็นลงน้า ✨"`;
+                    else if (m === '😭') petComment = `"${selectedCalendarDate} ซึมๆ หรอเค้ากอดๆ น้า 🥺"`;
+                    else if (m === '😴') petComment = `"${selectedCalendarDate} ดูเหนื่อยๆ ไปนอนพักกันงับ 💤"`;
+                    else if (m === '🥰') petComment = `"${selectedCalendarDate} แฮปปี้จังเลย อิจฉาแล้วน้า! 🥰"`;
+                    else petComment = `"${selectedCalendarDate} ยิ้มเยอะๆ สดใสที่สุดเลยงับ! 💖"`;
+
+                    document.getElementById('calPetSpeechText').innerText = petComment;
+                } else {
+                    document.getElementById('calPetSpeechText').innerText = `"วัน ${selectedCalendarDate} ยังไม่มีโน้ตเลย กดเพิ่มสิครับ!"`;
+                }
+
             } else {
                 titleEl.innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด`;
                 resetBtn.classList.add('hidden');
+                document.getElementById('calPetSpeechText').innerText = `"จิ้มเลือกวันที่บนปฏิทินเพื่อดูอารมณ์วันนั้นๆ ได้เลยงับ!"`;
             }
 
             if(!filteredEvents.length) { 
@@ -1252,7 +1357,10 @@
                 ${filteredEvents.map(ev => `
                     <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite text-darkText p-3 rounded-2xl border-2 border-darkText space-y-2 hover:bg-white cursor-pointer transition-all shadow-brutal-sm">
                         <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold bg-sunnyYellow px-2 py-0.5 rounded-lg border border-darkText">${ev.date}</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-lg">${ev.mood || '😊'}</span>
+                                <span class="text-xs font-bold bg-sunnyYellow px-2 py-0.5 rounded-lg border border-darkText">${ev.date}</span>
+                            </div>
                             <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
                         </div>
                         <h4 class="font-bold text-sm text-popBlue">${ev.title}</h4>
@@ -1283,7 +1391,7 @@
             list.innerHTML = state.calcHistory.map(h => `<div class="bg-offWhite p-2 rounded-xl border flex justify-between text-xs"><span>${h.expr} =</span><strong class="text-popBlue">฿ ${h.result}</strong></div>`).join('');
         }
         function saveCalcAsNote() {
-            state.events.unshift({ id: 'ev_' + Date.now(), date: new Date().toISOString().split('T')[0], title: `คำนวณ: ฿${lastCalcResult}` });
+            state.events.unshift({ id: 'ev_' + Date.now(), date: new Date().toISOString().split('T')[0], mood: '😊', title: `คำนวณ: ฿${lastCalcResult}` });
             saveData(); renderCalendar(); renderEventsList(); showToast('บันทึกเป็นโน้ตแล้ว!');
         }
         function saveCalcAsExpense(type) {

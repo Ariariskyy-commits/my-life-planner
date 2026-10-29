@@ -1,0 +1,15 @@
+{
+  "name": "Y2K Playful Life Planner",
+  "short_name": "Y2K Planner",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F9F9FB",
+  "theme_color": "#0055FF",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/616/616408.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

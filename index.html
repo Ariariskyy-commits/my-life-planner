@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Y2K Playful Life Planner - รายรับรายจ่าย แพลนเนอร์ & สัตว์เลี้ยงส่วนตัว</title>
+    
+    <!-- PWA Settings for Mobile / iOS / Android -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0055FF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/616/616408.png">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Prompt & Fredoka -->
@@ -80,7 +88,7 @@
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative pb-20">
 
-    <!-- FLOATING TAMAGOTCHI PET WIDGET (FIXED Z-INDEX TO PREVENT OVERLAP) -->
+    <!-- FLOATING TAMAGOTCHI PET WIDGET (FIXED Z-INDEX) -->
     <div id="floatingPet" class="fixed bottom-6 right-6 z-[9999] bg-sunnyYellow border-3 border-darkText rounded-3xl p-3 shadow-brutal flex items-center gap-3 animate-bounce cursor-pointer select-none hover:scale-105 transition-all" onclick="switchTab('pet')">
         <div id="petAvatar" class="text-3xl bg-white w-12 h-12 rounded-2xl border-2 border-darkText flex items-center justify-center shadow-brutal-sm">
             🐱
@@ -659,7 +667,7 @@
         </div>
     </div>
 
-    <!-- Modal: Calendar Add Event & Photo Diary (WITH MOOD PICKER) -->
+    <!-- Modal: Calendar Add Event & Photo Diary -->
     <div id="eventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
         <div class="bg-white text-darkText w-full max-w-md p-6 rounded-3xl border-4 border-darkText shadow-brutal space-y-4 relative">
             <div class="flex justify-between items-center pb-3 border-b-2 border-darkText">
@@ -729,7 +737,7 @@
         </div>
     </div>
 
-    <!-- TOAST -->
+    <!-- TOAST NOTIFICATION -->
     <div id="toastNotification" class="fixed bottom-6 left-6 z-[10000] transform -translate-y-32 opacity-0 transition-all duration-300 pointer-events-none">
         <div class="bg-limeGreen text-darkText font-bold px-5 py-3 rounded-2xl border-3 border-darkText shadow-brutal flex items-center gap-3">
             <i class="fa-solid fa-circle-check text-xl"></i>
@@ -737,8 +745,17 @@
         </div>
     </div>
 
-    <!-- SCRIPT -->
+    <!-- MAIN APP SCRIPT -->
     <script>
+        // PWA SERVICE WORKER REGISTRATION
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('PWA Service Worker Ready!'))
+                    .catch(err => console.log('SW registration failed: ', err));
+            });
+        }
+
         let state = {
             theme: localStorage.getItem('y2k_theme') || 'y2k',
             deviceMode: localStorage.getItem('y2k_device') || 'desktop',
@@ -801,7 +818,6 @@
             localStorage.setItem('y2k_device', state.deviceMode);
         }
 
-        // ================= MOOD EMOJI SELECTION =================
         function selectMoodEmoji(emoji) {
             selectedMood = emoji;
             document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('mood-btn-selected'));
@@ -809,7 +825,6 @@
             if(activeBtn) activeBtn.classList.add('mood-btn-selected');
         }
 
-        // ================= DYNAMIC PHOTO COMPRESSION SYSTEM =================
         function handlePhotoSelection(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -848,7 +863,6 @@
             document.getElementById('photoPreviewArea').classList.add('hidden');
         }
 
-        // ================= DYNAMIC PET LOGIC (STRICTLY REAL BALANCE) =================
         function updatePetSettings() {
             state.pet.name = document.getElementById('petNameInput').value.trim() || 'สัตว์เลี้ยง';
             state.pet.avatar = document.getElementById('petAvatarSelect').value;
@@ -940,7 +954,6 @@
             `).join('');
         }
 
-        // EXPORT & IMPORT SYSTEM
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
             const dlAnchorElem = document.createElement('a');
@@ -1033,7 +1046,6 @@
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // Transactions logic
         function openTransactionModal(type) {
             document.getElementById('txType').value = type;
             document.getElementById('txModalTitle').innerText = type === 'income' ? '💰 เพิ่มรายรับ' : '💸 เพิ่มรายจ่าย';
@@ -1104,7 +1116,6 @@
             `).join('');
         }
 
-        // Bills
         function openBillModal() { document.getElementById('billForm').reset(); setDefaultDates(); openModal('billModal'); }
         function handleSaveBill(e) {
             e.preventDefault();
@@ -1130,7 +1141,6 @@
             `).join('');
         }
 
-        // Tasks
         function openTaskModal() { document.getElementById('taskForm').reset(); setDefaultDates(); openModal('taskModal'); }
         function handleSaveTask(e) {
             e.preventDefault();
@@ -1158,7 +1168,6 @@
             document.getElementById('dashPendingTasks').innerText = state.tasks.filter(t => t.status !== 'done').length + ' รายการ';
         }
 
-        // ================= CALENDAR, MOOD ANALYTICS & PET COMMENTARY =================
         function openEventModal(presetDate) { 
             document.getElementById('eventForm').reset(); 
             setDefaultDates(); 
@@ -1387,7 +1396,6 @@
             `;
         }
 
-        // Calculator
         function calcClear() { currentCalcExpression = "0"; document.getElementById('calcScreen').innerText = "0"; }
         function calcAppend(val) { currentCalcExpression = currentCalcExpression === "0" && !['+','-','*','/','%','.'].includes(val) ? val : currentCalcExpression + val; document.getElementById('calcScreen').innerText = currentCalcExpression; }
         function calcCalculate() {
@@ -1416,7 +1424,6 @@
             saveData(); renderDashboard(); renderTransactions(); updatePetStatus(); showToast('บันทึกรายการเงินแล้ว!');
         }
 
-        // Dashboard & Charts
         function renderDashboard() {
             let inc = 0, exp = 0;
             state.transactions.forEach(t => t.type === 'income' ? inc += t.amount : exp += t.amount);

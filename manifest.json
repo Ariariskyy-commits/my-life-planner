@@ -6,6 +6,8 @@
   "start_url": "/my-life-planner/",
   "display": "standalone",
   "orientation": "any",
+  "theme_color": "#0055ff",
+  "background_color": "#ffffff",
   "categories": [
     "lifestyle",
     "productivity",
@@ -13,16 +15,15 @@
   ],
   "icons": [
     {
-      "src": "icon.jpg.png",
+      "src": "./icon.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ],
   "screenshots": [
     {
-      "src": "screenshot-desktop.png",
-      "sizes": "1920x1080",
+      "src": "./screenshot-desktop.png",
+      "sizes": "1366x632",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Y2K Planner Dashboard"

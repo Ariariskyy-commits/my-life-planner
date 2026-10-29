@@ -67,7 +67,6 @@
                     boxShadow: {
                         'brutal': '4px 4px 0px #1A1A1A',
                         'brutal-sm': '2px 2px 0px #1A1A1A',
-                        'brutal-blue': '4px 4px 0px #0055FF',
                     }
                 }
             }
@@ -104,21 +103,21 @@
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative pb-20">
 
-    <!-- FLOATING TAMAGOTCHI PET (ย่อขนาดให้เล็กจิ๋ว น่ารัก ไม่เกะกะ) -->
-    <div id="floatingPet" class="fixed bottom-2 right-2 z-[9999] bg-sunnyYellow border-2 border-darkText rounded-xl px-2 py-1 shadow-brutal-sm flex items-center gap-1.5 animate-bounce cursor-pointer select-none hover:scale-105 transition-all max-w-[180px]" onclick="switchTab('pet')">
-        <div id="petAvatar" class="text-xl bg-white w-7 h-7 rounded-lg border border-darkText flex items-center justify-center shrink-0">
+    <!-- FLOATING TAMAGOTCHI PET (ย่อขนาดให้จิ๋วและน่ารัก ไม่บังหน้าจอ) -->
+    <div id="floatingPet" class="fixed bottom-2 right-2 z-[9999] bg-sunnyYellow border-2 border-darkText rounded-xl px-2 py-1 shadow-sm flex items-center gap-1.5 animate-bounce cursor-pointer select-none hover:scale-105 transition-all max-w-[160px]" onclick="switchTab('pet')">
+        <div id="petAvatar" class="text-lg bg-white w-6 h-6 rounded-lg border border-darkText flex items-center justify-center shrink-0">
             🐱
         </div>
-        <div class="overflow-hidden pr-1">
+        <div class="overflow-hidden pr-0.5">
             <span id="floatingPetName" class="text-[9px] font-extrabold text-darkText block truncate">สัตว์เลี้ยง</span>
             <p id="petSpeechBubble" class="text-[9px] font-bold text-hotPink truncate">
-                ยินดีต้อนรับนะงับ! 💰
+                ยินดีต้อนรับ! 💰
             </p>
         </div>
     </div>
 
     <!-- DEVICE VIEWPORT & THEME CONTROLS BAR -->
-    <div class="bg-darkText text-white px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold">
+    <div class="bg-darkText text-white px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold w-full">
         <div class="flex items-center gap-1.5 flex-wrap">
             <span>🎨 ธีม:</span>
             <button onclick="setTheme('y2k')" class="px-2 py-0.5 rounded bg-popBlue text-white">Y2K</button>
@@ -141,413 +140,402 @@
         </div>
     </div>
 
-    <!-- MAIN CONTAINER -->
-    <div id="deviceWrapper" class="flex-1 flex flex-col w-full">
+    <!-- TOP HEADER NAVBAR (เต็มจอ 100% ไม่มีกรอบบล็อก) -->
+    <header class="bg-popBlue border-b-3 border-darkText text-white px-3 py-2.5 shadow-[0_3px_0px_#1A1A1A] w-full">
+        <div class="w-full flex flex-col lg:flex-row items-center justify-between gap-3">
+            
+            <div class="flex items-center space-x-2">
+                <div class="bg-limeGreen text-darkText font-cute font-bold text-xl px-2.5 py-0.5 rounded-xl border-2 border-darkText shadow-sm transform -rotate-2">
+                    ✨ Y2K PLANNER
+                </div>
+            </div>
 
-        <!-- TOP HEADER NAVBAR (ขนาดกะทัดรัด สบายตา) -->
-        <header class="bg-popBlue border-b-3 border-darkText text-white px-3 py-2.5 shadow-[0_3px_0px_#1A1A1A] w-full">
-            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-                
-                <div class="flex items-center space-x-2">
-                    <div class="bg-limeGreen text-darkText font-cute font-bold text-xl px-2.5 py-0.5 rounded-xl border-2 border-darkText shadow-sm transform -rotate-2">
-                        ✨ Y2K PLANNER
+            <nav class="flex flex-wrap items-center justify-center gap-1 bg-white/10 p-1 rounded-xl border border-darkText">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs bg-limeGreen text-darkText border border-darkText shadow-sm flex items-center gap-1">
+                    <i class="fa-solid fa-chart-pie"></i> แดชบอร์ด
+                </button>
+                <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
+                    <i class="fa-solid fa-wallet"></i> รายรับ-รายจ่าย
+                </button>
+                <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> เตรียมจ่าย
+                </button>
+                <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
+                    <i class="fa-solid fa-list-check"></i> แพลนเนอร์
+                </button>
+                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
+                    <i class="fa-solid fa-calendar-days"></i> ปฏิทิน
+                </button>
+                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
+                    <i class="fa-solid fa-calculator"></i> คำนวณ
+                </button>
+                <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
+                    <i class="fa-solid fa-paw"></i> สัตว์เลี้ยง
+                </button>
+            </nav>
+
+            <div class="flex items-center">
+                <button onclick="openModal('quickAddModal')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> เพิ่มด่วน
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 w-full max-w-5xl mx-auto p-3 md:p-5 relative">
+
+        <!-- TAB 1: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content space-y-4">
+            <div class="bg-gradient-to-r from-limeGreen to-sunnyYellow p-4 md:p-5 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 text-darkText">
+                <div class="space-y-1">
+                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">
+                        👋 ยินดีต้อนรับกลับมานะคนเก่ง!
+                    </div>
+                    <h1 class="text-xl md:text-2xl font-extrabold font-cute">
+                        จัดการชีวิต เงินทอง & แพลนวันนี้ให้ปังปุริเย่ 🌟
+                    </h1>
+                </div>
+                <div class="bg-white p-3 rounded-xl border-2 border-darkText text-center shadow-sm">
+                    <span class="text-[10px] font-bold text-gray-500 block">ยอดเงินสุทธิคงเหลือ</span>
+                    <span id="dashNetBalance" class="text-xl font-extrabold text-popBlue">฿ 0.00</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-500">รายรับเดือนนี้</p>
+                        <h3 id="dashTotalIncome" class="text-lg font-extrabold text-green-600">฿ 0.00</h3>
+                    </div>
+                    <div class="w-9 h-9 bg-limeGreen rounded-xl border-2 border-darkText flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                </div>
+                <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-500">รายจ่ายเดือนนี้</p>
+                        <h3 id="dashTotalExpense" class="text-lg font-extrabold text-hotPink">฿ 0.00</h3>
+                    </div>
+                    <div class="w-9 h-9 bg-hotPink/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-hotPink">
+                        <i class="fa-solid fa-arrow-trend-down"></i>
+                    </div>
+                </div>
+                <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-500">บิลค้างจ่าย</p>
+                        <h3 id="dashPendingBills" class="text-lg font-extrabold text-retroPurple">0 รายการ</h3>
+                    </div>
+                    <div class="w-9 h-9 bg-retroPurple/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-retroPurple">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                </div>
+                <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-500">งานวันนี้</p>
+                        <h3 id="dashPendingTasks" class="text-lg font-extrabold text-popBlue">0 รายการ</h3>
+                    </div>
+                    <div class="w-9 h-9 bg-popBlue/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-popBlue">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 flex flex-col">
+                    <h3 class="font-cute font-bold text-base mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-bar text-popBlue"></i> สรุปสัดส่วนรายจ่ายตามหมวดหมู่
+                    </h3>
+                    <div class="relative flex-1 flex items-center justify-center min-h-[220px]">
+                        <canvas id="expenseCategoryChart" class="max-h-[240px]"></canvas>
                     </div>
                 </div>
 
-                <nav class="flex flex-wrap items-center justify-center gap-1 bg-white/10 p-1 rounded-xl border border-darkText">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs bg-limeGreen text-darkText border border-darkText shadow-sm flex items-center gap-1">
-                        <i class="fa-solid fa-chart-pie"></i> แดชบอร์ด
-                    </button>
-                    <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
-                        <i class="fa-solid fa-wallet"></i> รายรับ-รายจ่าย
-                    </button>
-                    <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
-                        <i class="fa-solid fa-file-invoice-dollar"></i> เตรียมจ่าย
-                    </button>
-                    <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
-                        <i class="fa-solid fa-list-check"></i> แพลนเนอร์
-                    </button>
-                    <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
-                        <i class="fa-solid fa-calendar-days"></i> ปฏิทิน
-                    </button>
-                    <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
-                        <i class="fa-solid fa-calculator"></i> คำนวณ
-                    </button>
-                    <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
-                        <i class="fa-solid fa-paw"></i> สัตว์เลี้ยง
-                    </button>
-                </nav>
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-cute font-bold text-base flex items-center gap-2">
+                            <i class="fa-solid fa-bolt text-sunnyYellow"></i> แพลนด่วนวันนี้
+                        </h3>
+                        <button onclick="switchTab('planner')" class="text-xs font-bold text-popBlue underline">ดูทั้งหมด</button>
+                    </div>
+                    <div id="dashTodoList" class="space-y-2 overflow-y-auto max-h-[220px] pr-1 text-xs">
+                        <div class="text-center py-8 text-gray-400">ไม่มีรายการแพลนเนอร์ค้างอยู่ 🎉</div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-                <div class="flex items-center">
-                    <button onclick="openModal('quickAddModal')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus"></i> เพิ่มด่วน
+        <!-- TAB 2: FINANCE -->
+        <section id="tab-finance" class="tab-content hidden space-y-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
+                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2">
+                    <i class="fa-solid fa-wallet text-popBlue"></i> บันทึกรายรับ - รายจ่าย
+                </h2>
+                <div class="flex gap-2">
+                    <button onclick="openTransactionModal('income')" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus-circle"></i> เพิ่มรายรับ
+                    </button>
+                    <button onclick="openTransactionModal('expense')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-minus-circle"></i> เพิ่มรายจ่าย
                     </button>
                 </div>
             </div>
-        </header>
 
-        <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 max-w-7xl w-full mx-auto p-3 md:p-5 relative">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="bg-limeGreen/20 text-darkText p-3.5 rounded-xl border-2 border-darkText">
+                    <span class="text-xs font-bold text-gray-600 block">รายรับทั้งหมด</span>
+                    <h3 id="finTotalIncome" class="text-2xl font-extrabold text-green-700 mt-0.5">฿ 0.00</h3>
+                </div>
+                <div class="bg-hotPink/10 text-darkText p-3.5 rounded-xl border-2 border-darkText">
+                    <span class="text-xs font-bold text-gray-600 block">รายจ่ายทั้งหมด</span>
+                    <h3 id="finTotalExpense" class="text-2xl font-extrabold text-hotPink mt-0.5">฿ 0.00</h3>
+                </div>
+                <div class="bg-popBlue/10 text-darkText p-3.5 rounded-xl border-2 border-darkText">
+                    <span class="text-xs font-bold text-gray-600 block">เงินคงเหลือสุทธิ</span>
+                    <h3 id="finNetBalance" class="text-2xl font-extrabold text-popBlue mt-0.5">฿ 0.00</h3>
+                </div>
+            </div>
 
-            <!-- TAB 1: DASHBOARD -->
-            <section id="tab-dashboard" class="tab-content space-y-4">
-                <div class="bg-gradient-to-r from-limeGreen to-sunnyYellow p-4 md:p-5 rounded-2xl border-3 border-darkText shadow-brutal-sm flex flex-col md:flex-row justify-between items-center gap-4 text-darkText">
-                    <div class="space-y-1">
-                        <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">
-                            👋 ยินดีต้อนรับกลับมานะคนเก่ง!
-                        </div>
-                        <h1 class="text-2xl font-extrabold font-cute">
-                            จัดการชีวิต เงินทอง & แพลนวันนี้ให้ปังปุริเย่ 🌟
-                        </h1>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border-2 border-darkText text-center shadow-sm">
-                        <span class="text-[10px] font-bold text-gray-500 block">ยอดเงินสุทธิคงเหลือ</span>
-                        <span id="dashNetBalance" class="text-xl font-extrabold text-popBlue">฿ 0.00</span>
+            <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <h3 class="font-cute font-bold text-base">ประวัติรายการเงิน</h3>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <select id="finFilterType" onchange="renderTransactions()" class="bg-offWhite border-2 border-darkText font-medium text-xs rounded-xl px-2 py-1.5 outline-none">
+                            <option value="all">ทุกประเภท</option>
+                            <option value="income">รายรับ</option>
+                            <option value="expense">รายจ่าย</option>
+                        </select>
+                        <input type="text" id="finSearch" oninput="renderTransactions()" placeholder="ค้นหารายการ..." class="bg-offWhite border-2 border-darkText font-medium text-xs rounded-xl px-2 py-1.5 outline-none w-full sm:w-48">
                     </div>
                 </div>
-
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-bold text-gray-500">รายรับเดือนนี้</p>
-                            <h3 id="dashTotalIncome" class="text-lg font-extrabold text-green-600">฿ 0.00</h3>
-                        </div>
-                        <div class="w-9 h-9 bg-limeGreen rounded-xl border-2 border-darkText flex items-center justify-center text-sm">
-                            <i class="fa-solid fa-arrow-trend-up"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-bold text-gray-500">รายจ่ายเดือนนี้</p>
-                            <h3 id="dashTotalExpense" class="text-lg font-extrabold text-hotPink">฿ 0.00</h3>
-                        </div>
-                        <div class="w-9 h-9 bg-hotPink/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-hotPink">
-                            <i class="fa-solid fa-arrow-trend-down"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-bold text-gray-500">บิลค้างจ่าย</p>
-                            <h3 id="dashPendingBills" class="text-lg font-extrabold text-retroPurple">0 รายการ</h3>
-                        </div>
-                        <div class="w-9 h-9 bg-retroPurple/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-retroPurple">
-                            <i class="fa-solid fa-file-invoice-dollar"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-bold text-gray-500">งานวันนี้</p>
-                            <h3 id="dashPendingTasks" class="text-lg font-extrabold text-popBlue">0 รายการ</h3>
-                        </div>
-                        <div class="w-9 h-9 bg-popBlue/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-popBlue">
-                            <i class="fa-solid fa-list-check"></i>
-                        </div>
-                    </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-offWhite border-b-2 border-darkText font-bold uppercase">
+                                <th class="p-2.5 border-r border-darkText">วันที่</th>
+                                <th class="p-2.5 border-r border-darkText">ประเภท</th>
+                                <th class="p-2.5 border-r border-darkText">หมวดหมู่</th>
+                                <th class="p-2.5 border-r border-darkText">รายการ</th>
+                                <th class="p-2.5 border-r border-darkText text-right">จำนวน (฿)</th>
+                                <th class="p-2.5 text-center">ลบ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTableBody" class="divide-y divide-darkText font-medium"></tbody>
+                    </table>
                 </div>
+            </div>
+        </section>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 flex flex-col">
-                        <h3 class="font-cute font-bold text-base mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-chart-bar text-popBlue"></i> สรุปสัดส่วนรายจ่ายตามหมวดหมู่
-                        </h3>
-                        <div class="relative flex-1 flex items-center justify-center min-h-[200px]">
-                            <canvas id="expenseCategoryChart" class="max-h-[220px]"></canvas>
-                        </div>
-                    </div>
+        <!-- TAB 3: UPCOMING BILLS -->
+        <section id="tab-bills" class="tab-content hidden space-y-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
+                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย
+                </h2>
+                <button onclick="openBillModal()" class="bg-retroPurple text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> เพิ่มบิล
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="billsGrid"></div>
+        </section>
 
-                    <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-cute font-bold text-base flex items-center gap-2">
-                                <i class="fa-solid fa-bolt text-sunnyYellow"></i> แพลนด่วนวันนี้
-                            </h3>
-                            <button onclick="switchTab('planner')" class="text-xs font-bold text-popBlue underline">ดูทั้งหมด</button>
-                        </div>
-                        <div id="dashTodoList" class="space-y-2 overflow-y-auto max-h-[220px] pr-1 text-xs">
-                            <div class="text-center py-8 text-gray-400">ไม่มีรายการแพลนเนอร์ค้างอยู่ เยี่ยมมาก! 🎉</div>
-                        </div>
+        <!-- TAB 4: PLANNER -->
+        <section id="tab-planner" class="tab-content hidden space-y-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
+                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-popBlue"></i> แพลนเนอร์
+                </h2>
+                <button onclick="openTaskModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> เพิ่มงาน
+                </button>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
+                    <div class="flex items-center justify-between pb-2 border-b border-darkText">
+                        <h3 class="font-cute font-bold text-sm">ต้องทำ (To Do)</h3>
+                        <span id="countTodo" class="bg-sunnyYellow text-darkText font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span>
                     </div>
+                    <div id="listTodo" class="space-y-2 min-h-[220px] overflow-y-auto pr-1 text-xs"></div>
                 </div>
-            </section>
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
+                    <div class="flex items-center justify-between pb-2 border-b border-darkText">
+                        <h3 class="font-cute font-bold text-sm">กำลังทำ (In Progress)</h3>
+                        <span id="countProgress" class="bg-popBlue text-white font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span>
+                    </div>
+                    <div id="listProgress" class="space-y-2 min-h-[220px] overflow-y-auto pr-1 text-xs"></div>
+                </div>
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
+                    <div class="flex items-center justify-between pb-2 border-b border-darkText">
+                        <h3 class="font-cute font-bold text-sm">เสร็จสิ้น (Done)</h3>
+                        <span id="countDone" class="bg-limeGreen text-darkText font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span>
+                    </div>
+                    <div id="listDone" class="space-y-2 min-h-[220px] overflow-y-auto pr-1 text-xs"></div>
+                </div>
+            </div>
+        </section>
 
-            <!-- TAB 2: FINANCE -->
-            <section id="tab-finance" class="tab-content hidden space-y-4">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
+        <!-- TAB 5: CALENDAR & DIARY -->
+        <section id="tab-calendar" class="tab-content hidden space-y-4">
+            <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-darkText">
+                <div class="space-y-1 flex-1">
+                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">📊 อารมณ์เดือนนี้</div>
+                    <h2 id="calendarMonthMoodTitle" class="text-xl font-extrabold font-cute">อารมณ์ประจำเดือนนี้</h2>
+                    <p id="calendarMonthMoodSummary" class="font-bold text-xs bg-white/80 p-2.5 rounded-xl border border-darkText inline-block">กำลังประมวลผล...</p>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border-2 border-darkText flex items-center gap-2.5 min-w-[240px]">
+                    <div id="calPetAvatar" class="text-3xl bg-sunnyYellow/30 w-11 h-11 rounded-xl border border-darkText flex items-center justify-center">🐱</div>
                     <div>
-                        <h2 class="text-xl font-extrabold font-cute flex items-center gap-2">
-                            <i class="fa-solid fa-wallet text-popBlue"></i> บันทึกรายรับ - รายจ่าย
-                        </h2>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="openTransactionModal('income')" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5">
-                            <i class="fa-solid fa-plus-circle"></i> เพิ่มรายรับ
-                        </button>
-                        <button onclick="openTransactionModal('expense')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5">
-                            <i class="fa-solid fa-minus-circle"></i> เพิ่มรายจ่าย
-                        </button>
+                        <span class="text-[10px] font-extrabold text-popBlue block">คำทักทายวันนี้ 🐾</span>
+                        <p id="calPetSpeechText" class="text-[11px] font-bold text-hotPink mt-0.5">"จิ้มเลือกวันที่ได้เลย!"</p>
                     </div>
                 </div>
+            </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="bg-limeGreen/20 text-darkText p-3.5 rounded-xl border-2 border-darkText">
-                        <span class="text-xs font-bold text-gray-600 block">รายรับทั้งหมด</span>
-                        <h3 id="finTotalIncome" class="text-2xl font-extrabold text-green-700 mt-0.5">฿ 0.00</h3>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 id="calMonthYearLabel" class="font-cute font-extrabold text-xl">ตุลาคม 2569</h3>
+                        <div class="flex gap-1.5">
+                            <button onclick="changeMonth(-1)" class="w-8 h-8 bg-offWhite border border-darkText rounded-lg font-bold flex items-center justify-center text-xs"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button onclick="changeMonth(1)" class="w-8 h-8 bg-offWhite border border-darkText rounded-lg font-bold flex items-center justify-center text-xs"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
                     </div>
-                    <div class="bg-hotPink/10 text-darkText p-3.5 rounded-xl border-2 border-darkText">
-                        <span class="text-xs font-bold text-gray-600 block">รายจ่ายทั้งหมด</span>
-                        <h3 id="finTotalExpense" class="text-2xl font-extrabold text-hotPink mt-0.5">฿ 0.00</h3>
+                    <div class="grid grid-cols-7 text-center font-bold text-xs text-gray-500 border-b border-darkText pb-1.5">
+                        <span class="text-hotPink">อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span class="text-popBlue">ส</span>
                     </div>
-                    <div class="bg-popBlue/10 text-darkText p-3.5 rounded-xl border-2 border-darkText">
-                        <span class="text-xs font-bold text-gray-600 block">เงินคงเหลือสุทธิ</span>
-                        <h3 id="finNetBalance" class="text-2xl font-extrabold text-popBlue mt-0.5">฿ 0.00</h3>
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 min-h-[300px]"></div>
+                </div>
+
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
+                    <div class="flex justify-between items-center border-b border-darkText pb-2">
+                        <h3 id="diarySidebarTitle" class="font-cute font-bold text-base flex items-center gap-1.5">
+                            <i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด
+                        </h3>
+                        <button id="resetDateFilterBtn" onclick="selectCalendarDate(null)" class="hidden text-[10px] font-bold bg-gray-200 px-2 py-0.5 rounded border border-darkText">แสดงทั้งหมด</button>
+                    </div>
+                    <div id="eventsListSidebar" class="space-y-2 overflow-y-auto max-h-[320px] flex-1 pr-1 text-xs"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 6: CALCULATOR -->
+        <section id="tab-calculator" class="tab-content hidden space-y-4">
+            <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
+                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2 mb-1">
+                    <i class="fa-solid fa-calculator text-popBlue"></i> เครื่องคิดเลขการเงิน
+                </h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col items-center">
+                    <div class="w-full max-w-xs bg-offWhite border-2 border-darkText rounded-2xl p-4 shadow-sm">
+                        <div class="bg-darkText text-limeGreen font-mono text-2xl font-extrabold p-3 rounded-xl mb-3 text-right overflow-x-auto border border-darkText" id="calcScreen">0</div>
+                        <div class="grid grid-cols-4 gap-2 text-xs">
+                            <button onclick="calcClear()" class="bg-hotPink text-white font-bold p-3 rounded-xl border border-darkText">AC</button>
+                            <button onclick="calcAppend('%')" class="bg-gray-200 text-darkText font-bold p-3 rounded-xl border border-darkText">%</button>
+                            <button onclick="calcAppend('/')" class="bg-sunnyYellow text-darkText font-bold p-3 rounded-xl border border-darkText">÷</button>
+                            <button onclick="calcAppend('*')" class="bg-sunnyYellow text-darkText font-bold p-3 rounded-xl border border-darkText">×</button>
+                            <button onclick="calcAppend('7')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">7</button>
+                            <button onclick="calcAppend('8')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">8</button>
+                            <button onclick="calcAppend('9')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">9</button>
+                            <button onclick="calcAppend('-')" class="bg-sunnyYellow text-darkText font-bold p-3 rounded-xl border border-darkText">-</button>
+                            <button onclick="calcAppend('4')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">4</button>
+                            <button onclick="calcAppend('5')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">5</button>
+                            <button onclick="calcAppend('6')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">6</button>
+                            <button onclick="calcAppend('+')" class="bg-sunnyYellow text-darkText font-bold p-3 rounded-xl border border-darkText">+</button>
+                            <button onclick="calcAppend('1')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">1</button>
+                            <button onclick="calcAppend('2')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">2</button>
+                            <button onclick="calcAppend('3')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">3</button>
+                            <button onclick="calcCalculate()" class="bg-popBlue text-white font-bold p-3 rounded-xl border border-darkText row-span-2 flex items-center justify-center text-lg">=</button>
+                            <button onclick="calcAppend('0')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText col-span-2">0</button>
+                            <button onclick="calcAppend('.')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">.</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col space-y-3">
+                    <div class="flex justify-between items-center border-b border-darkText pb-2">
+                        <h3 class="font-cute font-bold text-base">📜 ประวัติคำนวณ</h3>
+                        <button onclick="clearCalcHistory()" class="text-[10px] font-bold text-hotPink underline">ล้าง</button>
+                    </div>
+                    <div class="bg-offWhite p-3 rounded-xl border border-darkText space-y-2 text-xs">
+                        <label class="block font-bold">ผลลัพธ์ล่าสุด (<span id="latestCalcVal" class="text-popBlue font-extrabold">0</span>):</label>
+                        <input type="text" id="calcNoteDesc" placeholder="รายละเอียด เช่น ค่าข้าว" class="w-full bg-white border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium">
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <button onclick="saveCalcAsNote()" class="bg-retroPurple text-white font-bold py-1.5 rounded-lg border border-darkText text-[10px]">โน้ต</button>
+                            <button onclick="saveCalcAsExpense('expense')" class="bg-hotPink text-white font-bold py-1.5 rounded-lg border border-darkText text-[10px]">จ่าย</button>
+                            <button onclick="saveCalcAsExpense('income')" class="bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px]">รับ</button>
+                        </div>
+                    </div>
+                    <div id="calcHistoryList" class="space-y-1.5 overflow-y-auto max-h-[180px] flex-1 pr-1 text-xs"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 7: TAMAGOTCHI PET -->
+        <section id="tab-pet" class="tab-content hidden space-y-4">
+            <div class="bg-gradient-to-r from-sunnyYellow to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-darkText">
+                <div class="space-y-1 text-center md:text-left">
+                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">🐾 สัตว์เลี้ยงการเงิน</div>
+                    <h2 id="petHeaderTitle" class="text-2xl font-extrabold font-cute">สัตว์เลี้ยงการเงิน (Tamagotchi)</h2>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border-2 border-darkText text-center min-w-[185px]">
+                    <div id="petBigAvatar" class="text-5xl mb-1 animate-bounce">🐱</div>
+                    <h3 id="petBigName" class="font-cute font-bold text-sm">สัตว์เลี้ยงของคุณ</h3>
+                    <p id="petBigStatusText" class="text-[10px] font-bold text-popBlue mt-0.5">สถานะ...</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
+                    <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ตั้งค่าสัตว์เลี้ยง</h3>
+                    <div class="space-y-2 text-xs">
+                        <div>
+                            <label class="block font-bold mb-0.5">ชื่อ</label>
+                            <input type="text" id="petNameInput" onchange="updatePetSettings()" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-0.5">ประเภท</label>
+                            <select id="petAvatarSelect" onchange="updatePetSettings()" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                                <option value="🐱">🐱 แมว</option>
+                                <option value="🐶">🐶 หมา</option>
+                                <option value="🐰">🐰 กระต่าย</option>
+                                <option value="🐹">🐹 แฮมสเตอร์</option>
+                                <option value="🐻">🐻 หมี</option>
+                                <option value="🦆">🦆 เป็ด</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                    <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
-                        <h3 class="font-cute font-bold text-base">ประวัติรายการเงิน</h3>
-                        <div class="flex items-center gap-2 w-full sm:w-auto">
-                            <select id="finFilterType" onchange="renderTransactions()" class="bg-offWhite border-2 border-darkText font-medium text-xs rounded-xl px-2 py-1.5 outline-none">
-                                <option value="all">ทุกประเภท</option>
-                                <option value="income">รายรับ</option>
-                                <option value="expense">รายจ่าย</option>
-                            </select>
-                            <input type="text" id="finSearch" oninput="renderTransactions()" placeholder="ค้นหารายการ..." class="bg-offWhite border-2 border-darkText font-medium text-xs rounded-xl px-2 py-1.5 outline-none w-full sm:w-48">
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="bg-offWhite border-b-2 border-darkText font-bold uppercase">
-                                    <th class="p-2.5 border-r border-darkText">วันที่</th>
-                                    <th class="p-2.5 border-r border-darkText">ประเภท</th>
-                                    <th class="p-2.5 border-r border-darkText">หมวดหมู่</th>
-                                    <th class="p-2.5 border-r border-darkText">รายการ</th>
-                                    <th class="p-2.5 border-r border-darkText text-right">จำนวน (฿)</th>
-                                    <th class="p-2.5 text-center">ลบ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="transactionTableBody" class="divide-y divide-darkText font-medium"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB 3: UPCOMING BILLS -->
-            <section id="tab-bills" class="tab-content hidden space-y-4">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                    <div>
-                        <h2 class="text-xl font-extrabold font-cute flex items-center gap-2">
-                            <i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย
-                        </h2>
-                    </div>
-                    <button onclick="openBillModal()" class="bg-retroPurple text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus"></i> เพิ่มบิล
-                    </button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="billsGrid"></div>
-            </section>
-
-            <!-- TAB 4: PLANNER -->
-            <section id="tab-planner" class="tab-content hidden space-y-4">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                    <div>
-                        <h2 class="text-xl font-extrabold font-cute flex items-center gap-2">
-                            <i class="fa-solid fa-list-check text-popBlue"></i> แพลนเนอร์
-                        </h2>
-                    </div>
-                    <button onclick="openTaskModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus"></i> เพิ่มงาน
-                    </button>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                        <div class="flex items-center justify-between pb-2 border-b border-darkText">
-                            <h3 class="font-cute font-bold text-sm">ต้องทำ (To Do)</h3>
-                            <span id="countTodo" class="bg-sunnyYellow text-darkText font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span>
-                        </div>
-                        <div id="listTodo" class="space-y-2 min-h-[220px] overflow-y-auto pr-1 text-xs"></div>
-                    </div>
-                    <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                        <div class="flex items-center justify-between pb-2 border-b border-darkText">
-                            <h3 class="font-cute font-bold text-sm">กำลังทำ (In Progress)</h3>
-                            <span id="countProgress" class="bg-popBlue text-white font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span>
-                        </div>
-                        <div id="listProgress" class="space-y-2 min-h-[220px] overflow-y-auto pr-1 text-xs"></div>
-                    </div>
-                    <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                        <div class="flex items-center justify-between pb-2 border-b border-darkText">
-                            <h3 class="font-cute font-bold text-sm">เสร็จสิ้น (Done)</h3>
-                            <span id="countDone" class="bg-limeGreen text-darkText font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span>
-                        </div>
-                        <div id="listDone" class="space-y-2 min-h-[220px] overflow-y-auto pr-1 text-xs"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB 5: CALENDAR & DIARY -->
-            <section id="tab-calendar" class="tab-content hidden space-y-4">
-                <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-darkText">
-                    <div class="space-y-1 flex-1">
-                        <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">📊 อารมณ์เดือนนี้</div>
-                        <h2 id="calendarMonthMoodTitle" class="text-xl font-extrabold font-cute">อารมณ์ประจำเดือนนี้</h2>
-                        <p id="calendarMonthMoodSummary" class="font-bold text-xs bg-white/80 p-2.5 rounded-xl border border-darkText inline-block">กำลังประมวลผล...</p>
-                    </div>
-                    <div class="bg-white p-3 rounded-2xl border-2 border-darkText flex items-center gap-2.5 min-w-[240px]">
-                        <div id="calPetAvatar" class="text-3xl bg-sunnyYellow/30 w-11 h-11 rounded-xl border border-darkText flex items-center justify-center">🐱</div>
+                    <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">สถานะตามเงินจริง</h3>
+                    <div class="space-y-3 text-xs">
                         <div>
-                            <span class="text-[10px] font-extrabold text-popBlue block">คำทักทายวันนี้ 🐾</span>
-                            <p id="calPetSpeechText" class="text-[11px] font-bold text-hotPink mt-0.5">"จิ้มเลือกวันที่ได้เลย!"</p>
+                            <div class="flex justify-between font-bold mb-0.5"><span>ความอิ่มเอม</span><span id="petHungerVal">0%</span></div>
+                            <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden"><div id="petHungerBar" class="bg-limeGreen h-full w-[0%]"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between font-bold mb-0.5"><span>ความสุข</span><span id="petHappyVal">0%</span></div>
+                            <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden"><div id="petHappyBar" class="bg-sunnyYellow h-full w-[0%]"></div></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <h3 id="calMonthYearLabel" class="font-cute font-extrabold text-xl">ตุลาคม 2569</h3>
-                            <div class="flex gap-1.5">
-                                <button onclick="changeMonth(-1)" class="w-8 h-8 bg-offWhite border border-darkText rounded-lg font-bold flex items-center justify-center text-xs"><i class="fa-solid fa-chevron-left"></i></button>
-                                <button onclick="changeMonth(1)" class="w-8 h-8 bg-offWhite border border-darkText rounded-lg font-bold flex items-center justify-center text-xs"><i class="fa-solid fa-chevron-right"></i></button>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-7 text-center font-bold text-xs text-gray-500 border-b border-darkText pb-1.5">
-                            <span class="text-hotPink">อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span class="text-popBlue">ส</span>
-                        </div>
-                        <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 min-h-[300px]"></div>
-                    </div>
-
-                    <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
-                        <div class="flex justify-between items-center border-b border-darkText pb-2">
-                            <h3 id="diarySidebarTitle" class="font-cute font-bold text-base flex items-center gap-1.5">
-                                <i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด
-                            </h3>
-                            <button id="resetDateFilterBtn" onclick="selectCalendarDate(null)" class="hidden text-[10px] font-bold bg-gray-200 px-2 py-0.5 rounded border border-darkText">แสดงทั้งหมด</button>
-                        </div>
-                        <div id="eventsListSidebar" class="space-y-2 overflow-y-auto max-h-[320px] flex-1 pr-1 text-xs"></div>
-                    </div>
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
+                    <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ประวัติคำพูด</h3>
+                    <div id="petSpeechHistory" class="space-y-2 overflow-y-auto max-h-[160px] flex-1 pr-1 text-xs"></div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- TAB 6: CALCULATOR -->
-            <section id="tab-calculator" class="tab-content hidden space-y-4">
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                    <h2 class="text-xl font-extrabold font-cute flex items-center gap-2 mb-1">
-                        <i class="fa-solid fa-calculator text-popBlue"></i> เครื่องคิดเลขการเงิน
-                    </h2>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col items-center">
-                        <div class="w-full max-w-xs bg-offWhite border-2 border-darkText rounded-2xl p-4 shadow-sm">
-                            <div class="bg-darkText text-limeGreen font-mono text-2xl font-extrabold p-3 rounded-xl mb-3 text-right overflow-x-auto border border-darkText" id="calcScreen">0</div>
-                            <div class="grid grid-cols-4 gap-2 text-xs">
-                                <button onclick="calcClear()" class="bg-hotPink text-white font-bold p-3 rounded-xl border border-darkText">AC</button>
-                                <button onclick="calcAppend('%')" class="bg-gray-200 text-darkText font-bold p-3 rounded-xl border border-darkText">%</button>
-                                <button onclick="calcAppend('/')" class="bg-sunnyYellow text-darkText font-bold p-3 rounded-xl border border-darkText">÷</button>
-                                <button onclick="calcAppend('*')" class="bg-sunnyYellow text-darkText font-bold p-3 rounded-xl border border-darkText">×</button>
-                                <button onclick="calcAppend('7')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">7</button>
-                                <button onclick="calcAppend('8')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">8</button>
-                                <button onclick="calcAppend('9')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">9</button>
-                                <button onclick="calcAppend('-')" class="bg-sunnyYellow text-darkText font-bold p-3 rounded-xl border border-darkText">-</button>
-                                <button onclick="calcAppend('4')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">4</button>
-                                <button onclick="calcAppend('5')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">5</button>
-                                <button onclick="calcAppend('6')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">6</button>
-                                <button onclick="calcAppend('+')" class="bg-sunnyYellow text-darkText font-bold p-3 rounded-xl border border-darkText">+</button>
-                                <button onclick="calcAppend('1')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">1</button>
-                                <button onclick="calcAppend('2')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">2</button>
-                                <button onclick="calcAppend('3')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">3</button>
-                                <button onclick="calcCalculate()" class="bg-popBlue text-white font-bold p-3 rounded-xl border border-darkText row-span-2 flex items-center justify-center text-lg">=</button>
-                                <button onclick="calcAppend('0')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText col-span-2">0</button>
-                                <button onclick="calcAppend('.')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">.</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col space-y-3">
-                        <div class="flex justify-between items-center border-b border-darkText pb-2">
-                            <h3 class="font-cute font-bold text-base">📜 ประวัติคำนวณ</h3>
-                            <button onclick="clearCalcHistory()" class="text-[10px] font-bold text-hotPink underline">ล้าง</button>
-                        </div>
-                        <div class="bg-offWhite p-3 rounded-xl border border-darkText space-y-2 text-xs">
-                            <label class="block font-bold">ผลลัพธ์ล่าสุด (<span id="latestCalcVal" class="text-popBlue font-extrabold">0</span>):</label>
-                            <input type="text" id="calcNoteDesc" placeholder="รายละเอียด เช่น ค่าข้าว" class="w-full bg-white border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium">
-                            <div class="grid grid-cols-3 gap-1.5">
-                                <button onclick="saveCalcAsNote()" class="bg-retroPurple text-white font-bold py-1.5 rounded-lg border border-darkText text-[10px]">โน้ต</button>
-                                <button onclick="saveCalcAsExpense('expense')" class="bg-hotPink text-white font-bold py-1.5 rounded-lg border border-darkText text-[10px]">จ่าย</button>
-                                <button onclick="saveCalcAsExpense('income')" class="bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px]">รับ</button>
-                            </div>
-                        </div>
-                        <div id="calcHistoryList" class="space-y-1.5 overflow-y-auto max-h-[180px] flex-1 pr-1 text-xs"></div>
-                    </div>
-                </div>
-            </section>
+    </main>
 
-            <!-- TAB 7: TAMAGOTCHI PET -->
-            <section id="tab-pet" class="tab-content hidden space-y-4">
-                <div class="bg-gradient-to-r from-sunnyYellow to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-darkText">
-                    <div class="space-y-1 text-center md:text-left">
-                        <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">🐾 สัตว์เลี้ยงการเงิน</div>
-                        <h2 id="petHeaderTitle" class="text-2xl font-extrabold font-cute">สัตว์เลี้ยงการเงิน (Tamagotchi)</h2>
-                    </div>
-                    <div class="bg-white p-4 rounded-2xl border-2 border-darkText text-center min-w-[185px]">
-                        <div id="petBigAvatar" class="text-5xl mb-1 animate-bounce">🐱</div>
-                        <h3 id="petBigName" class="font-cute font-bold text-sm">สัตว์เลี้ยงของคุณ</h3>
-                        <p id="petBigStatusText" class="text-[10px] font-bold text-popBlue mt-0.5">สถานะ...</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                        <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ตั้งค่าสัตว์เลี้ยง</h3>
-                        <div class="space-y-2 text-xs">
-                            <div>
-                                <label class="block font-bold mb-0.5">ชื่อ</label>
-                                <input type="text" id="petNameInput" onchange="updatePetSettings()" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 font-bold outline-none">
-                            </div>
-                            <div>
-                                <label class="block font-bold mb-0.5">ประเภท</label>
-                                <select id="petAvatarSelect" onchange="updatePetSettings()" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 font-bold outline-none">
-                                    <option value="🐱">🐱 แมว</option>
-                                    <option value="🐶">🐶 หมา</option>
-                                    <option value="🐰">🐰 กระต่าย</option>
-                                    <option value="🐹">🐹 แฮมสเตอร์</option>
-                                    <option value="🐻">🐻 หมี</option>
-                                    <option value="🦆">🦆 เป็ด</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                        <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">สถานะตามเงินจริง</h3>
-                        <div class="space-y-3 text-xs">
-                            <div>
-                                <div class="flex justify-between font-bold mb-0.5"><span>ความอิ่มเอม</span><span id="petHungerVal">0%</span></div>
-                                <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden"><div id="petHungerBar" class="bg-limeGreen h-full w-[0%]"></div></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between font-bold mb-0.5"><span>ความสุข</span><span id="petHappyVal">0%</span></div>
-                                <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden"><div id="petHappyBar" class="bg-sunnyYellow h-full w-[0%]"></div></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
-                        <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ประวัติคำพูด</h3>
-                        <div id="petSpeechHistory" class="space-y-2 overflow-y-auto max-h-[160px] flex-1 pr-1 text-xs"></div>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-
-        <footer class="bg-darkText text-white py-4 px-3 mt-8 border-t-2 border-darkText text-center text-xs w-full">
-            <p>✨ Y2K Playful Life Planner 🚀</p>
-        </footer>
-
-    </div>
+    <footer class="bg-darkText text-white py-4 px-3 mt-8 border-t-2 border-darkText text-center text-xs w-full">
+        <p>✨ Y2K Playful Life Planner 🚀</p>
+    </footer>
 
     <!-- MODALS -->
     <div id="quickAddModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-brutal space-y-3 relative">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative">
             <div class="flex justify-between items-center pb-2 border-b border-darkText">
                 <h3 class="font-cute font-bold text-lg">⚡ เพิ่มรายการด่วน</h3>
                 <button onclick="closeModal('quickAddModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold text-xs">✕</button>
@@ -562,7 +550,7 @@
     </div>
 
     <div id="transactionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-brutal space-y-3 relative text-xs">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText">
                 <h3 id="txModalTitle" class="font-cute font-bold text-lg">เพิ่มรายการเงิน</h3>
                 <button onclick="closeModal('transactionModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold text-xs">✕</button>
@@ -595,7 +583,7 @@
     </div>
 
     <div id="billModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-brutal space-y-3 relative text-xs">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText">
                 <h3 class="font-cute font-bold text-lg">💡 เพิ่มบิลเตรียมจ่าย</h3>
                 <button onclick="closeModal('billModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button>
@@ -615,7 +603,7 @@
     </div>
 
     <div id="taskModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-brutal space-y-3 relative text-xs">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText">
                 <h3 class="font-cute font-bold text-lg">เพิ่มแพลนงานใหม่</h3>
                 <button onclick="closeModal('taskModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button>
@@ -643,7 +631,7 @@
     </div>
 
     <div id="eventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-brutal space-y-3 relative text-xs">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText">
                 <h3 class="font-cute font-bold text-lg">📸 บันทึกไดอารี่</h3>
                 <button onclick="closeModal('eventModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button>
@@ -682,7 +670,7 @@
     </div>
 
     <div id="viewEventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-brutal space-y-3 relative text-xs">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText">
                 <div class="flex items-center gap-1.5">
                     <span id="viewEventMood" class="text-xl">😊</span>

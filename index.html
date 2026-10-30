@@ -545,7 +545,7 @@
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col space-y-3">
                     <div class="flex justify-between items-center border-b border-darkText pb-2">
                         <h3 class="font-cute font-bold text-base">📜 ประวัติคำนวณ (เลือกรายการเพื่อโน้ต)</h3>
-                        <button onclick="clearCalcHistory()" class="text-[10px] font-bold text-hotPink underline">ล้าง</button>
+                        <button onclick="clearCalcHistory()" class="text-[10px] font-bold text-hotPink underline">ล้างทั้งหมด</button>
                     </div>
                     <div class="bg-offWhite p-3 rounded-xl border border-darkText space-y-2 text-xs">
                         <input type="text" id="calcNoteDesc" placeholder="รายละเอียด เช่น ค่าข้าว" class="w-full bg-white border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium text-darkText">
@@ -600,7 +600,10 @@
                     </div>
                 </div>
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
-                    <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ประวัติคำพูด</h3>
+                    <div class="flex justify-between items-center border-b border-darkText pb-2">
+                        <h3 class="font-cute font-bold text-base">ประวัติคำพูด (แชท)</h3>
+                        <button onclick="clearPetSpeechHistory()" class="text-[10px] font-bold text-hotPink underline">ล้างแชท</button>
+                    </div>
                     <div id="petSpeechHistory" class="space-y-2 overflow-y-auto max-h-[160px] flex-1 pr-1 text-xs"></div>
                 </div>
             </div>
@@ -1319,6 +1322,13 @@
             showToast('อัปเดตสัตว์เลี้ยงแล้ว! ✨');
         }
 
+        function clearPetSpeechHistory() {
+            state.pet.speechHistory = [];
+            saveData();
+            renderPetSpeechHistory();
+            showToast('ล้างประวัติแชทสัตว์เลี้ยงแล้ว');
+        }
+
         function calcNetBalance() {
             let inc = 0, exp = 0;
             state.transactions.forEach(t => t.type === 'income' ? inc += t.amount : exp += t.amount);
@@ -1363,6 +1373,10 @@
         }
 
         function renderPetSpeechHistory() {
+            if (!state.pet.speechHistory.length) {
+                $('petSpeechHistory').innerHTML = `<div class="text-center py-4 text-gray-400 text-[10px]">ไม่มีประวัติแชท</div>`;
+                return;
+            }
             $('petSpeechHistory').innerHTML = state.pet.speechHistory.map(h => `
                 <div class="bg-offWhite text-darkText p-2 rounded-lg border border-darkText text-[11px] flex items-center gap-2">
                     <span>${esc(state.pet.avatar) || '🐾'}</span>
@@ -2028,7 +2042,8 @@
                 if (!isFinite(res)) throw new Error('not finite');
                 lastCalcResult = Math.round(res * 100) / 100;
                 $('calcScreen').innerText = lastCalcResult;
-                state.calcHistory.unshift({ expr: calcExpr, result: lastCalcResult });
+                const uniqueId = 'calc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+                state.calcHistory.unshift({ id: uniqueId, expr: calcExpr, result: lastCalcResult });
                 if (state.calcHistory.length > 15) state.calcHistory.pop();
                 calcExpr = String(lastCalcResult);
                 saveData();
@@ -2041,7 +2056,19 @@
             calcExpr = '0';
         }
 
-        function clearCalcHistory() { state.calcHistory = []; saveData(); renderCalcHistory(); }
+        function clearCalcHistory() {
+            state.calcHistory = [];
+            saveData();
+            renderCalcHistory();
+            showToast('ล้างประวัติคำนวณทั้งหมดแล้ว');
+        }
+
+        function deleteCalcHistoryItem(id) {
+            state.calcHistory = state.calcHistory.filter(h => h.id !== id);
+            saveData();
+            renderCalcHistory();
+            showToast('ลบรายการคำนวณแล้ว');
+        }
 
         function renderCalcHistory() {
             const list = $('calcHistoryList');
@@ -2052,8 +2079,11 @@
             list.innerHTML = state.calcHistory.map(h => `
                 <div class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1.5">
                     <div class="flex justify-between items-center text-xs">
-                        <span class="font-mono text-gray-600">${esc(h.expr)} =</span>
-                        <strong class="text-popBlue text-sm font-extrabold">฿ ${money(h.result)}</strong>
+                        <span class="font-mono text-gray-600 truncate max-w-[150px]">${esc(h.expr)} =</span>
+                        <div class="flex items-center gap-2">
+                            <strong class="text-popBlue text-sm font-extrabold">฿ ${money(h.result)}</strong>
+                            <button onclick="deleteCalcHistoryItem('${h.id}')" class="text-gray-400 hover:text-hotPink text-xs px-1" title="ลบรายการนี้"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
                     </div>
                     <div class="grid grid-cols-3 gap-1 pt-1 border-t border-darkText/10">
                         <button onclick="saveSpecificCalcAsNote(${h.result}, '${esc(h.expr)}')" class="bg-retroPurple text-white font-bold py-1 rounded border border-darkText text-[10px]">บันทึกโน้ต</button>

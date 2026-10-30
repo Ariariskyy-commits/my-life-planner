@@ -414,7 +414,7 @@
                                 <th class="p-2.5 border-r border-darkText">หมวดหมู่</th>
                                 <th class="p-2.5 border-r border-darkText">รายการ</th>
                                 <th class="p-2.5 border-r border-darkText text-right">จำนวน (฿)</th>
-                                <th class="p-2.5 text-center">ลบ</th>
+                                <th class="p-2.5 text-center">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody id="transactionTableBody" class="divide-y divide-darkText font-medium"></tbody>
@@ -619,10 +619,12 @@
         </div>
     </div>
 
+    <!-- TRANSACTION MODAL -->
     <div id="transactionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 id="txModalTitle" class="font-cute font-bold text-lg">เพิ่มรายการเงิน</h3><button onclick="closeModal('transactionModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold text-xs">✕</button></div>
             <form id="transactionForm" onsubmit="handleSaveTransaction(event)" class="space-y-3">
+                <input type="hidden" id="txId" value="">
                 <input type="hidden" id="txType" value="expense">
                 <div><label class="block font-bold mb-0.5">วันที่</label><input type="date" id="txDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div><label class="block font-bold mb-0.5">ชื่อรายการ</label><input type="text" id="txTitle" placeholder="เช่น ค่ากาแฟ" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
@@ -644,10 +646,12 @@
         </div>
     </div>
 
+    <!-- BILL MODAL -->
     <div id="billModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">💡 เพิ่มบิลเตรียมจ่าย</h3><button onclick="closeModal('billModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
+            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 id="billModalTitle" class="font-cute font-bold text-lg">💡 เพิ่มบิลเตรียมจ่าย</h3><button onclick="closeModal('billModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
             <form id="billForm" onsubmit="handleSaveBill(event)" class="space-y-3">
+                <input type="hidden" id="billId" value="">
                 <div><label class="block font-bold mb-0.5">ชื่อบิล</label><input type="text" id="billTitle" placeholder="เช่น ค่าหอ" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div><label class="block font-bold mb-0.5">กำหนดจ่าย</label><input type="date" id="billDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div class="grid grid-cols-2 gap-2">
@@ -668,10 +672,12 @@
         </div>
     </div>
 
+    <!-- TASK MODAL -->
     <div id="taskModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">เพิ่มแพลนงานใหม่</h3><button onclick="closeModal('taskModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
+            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 id="taskModalTitle" class="font-cute font-bold text-lg">เพิ่มแพลนงานใหม่</h3><button onclick="closeModal('taskModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
             <form id="taskForm" onsubmit="handleSaveTask(event)" class="space-y-3">
+                <input type="hidden" id="taskId" value="">
                 <div><label class="block font-bold mb-0.5">หัวข้องาน</label><input type="text" id="taskTitle" placeholder="เช่น ส่งงาน" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div class="grid grid-cols-2 gap-2">
                     <div><label class="block font-bold mb-0.5">กำหนด</label><input type="date" id="taskDate" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
@@ -693,6 +699,7 @@
         </div>
     </div>
 
+    <!-- EVENT / DIARY MODAL -->
     <div id="eventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">📸 บันทึกไดอารี่</h3><button onclick="closeModal('eventModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
@@ -739,8 +746,8 @@
             <h3 id="viewEventTitle" class="font-cute font-extrabold text-lg text-popBlue"></h3>
             <div id="viewEventPhotoContainer" class="hidden"><img id="viewEventPhoto" class="w-full max-h-56 object-cover rounded-xl border border-darkText"></div>
             <p id="viewEventPhotoNote" class="hidden text-[10px] text-gray-500"></p>
-            <div class="pt-2 border-t border-darkText">
-                <button id="deleteEventBtn" class="w-full bg-hotPink text-white font-bold py-2 rounded-lg border border-darkText text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ลบโน้ตนี้</button>
+            <div class="pt-2 border-t border-darkText flex gap-2">
+                <button id="deleteEventBtn" class="flex-1 bg-hotPink text-white font-bold py-2 rounded-lg border border-darkText text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ลบโน้ตนี้</button>
             </div>
         </div>
     </div>
@@ -1393,32 +1400,62 @@
             showToast('เพิ่มหมวดหมู่สำเร็จ! ✨');
         }
 
-        function openTransactionModal(type) {
+        function openTransactionModal(type, editId = null) {
             $('transactionForm').reset();
+            $('txId').value = '';
             $('txType').value = type;
-            $('txModalTitle').innerText = type === 'income' ? '💰 เพิ่มรายรับ' : '💸 เพิ่มรายจ่าย';
             setDefaultDates();
-            updateCategorySelects(type === 'income' ? '💰 เงินเดือน/รายรับ' : '🍔 อาหาร/เครื่องดื่ม');
+            
+            if (editId) {
+                const t = state.transactions.find(x => x.id === editId);
+                if (t) {
+                    $('txId').value = t.id;
+                    $('txType').value = t.type;
+                    $('txDate').value = t.date;
+                    $('txTitle').value = t.title;
+                    updateCategorySelects(t.category);
+                    $('txAmount').value = t.amount;
+                    $('txModalTitle').innerText = t.type === 'income' ? '✏️ แก้ไขรายรับ' : '✏️ แก้ไขรายจ่าย';
+                }
+            } else {
+                updateCategorySelects(type === 'income' ? '💰 เงินเดือน/รายรับ' : '🍔 อาหาร/เครื่องดื่ม');
+                $('txModalTitle').innerText = type === 'income' ? '💰 เพิ่มรายรับ' : '💸 เพิ่มรายจ่าย';
+            }
             openModal('transactionModal');
         }
 
         function handleSaveTransaction(e) {
             e.preventDefault();
+            const id = $('txId').value;
             const type = $('txType').value;
             const amount = parseFloat($('txAmount').value);
             if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
-            state.transactions.unshift({
-                id: 'tx_' + Date.now(),
-                date: $('txDate').value,
-                title: $('txTitle').value.trim(),
-                category: $('txCategory').value,
-                amount, type
-            });
-            triggerPetSpeech(type === 'income' ? `เย้! เงินเข้า +฿${money(amount)} 🎉` : `รายจ่าย -฿${money(amount)} 🥺`);
+
+            if (id) {
+                const t = state.transactions.find(x => x.id === id);
+                if (t) {
+                    t.date = $('txDate').value;
+                    t.title = $('txTitle').value.trim();
+                    t.category = $('txCategory').value;
+                    t.amount = amount;
+                    t.type = type;
+                }
+                showToast('แก้ไขรายการสำเร็จ! ✨');
+            } else {
+                state.transactions.unshift({
+                    id: 'tx_' + Date.now(),
+                    date: $('txDate').value,
+                    title: $('txTitle').value.trim(),
+                    category: $('txCategory').value,
+                    amount, type
+                });
+                triggerPetSpeech(type === 'income' ? `เย้! เงินเข้า +฿${money(amount)} 🎉` : `รายจ่าย -฿${money(amount)} 🥺`);
+                showToast('บันทึกสำเร็จ!');
+            }
+
             saveData();
             closeModal('transactionModal');
             refreshUI();
-            showToast('บันทึกสำเร็จ!');
         }
 
         function deleteTransaction(id) {
@@ -1449,30 +1486,65 @@
                     <td class="p-2.5 border-r border-darkText">${esc(t.category)}</td>
                     <td class="p-2.5 border-r border-darkText font-bold">${esc(t.title)}</td>
                     <td class="p-2.5 border-r border-darkText text-right font-extrabold ${t.type === 'income' ? 'text-green-600' : 'text-hotPink'}">${t.type === 'income' ? '+' : '-'}฿ ${money(t.amount)}</td>
-                    <td class="p-2.5 text-center"><button onclick="deleteTransaction('${t.id}')" class="text-hotPink hover:scale-110"><i class="fa-solid fa-trash-can"></i></button></td>
+                    <td class="p-2.5 text-center flex items-center justify-center gap-2">
+                        <button onclick="openTransactionModal('${t.type}', '${t.id}')" class="text-popBlue hover:scale-110" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteTransaction('${t.id}')" class="text-hotPink hover:scale-110" title="ลบ"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
                 </tr>`).join('');
         }
 
         // ================= BILLS =================
-        function openBillModal() {
+        function openBillModal(editId = null) {
             $('billForm').reset();
+            $('billId').value = '';
             setDefaultDates();
-            updateCategorySelects('💡 บิล/ค่าใช้จ่าย');
+
+            if (editId) {
+                const b = state.bills.find(x => x.id === editId);
+                if (b) {
+                    $('billId').value = b.id;
+                    $('billTitle').value = b.title;
+                    $('billDate').value = b.date;
+                    updateCategorySelects(b.category || '💡 บิล/ค่าใช้จ่าย');
+                    $('billAmount').value = b.amount;
+                    $('billModalTitle').innerText = '✏️ แก้ไขบิลเตรียมจ่าย';
+                }
+            } else {
+                updateCategorySelects('💡 บิล/ค่าใช้จ่าย');
+                $('billModalTitle').innerText = '💡 เพิ่มบิลเตรียมจ่าย';
+            }
             openModal('billModal');
         }
 
         function handleSaveBill(e) {
             e.preventDefault();
+            const id = $('billId').value;
             const amount = parseFloat($('billAmount').value);
             if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
-            state.bills.unshift({
-                id: 'bill_' + Date.now(),
-                title: $('billTitle').value.trim(),
-                date: $('billDate').value,
-                category: $('billCategory').value,
-                amount, paid: false
-            });
-            saveData(); closeModal('billModal'); refreshUI(); showToast('เพิ่มบิลแล้ว!');
+
+            if (id) {
+                const b = state.bills.find(x => x.id === id);
+                if (b) {
+                    b.title = $('billTitle').value.trim();
+                    b.date = $('billDate').value;
+                    b.category = $('billCategory').value;
+                    b.amount = amount;
+                }
+                showToast('แก้ไขบิลสำเร็จ! ✨');
+            } else {
+                state.bills.unshift({
+                    id: 'bill_' + Date.now(),
+                    title: $('billTitle').value.trim(),
+                    date: $('billDate').value,
+                    category: $('billCategory').value,
+                    amount, paid: false
+                });
+                showToast('เพิ่มบิลแล้ว!');
+            }
+
+            saveData();
+            closeModal('billModal');
+            refreshUI();
         }
 
         function toggleBillPaid(id) {
@@ -1506,7 +1578,10 @@
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2 ${b.paid ? 'opacity-60' : ''}">
                     <div class="flex justify-between items-start">
                         <span class="text-[10px] font-bold bg-retroPurple text-white px-2 py-0.5 rounded">${esc(b.date)}</span>
-                        <button onclick="deleteBill('${b.id}')" class="text-gray-400 hover:text-hotPink">✕</button>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="openBillModal('${b.id}')" class="text-popBlue hover:scale-110 text-xs" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteBill('${b.id}')" class="text-gray-400 hover:text-hotPink text-xs" title="ลบ"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
                     </div>
                     <div class="flex justify-between items-center">
                         <h4 class="font-bold text-sm">${esc(b.title)}</h4>
@@ -1521,18 +1596,54 @@
         }
 
         // ================= PLANNER =================
-        function openTaskModal() { $('taskForm').reset(); setDefaultDates(); openModal('taskModal'); }
+        function openTaskModal(editId = null) {
+            $('taskForm').reset();
+            $('taskId').value = '';
+            setDefaultDates();
+
+            if (editId) {
+                const t = state.tasks.find(x => x.id === editId);
+                if (t) {
+                    $('taskId').value = t.id;
+                    $('taskTitle').value = t.title;
+                    $('taskDate').value = t.date || localDateKey();
+                    $('taskStatus').value = t.status || 'todo';
+                    $('taskDesc').value = t.desc || '';
+                    $('taskModalTitle').innerText = '✏️ แก้ไขแพลนงาน';
+                }
+            } else {
+                $('taskModalTitle').innerText = 'เพิ่มแพลนงานใหม่';
+            }
+            openModal('taskModal');
+        }
 
         function handleSaveTask(e) {
             e.preventDefault();
-            state.tasks.unshift({
-                id: 't_' + Date.now(),
-                title: $('taskTitle').value.trim(),
-                date: $('taskDate').value,
-                status: $('taskStatus').value,
-                desc: $('taskDesc').value.trim()
-            });
-            saveData(); closeModal('taskModal'); refreshUI(); showToast('เพิ่มงานแล้ว!');
+            const id = $('taskId').value;
+
+            if (id) {
+                const t = state.tasks.find(x => x.id === id);
+                if (t) {
+                    t.title = $('taskTitle').value.trim();
+                    t.date = $('taskDate').value;
+                    t.status = $('taskStatus').value;
+                    t.desc = $('taskDesc').value.trim();
+                }
+                showToast('แก้ไขงานสำเร็จ! ✨');
+            } else {
+                state.tasks.unshift({
+                    id: 't_' + Date.now(),
+                    title: $('taskTitle').value.trim(),
+                    date: $('taskDate').value,
+                    status: $('taskStatus').value,
+                    desc: $('taskDesc').value.trim()
+                });
+                showToast('เพิ่มงานแล้ว!');
+            }
+
+            saveData();
+            closeModal('taskModal');
+            refreshUI();
         }
 
         function updateTaskStatus(id, st) {
@@ -1552,7 +1663,13 @@
                 $(countId).innerText = list.length;
                 $(listId).innerHTML = list.length ? list.map(t => `
                     <div class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1">
-                        <div class="flex justify-between text-[10px] font-bold"><span>${esc(t.date) || 'ไม่มีกำหนด'}</span><button onclick="deleteTask('${t.id}')" class="text-gray-400 hover:text-hotPink">✕</button></div>
+                        <div class="flex justify-between text-[10px] font-bold">
+                            <span>${esc(t.date) || 'ไม่มีกำหนด'}</span>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="openTaskModal('${t.id}')" class="text-popBlue hover:scale-110" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="deleteTask('${t.id}')" class="text-gray-400 hover:text-hotPink" title="ลบ"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>
                         <h4 class="font-bold text-xs">${esc(t.title)}</h4>
                         ${t.desc ? `<p class="text-[10px] text-gray-500">${esc(t.desc)}</p>` : ''}
                         <div class="flex gap-1 pt-1">

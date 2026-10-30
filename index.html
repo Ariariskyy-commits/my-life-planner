@@ -364,11 +364,11 @@
     <!-- MAIN HEADER PLANNER CARD (WITH COLLAPSE/EXPAND TOGGLE) -->
     <header class="bg-popBlue border-3 border-darkText text-darkText p-2.5 md:p-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-2" style="margin:8px 12px 0; width:calc(100% - 24px);">
         
-        <!-- AI SMART COMMAND BAR (NEW!) -->
+        <!-- AI SMART COMMAND BAR (SUPER SMARTER!) -->
         <div class="bg-white/95 border-2 border-darkText p-2 rounded-xl shadow-sm flex items-center gap-2">
             <span class="text-base shrink-0 animate-bounce">🤖</span>
             <div class="flex-1 relative">
-                <input type="text" id="aiCommandInput" onkeydown="if(event.key==='Enter') executeAiCommand()" placeholder="พิมพ์สั่ง AI เช่น 'กินข้าว 80' หรือ 'เงินเดือน 15000'..." class="w-full bg-offWhite border-2 border-darkText rounded-lg px-2.5 py-1 text-xs font-bold text-darkText outline-none pr-16">
+                <input type="text" id="aiCommandInput" onkeydown="if(event.key==='Enter') executeAiCommand()" placeholder="พิมพ์สั่ง AI เช่น 'พรุ่งนี้จ่ายค่าเน็ต 500' หรือ 'อีก 2 วันส่งงาน'..." class="w-full bg-offWhite border-2 border-darkText rounded-lg px-2.5 py-1 text-xs font-bold text-darkText outline-none pr-16">
             </div>
             <button onclick="executeAiCommand()" class="bg-hotPink text-white font-extrabold px-3 py-1 rounded-lg border-2 border-darkText text-xs shadow-sm hover:brightness-105 shrink-0 flex items-center gap-1">
                 <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> สั่ง AI
@@ -961,6 +961,25 @@
         }
         const thisMonthKey = () => localDateKey().slice(0, 7);
 
+        // ===== ฟังก์ชันคำนวณวันอัจฉริยะ (รองรับ พรุ่งนี้, เมื่อวาน, อีก X วัน) =====
+        function parseDateFromText(text) {
+            const d = new Date();
+            const lower = text.toLowerCase();
+            if (lower.includes('มะรืนนี้')) {
+                d.setDate(d.getDate() + 2);
+            } else if (lower.includes('พรุ่งนี้')) {
+                d.setDate(d.getDate() + 1);
+            } else if (lower.includes('เมื่อวานนี้') || lower.includes('เมื่อวาน')) {
+                d.setDate(d.getDate() - 1);
+            } else {
+                const matchDays = text.match(/อีก\s*(\d+)\s*วัน/);
+                if (matchDays) {
+                    d.setDate(d.getDate() + parseInt(matchDays[1]));
+                }
+            }
+            return localDateKey(d);
+        }
+
         // ===== วันหยุดราชการไทย =====
         const THAI_FIXED_HOLIDAYS = {
             '01-01': 'วันขึ้นปีใหม่', '04-06': 'วันจักรี', '04-13': 'วันสงกรานต์', '04-14': 'วันสงกรานต์',
@@ -1018,7 +1037,7 @@
             setView(saved || auto, false);
         }
 
-        // ===== ระบบ AI Smart Command (วิเคราะห์ข้อความธรรมชาติแล้วบันทึกให้ทันที) =====
+        // ===== ระบบ AI Smart Command (ฉลาดสุดๆ เข้าปฏิทินและแพลนเนอร์ทันที) =====
         function executeAiCommand() {
             const input = $('aiCommandInput');
             const text = input.value.trim();
@@ -1026,75 +1045,107 @@
             input.value = '';
 
             const lower = text.toLowerCase();
+            const targetDate = parseDateFromText(text);
             const numMatch = text.match(/(\d+[\d,]*\.?\d*)/);
             const amount = numMatch ? parseFloat(numMatch[0].replace(/,/g, '')) : 0;
 
-            // ตรวจสอบว่าเป็นรายรับ
+            // 1. ตรวจสอบว่าเป็นรายรับ
             if (lower.includes('เงินเดือน') || lower.includes('รายรับ') || lower.includes('ได้เงิน') || lower.includes('ขายของ') || lower.includes('โบนัส')) {
-                const title = text.replace(numMatch ? numMatch[0] : '', '').replace(/เงินเดือน|รายรับ|ได้เงิน|ขายของ|โบนัส/g, '').trim() || 'รายรับจาก AI';
+                const title = text.replace(numMatch ? numMatch[0] : '', '').replace(/เงินเดือน|รายรับ|ได้เงิน|ขายของ|โบนัส|พรุ่งนี้|มะรืนนี้|เมื่อวาน/g, '').trim() || 'รายรับจาก AI';
                 state.transactions.unshift({
                     id: 'tx_' + Date.now(),
-                    date: localDateKey(),
+                    date: targetDate,
                     title: title,
                     category: '💰 เงินเดือน/รายรับ',
                     amount: amount > 0 ? amount : 1000,
                     type: 'income'
                 });
+                // บันทึกลงปฏิทิน (Events) ด้วย
+                state.events.unshift({
+                    id: 'ev_' + Date.now(),
+                    date: targetDate,
+                    mood: '🥰',
+                    title: `รับ: ${title} (+฿${money(amount > 0 ? amount : 1000)})`,
+                    hasPhoto: false
+                });
                 saveData();
                 refreshUI();
-                triggerPetSpeech(`AI จัดการเพิ่มรายรับให้แล้ว เย้! 🎉`);
-                showToast(`🤖 AI บันทึกรายรับสำเร็จ! (+฿${money(amount > 0 ? amount : 1000)})`);
+                triggerPetSpeech(`AI จัดการเพิ่มรายรับและลงปฏิทินให้แล้ว เย้! 🎉`);
+                showToast(`🤖 AI บันทึกรายรับลงปฏิทินสำเร็จ!`);
                 return;
             }
 
-            // ตรวจสอบว่าเป็นบิลเตรียมจ่าย
-            if (lower.includes('บิล') || lower.includes('ค่าเน็ต') || lower.includes('ค่าหอ') || lower.includes('ค่าไฟ') || lower.includes('ค่าน้ำ')) {
-                const title = text.replace(numMatch ? numMatch[0] : '', '').replace(/บิล|เตรียมจ่าย/g, '').trim() || 'บิลจาก AI';
+            // 2. ตรวจสอบว่าเป็นบิลเตรียมจ่าย (Bills)
+            if (lower.includes('บิล') || lower.includes('ค่าเน็ต') || lower.includes('ค่าหอ') || lower.includes('ค่าไฟ') || lower.includes('ค่าน้ำ') || lower.includes('จ่าย')) {
+                const title = text.replace(numMatch ? numMatch[0] : '', '').replace(/บิล|เตรียมจ่าย|จ่าย|พรุ่งนี้|มะรืนนี้/g, '').trim() || 'บิลจาก AI';
                 state.bills.unshift({
                     id: 'bill_' + Date.now(),
                     title: title,
-                    date: localDateKey(),
+                    date: targetDate,
                     category: '💡 บิล/ค่าใช้จ่าย',
                     amount: amount > 0 ? amount : 500,
                     paid: false
                 });
+                // บันทึกลงปฏิทิน (Events) ด้วย
+                state.events.unshift({
+                    id: 'ev_' + Date.now(),
+                    date: targetDate,
+                    mood: '😴',
+                    title: `จ่าย: ${title} (฿${money(amount > 0 ? amount : 500)})`,
+                    hasPhoto: false
+                });
                 saveData();
                 refreshUI();
-                triggerPetSpeech(`AI เพิ่มบิลเตรียมจ่ายให้แล้วนะ 💸`);
+                triggerPetSpeech(`AI เพิ่มบิลเตรียมจ่ายและลงปฏิทินให้แล้วนะ 💸`);
                 showToast(`🤖 AI เพิ่มบิลเตรียมจ่ายสำเร็จ!`);
                 return;
             }
 
-            // ตรวจสอบว่าเป็นงาน (Plan)
-            if (lower.includes('งาน') || lower.includes('ส่ง')  || lower.includes('พรุ่งนี้')  || lower.includes('ประชุม') || lower.includes('ทำการบ้าน')) {
+            // 3. ตรวจสอบว่าเป็นงาน / แพลนเนอร์ (Tasks)
+            if (lower.includes('งาน') || lower.includes('ส่ง') || lower.includes('ประชุม') || lower.includes('ทำ') || lower.includes('พรุ่งนี้') || lower.includes('อีก')) {
                 state.tasks.unshift({
                     id: 't_' + Date.now(),
                     title: text,
-                    date: localDateKey(),
+                    date: targetDate,
                     status: 'todo',
                     desc: 'สร้างโดย AI Assistant'
                 });
+                // บันทึกลงปฏิทิน (Events) ด้วยเพื่อให้โชว์ในปฏิทิน
+                state.events.unshift({
+                    id: 'ev_' + Date.now(),
+                    date: targetDate,
+                    mood: '😊',
+                    title: `งาน: ${text}`,
+                    hasPhoto: false
+                });
                 saveData();
                 refreshUI();
-                triggerPetSpeech(`AI บันทึกแพลนงานให้เรียบร้อย! 📝`);
-                showToast(`🤖 AI เพิ่มงานในแพลนเนอร์สำเร็จ!`);
+                triggerPetSpeech(`AI บันทึกแพลนงานและลงปฏิทินให้เรียบร้อย! 📝`);
+                showToast(`🤖 AI เพิ่มงานลงแพลนเนอร์และปฏิทินสำเร็จ!`);
                 return;
             }
 
-            // ค่าเริ่มต้น: บันทึกเป็นรายจ่าย
+            // 4. ค่าเริ่มต้น: บันทึกเป็นรายจ่าย + ลงปฏิทิน
             const title = text.replace(numMatch ? numMatch[0] : '', '').trim() || text;
             state.transactions.unshift({
                 id: 'tx_' + Date.now(),
-                date: localDateKey(),
+                date: targetDate,
                 title: title,
                 category: '🍔 อาหาร/เครื่องดื่ม',
                 amount: amount > 0 ? amount : 50,
                 type: 'expense'
             });
+            state.events.unshift({
+                id: 'ev_' + Date.now(),
+                date: targetDate,
+                mood: '😊',
+                title: `จ่าย: ${title} (-฿${money(amount > 0 ? amount : 50)})`,
+                hasPhoto: false
+            });
             saveData();
             refreshUI();
-            triggerPetSpeech(`AI บันทึกรายจ่าย "${title}" ให้แล้วงับ 🥺`);
-            showToast(`🤖 AI บันทึกรายจ่ายสำเร็จ! (-฿${money(amount > 0 ? amount : 50)})`);
+            triggerPetSpeech(`AI บันทึกรายจ่าย "${title}" และลงปฏิทินให้แล้วงับ 🥺`);
+            showToast(`🤖 AI บันทึกรายจ่ายสำเร็จ!`);
         }
 
         function togglePlannerHeader() {
@@ -1462,7 +1513,7 @@
             if (state.quickNoteShow) {
                 expandedContainer.classList.remove('hidden');
                 minimizedBtn.classList.add('hidden');
-                listContainer.innerHTML = hasNotes ? state.quickNotes.n = state.quickNotes.map(n => `
+                listContainer.innerHTML = hasNotes ? state.quickNotes.map(n => `
                     <div class="bg-white/90 text-darkText p-1.5 rounded border border-darkText/20 flex items-start justify-between gap-1 text-[11px] font-bold">
                         <span class="break-words flex-1 leading-snug">${esc(n.text)}</span>
                         <button onclick="deleteQuickNote('${n.id}')" class="text-gray-400 hover:text-hotPink shrink-0 px-1">✕</button>

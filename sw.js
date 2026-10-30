@@ -1,5 +1,10 @@
-const CACHE = 'y2k-planner-v5';
-const ASSETS = ['./', './index.html', './manifest.json', './icon.svg', './icon.png'];
+const CACHE = 'y2k-planner-v6';
+const ASSETS = [
+    './',
+    './index.html',
+    './manifest.json',
+    './icon.png'
+];
 
 self.addEventListener('install', event => {
     event.waitUntil(

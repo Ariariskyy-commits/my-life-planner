@@ -1884,5 +1884,12 @@
         if (!IS_CONFIGURED) setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
     });
     </script>
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('Service Worker Registered!'))
+            .catch(err => console.log('SW registration failed:', err));
+    });
+}
 </body>
 </html>

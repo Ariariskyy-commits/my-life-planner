@@ -8,7 +8,7 @@
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icon-192.png" type="image/png">
-<link id="appleIcon" rel="apple-touch-icon" href="icon-512.png">
+    <link id="appleIcon" rel="apple-touch-icon" href="icon-512.png">
     <meta name="theme-color" content="#0055FF">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Y2K Planner">
@@ -749,1140 +749,1125 @@
     </div>
 
     <script>
-    // ================= UTILITIES =================
-    const $ = id => document.getElementById(id);
-    const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const money = n => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    function localDateKey(d = new Date()) {
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    }
-    const thisMonthKey = () => localDateKey().slice(0, 7);
+        // ================= UTILITIES =================
+        const $ = id => document.getElementById(id);
+        const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const money = n => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        function localDateKey(d = new Date()) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+        const thisMonthKey = () => localDateKey().slice(0, 7);
 
-    // ค่าคงที่ของรูป: ย่อด้านยาวสุดเป็น 1024px, Firestore เก็บเอกสารได้ไม่เกิน 1 MiB จึงจำกัดความยาว base64
-    const MAX_PHOTO_PX = 1024;
-    const MAX_PHOTO_CHARS = 900000;
-    const CLOUD_TIMEOUT_MS = 20000;
+        const MAX_PHOTO_PX = 1024;
+        const MAX_PHOTO_CHARS = 900000;
+        const CLOUD_TIMEOUT_MS = 20000;
 
-    function showToast(message) {
-        $('toastMessage').innerText = message;
-        const t = $('toastNotification');
-        t.classList.remove('opacity-0');
-        t.classList.add('opacity-100');
-        clearTimeout(showToast._timer);
-        showToast._timer = setTimeout(() => { t.classList.add('opacity-0'); t.classList.remove('opacity-100'); }, 2300);
-    }
-    function openModal(id) { $(id).classList.remove('hidden'); $(id).classList.add('flex'); }
-    function closeModal(id) { $(id).classList.add('hidden'); $(id).classList.remove('flex'); }
+        function showToast(message) {
+            $('toastMessage').innerText = message;
+            const t = $('toastNotification');
+            t.classList.remove('opacity-0');
+            t.classList.add('opacity-100');
+            clearTimeout(showToast._timer);
+            showToast._timer = setTimeout(() => { t.classList.add('opacity-0'); t.classList.remove('opacity-100'); }, 2300);
+        }
+        function openModal(id) { $(id).classList.remove('hidden'); $(id).classList.add('flex'); }
+        function closeModal(id) { $(id).classList.add('hidden'); $(id).classList.remove('flex'); }
 
-    function withTimeout(promise, ms, msg) {
-        let timer;
-        return Promise.race([
-            promise,
-            new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(msg)), ms); })
-        ]).finally(() => clearTimeout(timer));
-    }
+        function withTimeout(promise, ms, msg) {
+            let timer;
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(msg)), ms); })
+            ]).finally(() => clearTimeout(timer));
+        }
 
-    // ================= VIEW SWITCHER =================
-    function setView(view, save = true) {
-        if (!['desktop', 'tablet', 'mobile'].includes(view)) view = 'desktop';
-        document.documentElement.setAttribute('data-view', view);
-        document.querySelectorAll('.vs-btn').forEach(b => b.classList.toggle('vs-active', b.dataset.v === view));
-        if (save) localStorage.setItem('y2k_view', view);
-        setTimeout(() => { if (expenseChartInstance) expenseChartInstance.resize(); }, 420);
-    }
+        // ================= VIEW SWITCHER =================
+        function setView(view, save = true) {
+            if (!['desktop', 'tablet', 'mobile'].includes(view)) view = 'desktop';
+            document.documentElement.setAttribute('data-view', view);
+            document.querySelectorAll('.vs-btn').forEach(b => b.classList.toggle('vs-active', b.dataset.v === view));
+            if (save) localStorage.setItem('y2k_view', view);
+            setTimeout(() => { if (expenseChartInstance) expenseChartInstance.resize(); }, 420);
+        }
 
-    function initView() {
-        let saved = null;
-        try { saved = localStorage.getItem('y2k_view'); } catch {}
-        const auto = window.innerWidth <= 768 ? 'mobile' : 'desktop';
-        setView(saved || auto, false);
-    }
+        function initView() {
+            let saved = null;
+            try { saved = localStorage.getItem('y2k_view'); } catch {}
+            const auto = window.innerWidth <= 768 ? 'mobile' : 'desktop';
+            setView(saved || auto, false);
+        }
 
-    // ================= PHOTO STORAGE (IndexedDB = แคชในเครื่อง, Firestore = ซิงก์ข้ามเครื่อง) =================
-    let photoDbPromise = null;
-    function photoDB() {
-        if (!photoDbPromise) {
-            photoDbPromise = new Promise((resolve, reject) => {
-                if (!('indexedDB' in window)) return reject(new Error('เบราว์เซอร์นี้ไม่รองรับการเก็บรูป'));
-                const req = indexedDB.open('y2k_photos', 1);
-                req.onupgradeneeded = () => req.result.createObjectStore('photos', { keyPath: 'id' });
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => { photoDbPromise = null; reject(req.error); };
+        // ================= PHOTO STORAGE (IndexedDB & Firestore) =================
+        let photoDbPromise = null;
+        function photoDB() {
+            if (!photoDbPromise) {
+                photoDbPromise = new Promise((resolve, reject) => {
+                    if (!('indexedDB' in window)) return reject(new Error('เบราว์เซอร์นี้ไม่รองรับการเก็บรูป'));
+                    const req = indexedDB.open('y2k_photos', 1);
+                    req.onupgradeneeded = () => req.result.createObjectStore('photos', { keyPath: 'id' });
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => { photoDbPromise = null; reject(req.error); };
+                });
+            }
+            return photoDbPromise;
+        }
+
+        async function idbTx(mode, fn) {
+            const db = await photoDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('photos', mode);
+                const req = fn(tx.objectStore('photos'));
+                let result;
+                if (req) req.onsuccess = () => { result = req.result; };
+                tx.oncomplete = () => resolve(result);
+                tx.onerror = () => reject(tx.error || new Error('บันทึกรูปในเครื่องไม่สำเร็จ'));
+                tx.onabort = () => reject(tx.error || new Error('บันทึกรูปในเครื่องไม่สำเร็จ'));
             });
         }
-        return photoDbPromise;
-    }
 
-    async function idbTx(mode, fn) {
-        const db = await photoDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction('photos', mode);
-            const req = fn(tx.objectStore('photos'));
-            let result;
-            if (req) req.onsuccess = () => { result = req.result; };
-            tx.oncomplete = () => resolve(result);
-            tx.onerror = () => reject(tx.error || new Error('บันทึกรูปในเครื่องไม่สำเร็จ'));
-            tx.onabort = () => reject(tx.error || new Error('บันทึกรูปในเครื่องไม่สำเร็จ (พื้นที่อาจเต็ม)'));
-        });
-    }
+        async function savePhotoLocal(id, data, synced) {
+            await idbTx('readwrite', s => s.put({ id, data, synced, createdAt: Date.now() }));
+        }
 
-    async function savePhotoLocal(id, data, synced) {
-        await idbTx('readwrite', s => s.put({ id, data, synced, createdAt: Date.now() }));
-    }
+        async function markPhotoSynced(id) {
+            const rec = await idbTx('readonly', s => s.get(id));
+            if (rec) await idbTx('readwrite', s => s.put({ ...rec, synced: true }));
+        }
 
-    async function markPhotoSynced(id) {
-        const rec = await idbTx('readonly', s => s.get(id));
-        if (rec) await idbTx('readwrite', s => s.put({ ...rec, synced: true }));
-    }
+        function photosCol(uid) {
+            return db.collection('users').doc(uid).collection('photos');
+        }
 
-    function photosCol(uid) {
-        return db.collection('users').doc(uid).collection('photos');
-    }
+        async function uploadPhoto(id, data) {
+            await withTimeout(
+                photosCol(currentUser.uid).doc(id).set({
+                    data,
+                    eventId: id,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }),
+                CLOUD_TIMEOUT_MS,
+                'อัปโหลดรูปขึ้นคลาวด์ไม่สำเร็จ'
+            );
+        }
 
-    async function uploadPhoto(id, data) {
-        await withTimeout(
-            photosCol(currentUser.uid).doc(id).set({
-                data,
-                eventId: id,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }),
-            CLOUD_TIMEOUT_MS,
-            'อัปโหลดรูปขึ้นคลาวด์ไม่สำเร็จ (ตรวจสอบอินเทอร์เน็ต)'
-        );
-    }
+        async function getPhotoData(eventId) {
+            const rec = await idbTx('readonly', s => s.get(eventId));
+            if (rec && rec.data) return rec.data;
+            if (!currentUser || !isFirebaseActive) return null;
+            const snap = await withTimeout(
+                photosCol(currentUser.uid).doc(eventId).get(),
+                CLOUD_TIMEOUT_MS,
+                'โหลดรูปจากคลาวด์ไม่สำเร็จ'
+            );
+            if (!snap.exists) return null;
+            const data = snap.data().data;
+            await savePhotoLocal(eventId, data, true);
+            return data;
+        }
 
-    // ดึงรูป: ถ้าไม่มีในเครื่องและล็อกอินอยู่ จะดึงจากคลาวด์แล้วแคชไว้ในเครื่อง
-    async function getPhotoData(eventId) {
-        const rec = await idbTx('readonly', s => s.get(eventId));
-        if (rec && rec.data) return rec.data;
-        if (!currentUser || !isFirebaseActive) return null;
-        const snap = await withTimeout(
-            photosCol(currentUser.uid).doc(eventId).get(),
-            CLOUD_TIMEOUT_MS,
-            'โหลดรูปจากคลาวด์ไม่สำเร็จ'
-        );
-        if (!snap.exists) return null;
-        const data = snap.data().data;
-        await savePhotoLocal(eventId, data, true);
-        return data;
-    }
+        async function deletePhotoEverywhere(id) {
+            try { await idbTx('readwrite', s => s.delete(id)); } catch (e) { console.warn(e); }
+            if (currentUser && isFirebaseActive) {
+                try {
+                    await withTimeout(photosCol(currentUser.uid).doc(id).delete(), CLOUD_TIMEOUT_MS, 'ลบรูปบนคลาวด์ไม่สำเร็จ');
+                } catch (e) { console.warn(e); }
+            }
+        }
 
-    async function deletePhotoEverywhere(id) {
-        try { await idbTx('readwrite', s => s.delete(id)); } catch (e) { console.warn(e); }
-        if (currentUser && isFirebaseActive) {
+        async function syncPendingPhotos() {
+            if (!currentUser || !isFirebaseActive) return;
             try {
-                await withTimeout(photosCol(currentUser.uid).doc(id).delete(), CLOUD_TIMEOUT_MS, 'ลบรูปบนคลาวด์ไม่สำเร็จ');
+                const all = (await idbTx('readonly', s => s.getAll())) || [];
+                for (const rec of all) {
+                    if (rec.synced) continue;
+                    const ev = state.events.find(e => e.id === rec.id);
+                    if (!ev || !ev.hasPhoto) continue;
+                    try {
+                        await uploadPhoto(rec.id, rec.data);
+                        await markPhotoSynced(rec.id);
+                    } catch (e) { console.warn('sync photo failed:', e); }
+                }
             } catch (e) { console.warn(e); }
         }
-    }
 
-    // อัปโหลดรูปที่ยังไม่ได้ซิงก์ (เช่น บันทึกตอนยังไม่ได้ล็อกอิน)
-    async function syncPendingPhotos() {
-        if (!currentUser || !isFirebaseActive) return;
-        try {
-            const all = (await idbTx('readonly', s => s.getAll())) || [];
-            for (const rec of all) {
-                if (rec.synced) continue;
-                const ev = state.events.find(e => e.id === rec.id);
-                if (!ev || !ev.hasPhoto) continue;
-                try {
-                    await uploadPhoto(rec.id, rec.data);
-                    await markPhotoSynced(rec.id);
-                } catch (e) { console.warn('sync photo failed:', e); }
-            }
-        } catch (e) { console.warn(e); }
-    }
-
-    // ย้ายรูปเก่า (ที่เคยเก็บใน localStorage หรือฝังใน event) มาไว้ IndexedDB
-    async function migrateLegacyPhotos() {
-        let changed = false;
-        for (const ev of state.events) {
-            if (ev.photo) {
-                await savePhotoLocal(ev.id, ev.photo, false);
-                ev.hasPhoto = true;
-                delete ev.photo;
-                changed = true;
-            }
-        }
-        const legacyKeys = Object.keys(localStorage).filter(k => k.startsWith('y2k_photo_'));
-        for (const k of legacyKeys) {
-            const id = k.slice('y2k_photo_'.length);
-            const v = localStorage.getItem(k);
-            if (v) await savePhotoLocal(id, v, false);
-            localStorage.removeItem(k);
-        }
-        if (changed) saveLocal();
-    }
-
-    // บีบอัดรูป: 1024px คุณภาพ 0.8 ถ้าใหญ่เกินที่ Firestore รับได้จะลดคุณภาพอัตโนมัติ
-    function compressImage(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onerror = () => reject(new Error('อ่านไฟล์รูปไม่ได้'));
-            reader.onload = () => {
-                const img = new Image();
-                img.onerror = () => reject(new Error('ไฟล์นี้ไม่ใช่รูปภาพที่ใช้ได้'));
-                img.onload = () => {
-                    const scale = Math.min(1, MAX_PHOTO_PX / Math.max(img.width, img.height));
-                    const w = Math.round(img.width * scale);
-                    const h = Math.round(img.height * scale);
-                    const canvas = document.createElement('canvas');
-                    canvas.width = w;
-                    canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    for (const q of [0.8, 0.65, 0.5]) {
-                        const url = canvas.toDataURL('image/jpeg', q);
-                        if (url.length <= MAX_PHOTO_CHARS) return resolve(url);
-                    }
-                    reject(new Error('รูปนี้มีรายละเอียดมากเกินไป ลองเลือกรูปอื่นที่เล็กกว่า'));
-                };
-                img.src = reader.result;
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    // ================= STATE & STORAGE =================
-    const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme' };
-    const makeDefaultPet = () => ({
-        name: 'น้องสัตว์เลี้ยง', avatar: '🐱',
-        speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭',
-        speechHistory: [{ time: 'เริ่มต้น', text: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭' }]
-    });
-    function readLS(key, fallback) {
-        try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
-    }
-
-    let state = {
-        theme: localStorage.getItem(KEYS.theme) || 'y2k',
-        transactions: readLS(KEYS.transactions, []),
-        bills: readLS(KEYS.bills, []),
-        tasks: readLS(KEYS.tasks, []),
-        events: readLS(KEYS.events, []),
-        calcHistory: readLS(KEYS.calcHistory, []),
-        pet: Object.assign(makeDefaultPet(), readLS(KEYS.pet, {}))
-    };
-    if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
-
-    function saveLocal() {
-        try {
-            localStorage.setItem(KEYS.transactions, JSON.stringify(state.transactions));
-            localStorage.setItem(KEYS.bills, JSON.stringify(state.bills));
-            localStorage.setItem(KEYS.tasks, JSON.stringify(state.tasks));
-            localStorage.setItem(KEYS.events, JSON.stringify(state.events));
-            localStorage.setItem(KEYS.calcHistory, JSON.stringify(state.calcHistory));
-            localStorage.setItem(KEYS.pet, JSON.stringify(state.pet));
-            localStorage.setItem(KEYS.theme, state.theme);
-        } catch (e) {
-            console.error(e);
-            showToast('บันทึกข้อมูลในเครื่องไม่สำเร็จ ⚠️ กรุณาลองใหม่');
-        }
-    }
-
-    function saveData() {
-        saveLocal();
-        scheduleCloudSave();
-    }
-
-    // ================= FIREBASE: AUTH + CLOUD SYNC =================
-    let auth = null, db = null, currentUser = null, isFirebaseActive = false, syncTimer = null;
-    let googleLoginInProgress = false;
-
-    function setSyncStatus(text) { $('syncStatus').innerText = text; }
-
-    async function initFirebase() {
-        if (!IS_CONFIGURED) {
-            setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
-            return;
-        }
-        try {
-            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            db = firebase.firestore();
-
-            try {
-                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-            } catch (persistenceError) {
-                console.warn('Firebase persistence warning:', persistenceError);
-            }
-
-            isFirebaseActive = true;
-
-            auth.onAuthStateChanged(async user => {
-                if (user) {
-                    const isNewUser = !currentUser || currentUser.uid !== user.uid;
-                    currentUser = user;
-                    renderAuthUI();
-                    if (isNewUser) await pullFromCloud(user.uid);
-                } else {
-                    currentUser = null;
-                    renderAuthUI();
-                    setSyncStatus('ออกจากระบบแล้ว · ข้อมูลอยู่ในเครื่อง');
+        async function migrateLegacyPhotos() {
+            let changed = false;
+            for (const ev of state.events) {
+                if (ev.photo) {
+                    await savePhotoLocal(ev.id, ev.photo, false);
+                    ev.hasPhoto = true;
+                    delete ev.photo;
+                    changed = true;
                 }
+            }
+            const legacyKeys = Object.keys(localStorage).filter(k => k.startsWith('y2k_photo_'));
+            for (const k of legacyKeys) {
+                const id = k.slice('y2k_photo_'.length);
+                const v = localStorage.getItem(k);
+                if (v) await savePhotoLocal(id, v, false);
+                localStorage.removeItem(k);
+            }
+            if (changed) saveLocal();
+        }
+
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('อ่านไฟล์รูปไม่ได้'));
+                reader.onload = () => {
+                    const img = new Image();
+                    img.onerror = () => reject(new Error('ไฟล์นี้ไม่ใช่รูปภาพที่ใช้ได้'));
+                    img.onload = () => {
+                        const scale = Math.min(1, MAX_PHOTO_PX / Math.max(img.width, img.height));
+                        const w = Math.round(img.width * scale);
+                        const h = Math.round(img.height * scale);
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        for (const q of [0.8, 0.65, 0.5]) {
+                            const url = canvas.toDataURL('image/jpeg', q);
+                            if (url.length <= MAX_PHOTO_CHARS) return resolve(url);
+                        }
+                        reject(new Error('รูปนี้มีรายละเอียดมากเกินไป ลองเลือกรูปอื่นที่เล็กกว่า'));
+                    };
+                    img.src = reader.result;
+                };
+                reader.readAsDataURL(file);
             });
+        }
+
+        // ================= STATE & STORAGE =================
+        const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme' };
+        const makeDefaultPet = () => ({
+            name: 'น้องสัตว์เลี้ยง', avatar: '🐱',
+            speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭',
+            speechHistory: [{ time: 'เริ่มต้น', text: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭' }]
+        });
+        function readLS(key, fallback) {
+            try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
+        }
+
+        let state = {
+            theme: localStorage.getItem(KEYS.theme) || 'y2k',
+            transactions: readLS(KEYS.transactions, []),
+            bills: readLS(KEYS.bills, []),
+            tasks: readLS(KEYS.tasks, []),
+            events: readLS(KEYS.events, []),
+            calcHistory: readLS(KEYS.calcHistory, []),
+            pet: Object.assign(makeDefaultPet(), readLS(KEYS.pet, {}))
+        };
+        if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
+
+        function saveLocal() {
+            try {
+                localStorage.setItem(KEYS.transactions, JSON.stringify(state.transactions));
+                localStorage.setItem(KEYS.bills, JSON.stringify(state.bills));
+                localStorage.setItem(KEYS.tasks, JSON.stringify(state.tasks));
+                localStorage.setItem(KEYS.events, JSON.stringify(state.events));
+                localStorage.setItem(KEYS.calcHistory, JSON.stringify(state.calcHistory));
+                localStorage.setItem(KEYS.pet, JSON.stringify(state.pet));
+                localStorage.setItem(KEYS.theme, state.theme);
+            } catch (e) {
+                console.error(e);
+                showToast('บันทึกข้อมูลในเครื่องไม่สำเร็จ ⚠️');
+            }
+        }
+
+        function saveData() {
+            saveLocal();
+            scheduleCloudSave();
+        }
+
+        // ================= FIREBASE: AUTH + CLOUD SYNC =================
+        let auth = null, db = null, currentUser = null, isFirebaseActive = false, syncTimer = null;
+        let googleLoginInProgress = false;
+
+        function setSyncStatus(text) { $('syncStatus').innerText = text; }
+
+        async function initFirebase() {
+            if (!IS_CONFIGURED) {
+                setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
+                return;
+            }
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+
+                try {
+                    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                } catch (persistenceError) {
+                    console.warn('Firebase persistence warning:', persistenceError);
+                }
+
+                isFirebaseActive = true;
+
+                auth.onAuthStateChanged(async user => {
+                    if (user) {
+                        const isNewUser = !currentUser || currentUser.uid !== user.uid;
+                        currentUser = user;
+                        renderAuthUI();
+                        if (isNewUser) await pullFromCloud(user.uid);
+                    } else {
+                        currentUser = null;
+                        renderAuthUI();
+                        setSyncStatus('ออกจากระบบแล้ว · ข้อมูลอยู่ในเครื่อง');
+                    }
+                });
+
+                try {
+                    const result = await auth.getRedirectResult();
+                    if (result && result.user) {
+                        currentUser = result.user;
+                        renderAuthUI();
+                        showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
+                    }
+                } catch (redirectError) {
+                    console.error('Firebase redirect result:', redirectError);
+                }
+
+                setSyncStatus('พร้อมเชื่อมต่อ Gmail');
+            } catch (error) {
+                console.error('Firebase initialization error:', error);
+                isFirebaseActive = false;
+                setSyncStatus('เชื่อมต่อ Firebase ไม่สำเร็จ ⚠️');
+            }
+        }
+
+        function renderAuthUI() {
+            const logged = !!currentUser;
+            $('googleLoginBtn').classList.toggle('hidden', logged);
+            $('userProfileArea').classList.toggle('hidden', !logged);
+            if (logged) {
+                $('userAvatarImg').src = currentUser.photoURL || '';
+                $('userNameText').innerText = currentUser.displayName || currentUser.email || 'ผู้ใช้';
+            }
+        }
+
+        async function loginWithGoogle() {
+            if (googleLoginInProgress) return;
+            if (!isFirebaseActive || !auth) {
+                alert('Firebase ยังไม่พร้อม กรุณารีเฟรชหน้าเว็บแล้วลองใหม่');
+                return;
+            }
+            if (auth.currentUser) {
+                currentUser = auth.currentUser;
+                renderAuthUI();
+                setSyncStatus('เชื่อมต่อ Gmail อยู่แล้ว');
+                return;
+            }
+
+            googleLoginInProgress = true;
+            const loginButton = $('googleLoginBtn');
+            const originalButtonHTML = loginButton.innerHTML;
+            loginButton.disabled = true;
+            loginButton.classList.add('opacity-60', 'cursor-not-allowed');
+            loginButton.innerHTML = '<i class="fa-brands fa-google text-red-500"></i> กำลังเชื่อมต่อ...';
+
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
 
             try {
-                const result = await auth.getRedirectResult();
+                setSyncStatus('กำลังเชื่อมต่อ Gmail...');
+                const result = await auth.signInWithPopup(provider);
                 if (result && result.user) {
                     currentUser = result.user;
                     renderAuthUI();
+                    await pullFromCloud(result.user.uid);
                     showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
                 }
-            } catch (redirectError) {
-                console.error('Firebase redirect result:', redirectError);
-            }
+            } catch (error) {
+                console.error('Google Login Error:', error);
 
-            setSyncStatus('พร้อมเชื่อมต่อ Gmail');
-        } catch (error) {
-            console.error('Firebase initialization error:', error);
-            isFirebaseActive = false;
-            setSyncStatus('เชื่อมต่อ Firebase ไม่สำเร็จ ⚠️');
-        }
-    }
-
-    function renderAuthUI() {
-        const logged = !!currentUser;
-        $('googleLoginBtn').classList.toggle('hidden', logged);
-        $('userProfileArea').classList.toggle('hidden', !logged);
-        if (logged) {
-            $('userAvatarImg').src = currentUser.photoURL || '';
-            $('userNameText').innerText = currentUser.displayName || currentUser.email || 'ผู้ใช้';
-        }
-    }
-
-    async function loginWithGoogle() {
-        if (googleLoginInProgress) return;
-        if (!isFirebaseActive || !auth) {
-            alert('Firebase ยังไม่พร้อม กรุณารีเฟรชหน้าเว็บแล้วลองใหม่');
-            return;
-        }
-        if (auth.currentUser) {
-            currentUser = auth.currentUser;
-            renderAuthUI();
-            setSyncStatus('เชื่อมต่อ Gmail อยู่แล้ว');
-            return;
-        }
-
-        googleLoginInProgress = true;
-        const loginButton = $('googleLoginBtn');
-        const originalButtonHTML = loginButton.innerHTML;
-        loginButton.disabled = true;
-        loginButton.classList.add('opacity-60', 'cursor-not-allowed');
-        loginButton.innerHTML = '<i class="fa-brands fa-google text-red-500"></i> กำลังเชื่อมต่อ...';
-
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-
-        try {
-            setSyncStatus('กำลังเชื่อมต่อ Gmail...');
-            const result = await auth.signInWithPopup(provider);
-            if (result && result.user) {
-                currentUser = result.user;
-                renderAuthUI();
-                await pullFromCloud(result.user.uid);
-                showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
-            }
-        } catch (error) {
-            console.error('Google Login Error:', error);
-
-            if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
-                setSyncStatus('การล็อกอินถูกยกเลิก กรุณากดใหม่อีกครั้ง');
-                return;
-            }
-
-            if (error.code === 'auth/popup-blocked' || error.code === 'auth/operation-not-supported-in-this-environment') {
-                try {
-                    await auth.signInWithRedirect(provider);
-                    return;
-                } catch (redirectError) {
-                    console.error('Google Redirect Error:', redirectError);
-                    setSyncStatus('ล็อกอินไม่สำเร็จ ⚠️');
-                    alert('เชื่อมต่อ Google ไม่สำเร็จ: ' + redirectError.message);
+                if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+                    setSyncStatus('การล็อกอินถูกยกเลิก กรุณากดใหม่อีกครั้ง');
                     return;
                 }
-            }
 
-            let message = error.message || 'เกิดข้อผิดพลาด';
-            if (error.code === 'auth/unauthorized-domain') {
-                message = 'โดเมนเว็บไซต์ยังไม่ได้รับอนุญาตใน Firebase';
-            } else if (error.code === 'auth/network-request-failed') {
-                message = 'อินเทอร์เน็ตมีปัญหา กรุณาลองใหม่';
-            }
-            setSyncStatus('ล็อกอินไม่สำเร็จ ⚠️');
-            alert('ล็อกอินไม่สำเร็จ: ' + message);
-        } finally {
-            googleLoginInProgress = false;
-            loginButton.disabled = false;
-            loginButton.classList.remove('opacity-60', 'cursor-not-allowed');
-            loginButton.innerHTML = originalButtonHTML;
-        }
-    }
-
-    async function logoutGoogle() {
-        if (!auth) return;
-        try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch (e) { console.error(e); }
-    }
-
-    function scheduleCloudSave() {
-        if (!currentUser || !db) return;
-        clearTimeout(syncTimer);
-        setSyncStatus('กำลังซิงก์...');
-        syncTimer = setTimeout(pushToCloud, 800);
-    }
-
-    // ข้อมูลหลักไม่รวมรูป (รูปแยกเป็นเอกสารของตัวเอง)
-    function cloudPayload() {
-        return {
-            transactions: state.transactions,
-            bills: state.bills,
-            tasks: state.tasks,
-            events: state.events,
-            calcHistory: state.calcHistory,
-            pet: state.pet,
-            theme: state.theme,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-    }
-
-    async function pushToCloud() {
-        if (!currentUser || !db) return;
-        try {
-            await db.collection('users').doc(currentUser.uid).set(cloudPayload());
-            setSyncStatus('ซิงก์แล้ว ☁️ ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }));
-        } catch (err) {
-            console.error(err);
-            setSyncStatus('ซิงก์ไม่สำเร็จ ⚠️');
-        }
-    }
-
-    async function pullFromCloud(uid) {
-        setSyncStatus('กำลังโหลดข้อมูล...');
-        try {
-            const snap = await db.collection('users').doc(uid).get();
-            if (snap.exists) {
-                try { localStorage.setItem('y2k_backup_before_cloud', JSON.stringify(collectMeta())); } catch {}
-                applyRemote(snap.data());
-                setSyncStatus('โหลดจากคลาวด์แล้ว ☁️');
-            } else {
-                await pushToCloud();
-            }
-            refreshUI();
-            syncPendingPhotos();
-        } catch (err) {
-            console.error(err);
-            setSyncStatus('โหลดข้อมูลไม่สำเร็จ ⚠️');
-        }
-    }
-
-    function applyRemote(d) {
-        state.transactions = d.transactions || [];
-        state.bills = d.bills || [];
-        state.tasks = d.tasks || [];
-        state.events = d.events || [];
-        state.calcHistory = d.calcHistory || [];
-        state.pet = Object.assign(makeDefaultPet(), d.pet || {});
-        if (d.theme) state.theme = d.theme;
-        saveLocal();
-    }
-
-    // ================= BACKUP / RESTORE =================
-    function collectMeta() {
-        return {
-            app: 'y2k-planner', version: 3, exportedAt: new Date().toISOString(),
-            transactions: state.transactions, bills: state.bills, tasks: state.tasks,
-            events: state.events, calcHistory: state.calcHistory, pet: state.pet,
-            theme: state.theme
-        };
-    }
-
-    // ไฟล์สำรองรวมรูปทั้งหมดด้วย
-    async function collectAll() {
-        const photos = {};
-        for (const ev of state.events) {
-            if (!ev.hasPhoto) continue;
-            try {
-                const d = await getPhotoData(ev.id);
-                if (d) photos[ev.id] = d;
-            } catch (e) { console.warn('backup photo skipped:', ev.id, e); }
-        }
-        return { ...collectMeta(), photos };
-    }
-
-    async function exportBackup() {
-        showToast('กำลังเตรียมไฟล์สำรอง...');
-        try {
-            const data = await collectAll();
-            const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `y2k-backup-${localDateKey()}.json`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(url), 1500);
-            showToast('ดาวน์โหลดไฟล์สำรองแล้ว 💾');
-        } catch (err) {
-            console.error(err);
-            alert('สร้างไฟล์สำรองไม่สำเร็จ: ' + err.message);
-        }
-    }
-
-    async function importBackup(e) {
-        const file = e.target.files[0];
-        e.target.value = '';
-        if (!file) return;
-
-        let d;
-        try { d = JSON.parse(await file.text()); } catch { return showToast('ไฟล์ไม่ถูกต้อง'); }
-        if (d.app !== 'y2k-planner') return showToast('ไม่ใช่ไฟล์สำรองของแอปนี้');
-        if (!confirm('แทนที่ข้อมูลปัจจุบันด้วยไฟล์สำรองนี้?')) return;
-
-        try {
-            for (const [id, data] of Object.entries(d.photos || {})) {
-                await savePhotoLocal(id, data, false);
-            }
-        } catch (err) {
-            return alert('คืนค่ารูปไม่สำเร็จ: ' + err.message + '\n(ข้อมูลเดิมยังอยู่ครบ)');
-        }
-
-        applyRemote(d);
-        refreshUI();
-        saveData();
-        syncPendingPhotos();
-        showToast('คืนค่าข้อมูลสำเร็จ! ✨');
-    }
-
-    // ================= THEME & PET =================
-    const PET_MOOD_FACES = {
-        '🐱': { sad: '😿', low: '😾', good: '😺', rich: '😻' },
-        '🐶': { sad: '🥺', low: '🐕', good: '🐶', rich: '🐶✨' },
-        '🐰': { sad: '😭', low: '🐰', good: '🐰✨', rich: '🐇💖' },
-        '🐹': { sad: '🥺', low: '🐹', good: '🐹✨', rich: '🐹👑' },
-        '🐻': { sad: '🐻‍❄️', low: '🐻', good: '🧸', rich: '🐻✨' },
-        '🦆': { sad: '😭', low: '🦆', good: '🦆✨', rich: '🐣🌟' }
-    };
-
-    function setTheme(themeName, save = true) {
-        state.theme = themeName;
-        document.body.className = `theme-${themeName} min-h-screen flex flex-col relative pb-20`;
-        if (save) saveData();
-    }
-
-    function updatePetSettings() {
-        state.pet.name = $('petNameInput').value.trim() || 'สัตว์เลี้ยง';
-        state.pet.avatar = $('petAvatarSelect').value;
-        saveData();
-        updatePetStatus();
-        showToast('อัปเดตสัตว์เลี้ยงแล้ว! ✨');
-    }
-
-    function calcNetBalance() {
-        let inc = 0, exp = 0;
-        state.transactions.forEach(t => t.type === 'income' ? inc += t.amount : exp += t.amount);
-        return { inc, exp, net: inc - exp };
-    }
-
-    function updatePetStatus() {
-        const { net } = calcNetBalance();
-        const faces = PET_MOOD_FACES[state.pet.avatar] || PET_MOOD_FACES['🐱'];
-        let hunger, happiness, avatar, moodText, defaultSpeech;
-
-        if (net <= 0)       { hunger = 0;   happiness = 0;   avatar = faces.sad;  moodText = 'หิวม๊าก 🥺';   defaultSpeech = 'เงินเป็น 0 แล้ว ช่วยเติมรายรับที! 😭'; }
-        else if (net < 1000){ hunger = 40;  happiness = 40;  avatar = faces.low;  moodText = 'ประหยัด...';    defaultSpeech = 'ประหยัดไว้ก่อนน้า 💸'; }
-        else if (net < 5000){ hunger = 75;  happiness = 75;  avatar = faces.good; moodText = 'อิ่มสบาย 😊';   defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟'; }
-        else                { hunger = 100; happiness = 100; avatar = faces.rich; moodText = 'เศรษฐี! 🤑';     defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖'; }
-
-        state.pet.hunger = hunger;
-        state.pet.happiness = happiness;
-        if (!state.pet.speech || state.pet.speech.includes('ยินดีต้อนรับ')) state.pet.speech = defaultSpeech;
-
-        const pName = state.pet.name || 'สัตว์เลี้ยง';
-        $('floatingPetName').innerText = pName;
-        $('petHeaderTitle').innerText = `${pName} (Tamagotchi)`;
-        $('petAvatar').innerText = avatar;
-        $('petBigAvatar').innerText = avatar;
-        $('calPetAvatar').innerText = avatar;
-        $('petBigName').innerText = `${pName} (${moodText})`;
-        $('petBigStatusText').innerText = `สุทธิ ฿${money(net)}`;
-        $('petHungerVal').innerText = hunger + '%';
-        $('petHungerBar').style.width = hunger + '%';
-        $('petHappyVal').innerText = happiness + '%';
-        $('petHappyBar').style.width = happiness + '%';
-        $('petSpeechBubble').innerText = state.pet.speech;
-        $('calPetSpeechText').innerText = state.pet.speech;
-        renderPetSpeechHistory();
-    }
-
-    function triggerPetSpeech(text) {
-        state.pet.speech = text;
-        state.pet.speechHistory.unshift({ time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), text });
-        if (state.pet.speechHistory.length > 8) state.pet.speechHistory.pop();
-    }
-
-    function renderPetSpeechHistory() {
-        $('petSpeechHistory').innerHTML = state.pet.speechHistory.map(h => `
-            <div class="bg-offWhite text-darkText p-2 rounded-lg border border-darkText text-[11px] flex items-center gap-2">
-                <span>${esc(state.pet.avatar) || '🐾'}</span>
-                <div><span class="text-[9px] text-gray-400">${esc(h.time)}</span><p class="font-bold text-hotPink">"${esc(h.text)}"</p></div>
-            </div>`).join('');
-    }
-
-    // ================= NAVIGATION =================
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border', 'border-darkText');
-            btn.classList.add('text-white', 'hover:bg-white/20');
-        });
-        $('tab-' + tabId).classList.remove('hidden');
-        const active = $('nav-' + tabId);
-        if (active) {
-            active.classList.remove('text-white', 'hover:bg-white/20');
-            active.classList.add('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border', 'border-darkText');
-        }
-        if (tabId === 'dashboard') renderDashboard();
-        if (tabId === 'finance') renderTransactions();
-        if (tabId === 'bills') renderBills();
-        if (tabId === 'planner') renderTasks();
-        if (tabId === 'calendar') renderCalendar();
-        if (tabId === 'pet') updatePetStatus();
-    }
-
-    function setDefaultDates() {
-        const today = localDateKey();
-        ['txDate', 'billDate', 'taskDate', 'eventDate'].forEach(id => { if ($(id)) $(id).value = today; });
-    }
-
-    function refreshUI() {
-        setTheme(state.theme, false);
-        $('petNameInput').value = state.pet.name;
-        $('petAvatarSelect').value = state.pet.avatar;
-        renderDashboard(); renderTransactions(); renderBills(); renderTasks();
-        renderCalendar(); renderEventsList(); updatePetStatus(); renderCalcHistory();
-    }
-
-    // ================= FINANCE =================
-    function openTransactionModal(type) {
-        $('transactionForm').reset();
-        $('txType').value = type;
-        $('txModalTitle').innerText = type === 'income' ? '💰 เพิ่มรายรับ' : '💸 เพิ่มรายจ่าย';
-        setDefaultDates();
-        openModal('transactionModal');
-    }
-
-    function handleSaveTransaction(e) {
-        e.preventDefault();
-        const type = $('txType').value;
-        const amount = parseFloat($('txAmount').value);
-        if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
-        state.transactions.unshift({
-            id: 'tx_' + Date.now(),
-            date: $('txDate').value,
-            title: $('txTitle').value.trim(),
-            category: $('txCategory').value,
-            amount, type
-        });
-        triggerPetSpeech(type === 'income' ? `เย้! เงินเข้า +฿${money(amount)} 🎉` : `รายจ่าย -฿${money(amount)} 🥺`);
-        saveData();
-        closeModal('transactionModal');
-        refreshUI();
-        showToast('บันทึกสำเร็จ!');
-    }
-
-    function deleteTransaction(id) {
-        state.transactions = state.transactions.filter(t => t.id !== id);
-        saveData(); refreshUI(); showToast('ลบรายการแล้ว');
-    }
-
-    function renderTransactions() {
-        const filterType = $('finFilterType').value;
-        const search = $('finSearch').value.toLowerCase();
-        const { inc, exp, net } = calcNetBalance();
-        $('finTotalIncome').innerText = '฿ ' + money(inc);
-        $('finTotalExpense').innerText = '฿ ' + money(exp);
-        $('finNetBalance').innerText = '฿ ' + money(net);
-
-        const filtered = state.transactions.filter(t =>
-            (filterType === 'all' || t.type === filterType) &&
-            (t.title.toLowerCase().includes(search) || t.category.toLowerCase().includes(search)));
-
-        if (!filtered.length) {
-            $('transactionTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">ไม่พบรายการ 🔎</td></tr>`;
-            return;
-        }
-        $('transactionTableBody').innerHTML = filtered.map(t => `
-            <tr class="hover:bg-offWhite transition-all">
-                <td class="p-2.5 border-r border-darkText">${esc(t.date)}</td>
-                <td class="p-2.5 border-r border-darkText"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.type === 'income' ? 'bg-limeGreen/30 text-green-800' : 'bg-hotPink/20 text-hotPink'}">${t.type === 'income' ? 'รับ' : 'จ่าย'}</span></td>
-                <td class="p-2.5 border-r border-darkText">${esc(t.category)}</td>
-                <td class="p-2.5 border-r border-darkText font-bold">${esc(t.title)}</td>
-                <td class="p-2.5 border-r border-darkText text-right font-extrabold ${t.type === 'income' ? 'text-green-600' : 'text-hotPink'}">${t.type === 'income' ? '+' : '-'}฿ ${money(t.amount)}</td>
-                <td class="p-2.5 text-center"><button onclick="deleteTransaction('${t.id}')" class="text-hotPink hover:scale-110"><i class="fa-solid fa-trash-can"></i></button></td>
-            </tr>`).join('');
-    }
-
-    // ================= BILLS =================
-    function openBillModal() { $('billForm').reset(); setDefaultDates(); openModal('billModal'); }
-
-    function handleSaveBill(e) {
-        e.preventDefault();
-        const amount = parseFloat($('billAmount').value);
-        if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
-        state.bills.unshift({
-            id: 'bill_' + Date.now(),
-            title: $('billTitle').value.trim(),
-            date: $('billDate').value,
-            amount, paid: false
-        });
-        saveData(); closeModal('billModal'); refreshUI(); showToast('เพิ่มบิลแล้ว!');
-    }
-
-    function toggleBillPaid(id) {
-        const b = state.bills.find(x => x.id === id);
-        if (!b) return;
-        b.paid = !b.paid;
-        if (b.paid) {
-            b.txId = 'tx_bill_' + b.id;
-            state.transactions.unshift({ id: b.txId, date: localDateKey(), title: 'จ่าย: ' + b.title, category: 'บิล/ค่าใช้จ่าย', amount: b.amount, type: 'expense' });
-        } else if (b.txId) {
-            state.transactions = state.transactions.filter(t => t.id !== b.txId);
-            delete b.txId;
-        }
-        saveData(); refreshUI(); showToast(b.paid ? 'จ่ายบิลแล้ว และบันทึกรายจ่ายให้แล้ว 💸' : 'ยกเลิกการจ่ายแล้ว');
-    }
-
-    function deleteBill(id) {
-        state.bills = state.bills.filter(x => x.id !== id);
-        saveData(); refreshUI(); showToast('ลบบิลแล้ว');
-    }
-
-    function renderBills() {
-        const grid = $('billsGrid');
-        $('dashPendingBills').innerText = state.bills.filter(b => !b.paid).length + ' รายการ';
-        if (!state.bills.length) {
-            grid.innerHTML = `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">ไม่มีบิลเตรียมจ่าย 💡</div>`;
-            return;
-        }
-        const sorted = [...state.bills].sort((a, b) => (a.paid - b.paid) || a.date.localeCompare(b.date));
-        grid.innerHTML = sorted.map(b => `
-            <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2 ${b.paid ? 'opacity-60' : ''}">
-                <div class="flex justify-between items-start">
-                    <span class="text-[10px] font-bold bg-retroPurple text-white px-2 py-0.5 rounded">${esc(b.date)}</span>
-                    <button onclick="deleteBill('${b.id}')" class="text-gray-400 hover:text-hotPink">✕</button>
-                </div>
-                <h4 class="font-bold text-sm">${esc(b.title)}</h4>
-                <span class="text-base font-extrabold text-hotPink">฿ ${money(b.amount)}</span>
-                <div class="pt-2 border-t border-darkText flex justify-between items-center text-xs">
-                    <span class="font-bold ${b.paid ? 'text-green-600' : 'text-orange-500'}">${b.paid ? '✔️ จ่ายแล้ว' : '⏳ รอจ่าย'}</span>
-                    <button onclick="toggleBillPaid('${b.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold border border-darkText ${b.paid ? 'bg-offWhite text-darkText' : 'bg-limeGreen text-darkText'}">${b.paid ? 'ยกเลิก' : 'จ่าย'}</button>
-                </div>
-            </div>`).join('');
-    }
-
-    // ================= PLANNER =================
-    function openTaskModal() { $('taskForm').reset(); setDefaultDates(); openModal('taskModal'); }
-
-    function handleSaveTask(e) {
-        e.preventDefault();
-        state.tasks.unshift({
-            id: 't_' + Date.now(),
-            title: $('taskTitle').value.trim(),
-            date: $('taskDate').value,
-            status: $('taskStatus').value,
-            desc: $('taskDesc').value.trim()
-        });
-        saveData(); closeModal('taskModal'); refreshUI(); showToast('เพิ่มงานแล้ว!');
-    }
-
-    function updateTaskStatus(id, st) {
-        const t = state.tasks.find(x => x.id === id);
-        if (t) { t.status = st; saveData(); refreshUI(); }
-    }
-
-    function deleteTask(id) {
-        state.tasks = state.tasks.filter(x => x.id !== id);
-        saveData(); refreshUI(); showToast('ลบงานแล้ว');
-    }
-
-    function renderTasks() {
-        const columns = { todo: ['listTodo', 'countTodo'], progress: ['listProgress', 'countProgress'], done: ['listDone', 'countDone'] };
-        Object.entries(columns).forEach(([st, [listId, countId]]) => {
-            const list = state.tasks.filter(t => t.status === st);
-            $(countId).innerText = list.length;
-            $(listId).innerHTML = list.length ? list.map(t => `
-                <div class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1">
-                    <div class="flex justify-between text-[10px] font-bold"><span>${esc(t.date) || 'ไม่มีกำหนด'}</span><button onclick="deleteTask('${t.id}')" class="text-gray-400 hover:text-hotPink">✕</button></div>
-                    <h4 class="font-bold text-xs">${esc(t.title)}</h4>
-                    ${t.desc ? `<p class="text-[10px] text-gray-500">${esc(t.desc)}</p>` : ''}
-                    <div class="flex gap-1 pt-1">
-                        ${st !== 'todo' ? `<button onclick="updateTaskStatus('${t.id}', 'todo')" class="text-[9px] bg-sunnyYellow text-darkText px-1 rounded border border-darkText">To Do</button>` : ''}
-                        ${st !== 'progress' ? `<button onclick="updateTaskStatus('${t.id}', 'progress')" class="text-[9px] bg-popBlue text-white px-1 rounded border border-darkText">Doing</button>` : ''}
-                        ${st !== 'done' ? `<button onclick="updateTaskStatus('${t.id}', 'done')" class="text-[9px] bg-limeGreen text-darkText px-1 rounded border border-darkText">Done</button>` : ''}
-                    </div>
-                </div>`).join('') : `<div class="text-center py-6 text-gray-400 text-[11px]">ไม่มีรายการ</div>`;
-        });
-        $('dashPendingTasks').innerText = state.tasks.filter(t => t.status !== 'done').length + ' รายการ';
-    }
-
-    // ================= CALENDAR & DIARY =================
-    let currentCalendarDate = new Date();
-    let selectedCalendarDate = null;
-    let selectedMood = '😊';
-    let pendingPhotoData = '';
-
-    function selectMoodEmoji(emoji) {
-        selectedMood = emoji;
-        document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('mood-btn-selected'));
-        const btn = $('mood-' + emoji);
-        if (btn) btn.classList.add('mood-btn-selected');
-    }
-
-    function setEventBusy(busy, text) {
-        const btn = $('eventSubmitBtn');
-        btn.disabled = busy;
-        btn.classList.toggle('opacity-60', busy);
-        btn.innerText = busy ? (text || 'กำลังบันทึก...') : 'บันทึก';
-    }
-
-    function openEventModal(presetDate) {
-        $('eventForm').reset();
-        setDefaultDates();
-        selectMoodEmoji('😊');
-        removeSelectedPhoto();
-        $('photoHint').innerText = currentUser
-            ? 'รูปจะซิงก์ไปยัง Gmail ของคุณ ปรับขนาดอัตโนมัติ'
-            : 'ยังไม่ได้ล็อกอิน Gmail รูปจะเก็บในเครื่องนี้เท่านั้น';
-        $('eventDate').value = presetDate || selectedCalendarDate || localDateKey();
-        openModal('eventModal');
-    }
-
-    async function handlePhotoSelection(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        setEventBusy(true, 'กำลังย่อรูป...');
-        try {
-            pendingPhotoData = await compressImage(file);
-            $('eventPhotoPreview').src = pendingPhotoData;
-            $('photoPreviewArea').classList.remove('hidden');
-        } catch (err) {
-            pendingPhotoData = '';
-            $('photoPreviewArea').classList.add('hidden');
-            alert('ใช้รูปนี้ไม่ได้: ' + err.message);
-        } finally {
-            setEventBusy(false);
-        }
-    }
-
-    function removeSelectedPhoto() {
-        pendingPhotoData = '';
-        $('eventPhotoInput').value = '';
-        $('photoPreviewArea').classList.add('hidden');
-    }
-
-    // บันทึกโน้ต: ถ้ามีรูปแล้วบันทึกรูปไม่สำเร็จ โน้ตจะไม่ถูกบันทึกเลย
-    async function handleSaveEvent(e) {
-        e.preventDefault();
-        const id = 'ev_' + Date.now();
-        const date = $('eventDate').value;
-        const title = $('eventTitle').value.trim();
-        let hasPhoto = false;
-
-        if (pendingPhotoData) {
-            setEventBusy(true);
-            try {
-                await savePhotoLocal(id, pendingPhotoData, false);
-                if (currentUser && isFirebaseActive) {
-                    await uploadPhoto(id, pendingPhotoData);
-                    await markPhotoSynced(id);
+                if (error.code === 'auth/popup-blocked' || error.code === 'auth/operation-not-supported-in-this-environment') {
+                    try {
+                        await auth.signInWithRedirect(provider);
+                        return;
+                    } catch (redirectError) {
+                        console.error('Google Redirect Error:', redirectError);
+                        setSyncStatus('ล็อกอินไม่สำเร็จ ⚠️');
+                        alert('เชื่อมต่อ Google ไม่สำเร็จ: ' + redirectError.message);
+                        return;
+                    }
                 }
-                hasPhoto = true;
+
+                let message = error.message || 'เกิดข้อผิดพลาด';
+                setSyncStatus('ล็อกอินไม่สำเร็จ ⚠️');
+                alert('ล็อกอินไม่สำเร็จ: ' + message);
+            } finally {
+                googleLoginInProgress = false;
+                loginButton.disabled = false;
+                loginButton.classList.remove('opacity-60', 'cursor-not-allowed');
+                loginButton.innerHTML = originalButtonHTML;
+            }
+        }
+
+        async function logoutGoogle() {
+            if (!auth) return;
+            try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch (e) { console.error(e); }
+        }
+
+        function scheduleCloudSave() {
+            if (!currentUser || !db) return;
+            clearTimeout(syncTimer);
+            setSyncStatus('กำลังซิงก์...');
+            syncTimer = setTimeout(pushToCloud, 800);
+        }
+
+        function cloudPayload() {
+            return {
+                transactions: state.transactions,
+                bills: state.bills,
+                tasks: state.tasks,
+                events: state.events,
+                calcHistory: state.calcHistory,
+                pet: state.pet,
+                theme: state.theme,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+        }
+
+        async function pushToCloud() {
+            if (!currentUser || !db) return;
+            try {
+                await db.collection('users').doc(currentUser.uid).set(cloudPayload());
+                setSyncStatus('ซิงก์แล้ว ☁️ ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }));
             } catch (err) {
                 console.error(err);
-                try { await idbTx('readwrite', s => s.delete(id)); } catch {}
-                setEventBusy(false);
-                alert('บันทึกรูปไม่สำเร็จ โน้ตนี้ยังไม่ถูกบันทึก\nสาเหตุ: ' + err.message + '\n\nลองใหม่อีกครั้ง หรือเลือกรูปที่มีขนาดเล็กกว่า');
+                setSyncStatus('ซิงก์ไม่สำเร็จ ⚠️');
+            }
+        }
+
+        async function pullFromCloud(uid) {
+            setSyncStatus('กำลังโหลดข้อมูล...');
+            try {
+                const snap = await db.collection('users').doc(uid).get();
+                if (snap.exists) {
+                    applyRemote(snap.data());
+                    setSyncStatus('โหลดจากคลาวด์แล้ว ☁️');
+                } else {
+                    await pushToCloud();
+                }
+                refreshUI();
+                syncPendingPhotos();
+            } catch (err) {
+                console.error(err);
+                setSyncStatus('โหลดข้อมูลไม่สำเร็จ ⚠️');
+            }
+        }
+
+        function applyRemote(d) {
+            state.transactions = d.transactions || [];
+            state.bills = d.bills || [];
+            state.tasks = d.tasks || [];
+            state.events = d.events || [];
+            state.calcHistory = d.calcHistory || [];
+            state.pet = Object.assign(makeDefaultPet(), d.pet || {});
+            if (d.theme) state.theme = d.theme;
+            saveLocal();
+        }
+
+        // ================= BACKUP / RESTORE =================
+        function collectMeta() {
+            return {
+                app: 'y2k-planner', version: 3, exportedAt: new Date().toISOString(),
+                transactions: state.transactions, bills: state.bills, tasks: state.tasks,
+                events: state.events, calcHistory: state.calcHistory, pet: state.pet,
+                theme: state.theme
+            };
+        }
+
+        async function collectAll() {
+            const photos = {};
+            for (const ev of state.events) {
+                if (!ev.hasPhoto) continue;
+                try {
+                    const d = await getPhotoData(ev.id);
+                    if (d) photos[ev.id] = d;
+                } catch (e) { console.warn('backup photo skipped:', ev.id, e); }
+            }
+            return { ...collectMeta(), photos };
+        }
+
+        async function exportBackup() {
+            showToast('กำลังเตรียมไฟล์สำรอง...');
+            try {
+                const data = await collectAll();
+                const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `y2k-backup-${localDateKey()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1500);
+                showToast('ดาวน์โหลดไฟล์สำรองแล้ว 💾');
+            } catch (err) {
+                console.error(err);
+                alert('สร้างไฟล์สำรองไม่สำเร็จ: ' + err.message);
+            }
+        }
+
+        async function importBackup(e) {
+            const file = e.target.files[0];
+            e.target.value = '';
+            if (!file) return;
+
+            let d;
+            try { d = JSON.parse(await file.text()); } catch { return showToast('ไฟล์ไม่ถูกต้อง'); }
+            if (d.app !== 'y2k-planner') return showToast('ไม่ใช่ไฟล์สำรองของแอปนี้');
+            if (!confirm('แทนที่ข้อมูลปัจจุบันด้วยไฟล์สำรองนี้?')) return;
+
+            try {
+                for (const [id, data] of Object.entries(d.photos || {})) {
+                    await savePhotoLocal(id, data, false);
+                }
+            } catch (err) {
+                return alert('คืนค่ารูปไม่สำเร็จ: ' + err.message);
+            }
+
+            applyRemote(d);
+            refreshUI();
+            saveData();
+            syncPendingPhotos();
+            showToast('คืนค่าข้อมูลสำเร็จ! ✨');
+        }
+
+        // ================= THEME & PET =================
+        const PET_MOOD_FACES = {
+            '🐱': { sad: '😿', low: '😾', good: '😺', rich: '😻' },
+            '🐶': { sad: '🥺', low: '🐕', good: '🐶', rich: '🐶✨' },
+            '🐰': { sad: '😭', low: '🐰', good: '🐰✨', rich: '🐇💖' },
+            '🐹': { sad: '🥺', low: '🐹', good: '🐹✨', rich: '🐹👑' },
+            '🐻': { sad: '🐻‍❄️', low: '🐻', good: '🧸', rich: '🐻✨' },
+            '🦆': { sad: '😭', low: '🦆', good: '🦆✨', rich: '🐣🌟' }
+        };
+
+        function setTheme(themeName, save = true) {
+            state.theme = themeName;
+            document.body.className = `theme-${themeName} min-h-screen flex flex-col relative pb-20`;
+            if (save) saveData();
+        }
+
+        function updatePetSettings() {
+            state.pet.name = $('petNameInput').value.trim() || 'สัตว์เลี้ยง';
+            state.pet.avatar = $('petAvatarSelect').value;
+            saveData();
+            updatePetStatus();
+            showToast('อัปเดตสัตว์เลี้ยงแล้ว! ✨');
+        }
+
+        function calcNetBalance() {
+            let inc = 0, exp = 0;
+            state.transactions.forEach(t => t.type === 'income' ? inc += t.amount : exp += t.amount);
+            return { inc, exp, net: inc - exp };
+        }
+
+        function updatePetStatus() {
+            const { net } = calcNetBalance();
+            const faces = PET_MOOD_FACES[state.pet.avatar] || PET_MOOD_FACES['🐱'];
+            let hunger, happiness, avatar, moodText, defaultSpeech;
+
+            if (net <= 0)       { hunger = 0;   happiness = 0;   avatar = faces.sad;  moodText = 'หิวม๊าก 🥺';   defaultSpeech = 'เงินเป็น 0 แล้ว ช่วยเติมรายรับที! 😭'; }
+            else if (net < 1000){ hunger = 40;  happiness = 40;  avatar = faces.low;  moodText = 'ประหยัด...';    defaultSpeech = 'ประหยัดไว้ก่อนน้า 💸'; }
+            else if (net < 5000){ hunger = 75;  happiness = 75;  avatar = faces.good; moodText = 'อิ่มสบาย 😊';   defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟'; }
+            else                { hunger = 100; happiness = 100; avatar = faces.rich; moodText = 'เศรษฐี! 🤑';     defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖'; }
+
+            state.pet.hunger = hunger;
+            state.pet.happiness = happiness;
+            if (!state.pet.speech || state.pet.speech.includes('ยินดีต้อนรับ')) state.pet.speech = defaultSpeech;
+
+            const pName = state.pet.name || 'สัตว์เลี้ยง';
+            $('floatingPetName').innerText = pName;
+            $('petHeaderTitle').innerText = `${pName} (Tamagotchi)`;
+            $('petAvatar').innerText = avatar;
+            $('petBigAvatar').innerText = avatar;
+            $('calPetAvatar').innerText = avatar;
+            $('petBigName').innerText = `${pName} (${moodText})`;
+            $('petBigStatusText').innerText = `สุทธิ ฿${money(net)}`;
+            $('petHungerVal').innerText = hunger + '%';
+            $('petHungerBar').style.width = hunger + '%';
+            $('petHappyVal').innerText = happiness + '%';
+            $('petHappyBar').style.width = happiness + '%';
+            $('petSpeechBubble').innerText = state.pet.speech;
+            $('calPetSpeechText').innerText = state.pet.speech;
+            renderPetSpeechHistory();
+        }
+
+        function triggerPetSpeech(text) {
+            state.pet.speech = text;
+            state.pet.speechHistory.unshift({ time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), text });
+            if (state.pet.speechHistory.length > 8) state.pet.speechHistory.pop();
+        }
+
+        function renderPetSpeechHistory() {
+            $('petSpeechHistory').innerHTML = state.pet.speechHistory.map(h => `
+                <div class="bg-offWhite text-darkText p-2 rounded-lg border border-darkText text-[11px] flex items-center gap-2">
+                    <span>${esc(state.pet.avatar) || '🐾'}</span>
+                    <div><span class="text-[9px] text-gray-400">${esc(h.time)}</span><p class="font-bold text-hotPink">"${esc(h.text)}"</p></div>
+                </div>`).join('');
+        }
+
+        // ================= NAVIGATION =================
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border', 'border-darkText');
+                btn.classList.add('text-white', 'hover:bg-white/20');
+            });
+            $('tab-' + tabId).classList.remove('hidden');
+            const active = $('nav-' + tabId);
+            if (active) {
+                active.classList.remove('text-white', 'hover:bg-white/20');
+                active.classList.add('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border', 'border-darkText');
+            }
+            if (tabId === 'dashboard') renderDashboard();
+            if (tabId === 'finance') renderTransactions();
+            if (tabId === 'bills') renderBills();
+            if (tabId === 'planner') renderTasks();
+            if (tabId === 'calendar') renderCalendar();
+            if (tabId === 'pet') updatePetStatus();
+        }
+
+        function setDefaultDates() {
+            const today = localDateKey();
+            ['txDate', 'billDate', 'taskDate', 'eventDate'].forEach(id => { if ($(id)) $(id).value = today; });
+        }
+
+        function refreshUI() {
+            setTheme(state.theme, false);
+            $('petNameInput').value = state.pet.name;
+            $('petAvatarSelect').value = state.pet.avatar;
+            renderDashboard(); renderTransactions(); renderBills(); renderTasks();
+            renderCalendar(); renderEventsList(); updatePetStatus(); renderCalcHistory();
+        }
+
+        // ================= FINANCE =================
+        function openTransactionModal(type) {
+            $('transactionForm').reset();
+            $('txType').value = type;
+            $('txModalTitle').innerText = type === 'income' ? '💰 เพิ่มรายรับ' : '💸 เพิ่มรายจ่าย';
+            setDefaultDates();
+            openModal('transactionModal');
+        }
+
+        function handleSaveTransaction(e) {
+            e.preventDefault();
+            const type = $('txType').value;
+            const amount = parseFloat($('txAmount').value);
+            if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
+            state.transactions.unshift({
+                id: 'tx_' + Date.now(),
+                date: $('txDate').value,
+                title: $('txTitle').value.trim(),
+                category: $('txCategory').value,
+                amount, type
+            });
+            triggerPetSpeech(type === 'income' ? `เย้! เงินเข้า +฿${money(amount)} 🎉` : `รายจ่าย -฿${money(amount)} 🥺`);
+            saveData();
+            closeModal('transactionModal');
+            refreshUI();
+            showToast('บันทึกสำเร็จ!');
+        }
+
+        function deleteTransaction(id) {
+            state.transactions = state.transactions.filter(t => t.id !== id);
+            saveData(); refreshUI(); showToast('ลบรายการแล้ว');
+        }
+
+        function renderTransactions() {
+            const filterType = $('finFilterType').value;
+            const search = $('finSearch').value.toLowerCase();
+            const { inc, exp, net } = calcNetBalance();
+            $('finTotalIncome').innerText = '฿ ' + money(inc);
+            $('finTotalExpense').innerText = '฿ ' + money(exp);
+            $('finNetBalance').innerText = '฿ ' + money(net);
+
+            const filtered = state.transactions.filter(t =>
+                (filterType === 'all' || t.type === filterType) &&
+                (t.title.toLowerCase().includes(search) || t.category.toLowerCase().includes(search)));
+
+            if (!filtered.length) {
+                $('transactionTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">ไม่พบรายการ 🔎</td></tr>`;
                 return;
             }
-            setEventBusy(false);
+            $('transactionTableBody').innerHTML = filtered.map(t => `
+                <tr class="hover:bg-offWhite transition-all">
+                    <td class="p-2.5 border-r border-darkText">${esc(t.date)}</td>
+                    <td class="p-2.5 border-r border-darkText"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.type === 'income' ? 'bg-limeGreen/30 text-green-800' : 'bg-hotPink/20 text-hotPink'}">${t.type === 'income' ? 'รับ' : 'จ่าย'}</span></td>
+                    <td class="p-2.5 border-r border-darkText">${esc(t.category)}</td>
+                    <td class="p-2.5 border-r border-darkText font-bold">${esc(t.title)}</td>
+                    <td class="p-2.5 border-r border-darkText text-right font-extrabold ${t.type === 'income' ? 'text-green-600' : 'text-hotPink'}">${t.type === 'income' ? '+' : '-'}฿ ${money(t.amount)}</td>
+                    <td class="p-2.5 text-center"><button onclick="deleteTransaction('${t.id}')" class="text-hotPink hover:scale-110"><i class="fa-solid fa-trash-can"></i></button></td>
+                </tr>`).join('');
         }
 
-        state.events.unshift({ id, date, mood: selectedMood, title, hasPhoto });
-        saveData();
-        closeModal('eventModal');
-        selectCalendarDate(date);
-        showToast('บันทึกไดอารี่แล้ว!');
-    }
+        // ================= BILLS =================
+        function openBillModal() { $('billForm').reset(); setDefaultDates(); openModal('billModal'); }
 
-    function selectCalendarDate(dateKey) {
-        selectedCalendarDate = dateKey;
-        renderCalendar();
-        renderEventsList();
-    }
+        function handleSaveBill(e) {
+            e.preventDefault();
+            const amount = parseFloat($('billAmount').value);
+            if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
+            state.bills.unshift({
+                id: 'bill_' + Date.now(),
+                title: $('billTitle').value.trim(),
+                date: $('billDate').value,
+                amount, paid: false
+            });
+            saveData(); closeModal('billModal'); refreshUI(); showToast('เพิ่มบิลแล้ว!');
+        }
 
-    async function viewEventDetails(eventId) {
-        const ev = state.events.find(e => e.id === eventId);
-        if (!ev) return;
-        $('viewEventMood').innerText = ev.mood || '😊';
-        $('viewEventDate').innerText = ev.date;
-        $('viewEventTitle').innerText = ev.title;
-        $('viewEventPhotoContainer').classList.add('hidden');
-        $('viewEventPhotoNote').classList.add('hidden');
-        $('deleteEventBtn').onclick = async () => {
-            await deleteEvent(ev.id);
-            closeModal('viewEventModal');
-        };
-        openModal('viewEventModal');
-
-        if (!ev.hasPhoto) return;
-
-        const note = $('viewEventPhotoNote');
-        note.innerText = 'กำลังโหลดรูป...';
-        note.classList.remove('hidden');
-        try {
-            const data = await getPhotoData(ev.id);
-            if (data) {
-                $('viewEventPhoto').src = data;
-                $('viewEventPhotoContainer').classList.remove('hidden');
-                note.classList.add('hidden');
-            } else {
-                note.innerText = 'ไม่พบรูปของโน้ตนี้ในเครื่อง ลองล็อกอิน Gmail เพื่อดึงรูปจากคลาวด์';
+        function toggleBillPaid(id) {
+            const b = state.bills.find(x => x.id === id);
+            if (!b) return;
+            b.paid = !b.paid;
+            if (b.paid) {
+                b.txId = 'tx_bill_' + b.id;
+                state.transactions.unshift({ id: b.txId, date: localDateKey(), title: 'จ่าย: ' + b.title, category: 'บิล/ค่าใช้จ่าย', amount: b.amount, type: 'expense' });
+            } else if (b.txId) {
+                state.transactions = state.transactions.filter(t => t.id !== b.txId);
+                delete b.txId;
             }
-        } catch (err) {
-            note.innerText = 'โหลดรูปไม่สำเร็จ: ' + err.message;
+            saveData(); refreshUI(); showToast(b.paid ? 'จ่ายบิลแล้ว และบันทึกรายจ่ายให้แล้ว 💸' : 'ยกเลิกการจ่ายแล้ว');
         }
-    }
 
-    async function deleteEvent(id) {
-        const ev = state.events.find(x => x.id === id);
-        if (ev && ev.hasPhoto) await deletePhotoEverywhere(id);
-        state.events = state.events.filter(x => x.id !== id);
-        saveData(); renderCalendar(); renderEventsList(); showToast('ลบโน้ตแล้ว');
-    }
+        function deleteBill(id) {
+            state.bills = state.bills.filter(x => x.id !== id);
+            saveData(); refreshUI(); showToast('ลบบิลแล้ว');
+        }
 
-    function changeMonth(dir) {
-        currentCalendarDate.setDate(1);
-        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir);
-        renderCalendar();
-    }
-
-    function renderCalendar() {
-        const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
-        const label = `${THAI_MONTHS[month]} ${year + 543}`;
-        $('calMonthYearLabel').innerText = label;
-        $('calendarMonthMoodTitle').innerText = `อารมณ์เดือน${label}`;
-
-        const firstDay = new Date(year, month, 1).getDay();
-        const totalDays = new Date(year, month + 1, 0).getDate();
-        const todayStr = localDateKey();
-        let html = '';
-        for (let i = 0; i < firstDay; i++) html += `<div class="aspect-square"></div>`;
-
-        for (let day = 1; day <= totalDays; day++) {
-            const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const evs = state.events.filter(e => e.date === dateKey);
-            const isSelected = selectedCalendarDate === dateKey;
-            const isToday = dateKey === todayStr;
-
-            let borderStyle = 'border-darkText', bgStyle = 'bg-offWhite';
-            if (isSelected) { borderStyle = 'border-limeGreen ring-2 ring-limeGreen'; bgStyle = 'bg-sunnyYellow/20'; }
-            else if (isToday) { borderStyle = 'border-popBlue'; bgStyle = 'bg-popBlue/10'; }
-
-            const topMood = evs.length ? (evs[0].mood || '😊') : '';
-            html += `
-                <div onclick="selectCalendarDate('${dateKey}')" class="${bgStyle} text-darkText p-1 rounded-xl border ${borderStyle} aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 transition-all select-none overflow-hidden">
-                    <div class="flex justify-between items-center shrink-0">
-                        <span class="text-[10px] font-bold ${isToday ? 'bg-popBlue text-white px-1 rounded-full' : ''}">${day}</span>
-                        ${topMood ? `<span class="text-[10px]">${topMood}</span>` : ''}
+        function renderBills() {
+            const grid = $('billsGrid');
+            $('dashPendingBills').innerText = state.bills.filter(b => !b.paid).length + ' รายการ';
+            if (!state.bills.length) {
+                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">ไม่มีบิลเตรียมจ่าย 💡</div>`;
+                return;
+            }
+            const sorted = [...state.bills].sort((a, b) => (a.paid - b.paid) || a.date.localeCompare(b.date));
+            grid.innerHTML = sorted.map(b => `
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2 ${b.paid ? 'opacity-60' : ''}">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[10px] font-bold bg-retroPurple text-white px-2 py-0.5 rounded">${esc(b.date)}</span>
+                        <button onclick="deleteBill('${b.id}')" class="text-gray-400 hover:text-hotPink">✕</button>
                     </div>
-                    <div class="space-y-0.5 overflow-y-auto flex-1 mt-0.5">
-                        ${evs.map(ev => `
-                            <div onclick="event.stopPropagation(); viewEventDetails('${ev.id}')" class="text-[8px] bg-white text-darkText px-1 py-0.5 rounded border border-darkText truncate font-bold">
-                                ${ev.mood || ''} ${esc(ev.title)}
-                            </div>`).join('')}
+                    <h4 class="font-bold text-sm">${esc(b.title)}</h4>
+                    <span class="text-base font-extrabold text-hotPink">฿ ${money(b.amount)}</span>
+                    <div class="pt-2 border-t border-darkText flex justify-between items-center text-xs">
+                        <span class="font-bold ${b.paid ? 'text-green-600' : 'text-orange-500'}">${b.paid ? '✔️ จ่ายแล้ว' : '⏳ รอจ่าย'}</span>
+                        <button onclick="toggleBillPaid('${b.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold border border-darkText ${b.paid ? 'bg-offWhite text-darkText' : 'bg-limeGreen text-darkText'}">${b.paid ? 'ยกเลิก' : 'จ่าย'}</button>
                     </div>
-                </div>`;
-        }
-        $('calendarGrid').innerHTML = html;
-        renderMonthlyMoodSummary(year, month);
-    }
-
-    function renderMonthlyMoodSummary(year, month) {
-        const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
-        const monthEvents = state.events.filter(e => e.date && e.date.startsWith(prefix));
-        if (!monthEvents.length) { $('calendarMonthMoodSummary').innerText = 'ยังไม่มีบันทึกอารมณ์ในเดือนนี้ 📝'; return; }
-        const counts = {};
-        monthEvents.forEach(ev => { const m = ev.mood || '😊'; counts[m] = (counts[m] || 0) + 1; });
-        const topMood = Object.keys(counts).reduce((a, b) => counts[a] >= counts[b] ? a : b);
-        const msg = topMood === '😡' ? `เดือนนี้หัวร้อนบ่อย (${counts['😡']} วัน) พักผ่อนบ้างน้า 🥺`
-                  : topMood === '🥰' ? `เดือนนี้แฮปปี้สุดๆ ไปเลย! (${counts['🥰']} วัน) 🌸`
-                  : `เดือนนี้สดใสมีความสุขดี 🌟`;
-        $('calendarMonthMoodSummary').innerText = msg;
-    }
-
-    function renderEventsList() {
-        const sb = $('eventsListSidebar');
-        const titleEl = $('diarySidebarTitle');
-        const resetBtn = $('resetDateFilterBtn');
-        let list = state.events;
-
-        if (selectedCalendarDate) {
-            list = state.events.filter(e => e.date === selectedCalendarDate);
-            titleEl.innerHTML = `<i class="fa-solid fa-calendar-day text-hotPink"></i> วันที่ ${esc(selectedCalendarDate)}`;
-            resetBtn.classList.remove('hidden');
-        } else {
-            titleEl.innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด`;
-            resetBtn.classList.add('hidden');
+                </div>`).join('');
         }
 
-        const addBtn = selectedCalendarDate
-            ? `<button onclick="openEventModal('${selectedCalendarDate}')" class="w-full bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px] mb-2">+ เพิ่มโน้ตวันนี้</button>`
-            : '';
+        // ================= PLANNER =================
+        function openTaskModal() { $('taskForm').reset(); setDefaultDates(); openModal('taskModal'); }
 
-        if (!list.length) {
-            sb.innerHTML = `${addBtn}<div class="text-center py-6 text-gray-400 text-xs">ไม่มีโน้ต</div>`;
-            return;
+        function handleSaveTask(e) {
+            e.preventDefault();
+            state.tasks.unshift({
+                id: 't_' + Date.now(),
+                title: $('taskTitle').value.trim(),
+                date: $('taskDate').value,
+                status: $('taskStatus').value,
+                desc: $('taskDesc').value.trim()
+            });
+            saveData(); closeModal('taskModal'); refreshUI(); showToast('เพิ่มงานแล้ว!');
         }
-        sb.innerHTML = addBtn + list.map(ev => `
-            <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1 cursor-pointer hover:bg-white text-xs">
-                <div class="flex justify-between items-center text-[10px]">
-                    <span>${ev.mood || '😊'} <b>${esc(ev.date)}</b>${ev.hasPhoto ? ' 📷' : ''}</span>
-                    <i class="fa-solid fa-chevron-right text-gray-400"></i>
-                </div>
-                <h4 class="font-bold text-popBlue truncate">${esc(ev.title)}</h4>
-            </div>`).join('');
-    }
 
-    // ================= CALCULATOR =================
-    let calcExpr = '0';
-    let lastCalcResult = 0;
+        function updateTaskStatus(id, st) {
+            const t = state.tasks.find(x => x.id === id);
+            if (t) { t.status = st; saveData(); refreshUI(); }
+        }
 
-    function calcRender() { $('calcScreen').innerText = calcExpr; }
-    function calcClear() { calcExpr = '0'; lastCalcResult = 0; $('latestCalcVal').innerText = '0'; calcRender(); }
+        function deleteTask(id) {
+            state.tasks = state.tasks.filter(x => x.id !== id);
+            saveData(); refreshUI(); showToast('ลบงานแล้ว');
+        }
 
-    function calcAppend(val) {
-        const ops = ['+', '-', '*', '/', '%', '.'];
-        if (calcExpr === '0' && !ops.includes(val)) calcExpr = val;
-        else calcExpr += val;
-        calcRender();
-    }
+        function renderTasks() {
+            const columns = { todo: ['listTodo', 'countTodo'], progress: ['listProgress', 'countProgress'], done: ['listDone', 'countDone'] };
+            Object.entries(columns).forEach(([st, [listId, countId]]) => {
+                const list = state.tasks.filter(t => t.status === st);
+                $(countId).innerText = list.length;
+                $(listId).innerHTML = list.length ? list.map(t => `
+                    <div class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1">
+                        <div class="flex justify-between text-[10px] font-bold"><span>${esc(t.date) || 'ไม่มีกำหนด'}</span><button onclick="deleteTask('${t.id}')" class="text-gray-400 hover:text-hotPink">✕</button></div>
+                        <h4 class="font-bold text-xs">${esc(t.title)}</h4>
+                        ${t.desc ? `<p class="text-[10px] text-gray-500">${esc(t.desc)}</p>` : ''}
+                        <div class="flex gap-1 pt-1">
+                            ${st !== 'todo' ? `<button onclick="updateTaskStatus('${t.id}', 'todo')" class="text-[9px] bg-sunnyYellow text-darkText px-1 rounded border border-darkText">To Do</button>` : ''}
+                            ${st !== 'progress' ? `<button onclick="updateTaskStatus('${t.id}', 'progress')" class="text-[9px] bg-popBlue text-white px-1 rounded border border-darkText">Doing</button>` : ''}
+                            ${st !== 'done' ? `<button onclick="updateTaskStatus('${t.id}', 'done')" class="text-[9px] bg-limeGreen text-darkText px-1 rounded border border-darkText">Done</button>` : ''}
+                        </div>
+                    </div>`).join('') : `<div class="text-center py-6 text-gray-400 text-[11px]">ไม่มีรายการ</div>`;
+            });
+            $('dashPendingTasks').innerText = state.tasks.filter(t => t.status !== 'done').length + ' รายการ';
+        }
 
-    function calcCalculate() {
-        const expr = calcExpr.replace(/×/g, '*').replace(/÷/g, '/');
-        if (!/^[0-9+\-*/%.() ]+$/.test(expr)) return calcError();
-        try {
-            const res = Function('"use strict"; return (' + expr + ')')();
-            if (!isFinite(res)) throw new Error('not finite');
-            lastCalcResult = Math.round(res * 100) / 100;
-            $('calcScreen').innerText = lastCalcResult;
-            $('latestCalcVal').innerText = money(lastCalcResult);
-            state.calcHistory.unshift({ expr: calcExpr, result: lastCalcResult });
-            if (state.calcHistory.length > 10) state.calcHistory.pop();
-            calcExpr = String(lastCalcResult);
+        // ================= CALENDAR & DIARY =================
+        let currentCalendarDate = new Date();
+        let selectedCalendarDate = null;
+        let selectedMood = '😊';
+        let pendingPhotoData = '';
+
+        function selectMoodEmoji(emoji) {
+            selectedMood = emoji;
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('mood-btn-selected'));
+            const btn = $('mood-' + emoji);
+            if (btn) btn.classList.add('mood-btn-selected');
+        }
+
+        function setEventBusy(busy, text) {
+            const btn = $('eventSubmitBtn');
+            btn.disabled = busy;
+            btn.classList.toggle('opacity-60', busy);
+            btn.innerText = busy ? (text || 'กำลังบันทึก...') : 'บันทึก';
+        }
+
+        function openEventModal(presetDate) {
+            $('eventForm').reset();
+            setDefaultDates();
+            selectMoodEmoji('😊');
+            removeSelectedPhoto();
+            $('photoHint').innerText = currentUser
+                ? 'รูปจะซิงก์ไปยัง Gmail ของคุณ ปรับขนาดอัตโนมัติ'
+                : 'ยังไม่ได้ล็อกอิน Gmail รูปจะเก็บในเครื่องนี้เท่านั้น';
+            $('eventDate').value = presetDate || selectedCalendarDate || localDateKey();
+            openModal('eventModal');
+        }
+
+        async function handlePhotoSelection(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            setEventBusy(true, 'กำลังย่อรูป...');
+            try {
+                pendingPhotoData = await compressImage(file);
+                $('eventPhotoPreview').src = pendingPhotoData;
+                $('photoPreviewArea').classList.remove('hidden');
+            } catch (err) {
+                pendingPhotoData = '';
+                $('photoPreviewArea').classList.add('hidden');
+                alert('ใช้รูปนี้ไม่ได้: ' + err.message);
+            } finally {
+                setEventBusy(false);
+            }
+        }
+
+        function removeSelectedPhoto() {
+            pendingPhotoData = '';
+            $('eventPhotoInput').value = '';
+            $('photoPreviewArea').classList.add('hidden');
+        }
+
+        async function handleSaveEvent(e) {
+            e.preventDefault();
+            const id = 'ev_' + Date.now();
+            const date = $('eventDate').value;
+            const title = $('eventTitle').value.trim();
+            let hasPhoto = false;
+
+            if (pendingPhotoData) {
+                setEventBusy(true);
+                try {
+                    await savePhotoLocal(id, pendingPhotoData, false);
+                    if (currentUser && isFirebaseActive) {
+                        await uploadPhoto(id, pendingPhotoData);
+                        await markPhotoSynced(id);
+                    }
+                    hasPhoto = true;
+                } catch (err) {
+                    console.error(err);
+                    try { await idbTx('readwrite', s => s.delete(id)); } catch {}
+                    setEventBusy(false);
+                    alert('บันทึกรูปไม่สำเร็จ โน้ตนี้ยังไม่ถูกบันทึก\nสาเหตุ: ' + err.message);
+                    return;
+                }
+                setEventBusy(false);
+            }
+
+            state.events.unshift({ id, date, mood: selectedMood, title, hasPhoto });
             saveData();
-            renderCalcHistory();
-        } catch { calcError(); }
-    }
-
-    function calcError() {
-        $('calcScreen').innerText = 'Error';
-        calcExpr = '0';
-    }
-
-    function clearCalcHistory() { state.calcHistory = []; saveData(); renderCalcHistory(); }
-
-    function renderCalcHistory() {
-        const list = $('calcHistoryList');
-        if (!state.calcHistory.length) { list.innerHTML = `<div class="text-center py-4 text-gray-400 text-[10px]">ไม่มีประวัติ</div>`; return; }
-        list.innerHTML = state.calcHistory.map(h => `
-            <div class="bg-offWhite text-darkText p-1.5 rounded border border-darkText flex justify-between text-[11px]">
-                <span>${esc(h.expr)} =</span><strong class="text-popBlue">${esc(h.result)}</strong>
-            </div>`).join('');
-    }
-
-    function calcDesc(fallback) {
-        return $('calcNoteDesc').value.trim() || fallback;
-    }
-
-    function saveCalcAsNote() {
-        if (!lastCalcResult) return showToast('ยังไม่มีผลลัพธ์ให้บันทึก');
-        state.events.unshift({ id: 'ev_' + Date.now(), date: localDateKey(), mood: '😊', title: `คำนวณ: ${calcDesc('ผลลัพธ์')} = ฿${money(lastCalcResult)}`, hasPhoto: false });
-        saveData(); renderCalendar(); renderEventsList(); showToast('บันทึกโน้ตแล้ว');
-    }
-
-    function saveCalcAsExpense(type) {
-        if (!lastCalcResult) return showToast('ยังไม่มีผลลัพธ์ให้บันทึก');
-        state.transactions.unshift({
-            id: 'tx_' + Date.now(), date: localDateKey(),
-            title: calcDesc('จากเครื่องคิดเลข'),
-            category: type === 'expense' ? 'อื่นๆ' : 'เงินเดือน/รายรับ',
-            amount: Math.abs(lastCalcResult), type
-        });
-        triggerPetSpeech(type === 'income' ? `เย้! เงินเข้า +฿${money(lastCalcResult)} 🎉` : `รายจ่าย -฿${money(lastCalcResult)} 🥺`);
-        saveData(); refreshUI(); showToast('บันทึกรายการแล้ว');
-    }
-
-    // ================= DASHBOARD =================
-    function renderDashboard() {
-        const { inc, exp, net } = calcNetBalance();
-        const month = thisMonthKey();
-        let mInc = 0, mExp = 0;
-        state.transactions.forEach(t => {
-            if (!t.date || !t.date.startsWith(month)) return;
-            t.type === 'income' ? mInc += t.amount : mExp += t.amount;
-        });
-        $('dashNetBalance').innerText = '฿ ' + money(net);
-        $('dashTotalIncome').innerText = '฿ ' + money(mInc);
-        $('dashTotalExpense').innerText = '฿ ' + money(mExp);
-
-        const pending = state.tasks.filter(t => t.status !== 'done');
-        $('dashTodoList').innerHTML = pending.length
-            ? pending.slice(0, 8).map(t => `
-                <div class="bg-offWhite text-darkText p-2 rounded-lg border border-darkText flex justify-between items-center gap-2">
-                    <span class="font-bold truncate">${esc(t.title)}</span>
-                    <span class="text-[9px] shrink-0 ${t.status === 'progress' ? 'text-popBlue' : 'text-gray-500'}">${t.status === 'progress' ? 'กำลังทำ' : 'ต้องทำ'}</span>
-                </div>`).join('')
-            : `<div class="text-center py-8 text-gray-400">ไม่มีงานค้างอยู่ 🎉</div>`;
-
-        renderExpenseChart();
-    }
-
-    let expenseChartInstance = null;
-    function renderExpenseChart() {
-        const canvas = $('expenseCategoryChart');
-        if (!canvas || typeof Chart === 'undefined') return;
-        const map = {};
-        state.transactions.filter(t => t.type === 'expense').forEach(t => map[t.category] = (map[t.category] || 0) + t.amount);
-        const labels = Object.keys(map).length ? Object.keys(map) : ['ไม่มีรายจ่าย'];
-        const values = Object.keys(map).length ? Object.values(map) : [1];
-        if (expenseChartInstance) expenseChartInstance.destroy();
-        expenseChartInstance = new Chart(canvas.getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels,
-                datasets: [{ data: values, backgroundColor: ['#FF007F', '#0055FF', '#CCFF00', '#FFDD00', '#9D00FF', '#FF8A00', '#00C2A8'], borderWidth: 2, borderColor: '#1A1A1A' }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-        });
-    }
-
-    // ================= INIT =================
-    window.addEventListener('load', async () => {
-        initView();
-        // ขอให้เบราว์เซอร์เก็บข้อมูลไว้อย่างถาวร ลดโอกาสที่เบราว์เซอร์จะลบรูปเอง
-        if (navigator.storage && navigator.storage.persist) {
-            navigator.storage.persist().catch(() => {});
+            closeModal('eventModal');
+            selectCalendarDate(date);
+            showToast('บันทึกไดอารี่แล้ว!');
         }
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW error:', err));
+
+        function selectCalendarDate(dateKey) {
+            selectedCalendarDate = dateKey;
+            renderCalendar();
+            renderEventsList();
         }
-        try { await migrateLegacyPhotos(); } catch (e) { console.warn('migrate photos:', e); }
-        setDefaultDates();
-        refreshUI();
-        initFirebase();
-        if (!IS_CONFIGURED) setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
-    });
+
+        async function viewEventDetails(eventId) {
+            const ev = state.events.find(e => e.id === eventId);
+            if (!ev) return;
+            $('viewEventMood').innerText = ev.mood || '😊';
+            $('viewEventDate').innerText = ev.date;
+            $('viewEventTitle').innerText = ev.title;
+            $('viewEventPhotoContainer').classList.add('hidden');
+            $('viewEventPhotoNote').classList.add('hidden');
+            $('deleteEventBtn').onclick = async () => {
+                await deleteEvent(ev.id);
+                closeModal('viewEventModal');
+            };
+            openModal('viewEventModal');
+
+            if (!ev.hasPhoto) return;
+
+            const note = $('viewEventPhotoNote');
+            note.innerText = 'กำลังโหลดรูป...';
+            note.classList.remove('hidden');
+            try {
+                const data = await getPhotoData(ev.id);
+                if (data) {
+                    $('viewEventPhoto').src = data;
+                    $('viewEventPhotoContainer').classList.remove('hidden');
+                    note.classList.add('hidden');
+                } else {
+                    note.innerText = 'ไม่พบรูปของโน้ตนี้ในเครื่อง ลองล็อกอิน Gmail เพื่อดึงรูปจากคลาวด์';
+                }
+            } catch (err) {
+                note.innerText = 'โหลดรูปไม่สำเร็จ: ' + err.message;
+            }
+        }
+
+        async function deleteEvent(id) {
+            const ev = state.events.find(x => x.id === id);
+            if (ev && ev.hasPhoto) await deletePhotoEverywhere(id);
+            state.events = state.events.filter(x => x.id !== id);
+            saveData(); renderCalendar(); renderEventsList(); showToast('ลบโน้ตแล้ว');
+        }
+
+        function changeMonth(dir) {
+            currentCalendarDate.setDate(1);
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir);
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
+            const label = `${THAI_MONTHS[month]} ${year + 543}`;
+            $('calMonthYearLabel').innerText = label;
+            $('calendarMonthMoodTitle').innerText = `อารมณ์เดือน${label}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const totalDays = new Date(year, month + 1, 0).getDate();
+            const todayStr = localDateKey();
+            let html = '';
+            for (let i = 0; i < firstDay; i++) html += `<div class="aspect-square"></div>`;
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const evs = state.events.filter(e => e.date === dateKey);
+                const isSelected = selectedCalendarDate === dateKey;
+                const isToday = dateKey === todayStr;
+
+                let borderStyle = 'border-darkText', bgStyle = 'bg-offWhite';
+                if (isSelected) { borderStyle = 'border-limeGreen ring-2 ring-limeGreen'; bgStyle = 'bg-sunnyYellow/20'; }
+                else if (isToday) { borderStyle = 'border-popBlue'; bgStyle = 'bg-popBlue/10'; }
+
+                const topMood = evs.length ? (evs[0].mood || '😊') : '';
+                html += `
+                    <div onclick="selectCalendarDate('${dateKey}')" class="${bgStyle} text-darkText p-1 rounded-xl border ${borderStyle} aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 transition-all select-none overflow-hidden">
+                        <div class="flex justify-between items-center shrink-0">
+                            <span class="text-[10px] font-bold ${isToday ? 'bg-popBlue text-white px-1 rounded-full' : ''}">${day}</span>
+                            ${topMood ? `<span class="text-[10px]">${topMood}</span>` : ''}
+                        </div>
+                        <div class="space-y-0.5 overflow-y-auto flex-1 mt-0.5">
+                            ${evs.map(ev => `
+                                <div onclick="event.stopPropagation(); viewEventDetails('${ev.id}')" class="text-[8px] bg-white text-darkText px-1 py-0.5 rounded border border-darkText truncate font-bold">
+                                    ${ev.mood || ''} ${esc(ev.title)}
+                                </div>`).join('')}
+                        </div>
+                    </div>`;
+            }
+            $('calendarGrid').innerHTML = html;
+            renderMonthlyMoodSummary(year, month);
+        }
+
+        function renderMonthlyMoodSummary(year, month) {
+            const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+            const monthEvents = state.events.filter(e => e.date && e.date.startsWith(prefix));
+            if (!monthEvents.length) { $('calendarMonthMoodSummary').innerText = 'ยังไม่มีบันทึกอารมณ์ในเดือนนี้ 📝'; return; }
+            const counts = {};
+            monthEvents.forEach(ev => { const m = ev.mood || '😊'; counts[m] = (counts[m] || 0) + 1; });
+            const topMood = Object.keys(counts).reduce((a, b) => counts[a] >= counts[b] ? a : b);
+            const msg = topMood === '😡' ? `เดือนนี้หัวร้อนบ่อย (${counts['😡']} วัน) พักผ่อนบ้างน้า 🥺`
+                      : topMood === '🥰' ? `เดือนนี้แฮปปี้สุดๆ ไปเลย! (${counts['🥰']} วัน) 🌸`
+                      : `เดือนนี้สดใสมีความสุขดี 🌟`;
+            $('calendarMonthMoodSummary').innerText = msg;
+        }
+
+        function renderEventsList() {
+            const sb = $('eventsListSidebar');
+            const titleEl = $('diarySidebarTitle');
+            const resetBtn = $('resetDateFilterBtn');
+            let list = state.events;
+
+            if (selectedCalendarDate) {
+                list = state.events.filter(e => e.date === selectedCalendarDate);
+                titleEl.innerHTML = `<i class="fa-solid fa-calendar-day text-hotPink"></i> วันที่ ${esc(selectedCalendarDate)}`;
+                resetBtn.classList.remove('hidden');
+            } else {
+                titleEl.innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด`;
+                resetBtn.classList.add('hidden');
+            }
+
+            const addBtn = selectedCalendarDate
+                ? `<button onclick="openEventModal('${selectedCalendarDate}')" class="w-full bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px] mb-2">+ เพิ่มโน้ตวันนี้</button>`
+                : '';
+
+            if (!list.length) {
+                sb.innerHTML = `${addBtn}<div class="text-center py-6 text-gray-400 text-xs">ไม่มีโน้ต</div>`;
+                return;
+            }
+            sb.innerHTML = addBtn + list.map(ev => `
+                <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1 cursor-pointer hover:bg-white text-xs">
+                    <div class="flex justify-between items-center text-[10px]">
+                        <span>${ev.mood || '😊'} <b>${esc(ev.date)}</b>${ev.hasPhoto ? ' 📷' : ''}</span>
+                        <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                    </div>
+                    <h4 class="font-bold text-popBlue truncate">${esc(ev.title)}</h4>
+                </div>`).join('');
+        }
+
+        // ================= CALCULATOR =================
+        let calcExpr = '0';
+        let lastCalcResult = 0;
+
+        function calcRender() { $('calcScreen').innerText = calcExpr; }
+        function calcClear() { calcExpr = '0'; lastCalcResult = 0; $('latestCalcVal').innerText = '0'; calcRender(); }
+
+        function calcAppend(val) {
+            const ops = ['+', '-', '*', '/', '%', '.'];
+            if (calcExpr === '0' && !ops.includes(val)) calcExpr = val;
+            else calcExpr += val;
+            calcRender();
+        }
+
+        function calcCalculate() {
+            const expr = calcExpr.replace(/×/g, '*').replace(/÷/g, '/');
+            if (!/^[0-9+\-*/%.() ]+$/.test(expr)) return calcError();
+            try {
+                const res = Function('"use strict"; return (' + expr + ')')();
+                if (!isFinite(res)) throw new Error('not finite');
+                lastCalcResult = Math.round(res * 100) / 100;
+                $('calcScreen').innerText = lastCalcResult;
+                $('latestCalcVal').innerText = money(lastCalcResult);
+                state.calcHistory.unshift({ expr: calcExpr, result: lastCalcResult });
+                if (state.calcHistory.length > 10) state.calcHistory.pop();
+                calcExpr = String(lastCalcResult);
+                saveData();
+                renderCalcHistory();
+            } catch { calcError(); }
+        }
+
+        function calcError() {
+            $('calcScreen').innerText = 'Error';
+            calcExpr = '0';
+        }
+
+        function clearCalcHistory() { state.calcHistory = []; saveData(); renderCalcHistory(); }
+
+        function renderCalcHistory() {
+            const list = $('calcHistoryList');
+            if (!state.calcHistory.length) { list.innerHTML = `<div class="text-center py-4 text-gray-400 text-[10px]">ไม่มีประวัติ</div>`; return; }
+            list.innerHTML = state.calcHistory.map(h => `
+                <div class="bg-offWhite text-darkText p-1.5 rounded border border-darkText flex justify-between text-[11px]">
+                    <span>${esc(h.expr)} =</span><strong class="text-popBlue">${esc(h.result)}</strong>
+                </div>`).join('');
+        }
+
+        function calcDesc(fallback) {
+            return $('calcNoteDesc').value.trim() || fallback;
+        }
+
+        function saveCalcAsNote() {
+            if (!lastCalcResult) return showToast('ยังไม่มีผลลัพธ์ให้บันทึก');
+            state.events.unshift({ id: 'ev_' + Date.now(), date: localDateKey(), mood: '😊', title: `คำนวณ: ${calcDesc('ผลลัพธ์')} = ฿${money(lastCalcResult)}`, hasPhoto: false });
+            saveData(); renderCalendar(); renderEventsList(); showToast('บันทึกโน้ตแล้ว');
+        }
+
+        function saveCalcAsExpense(type) {
+            if (!lastCalcResult) return showToast('ยังไม่มีผลลัพธ์ให้บันทึก');
+            state.transactions.unshift({
+                id: 'tx_' + Date.now(), date: localDateKey(),
+                title: calcDesc('จากเครื่องคิดเลข'),
+                category: type === 'expense' ? 'อื่นๆ' : 'เงินเดือน/รายรับ',
+                amount: Math.abs(lastCalcResult), type
+            });
+            triggerPetSpeech(type === 'income' ? `เย้! เงินเข้า +฿${money(lastCalcResult)} 🎉` : `รายจ่าย -฿${money(lastCalcResult)} 🥺`);
+            saveData(); refreshUI(); showToast('บันทึกรายการแล้ว');
+        }
+
+        // ================= DASHBOARD =================
+        function renderDashboard() {
+            const { inc, exp, net } = calcNetBalance();
+            const month = thisMonthKey();
+            let mInc = 0, mExp = 0;
+            state.transactions.forEach(t => {
+                if (!t.date || !t.date.startsWith(month)) return;
+                t.type === 'income' ? mInc += t.amount : mExp += t.amount;
+            });
+            $('dashNetBalance').innerText = '฿ ' + money(net);
+            $('dashTotalIncome').innerText = '฿ ' + money(mInc);
+            $('dashTotalExpense').innerText = '฿ ' + money(mExp);
+
+            const pending = state.tasks.filter(t => t.status !== 'done');
+            $('dashTodoList').innerHTML = pending.length
+                ? pending.slice(0, 8).map(t => `
+                    <div class="bg-offWhite text-darkText p-2 rounded-lg border border-darkText flex justify-between items-center gap-2">
+                        <span class="font-bold truncate">${esc(t.title)}</span>
+                        <span class="text-[9px] shrink-0 ${t.status === 'progress' ? 'text-popBlue' : 'text-gray-500'}">${t.status === 'progress' ? 'กำลังทำ' : 'ต้องทำ'}</span>
+                    </div>`).join('')
+                : `<div class="text-center py-8 text-gray-400">ไม่มีงานค้างอยู่ 🎉</div>`;
+
+            renderExpenseChart();
+        }
+
+        let expenseChartInstance = null;
+        function renderExpenseChart() {
+            const canvas = $('expenseCategoryChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+            const map = {};
+            state.transactions.filter(t => t.type === 'expense').forEach(t => map[t.category] = (map[t.category] || 0) + t.amount);
+            const labels = Object.keys(map).length ? Object.keys(map) : ['ไม่มีรายจ่าย'];
+            const values = Object.keys(map).length ? Object.values(map) : [1];
+            if (expenseChartInstance) expenseChartInstance.destroy();
+            expenseChartInstance = new Chart(canvas.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels,
+                    datasets: [{ data: values, backgroundColor: ['#FF007F', '#0055FF', '#CCFF00', '#FFDD00', '#9D00FF', '#FF8A00', '#00C2A8'], borderWidth: 2, borderColor: '#1A1A1A' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        // ================= INIT =================
+        window.addEventListener('load', async () => {
+            initView();
+            if (navigator.storage && navigator.storage.persist) {
+                navigator.storage.persist().catch(() => {});
+            }
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW error:', err));
+            }
+            try { await migrateLegacyPhotos(); } catch (e) { console.warn('migrate photos:', e); }
+            setDefaultDates();
+            refreshUI();
+            initFirebase();
+            if (!IS_CONFIGURED) setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
+        });
     </script>
 </body>
 </html>

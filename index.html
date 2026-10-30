@@ -26,8 +26,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // ===== ตั้งค่า Firebase (กรอกครั้งเดียว ค่าจาก Firebase Console > Project settings) =====
-        // ถ้ายังไม่กรอก แอปจะทำงานแบบเครื่องเดียว (ข้อมูลอยู่ในเครื่อง) ไม่มีการล็อกอินปลอม
+        // ===== ตั้งค่า Firebase โปรเจกต์ y2k-planner (ใส่ให้แล้ว ไม่ต้องแก้) =====
         const firebaseConfig = {
             apiKey: "AIzaSyAXBrkRElXiLTfeEB5iWDiiZlV-07wfXlc",
             authDomain: "y2k-planner.firebaseapp.com",
@@ -69,12 +68,17 @@
             font-family: 'Prompt', sans-serif;
             box-sizing: border-box;
         }
+        html {
+            scroll-behavior: smooth;
+            -webkit-tap-highlight-color: transparent;
+        }
         body {
             min-height: 100vh;
             background-color: var(--bg-color, #F9F9FB);
             color: var(--text-color, #1A1A1A);
             padding-top: env(safe-area-inset-top, 0px);
             padding-bottom: env(safe-area-inset-bottom, 0px);
+            -webkit-font-smoothing: antialiased;
         }
 
         body.theme-y2k    { --bg-color: #F9F9FB; --card-bg: #FFFFFF; --text-color: #1A1A1A; }
@@ -102,28 +106,74 @@
             transform: scale(1.15);
         }
 
-        /* Header icons only: visible rounded icon chips */
-        .topbar-icon {
-            width: 1.35rem;
-            height: 1.35rem;
+        /* ===== ความนุ่มของทั้งเว็บ (สีและธีมไม่เปลี่ยน) ===== */
+        button:not(.tb-btn):not(.mood-btn):hover {
+            transform: translateY(-1px);
+        }
+        button:not(.tb-btn):not(.mood-btn):active {
+            transform: scale(.97);
+        }
+        button, label, select, input, textarea, a {
+            transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, filter .2s ease;
+        }
+        .bg-white.rounded-2xl,
+        .bg-white.rounded-xl {
+            box-shadow: 0 8px 22px -14px rgba(26,26,26,.28);
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,85,255,.18);
+        }
+        .tab-content {
+            animation: softFadeUp .35s ease both;
+        }
+        @keyframes softFadeUp {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: none; }
+        }
+
+        /* ===== แถบบนสุด: ไอคอนแบบเรียบ ===== */
+        .tb-icon {
+            font-size: .72rem;
+            width: .95rem;
+            text-align: center;
+            opacity: .9;
+        }
+        .tb-icon-sm {
+            font-size: .66rem;
+            margin-right: .2rem;
+        }
+        .tb-g {
+            width: .8rem;
+            height: .8rem;
+            flex: 0 0 .8rem;
+        }
+        .tb-sep {
+            display: inline-block;
+            width: 1px;
+            height: 14px;
+            background: rgba(255,255,255,.25);
+            margin: 0 .25rem;
+        }
+        .tb-btn {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            flex: 0 0 1.35rem;
+            gap: .15rem;
+            line-height: 1.4;
+            white-space: nowrap;
             border-radius: 999px;
-            border: 1px solid rgba(255,255,255,.55);
-            background: linear-gradient(145deg, rgba(255,255,255,.28), rgba(255,255,255,.08));
-            box-shadow: inset 0 1px 2px rgba(255,255,255,.25), 0 1px 2px rgba(0,0,0,.18);
-            font-size: 0.68rem;
-            line-height: 1;
-            vertical-align: middle;
+            transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
         }
-        .topbar-icon.brand-icon {
-            background: #fff;
-            border-color: #e5e7eb;
-            color: #EA4335;
-            box-shadow: 0 1px 2px rgba(0,0,0,.14);
+        .tb-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px -3px rgba(0,0,0,.4);
+            filter: brightness(1.06);
         }
+        .tb-btn:active {
+            transform: scale(.96);
+        }
+
+        /* ===== ไอคอนเมนูหลัก (ไม่เปลี่ยน) ===== */
         .header-nav-icon {
             width: 1.35rem;
             height: 1.35rem;
@@ -155,21 +205,6 @@
         #nav-dashboard:hover .header-nav-icon {
             background: #1A1A1A;
         }
-        .topbar-icon + span,
-        #googleLoginBtn .topbar-icon {
-            vertical-align: middle;
-        }
-        .bg-limeGreen .fa-cloud-arrow-down,
-        .bg-sunnyYellow .fa-cloud-arrow-up {
-            width: 1.2rem;
-            height: 1.2rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 999px;
-            background: rgba(26,26,26,.10);
-            font-size: .68rem;
-        }
     </style>
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative pb-20">
@@ -185,28 +220,34 @@
 
     <!-- TOP BAR: THEME, BACKUP, AUTH -->
     <div class="bg-darkText text-white px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold w-full">
-        <div class="flex items-center gap-1 flex-wrap">
-            <span class="topbar-icon" aria-hidden="true"><i class="fa-solid fa-palette"></i></span>
-            <button onclick="setTheme('y2k')" class="px-2 py-0.5 rounded bg-popBlue text-white">Y2K</button>
-            <button onclick="setTheme('pastel')" class="px-2 py-0.5 rounded bg-pink-400 text-white">พาสเทล</button>
-            <button onclick="setTheme('dark')" class="px-2 py-0.5 rounded bg-gray-800 text-white">ดาร์ก</button>
-            <button onclick="setTheme('minimal')" class="px-2 py-0.5 rounded bg-gray-300 text-darkText">มินิมอล</button>
-            <span class="mx-1 opacity-40">|</span>
-            <button onclick="exportBackup()" class="px-2 py-0.5 rounded bg-limeGreen text-darkText"><i class="fa-solid fa-cloud-arrow-down mr-1" aria-hidden="true"></i> สำรองข้อมูล</button>
-            <label class="px-2 py-0.5 rounded bg-sunnyYellow text-darkText cursor-pointer"><i class="fa-solid fa-cloud-arrow-up mr-1" aria-hidden="true"></i> คืนค่า
+        <div class="flex items-center gap-1.5 flex-wrap">
+            <i class="fa-solid fa-palette tb-icon" aria-hidden="true"></i>
+            <button onclick="setTheme('y2k')" class="tb-btn px-2.5 py-0.5 bg-popBlue text-white">Y2K</button>
+            <button onclick="setTheme('pastel')" class="tb-btn px-2.5 py-0.5 bg-pink-400 text-white">พาสเทล</button>
+            <button onclick="setTheme('dark')" class="tb-btn px-2.5 py-0.5 bg-gray-800 text-white">ดาร์ก</button>
+            <button onclick="setTheme('minimal')" class="tb-btn px-2.5 py-0.5 bg-gray-300 text-darkText">มินิมอล</button>
+            <span class="tb-sep" aria-hidden="true"></span>
+            <button onclick="exportBackup()" class="tb-btn px-2.5 py-0.5 bg-limeGreen text-darkText"><i class="fa-solid fa-download tb-icon-sm" aria-hidden="true"></i>สำรองข้อมูล</button>
+            <label class="tb-btn px-2.5 py-0.5 bg-sunnyYellow text-darkText cursor-pointer"><i class="fa-solid fa-upload tb-icon-sm" aria-hidden="true"></i>คืนค่า
                 <input type="file" accept="application/json,.json" onchange="importBackup(event)" class="hidden">
             </label>
         </div>
 
         <div class="flex items-center gap-2">
             <span id="syncStatus" class="text-[10px] opacity-80">กำลังเตรียม...</span>
-            <button id="googleLoginBtn" onclick="loginWithGoogle()" class="px-2.5 py-0.5 rounded bg-white text-darkText border border-darkText flex items-center gap-1 font-bold text-[11px]">
-                <span class="topbar-icon brand-icon"><i class="fa-brands fa-google"></i></span> ล็อกอิน Gmail
+            <button id="googleLoginBtn" onclick="loginWithGoogle()" class="tb-btn px-2.5 py-0.5 bg-white text-darkText border border-darkText font-bold text-[11px] gap-1.5">
+                <svg class="tb-g" viewBox="0 0 48 48" aria-hidden="true">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                ล็อกอิน Gmail
             </button>
-            <div id="userProfileArea" class="hidden flex items-center gap-1.5 bg-white/20 px-2 py-0.5 rounded">
+            <div id="userProfileArea" class="hidden flex items-center gap-1.5 bg-white/20 px-2 py-0.5 rounded-full">
                 <img id="userAvatarImg" class="w-5 h-5 rounded-full" src="" alt="">
                 <span id="userNameText" class="text-[11px] font-bold text-limeGreen max-w-[100px] truncate"></span>
-                <button onclick="logoutGoogle()" class="text-[9px] bg-hotPink text-white px-1.5 py-0.5 rounded">ออก</button>
+                <button onclick="logoutGoogle()" class="text-[9px] bg-hotPink text-white px-1.5 py-0.5 rounded-full">ออก</button>
             </div>
         </div>
     </div>
@@ -1072,7 +1113,7 @@
 
     function renderPetSpeechHistory() {
         $('petSpeechHistory').innerHTML = state.pet.speechHistory.map(h => `
-            <div class="bg-offWhite p-2 rounded-lg border border-darkText text-[11px] flex items-center gap-2">
+            <div class="bg-offWhite text-darkText p-2 rounded-lg border border-darkText text-[11px] flex items-center gap-2">
                 <span>${esc(state.pet.avatar) || '🐾'}</span>
                 <div><span class="text-[9px] text-gray-400">${esc(h.time)}</span><p class="font-bold text-hotPink">"${esc(h.text)}"</p></div>
             </div>`).join('');

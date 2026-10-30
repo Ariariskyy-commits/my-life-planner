@@ -18,7 +18,37 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <script>
+        // กำหนดค่า Firebase ของคุณตรงนี้ (ถ้ามี) หรือปล่อยไว้ใช้โหมดจำลอง
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        let auth = null;
+        let db = null;
+        let isFirebaseActive = false;
+
+        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+                isFirebaseActive = true;
+            } catch(e) {
+                console.warn("Firebase Init bypassed:", e);
+            }
+        }
+
         tailwind.config = {
             theme: {
                 extend: {
@@ -288,7 +318,6 @@
                     <div class="grid grid-cols-7 text-center font-bold text-xs text-gray-500 border-b border-darkText pb-1.5">
                         <span class="text-hotPink">อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span class="text-popBlue">ส</span>
                     </div>
-                    <!-- แก้ไขให้เป็นสี่เหลี่ยมพอดีด้วย aspect-square -->
                     <div id="calendarGrid" class="grid grid-cols-7 gap-1.5"></div>
                 </div>
 
@@ -591,21 +620,59 @@
         let lastCalcResult = 0;
         let currentUploadedPhotoBase64 = '';
 
-        // ระบบจำลองล็อกอิน Gmail สำเร็จรูป (กดปุ๊บติดปั๊บ ไม่ต้องตั้งค่า Firebase)
+        // ระบบล็อกอิน Gmail แบบปลอดภัย (รองรับทั้งโหมดจำลองและ Firebase Redirect ป้องกัน Popup ถูกบล็อก)
         function loginWithGoogle() {
-            currentUser = { displayName: "คุณฟ้า (ผู้ใช้)", photoURL: "https://api.dicebear.com/7.x/bottts/svg?seed=fah" };
-            document.getElementById('googleLoginBtn').classList.add('hidden');
-            document.getElementById('userProfileArea').classList.remove('hidden');
-            document.getElementById('userAvatarImg').src = currentUser.photoURL;
-            document.getElementById('userNameText').innerText = currentUser.displayName;
-            showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
+            if (!isFirebaseActive || !auth) {
+                currentUser = { displayName: "คุณฟ้า (ผู้ใช้)", photoURL: "https://api.dicebear.com/7.x/bottts/svg?seed=fah" };
+                document.getElementById('googleLoginBtn').classList.add('hidden');
+                document.getElementById('userProfileArea').classList.remove('hidden');
+                document.getElementById('userAvatarImg').src = currentUser.photoURL;
+                document.getElementById('userNameText').innerText = currentUser.displayName;
+                showToast('ล็อกอินสำเร็จ! 🌟');
+                return;
+            }
+
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithRedirect(provider).catch(err => {
+                alert('ล็อกอินไม่สำเร็จ: ' + err.message);
+            });
         }
 
         function logoutGoogle() {
-            currentUser = null;
-            document.getElementById('googleLoginBtn').classList.remove('hidden');
-            document.getElementById('userProfileArea').classList.add('hidden');
-            showToast('ออกจากระบบแล้ว');
+            if (isFirebaseActive && auth) {
+                auth.signOut().then(() => {
+                    currentUser = null;
+                    document.getElementById('googleLoginBtn').classList.remove('hidden');
+                    document.getElementById('userProfileArea').classList.add('hidden');
+                    showToast('ออกจากระบบแล้ว');
+                });
+            } else {
+                currentUser = null;
+                document.getElementById('googleLoginBtn').classList.remove('hidden');
+                document.getElementById('userProfileArea').classList.add('hidden');
+                showToast('ออกจากระบบแล้ว');
+            }
+        }
+
+        // ตรวจสอบสถานะและผลลัพธ์การล็อกอิน
+        if (isFirebaseActive && auth) {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('googleLoginBtn').classList.add('hidden');
+                    document.getElementById('userProfileArea').classList.remove('hidden');
+                    document.getElementById('userAvatarImg').src = user.photoURL || 'https://via.placeholder.com/150';
+                    document.getElementById('userNameText').innerText = user.displayName || user.email;
+                }
+            });
+
+            auth.getRedirectResult().then(result => {
+                if (result.user) {
+                    showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
+                }
+            }).catch(err => {
+                console.error("Redirect auth error:", err);
+            });
         }
 
         function saveData() {
@@ -934,7 +1001,6 @@
 
                 const topMood = evs.length > 0 ? (evs[0].mood || '😊') : '';
 
-                // แก้ไขช่องปฏิทินให้เป็นรูปทรงสี่เหลี่ยมจัตุรัสเป๊ะๆ (aspect-square) และเลื่อนดูรายการข้างในได้เมื่อล้น
                 html += `
                     <div onclick="selectCalendarDate('${dateKey}')" class="${bgStyle} text-darkText p-1 rounded-xl border ${borderStyle} aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 transition-all select-none relative overflow-hidden">
                         <div class="flex justify-between items-center shrink-0">

@@ -1,10 +1,9 @@
-const CACHE = 'y2k-planner-v7';
+const CACHE = 'y2k-planner-v8';
 const ASSETS = [
     './',
     './index.html',
     './manifest.json',
-    './icon-192.png',
-    './icon-512.png'
+    './icon.jpg'
 ];
 
 self.addEventListener('install', event => {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-view="desktop">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,8 +7,8 @@
 
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icon.svg" type="image/svg+xml">
-    <link id="appleIcon" rel="apple-touch-icon" href="icon.svg">
+    <link rel="icon" href="icon.png" type="image/png">
+    <link id="appleIcon" rel="apple-touch-icon" href="icon.png">
     <meta name="theme-color" content="#0055FF">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Y2K Planner">
@@ -76,8 +76,6 @@
             min-height: 100vh;
             background-color: var(--bg-color, #F9F9FB);
             color: var(--text-color, #1A1A1A);
-            padding-top: env(safe-area-inset-top, 0px);
-            padding-bottom: env(safe-area-inset-bottom, 0px);
             -webkit-font-smoothing: antialiased;
         }
 
@@ -106,11 +104,11 @@
             transform: scale(1.15);
         }
 
-        /* ===== ความนุ่มของทั้งเว็บ (สีและธีมไม่เปลี่ยน) ===== */
-        button:not(.tb-btn):not(.mood-btn):hover {
+        /* ===== ความนุ่มของทั้งเว็บ ===== */
+        button:not(.tb-btn):not(.mood-btn):not(.vs-btn):hover {
             transform: translateY(-1px);
         }
-        button:not(.tb-btn):not(.mood-btn):active {
+        button:not(.tb-btn):not(.mood-btn):not(.vs-btn):active {
             transform: scale(.97);
         }
         button, label, select, input, textarea, a {
@@ -132,12 +130,20 @@
             to   { opacity: 1; transform: none; }
         }
 
-        /* ===== แถบบนสุด: ไอคอนแบบเรียบ ===== */
+        /* ===== แถบบนสุดแบบแคปซูลลอย ===== */
+        .topbar {
+            margin: 10px 12px 0;
+            padding: 8px 12px !important;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #1A1A1A 0%, #2B2B3A 100%);
+            box-shadow: 0 12px 28px -14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
+            row-gap: 6px;
+        }
         .tb-icon {
             font-size: .72rem;
             width: .95rem;
             text-align: center;
-            opacity: .9;
+            opacity: .85;
         }
         .tb-icon-sm {
             font-size: .66rem;
@@ -152,7 +158,7 @@
             display: inline-block;
             width: 1px;
             height: 14px;
-            background: rgba(255,255,255,.25);
+            background: rgba(255,255,255,.22);
             margin: 0 .25rem;
         }
         .tb-btn {
@@ -173,37 +179,76 @@
             transform: scale(.96);
         }
 
-        /* ===== ไอคอนเมนูหลัก (ไม่เปลี่ยน) ===== */
-        .header-nav-icon {
-            width: 1.35rem;
-            height: 1.35rem;
-            flex: 0 0 1.35rem;
+        /* ===== ปุ่มสลับมุมมอง ===== */
+        .vs-wrap {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
+            gap: 2px;
+            padding: 2px;
             border-radius: 999px;
-            border: 1px solid rgba(255,255,255,.38);
-            background: rgba(255,255,255,.15);
-            box-shadow: inset 0 1px 2px rgba(255,255,255,.18);
-            font-size: 0.68rem;
-            line-height: 1;
-            opacity: 1;
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.12);
         }
-        .tab-btn {
-            gap: .38rem;
-            transition: background-color .16s ease, transform .16s ease;
+        .vs-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            padding: .2rem .55rem;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255,255,255,.75);
+            transition: background-color .2s ease, color .2s ease, transform .15s ease;
         }
-        .tab-btn:hover .header-nav-icon {
-            background: rgba(255,255,255,.28);
+        .vs-btn:hover { color: #fff; background: rgba(255,255,255,.12); }
+        .vs-btn.vs-active {
+            background: #CCFF00;
+            color: #1A1A1A;
+            box-shadow: 0 2px 6px -2px rgba(0,0,0,.4);
         }
-        #nav-dashboard .header-nav-icon {
-            color: #D8FF00;
-            background: #1A1A1A;
-            border-color: #1A1A1A;
-            box-shadow: inset 0 1px 2px rgba(255,255,255,.18);
+        .vs-btn i { font-size: .75rem; }
+
+        /* ===== กรอบแอปเมื่อดูแบบแท็บเล็ต/มือถือ ===== */
+        #appFrame {
+            margin: 0 auto;
+            min-height: 100vh;
+            background: var(--bg-color, #F9F9FB);
+            transition: max-width .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease;
         }
-        #nav-dashboard:hover .header-nav-icon {
-            background: #1A1A1A;
+        html[data-view="tablet"] #appFrame,
+        html[data-view="mobile"] #appFrame {
+            border-left: 2px solid #1A1A1A;
+            border-right: 2px solid #1A1A1A;
+            box-shadow: 0 24px 60px -24px rgba(0,0,0,.4);
+            overflow: hidden;
+        }
+        html[data-view="tablet"] #appFrame { max-width: 768px; border-radius: 24px; }
+        html[data-view="mobile"] #appFrame { max-width: 390px; border-radius: 32px; }
+        html[data-view="tablet"] body,
+        html[data-view="mobile"] body { background-color: #DDE3EE !important; }
+        html[data-view="tablet"].theme-dark body, html[data-view="mobile"] body.theme-dark { background-color: #0a0a0a !important; }
+
+        /* จัดเลย์เอาต์ให้เหมาะกับกรอบแท็บเล็ต/มือถือ */
+        html[data-view="tablet"] .lg\:grid-cols-3,
+        html[data-view="tablet"] .md\:grid-cols-2.lg\:grid-cols-3 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+        html[data-view="tablet"] .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)) !important; }
+
+        html[data-view="mobile"] .lg\:grid-cols-3,
+        html[data-view="mobile"] .md\:grid-cols-2,
+        html[data-view="mobile"] .md\:grid-cols-3 { grid-template-columns: minmax(0,1fr) !important; }
+        html[data-view="mobile"] .lg\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+        html[data-view="mobile"] .lg\:flex-row,
+        html[data-view="mobile"] .md\:flex-row { flex-direction: column !important; }
+
+        html[data-view="tablet"] .lg\:flex-row { flex-direction: column !important; }
+
+        /* บนมือถือจริง ให้กว้างเต็มจอเสมอ */
+        @media (max-width: 768px) {
+            html[data-view] #appFrame { max-width: 100% !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; }
+            html[data-view] body { background-color: var(--bg-color, #F9F9FB) !important; }
+        }
+        @media (max-width: 640px) {
+            .topbar { margin: 6px 6px 0; border-radius: 18px; }
         }
     </style>
 </head>
@@ -218,8 +263,10 @@
         </div>
     </div>
 
-    <!-- TOP BAR: THEME, BACKUP, AUTH -->
-    <div class="bg-darkText text-white px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold w-full">
+    <div id="appFrame">
+
+    <!-- TOP BAR: THEME, VIEW, BACKUP, AUTH -->
+    <div class="topbar text-white flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold w-full">
         <div class="flex items-center gap-1.5 flex-wrap">
             <i class="fa-solid fa-palette tb-icon" aria-hidden="true"></i>
             <button onclick="setTheme('y2k')" class="tb-btn px-2.5 py-0.5 bg-popBlue text-white">Y2K</button>
@@ -233,7 +280,13 @@
             </label>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="vs-wrap" role="group" aria-label="เลือกมุมมอง">
+            <button class="vs-btn" data-v="desktop" onclick="setView('desktop')"><i class="fa-solid fa-desktop"></i><span>คอม</span></button>
+            <button class="vs-btn" data-v="tablet" onclick="setView('tablet')"><i class="fa-solid fa-tablet-screen-button"></i><span>แท็บเล็ต</span></button>
+            <button class="vs-btn" data-v="mobile" onclick="setView('mobile')"><i class="fa-solid fa-mobile-screen-button"></i><span>มือถือ</span></button>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
             <span id="syncStatus" class="text-[10px] opacity-80">กำลังเตรียม...</span>
             <button id="googleLoginBtn" onclick="loginWithGoogle()" class="tb-btn px-2.5 py-0.5 bg-white text-darkText border border-darkText font-bold text-[11px] gap-1.5">
                 <svg class="tb-g" viewBox="0 0 48 48" aria-hidden="true">
@@ -253,7 +306,7 @@
     </div>
 
     <!-- HEADER NAV -->
-    <header class="bg-popBlue border-b-3 border-darkText text-white px-3 py-2.5 shadow-[0_3px_0px_#1A1A1A] w-full">
+    <header class="bg-popBlue border-2 border-darkText text-white px-3 py-2.5 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl" style="margin:10px 12px 0; width:calc(100% - 24px);">
         <div class="w-full flex flex-col lg:flex-row items-center justify-between gap-3">
             <div class="bg-limeGreen text-darkText font-cute font-bold text-xl px-2.5 py-0.5 rounded-xl border-2 border-darkText shadow-sm -rotate-2">
                 ✨ Y2K PLANNER
@@ -547,6 +600,8 @@
         <p>✨ Y2K Playful Life Planner 🚀</p>
     </footer>
 
+    </div><!-- /appFrame -->
+
     <!-- MODALS -->
     <div id="quickAddModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3">
@@ -711,6 +766,23 @@
     }
     function openModal(id) { $(id).classList.remove('hidden'); $(id).classList.add('flex'); }
     function closeModal(id) { $(id).classList.add('hidden'); $(id).classList.remove('flex'); }
+
+    // ================= VIEW SWITCHER (เดสก์ท็อป / แท็บเล็ต / มือถือ) =================
+    function setView(view, save = true) {
+        if (!['desktop', 'tablet', 'mobile'].includes(view)) view = 'desktop';
+        document.documentElement.setAttribute('data-view', view);
+        document.querySelectorAll('.vs-btn').forEach(b => b.classList.toggle('vs-active', b.dataset.v === view));
+        if (save) localStorage.setItem('y2k_view', view);
+        // ให้กราฟปรับขนาดตามกรอบใหม่หลังแอนิเมชันจบ
+        setTimeout(() => { if (expenseChartInstance) expenseChartInstance.resize(); }, 420);
+    }
+
+    function initView() {
+        let saved = null;
+        try { saved = localStorage.getItem('y2k_view'); } catch {}
+        const auto = window.innerWidth <= 768 ? 'mobile' : 'desktop';
+        setView(saved || auto, false);
+    }
 
     // ================= STATE & STORAGE =================
     const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme' };
@@ -1620,20 +1692,8 @@
     }
 
     // ================= INIT =================
-    function setAppleIcon() {
-        const c = document.createElement('canvas');
-        c.width = 180; c.height = 180;
-        const x = c.getContext('2d');
-        x.fillStyle = '#0055FF'; x.fillRect(0, 0, 180, 180);
-        x.fillStyle = '#CCFF00'; x.fillRect(30, 30, 120, 120);
-        x.strokeStyle = '#1A1A1A'; x.lineWidth = 6; x.strokeRect(30, 30, 120, 120);
-        x.fillStyle = '#1A1A1A'; x.font = 'bold 40px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
-        x.fillText('Y2K', 90, 92);
-        $('appleIcon').href = c.toDataURL('image/png');
-    }
-
     window.addEventListener('load', () => {
-        setAppleIcon();
+        initView();
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW error:', err));
         }

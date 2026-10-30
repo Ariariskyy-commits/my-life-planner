@@ -241,6 +241,45 @@
         html[data-view="mobile"] .lg\:flex-row,
         html[data-view="mobile"] .md\:flex-row { flex-direction: column !important; }
 
+        /* ===== เมนูการ์ดหน้าหลัก: 3 คอลัมน์ทุกมุมมอง (แก้ให้เหมือนภาพ) ===== */
+        #navGrid,
+        html[data-view="mobile"] #navGrid,
+        html[data-view="tablet"] #navGrid,
+        html[data-view="desktop"] #navGrid {
+            grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+            gap: 8px !important;
+        }
+        #navGrid > button {
+            min-width: 0;
+            padding: 0.55rem 0.5rem !important;
+            font-size: 0.7rem !important;
+            line-height: 1.25 !important;
+        }
+        #navGrid > button > span {
+            min-width: 0;
+            gap: 0.35rem !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #navGrid > button > span > i {
+            flex-shrink: 0;
+            font-size: 0.8rem;
+        }
+        #navGrid > button > i:last-child {
+            flex-shrink: 0;
+            font-size: 0.6rem !important;
+        }
+        @media (max-width: 640px) {
+            #navGrid { gap: 6px !important; }
+            #navGrid > button {
+                padding: 0.45rem 0.4rem !important;
+                font-size: 0.64rem !important;
+            }
+            #navGrid > button > span { gap: 0.25rem !important; }
+            #navGrid > button > span > i { font-size: 0.72rem; }
+        }
+
         @media (max-width: 768px) {
             html[data-view] #appFrame { max-width: 100% !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; }
             html[data-view] body { background-color: var(--bg-color, #F9F9FB) !important; }
@@ -349,7 +388,7 @@
         </div>
 
         <!-- เมนูปุ่มกดการ์ดขนาดใหญ่ (จัดเรียง 3 แถว สัดส่วนเหมือนเรฟเป๊ะ) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+        <div id="navGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
             <!-- แถวที่ 1: แดชบอร์ด, รายรับ-รายจ่าย, เตรียมจ่าย -->
             <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn bg-limeGreen text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
                 <span class="flex items-center gap-2"><i class="fa-solid fa-house text-sm"></i> แดชบอร์ด</span>
@@ -877,6 +916,40 @@
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
         const thisMonthKey = () => localDateKey().slice(0, 7);
+
+        // ===== วันหยุดราชการไทย (วันที่คงที่ทุกปี) =====
+        const THAI_FIXED_HOLIDAYS = {
+            '01-01': 'วันขึ้นปีใหม่',
+            '04-06': 'วันจักรี',
+            '04-13': 'วันสงกรานต์',
+            '04-14': 'วันสงกรานต์',
+            '04-15': 'วันสงกรานต์',
+            '05-01': 'วันแรงงานแห่งชาติ',
+            '05-04': 'วันฉัตรมงคล',
+            '06-03': 'วันเฉลิมพระชนมพรรษาสมเด็จพระราชินี',
+            '07-28': 'วันเฉลิมพระชนมพรรษา รัชกาลที่ 10',
+            '08-12': 'วันแม่แห่งชาติ',
+            '10-13': 'วันนวมินทรมหาราช',
+            '10-23': 'วันปิยมหาราช',
+            '12-05': 'วันพ่อแห่งชาติ',
+            '12-10': 'วันรัฐธรรมนูญ',
+            '12-31': 'วันสิ้นปี'
+        };
+        // ===== วันหยุดที่เปลี่ยนตามปฏิทินจันทรคติ (เพิ่มปีใหม่ได้ที่นี่) =====
+        const THAI_MOVABLE_HOLIDAYS = {
+            '2025-02-12': 'วันมาฆบูชา',
+            '2025-05-12': 'วันวิสาขบูชา',
+            '2025-07-10': 'วันอาสาฬหบูชา',
+            '2025-07-11': 'วันเข้าพรรษา',
+            '2026-03-03': 'วันมาฆบูชา',
+            '2026-06-01': 'วันวิสาขบูชา',
+            '2026-07-29': 'วันอาสาฬหบูชา',
+            '2026-07-30': 'วันเข้าพรรษา'
+        };
+        function getHolidayName(dateKey) {
+            if (!dateKey) return '';
+            return THAI_MOVABLE_HOLIDAYS[dateKey] || THAI_FIXED_HOLIDAYS[dateKey.slice(5)] || '';
+        }
 
         const MAX_PHOTO_PX = 1024;
         const MAX_PHOTO_CHARS = 900000;
@@ -2028,6 +2101,10 @@
             selectedCalendarDate = dateKey;
             renderCalendar();
             renderEventsList();
+            if (dateKey) {
+                const holiday = getHolidayName(dateKey);
+                if (holiday) showToast(`🎌 ${holiday}`);
+            }
         }
 
         async function viewEventDetails(eventId) {
@@ -2093,16 +2170,24 @@
                 const evs = state.events.filter(e => e.date === dateKey);
                 const isSelected = selectedCalendarDate === dateKey;
                 const isToday = dateKey === todayStr;
+                const holiday = getHolidayName(dateKey);
 
                 let borderStyle = 'border-darkText', bgStyle = 'bg-offWhite';
                 if (isSelected) { borderStyle = 'border-limeGreen ring-2 ring-limeGreen'; bgStyle = 'bg-sunnyYellow/20'; }
                 else if (isToday) { borderStyle = 'border-popBlue'; bgStyle = 'bg-popBlue/10'; }
 
+                const holidayDot = holiday
+                    ? `<span class="w-1.5 h-1.5 rounded-full bg-hotPink border border-darkText inline-block shrink-0" title="${esc(holiday)}"></span>`
+                    : '';
+
                 const topMood = evs.length ? (evs[0].mood || '😊') : '';
                 html += `
                     <div onclick="selectCalendarDate('${dateKey}')" class="${bgStyle} text-darkText p-1 rounded-xl border ${borderStyle} aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 transition-all select-none overflow-hidden">
                         <div class="flex justify-between items-center shrink-0">
-                            <span class="text-[10px] font-bold ${isToday ? 'bg-popBlue text-white px-1 rounded-full' : ''}">${day}</span>
+                            <div class="flex items-center gap-0.5">
+                                <span class="text-[10px] font-bold ${isToday ? 'bg-popBlue text-white px-1 rounded-full' : ''}">${day}</span>
+                                ${holidayDot}
+                            </div>
                             ${topMood ? `<span class="text-[10px]">${topMood}</span>` : ''}
                         </div>
                         <div class="space-y-0.5 overflow-y-auto flex-1 mt-0.5">
@@ -2145,15 +2230,20 @@
                 resetBtn.classList.add('hidden');
             }
 
+            const holiday = selectedCalendarDate ? getHolidayName(selectedCalendarDate) : '';
+            const holidayBanner = holiday
+                ? `<div class="bg-hotPink/10 text-darkText font-bold text-[11px] px-2.5 py-1.5 rounded-xl border border-darkText flex items-center gap-1.5 mb-2"><span class="w-2 h-2 rounded-full bg-hotPink border border-darkText inline-block"></span>🎌 ${esc(holiday)}</div>`
+                : '';
+
             const addBtn = selectedCalendarDate
                 ? `<button onclick="openEventModal('${selectedCalendarDate}')" class="w-full bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px] mb-2">+ เพิ่มโน้ตวันนี้</button>`
                 : '';
 
             if (!list.length) {
-                sb.innerHTML = `${addBtn}<div class="text-center py-6 text-gray-400 text-xs">ไม่มีโน้ต</div>`;
+                sb.innerHTML = `${holidayBanner}${addBtn}<div class="text-center py-6 text-gray-400 text-xs">ไม่มีโน้ต</div>`;
                 return;
             }
-            sb.innerHTML = addBtn + list.map(ev => `
+            sb.innerHTML = holidayBanner + addBtn + list.map(ev => `
                 <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1 cursor-pointer hover:bg-white text-xs">
                     <div class="flex justify-between items-center text-[10px]">
                         <span>${ev.mood || '😊'} <b>${esc(ev.date)}</b>${ev.hasPhoto ? ' 📷' : ''}</span>

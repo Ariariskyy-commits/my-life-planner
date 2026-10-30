@@ -331,25 +331,64 @@
         </div>
     </div>
 
-    <!-- HEADER NAV (จัดระเบียบปุ่มเมนูให้เรียบร้อย สวยงาม ไม่อัดแน่นและอยู่ในแนวเดียวกัน) -->
-    <header class="bg-popBlue border-2 border-darkText text-white px-4 py-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0" style="margin:10px 12px 0; width:calc(100% - 24px);">
-        <div class="w-full flex flex-col lg:flex-row items-center justify-between gap-3">
-            <div class="bg-limeGreen text-darkText font-cute font-bold text-xl px-3 py-1 rounded-xl border-2 border-darkText shadow-sm -rotate-2">
-                ✨ Y2K PLANNER
+    <!-- MAIN HEADER PLANNER CARD (ปรับสัดส่วนใหม่ตามเรฟเป๊ะๆ: แดชบอร์ดเขียวสว่าง + เมนูการ์ด 3 แถว + ปุ่มเพิ่มด่วนชมพู) -->
+    <header class="bg-popBlue border-3 border-darkText text-darkText p-3.5 md:p-4 shadow-[0_4px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-3" style="margin:10px 12px 0; width:calc(100% - 24px);">
+        
+        <!-- แถวบน: โลโก้ Y2K และ สถานะสวัสดีตอนค่ำ -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+            <div class="bg-limeGreen text-darkText font-cute font-extrabold text-xl px-3.5 py-1 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1.5">
+                <span>✨</span> Y2K PLANNER
             </div>
-            <nav class="flex flex-wrap items-center justify-center gap-2 bg-white/10 p-2 rounded-xl border border-darkText">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs bg-limeGreen text-darkText border border-darkText shadow-sm flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-solid fa-house"></i></span> แดชบอร์ด</button>
-                <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-solid fa-arrow-right-arrow-left"></i></span> รายรับ-รายจ่าย</button>
-                <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-solid fa-receipt"></i></span> เตรียมจ่าย</button>
-                <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-solid fa-list-check"></i></span> แพลนเนอร์</button>
-                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-regular fa-calendar"></i></span> ปฏิทิน</button>
-                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-solid fa-calculator"></i></span> คำนวณ</button>
-                <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-solid fa-paw"></i></span> สัตว์เลี้ยง</button>
-            </nav>
-            <button onclick="openModal('quickAddModal')" class="bg-hotPink text-white font-bold px-3.5 py-2 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center gap-1.5">
-                <span class="header-nav-icon"><i class="fa-solid fa-plus"></i></span> เพิ่มด่วน
+            <div class="bg-white/90 border-2 border-darkText px-3 py-1 rounded-xl shadow-sm text-right flex items-center gap-2">
+                <div class="text-right">
+                    <span class="text-xs font-extrabold text-darkText block" id="greetingText">สวัสดีตอนค่ำ 🌙</span>
+                    <span class="text-[10px] font-bold text-gray-500 block">* วันนี้ที่ดูยอดแล้ว</span>
+                </div>
+                <i class="fa-solid fa-cloud text-gray-400 text-lg"></i>
+            </div>
+        </div>
+
+        <!-- เมนูปุ่มกดการ์ดขนาดใหญ่ (จัดเรียง 3 แถว สัดส่วนเหมือนเรฟเป๊ะ) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+            <!-- แถวที่ 1: แดชบอร์ด, รายรับ-รายจ่าย, เตรียมจ่าย -->
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn bg-limeGreen text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-house text-sm"></i> แดชบอร์ด</span>
+                <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+            </button>
+            <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn bg-white text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-arrow-right-arrow-left text-popBlue text-sm"></i> รายรับ-รายจ่าย</span>
+                <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+            </button>
+            <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn bg-white text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-receipt text-retroPurple text-sm"></i> เตรียมจ่าย</span>
+                <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+            </button>
+
+            <!-- แถวที่ 2: แพลนเนอร์, ปฏิทิน, คำนวณ -->
+            <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn bg-white text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-list-check text-sunnyYellow text-sm"></i> แพลนเนอร์</span>
+                <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+            </button>
+            <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn bg-white text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
+                <span class="flex items-center gap-2"><i class="fa-regular fa-calendar text-hotPink text-sm"></i> ปฏิทิน</span>
+                <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+            </button>
+            <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn bg-white text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-calculator text-popBlue text-sm"></i> คำนวณ</span>
+                <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
             </button>
         </div>
+
+        <!-- แถวที่ 3: สัตว์เลี้ยง (เต็มแถว) -->
+        <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn w-full bg-white text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-paw text-hotPink text-sm"></i> สัตว์เลี้ยง</span>
+            <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+        </button>
+
+        <!-- ปุ่มเพิ่มด่วนสีชมพูขอบดำหนา -->
+        <button onclick="openModal('quickAddModal')" class="w-full bg-hotPink text-white font-extrabold p-3 rounded-xl border-2 border-darkText shadow-sm text-sm flex items-center justify-center gap-2 hover:brightness-105 active:scale-[0.99] transition-all">
+            <i class="fa-solid fa-plus text-base"></i> เพิ่มด่วน
+        </button>
     </header>
 
     <main class="flex-1 w-full max-w-5xl mx-auto p-3 md:p-5 relative">
@@ -1490,14 +1529,16 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border', 'border-darkText');
-                btn.classList.add('text-white', 'hover:bg-white/20');
+                btn.classList.remove('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border-2', 'border-darkText');
+                if (btn.id !== 'nav-dashboard') {
+                    btn.classList.add('bg-white', 'text-darkText');
+                }
             });
             $('tab-' + tabId).classList.remove('hidden');
             const active = $('nav-' + tabId);
             if (active) {
-                active.classList.remove('text-white', 'hover:bg-white/20');
-                active.classList.add('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border', 'border-darkText');
+                active.classList.remove('bg-white');
+                active.classList.add('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border-2', 'border-darkText');
             }
             if (tabId === 'dashboard') renderDashboard();
             if (tabId === 'finance') renderTransactions();

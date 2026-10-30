@@ -1,3 +1,19 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -29,14 +45,17 @@
         // ===== ตั้งค่า Firebase (กรอกครั้งเดียว ค่าจาก Firebase Console > Project settings) =====
         // ถ้ายังไม่กรอก แอปจะทำงานแบบเครื่องเดียว (ข้อมูลอยู่ในเครื่อง) ไม่มีการล็อกอินปลอม
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyAXBrkRElXiLTfeEB5iWDiiZlV-07wfXlc",
+            authDomain: "y2k-planner.firebaseapp.com",
+            projectId: "y2k-planner",
+            storageBucket: "y2k-planner.firebasestorage.app",
+            messagingSenderId: "214890533249",
+            appId: "1:214890533249:web:42f0bf9751f99398f61880",
+            measurementId: "G-6NVER687G3"
         };
-        const IS_CONFIGURED = !!firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("YOUR_");
+        const IS_CONFIGURED =
+            !!firebaseConfig.apiKey &&
+            !firebaseConfig.apiKey.startsWith("YOUR_");
 
         tailwind.config = {
             theme: {
@@ -656,38 +675,66 @@
 
     function setSyncStatus(text) { $('syncStatus').innerText = text; }
 
-    function initFirebase() {
+    async function initFirebase() {
         if (!IS_CONFIGURED) {
             setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
             return;
         }
+
         try {
-            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+
             auth = firebase.auth();
             db = firebase.firestore();
-            isFirebaseActive = true;
-        } catch (e) {
-            console.error(e);
-            setSyncStatus('ตั้งค่า Firebase ไม่ถูกต้อง ⚠️');
-            return;
-        }
 
-        auth.onAuthStateChanged(async user => {
-            if (user) {
-                const isNewUser = !currentUser || currentUser.uid !== user.uid;
-                currentUser = user;
-                renderAuthUI();
-                if (isNewUser) await pullFromCloud(user.uid);
-            } else {
-                currentUser = null;
-                renderAuthUI();
-                setSyncStatus('ออกจากระบบแล้ว · ข้อมูลอยู่ในเครื่อง');
+            // จดจำสถานะการเข้าสู่ระบบในอุปกรณ์
+            try {
+                await auth.setPersistence(
+                    firebase.auth.Auth.Persistence.LOCAL
+                );
+            } catch (persistenceError) {
+                console.warn('Firebase persistence warning:', persistenceError);
             }
-        });
 
-        auth.getRedirectResult()
-            .then(res => { if (res.user) showToast('ล็อกอิน Gmail สำเร็จ! 🌟'); })
-            .catch(err => { console.error(err); if (err.code) alert('ล็อกอินไม่สำเร็จ: ' + err.message); });
+            isFirebaseActive = true;
+
+            auth.onAuthStateChanged(async user => {
+                if (user) {
+                    const isNewUser = !currentUser || currentUser.uid !== user.uid;
+                    currentUser = user;
+                    renderAuthUI();
+
+                    if (isNewUser) {
+                        await pullFromCloud(user.uid);
+                    }
+                } else {
+                    currentUser = null;
+                    renderAuthUI();
+                    setSyncStatus('ออกจากระบบแล้ว · ข้อมูลอยู่ในเครื่อง');
+                }
+            });
+
+            // รองรับผลลัพธ์ Redirect ที่อาจเริ่มไว้ก่อนหน้านี้
+            try {
+                const result = await auth.getRedirectResult();
+                if (result && result.user) {
+                    currentUser = result.user;
+                    renderAuthUI();
+                    showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
+                }
+            } catch (redirectError) {
+                console.error('Firebase redirect result:', redirectError);
+            }
+
+            setSyncStatus('พร้อมเชื่อมต่อ Gmail');
+
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            isFirebaseActive = false;
+            setSyncStatus('เชื่อมต่อ Firebase ไม่สำเร็จ ⚠️');
+        }
     }
 
     function renderAuthUI() {
@@ -701,23 +748,61 @@
     }
 
     async function loginWithGoogle() {
-        if (!isFirebaseActive) {
-            alert('ยังไม่ได้ตั้งค่า Firebase\nให้กรอก firebaseConfig ในไฟล์ index.html ก่อน (ดูคู่มือการตั้งค่า)');
+        if (!isFirebaseActive || !auth) {
+            alert('Firebase ยังไม่พร้อม กรุณารีเฟรชหน้าเว็บแล้วลองใหม่');
             return;
         }
+
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
         try {
-            if (isMobile) await auth.signInWithRedirect(provider);
-            else await auth.signInWithPopup(provider);
-        } catch (err) {
-            // popup ถูกบล็อก -> ใช้ redirect แทน
-            if (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment') {
-                await auth.signInWithRedirect(provider);
-            } else if (err.code !== 'auth/popup-closed-by-user') {
-                alert('ล็อกอินไม่สำเร็จ: ' + err.message);
+            setSyncStatus('กำลังเชื่อมต่อ Gmail...');
+
+            // เริ่มจาก Popup เมื่อเปิดเว็บผ่าน Chrome โดยตรง
+            const result = await auth.signInWithPopup(provider);
+
+            if (result && result.user) {
+                currentUser = result.user;
+                renderAuthUI();
+                await pullFromCloud(result.user.uid);
+                showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
             }
+
+        } catch (error) {
+            console.error('Google Login Error:', error);
+
+            if (error.code === 'auth/popup-closed-by-user') {
+                setSyncStatus('ยกเลิกการล็อกอิน');
+                return;
+            }
+
+            // ถ้า Popup ถูกบล็อก ให้ลอง Redirect เป็นทางสำรอง
+            if (
+                error.code === 'auth/popup-blocked' ||
+                error.code === 'auth/operation-not-supported-in-this-environment'
+            ) {
+                try {
+                    await auth.signInWithRedirect(provider);
+                    return;
+                } catch (redirectError) {
+                    console.error('Google Redirect Error:', redirectError);
+                    setSyncStatus('ล็อกอินไม่สำเร็จ ⚠️');
+                    alert('เชื่อมต่อ Google ไม่สำเร็จ: ' + redirectError.message);
+                    return;
+                }
+            }
+
+            let message = error.message || 'เกิดข้อผิดพลาด';
+
+            if (error.code === 'auth/unauthorized-domain') {
+                message = 'โดเมนเว็บไซต์ยังไม่ได้รับอนุญาตใน Firebase';
+            } else if (error.code === 'auth/network-request-failed') {
+                message = 'อินเทอร์เน็ตมีปัญหา กรุณาลองใหม่';
+            }
+
+            setSyncStatus('ล็อกอินไม่สำเร็จ ⚠️');
+            alert('ล็อกอินไม่สำเร็จ: ' + message);
         }
     }
 
@@ -1439,3 +1524,5 @@
     </script>
 </body>
 </html>
+
+

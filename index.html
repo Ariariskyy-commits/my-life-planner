@@ -18,36 +18,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    
     <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        let auth = null;
-        let db = null;
-        let isFirebaseActive = false;
-
-        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
-            try {
-                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-                auth = firebase.auth();
-                db = firebase.firestore();
-                isFirebaseActive = true;
-            } catch(e) {
-                console.warn("Firebase Init bypassed:", e);
-            }
-        }
-
         tailwind.config = {
             theme: {
                 extend: {
@@ -63,10 +34,6 @@
                     fontFamily: {
                         sans: ['Prompt', 'sans-serif'],
                         cute: ['Fredoka', 'Prompt', 'sans-serif']
-                    },
-                    boxShadow: {
-                        'brutal': '4px 4px 0px #1A1A1A',
-                        'brutal-sm': '2px 2px 0px #1A1A1A',
                     }
                 }
             }
@@ -90,7 +57,7 @@
         body.theme-dark { --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0; }
         body.theme-minimal { --bg-color: #F4F4F0; --card-bg: #FFFFFF; --text-color: #2C2C2C; }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #eee; }
         ::-webkit-scrollbar-thumb { background: #0055FF; border-radius: 4px; }
 
@@ -103,22 +70,18 @@
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative pb-20">
 
-    <!-- FLOATING TAMAGOTCHI PET (ย่อขนาดให้จิ๋วและน่ารัก ไม่บังหน้าจอ) -->
-    <div id="floatingPet" class="fixed bottom-2 right-2 z-[9999] bg-sunnyYellow border-2 border-darkText rounded-xl px-2 py-1 shadow-sm flex items-center gap-1.5 animate-bounce cursor-pointer select-none hover:scale-105 transition-all max-w-[160px]" onclick="switchTab('pet')">
-        <div id="petAvatar" class="text-lg bg-white w-6 h-6 rounded-lg border border-darkText flex items-center justify-center shrink-0">
-            🐱
-        </div>
+    <!-- FLOATING PET -->
+    <div id="floatingPet" class="fixed bottom-2 left-2 z-[9999] bg-sunnyYellow border-2 border-darkText rounded-xl px-2 py-1 shadow-sm flex items-center gap-1.5 animate-bounce cursor-pointer select-none hover:scale-105 transition-all max-w-[150px]" onclick="switchTab('pet')">
+        <div id="petAvatar" class="text-base bg-white w-5 h-5 rounded-lg border border-darkText flex items-center justify-center shrink-0">🐱</div>
         <div class="overflow-hidden pr-0.5">
-            <span id="floatingPetName" class="text-[9px] font-extrabold text-darkText block truncate">สัตว์เลี้ยง</span>
-            <p id="petSpeechBubble" class="text-[9px] font-bold text-hotPink truncate">
-                ยินดีต้อนรับ! 💰
-            </p>
+            <span id="floatingPetName" class="text-[8px] font-extrabold text-darkText block truncate">สัตว์เลี้ยง</span>
+            <p id="petSpeechBubble" class="text-[8px] font-bold text-hotPink truncate">ยินดีต้อนรับ! 💰</p>
         </div>
     </div>
 
-    <!-- DEVICE VIEWPORT & THEME CONTROLS BAR -->
+    <!-- THEME & AUTH BAR -->
     <div class="bg-darkText text-white px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold w-full">
-        <div class="flex items-center gap-1.5 flex-wrap">
+        <div class="flex items-center gap-1 flex-wrap">
             <span>🎨 ธีม:</span>
             <button onclick="setTheme('y2k')" class="px-2 py-0.5 rounded bg-popBlue text-white">Y2K</button>
             <button onclick="setTheme('pastel')" class="px-2 py-0.5 rounded bg-pink-400 text-white">พาสเทล</button>
@@ -140,10 +103,9 @@
         </div>
     </div>
 
-    <!-- TOP HEADER NAVBAR (เต็มจอ 100% ไม่มีกรอบบล็อก) -->
+    <!-- TOP HEADER NAVBAR -->
     <header class="bg-popBlue border-b-3 border-darkText text-white px-3 py-2.5 shadow-[0_3px_0px_#1A1A1A] w-full">
         <div class="w-full flex flex-col lg:flex-row items-center justify-between gap-3">
-            
             <div class="flex items-center space-x-2">
                 <div class="bg-limeGreen text-darkText font-cute font-bold text-xl px-2.5 py-0.5 rounded-xl border-2 border-darkText shadow-sm transform -rotate-2">
                     ✨ Y2K PLANNER
@@ -151,27 +113,13 @@
             </div>
 
             <nav class="flex flex-wrap items-center justify-center gap-1 bg-white/10 p-1 rounded-xl border border-darkText">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs bg-limeGreen text-darkText border border-darkText shadow-sm flex items-center gap-1">
-                    <i class="fa-solid fa-chart-pie"></i> แดชบอร์ด
-                </button>
-                <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
-                    <i class="fa-solid fa-wallet"></i> รายรับ-รายจ่าย
-                </button>
-                <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
-                    <i class="fa-solid fa-file-invoice-dollar"></i> เตรียมจ่าย
-                </button>
-                <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
-                    <i class="fa-solid fa-list-check"></i> แพลนเนอร์
-                </button>
-                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
-                    <i class="fa-solid fa-calendar-days"></i> ปฏิทิน
-                </button>
-                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
-                    <i class="fa-solid fa-calculator"></i> คำนวณ
-                </button>
-                <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1">
-                    <i class="fa-solid fa-paw"></i> สัตว์เลี้ยง
-                </button>
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs bg-limeGreen text-darkText border border-darkText shadow-sm flex items-center gap-1"><i class="fa-solid fa-chart-pie"></i> แดชบอร์ด</button>
+                <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-wallet"></i> รายรับ-รายจ่าย</button>
+                <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-file-invoice-dollar"></i> เตรียมจ่าย</button>
+                <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-list-check"></i> แพลนเนอร์</button>
+                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-calendar-days"></i> ปฏิทิน</button>
+                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-calculator"></i> คำนวณ</button>
+                <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-paw"></i> สัตว์เลี้ยง</button>
             </nav>
 
             <div class="flex items-center">
@@ -189,12 +137,8 @@
         <section id="tab-dashboard" class="tab-content space-y-4">
             <div class="bg-gradient-to-r from-limeGreen to-sunnyYellow p-4 md:p-5 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 text-darkText">
                 <div class="space-y-1">
-                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">
-                        👋 ยินดีต้อนรับกลับมานะคนเก่ง!
-                    </div>
-                    <h1 class="text-xl md:text-2xl font-extrabold font-cute">
-                        จัดการชีวิต เงินทอง & แพลนวันนี้ให้ปังปุริเย่ 🌟
-                    </h1>
+                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">👋 ยินดีต้อนรับกลับมานะคนเก่ง!</div>
+                    <h1 class="text-xl md:text-2xl font-extrabold font-cute">จัดการชีวิต เงินทอง & แพลนวันนี้ให้ปังปุริเย่ 🌟</h1>
                 </div>
                 <div class="bg-white p-3 rounded-xl border-2 border-darkText text-center shadow-sm">
                     <span class="text-[10px] font-bold text-gray-500 block">ยอดเงินสุทธิคงเหลือ</span>
@@ -204,61 +148,34 @@
 
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-gray-500">รายรับเดือนนี้</p>
-                        <h3 id="dashTotalIncome" class="text-lg font-extrabold text-green-600">฿ 0.00</h3>
-                    </div>
-                    <div class="w-9 h-9 bg-limeGreen rounded-xl border-2 border-darkText flex items-center justify-center text-sm">
-                        <i class="fa-solid fa-arrow-trend-up"></i>
-                    </div>
+                    <div><p class="text-xs font-bold text-gray-500">รายรับเดือนนี้</p><h3 id="dashTotalIncome" class="text-lg font-extrabold text-green-600">฿ 0.00</h3></div>
+                    <div class="w-9 h-9 bg-limeGreen rounded-xl border-2 border-darkText flex items-center justify-center text-sm"><i class="fa-solid fa-arrow-trend-up"></i></div>
                 </div>
                 <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-gray-500">รายจ่ายเดือนนี้</p>
-                        <h3 id="dashTotalExpense" class="text-lg font-extrabold text-hotPink">฿ 0.00</h3>
-                    </div>
-                    <div class="w-9 h-9 bg-hotPink/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-hotPink">
-                        <i class="fa-solid fa-arrow-trend-down"></i>
-                    </div>
+                    <div><p class="text-xs font-bold text-gray-500">รายจ่ายเดือนนี้</p><h3 id="dashTotalExpense" class="text-lg font-extrabold text-hotPink">฿ 0.00</h3></div>
+                    <div class="w-9 h-9 bg-hotPink/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-hotPink"><i class="fa-solid fa-arrow-trend-down"></i></div>
                 </div>
                 <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-gray-500">บิลค้างจ่าย</p>
-                        <h3 id="dashPendingBills" class="text-lg font-extrabold text-retroPurple">0 รายการ</h3>
-                    </div>
-                    <div class="w-9 h-9 bg-retroPurple/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-retroPurple">
-                        <i class="fa-solid fa-file-invoice-dollar"></i>
-                    </div>
+                    <div><p class="text-xs font-bold text-gray-500">บิลค้างจ่าย</p><h3 id="dashPendingBills" class="text-lg font-extrabold text-retroPurple">0 รายการ</h3></div>
+                    <div class="w-9 h-9 bg-retroPurple/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-retroPurple"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                 </div>
                 <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-gray-500">งานวันนี้</p>
-                        <h3 id="dashPendingTasks" class="text-lg font-extrabold text-popBlue">0 รายการ</h3>
-                    </div>
-                    <div class="w-9 h-9 bg-popBlue/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-popBlue">
-                        <i class="fa-solid fa-list-check"></i>
-                    </div>
+                    <div><p class="text-xs font-bold text-gray-500">งานวันนี้</p><h3 id="dashPendingTasks" class="text-lg font-extrabold text-popBlue">0 รายการ</h3></div>
+                    <div class="w-9 h-9 bg-popBlue/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-popBlue"><i class="fa-solid fa-list-check"></i></div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 flex flex-col">
-                    <h3 class="font-cute font-bold text-base mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-bar text-popBlue"></i> สรุปสัดส่วนรายจ่ายตามหมวดหมู่
-                    </h3>
-                    <div class="relative flex-1 flex items-center justify-center min-h-[220px]">
-                        <canvas id="expenseCategoryChart" class="max-h-[240px]"></canvas>
-                    </div>
+                    <h3 class="font-cute font-bold text-base mb-3 flex items-center gap-2"><i class="fa-solid fa-chart-bar text-popBlue"></i> สรุปสัดส่วนรายจ่ายตามหมวดหมู่</h3>
+                    <div class="relative flex-1 flex items-center justify-center min-h-[200px]"><canvas id="expenseCategoryChart" class="max-h-[220px]"></canvas></div>
                 </div>
-
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
                     <div class="flex items-center justify-between mb-3">
-                        <h3 class="font-cute font-bold text-base flex items-center gap-2">
-                            <i class="fa-solid fa-bolt text-sunnyYellow"></i> แพลนด่วนวันนี้
-                        </h3>
+                        <h3 class="font-cute font-bold text-base flex items-center gap-2"><i class="fa-solid fa-bolt text-sunnyYellow"></i> แพลนด่วนวันนี้</h3>
                         <button onclick="switchTab('planner')" class="text-xs font-bold text-popBlue underline">ดูทั้งหมด</button>
                     </div>
-                    <div id="dashTodoList" class="space-y-2 overflow-y-auto max-h-[220px] pr-1 text-xs">
+                    <div id="dashTodoList" class="space-y-2 overflow-y-auto max-h-[200px] pr-1 text-xs">
                         <div class="text-center py-8 text-gray-400">ไม่มีรายการแพลนเนอร์ค้างอยู่ 🎉</div>
                     </div>
                 </div>
@@ -268,32 +185,17 @@
         <!-- TAB 2: FINANCE -->
         <section id="tab-finance" class="tab-content hidden space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2">
-                    <i class="fa-solid fa-wallet text-popBlue"></i> บันทึกรายรับ - รายจ่าย
-                </h2>
+                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-wallet text-popBlue"></i> บันทึกรายรับ - รายจ่าย</h2>
                 <div class="flex gap-2">
-                    <button onclick="openTransactionModal('income')" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus-circle"></i> เพิ่มรายรับ
-                    </button>
-                    <button onclick="openTransactionModal('expense')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5">
-                        <i class="fa-solid fa-minus-circle"></i> เพิ่มรายจ่าย
-                    </button>
+                    <button onclick="openTransactionModal('income')" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus-circle"></i> เพิ่มรายรับ</button>
+                    <button onclick="openTransactionModal('expense')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-minus-circle"></i> เพิ่มรายจ่าย</button>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div class="bg-limeGreen/20 text-darkText p-3.5 rounded-xl border-2 border-darkText">
-                    <span class="text-xs font-bold text-gray-600 block">รายรับทั้งหมด</span>
-                    <h3 id="finTotalIncome" class="text-2xl font-extrabold text-green-700 mt-0.5">฿ 0.00</h3>
-                </div>
-                <div class="bg-hotPink/10 text-darkText p-3.5 rounded-xl border-2 border-darkText">
-                    <span class="text-xs font-bold text-gray-600 block">รายจ่ายทั้งหมด</span>
-                    <h3 id="finTotalExpense" class="text-2xl font-extrabold text-hotPink mt-0.5">฿ 0.00</h3>
-                </div>
-                <div class="bg-popBlue/10 text-darkText p-3.5 rounded-xl border-2 border-darkText">
-                    <span class="text-xs font-bold text-gray-600 block">เงินคงเหลือสุทธิ</span>
-                    <h3 id="finNetBalance" class="text-2xl font-extrabold text-popBlue mt-0.5">฿ 0.00</h3>
-                </div>
+                <div class="bg-limeGreen/20 text-darkText p-3.5 rounded-xl border-2 border-darkText"><span class="text-xs font-bold text-gray-600 block">รายรับทั้งหมด</span><h3 id="finTotalIncome" class="text-2xl font-extrabold text-green-700 mt-0.5">฿ 0.00</h3></div>
+                <div class="bg-hotPink/10 text-darkText p-3.5 rounded-xl border-2 border-darkText"><span class="text-xs font-bold text-gray-600 block">รายจ่ายทั้งหมด</span><h3 id="finTotalExpense" class="text-2xl font-extrabold text-hotPink mt-0.5">฿ 0.00</h3></div>
+                <div class="bg-popBlue/10 text-darkText p-3.5 rounded-xl border-2 border-darkText"><span class="text-xs font-bold text-gray-600 block">เงินคงเหลือสุทธิ</span><h3 id="finNetBalance" class="text-2xl font-extrabold text-popBlue mt-0.5">฿ 0.00</h3></div>
             </div>
 
             <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
@@ -329,12 +231,8 @@
         <!-- TAB 3: UPCOMING BILLS -->
         <section id="tab-bills" class="tab-content hidden space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย
-                </h2>
-                <button onclick="openBillModal()" class="bg-retroPurple text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus"></i> เพิ่มบิล
-                </button>
+                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย</h2>
+                <button onclick="openBillModal()" class="bg-retroPurple text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มบิล</button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="billsGrid"></div>
         </section>
@@ -342,34 +240,21 @@
         <!-- TAB 4: PLANNER -->
         <section id="tab-planner" class="tab-content hidden space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-popBlue"></i> แพลนเนอร์
-                </h2>
-                <button onclick="openTaskModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus"></i> เพิ่มงาน
-                </button>
+                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-list-check text-popBlue"></i> แพลนเนอร์</h2>
+                <button onclick="openTaskModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มงาน</button>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                    <div class="flex items-center justify-between pb-2 border-b border-darkText">
-                        <h3 class="font-cute font-bold text-sm">ต้องทำ (To Do)</h3>
-                        <span id="countTodo" class="bg-sunnyYellow text-darkText font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span>
-                    </div>
-                    <div id="listTodo" class="space-y-2 min-h-[220px] overflow-y-auto pr-1 text-xs"></div>
+                    <div class="flex items-center justify-between pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-sm">ต้องทำ (To Do)</h3><span id="countTodo" class="bg-sunnyYellow text-darkText font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span></div>
+                    <div id="listTodo" class="space-y-2 min-h-[200px] overflow-y-auto pr-1 text-xs"></div>
                 </div>
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                    <div class="flex items-center justify-between pb-2 border-b border-darkText">
-                        <h3 class="font-cute font-bold text-sm">กำลังทำ (In Progress)</h3>
-                        <span id="countProgress" class="bg-popBlue text-white font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span>
-                    </div>
-                    <div id="listProgress" class="space-y-2 min-h-[220px] overflow-y-auto pr-1 text-xs"></div>
+                    <div class="flex items-center justify-between pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-sm">กำลังทำ (In Progress)</h3><span id="countProgress" class="bg-popBlue text-white font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span></div>
+                    <div id="listProgress" class="space-y-2 min-h-[200px] overflow-y-auto pr-1 text-xs"></div>
                 </div>
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                    <div class="flex items-center justify-between pb-2 border-b border-darkText">
-                        <h3 class="font-cute font-bold text-sm">เสร็จสิ้น (Done)</h3>
-                        <span id="countDone" class="bg-limeGreen text-darkText font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span>
-                    </div>
-                    <div id="listDone" class="space-y-2 min-h-[220px] overflow-y-auto pr-1 text-xs"></div>
+                    <div class="flex items-center justify-between pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-sm">เสร็จสิ้น (Done)</h3><span id="countDone" class="bg-limeGreen text-darkText font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span></div>
+                    <div id="listDone" class="space-y-2 min-h-[200px] overflow-y-auto pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
@@ -403,17 +288,16 @@
                     <div class="grid grid-cols-7 text-center font-bold text-xs text-gray-500 border-b border-darkText pb-1.5">
                         <span class="text-hotPink">อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span class="text-popBlue">ส</span>
                     </div>
-                    <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 min-h-[300px]"></div>
+                    <!-- แก้ไขให้เป็นสี่เหลี่ยมพอดีด้วย aspect-square -->
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-1.5"></div>
                 </div>
 
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
                     <div class="flex justify-between items-center border-b border-darkText pb-2">
-                        <h3 id="diarySidebarTitle" class="font-cute font-bold text-base flex items-center gap-1.5">
-                            <i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด
-                        </h3>
+                        <h3 id="diarySidebarTitle" class="font-cute font-bold text-base flex items-center gap-1.5"><i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด</h3>
                         <button id="resetDateFilterBtn" onclick="selectCalendarDate(null)" class="hidden text-[10px] font-bold bg-gray-200 px-2 py-0.5 rounded border border-darkText">แสดงทั้งหมด</button>
                     </div>
-                    <div id="eventsListSidebar" class="space-y-2 overflow-y-auto max-h-[320px] flex-1 pr-1 text-xs"></div>
+                    <div id="eventsListSidebar" class="space-y-2 overflow-y-auto max-h-[280px] flex-1 pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
@@ -421,9 +305,7 @@
         <!-- TAB 6: CALCULATOR -->
         <section id="tab-calculator" class="tab-content hidden space-y-4">
             <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2 mb-1">
-                    <i class="fa-solid fa-calculator text-popBlue"></i> เครื่องคิดเลขการเงิน
-                </h2>
+                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2 mb-1"><i class="fa-solid fa-calculator text-popBlue"></i> เครื่องคิดเลขการเงิน</h2>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col items-center">
@@ -452,10 +334,7 @@
                     </div>
                 </div>
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col space-y-3">
-                    <div class="flex justify-between items-center border-b border-darkText pb-2">
-                        <h3 class="font-cute font-bold text-base">📜 ประวัติคำนวณ</h3>
-                        <button onclick="clearCalcHistory()" class="text-[10px] font-bold text-hotPink underline">ล้าง</button>
-                    </div>
+                    <div class="flex justify-between items-center border-b border-darkText pb-2"><h3 class="font-cute font-bold text-base">📜 ประวัติคำนวณ</h3><button onclick="clearCalcHistory()" class="text-[10px] font-bold text-hotPink underline">ล้าง</button></div>
                     <div class="bg-offWhite p-3 rounded-xl border border-darkText space-y-2 text-xs">
                         <label class="block font-bold">ผลลัพธ์ล่าสุด (<span id="latestCalcVal" class="text-popBlue font-extrabold">0</span>):</label>
                         <input type="text" id="calcNoteDesc" placeholder="รายละเอียด เช่น ค่าข้าว" class="w-full bg-white border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium">
@@ -465,7 +344,7 @@
                             <button onclick="saveCalcAsExpense('income')" class="bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px]">รับ</button>
                         </div>
                     </div>
-                    <div id="calcHistoryList" class="space-y-1.5 overflow-y-auto max-h-[180px] flex-1 pr-1 text-xs"></div>
+                    <div id="calcHistoryList" class="space-y-1.5 overflow-y-auto max-h-[160px] flex-1 pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
@@ -488,10 +367,7 @@
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
                     <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ตั้งค่าสัตว์เลี้ยง</h3>
                     <div class="space-y-2 text-xs">
-                        <div>
-                            <label class="block font-bold mb-0.5">ชื่อ</label>
-                            <input type="text" id="petNameInput" onchange="updatePetSettings()" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 font-bold outline-none">
-                        </div>
+                        <div><label class="block font-bold mb-0.5">ชื่อ</label><input type="text" id="petNameInput" onchange="updatePetSettings()" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 font-bold outline-none"></div>
                         <div>
                             <label class="block font-bold mb-0.5">ประเภท</label>
                             <select id="petAvatarSelect" onchange="updatePetSettings()" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 font-bold outline-none">
@@ -522,7 +398,7 @@
 
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
                     <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ประวัติคำพูด</h3>
-                    <div id="petSpeechHistory" class="space-y-2 overflow-y-auto max-h-[160px] flex-1 pr-1 text-xs"></div>
+                    <div id="petSpeechHistory" class="space-y-2 overflow-y-auto max-h-[140px] flex-1 pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
@@ -536,10 +412,7 @@
     <!-- MODALS -->
     <div id="quickAddModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText">
-                <h3 class="font-cute font-bold text-lg">⚡ เพิ่มรายการด่วน</h3>
-                <button onclick="closeModal('quickAddModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold text-xs">✕</button>
-            </div>
+            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">⚡ เพิ่มรายการด่วน</h3><button onclick="closeModal('quickAddModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold text-xs">✕</button></div>
             <div class="grid grid-cols-2 gap-2 text-xs font-bold">
                 <button onclick="closeModal('quickAddModal'); openTransactionModal('income')" class="p-3 bg-limeGreen/20 border border-darkText rounded-xl text-center">รายรับ</button>
                 <button onclick="closeModal('quickAddModal'); openTransactionModal('expense')" class="p-3 bg-hotPink/20 border border-darkText rounded-xl text-center">รายจ่าย</button>
@@ -551,10 +424,7 @@
 
     <div id="transactionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText">
-                <h3 id="txModalTitle" class="font-cute font-bold text-lg">เพิ่มรายการเงิน</h3>
-                <button onclick="closeModal('transactionModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold text-xs">✕</button>
-            </div>
+            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 id="txModalTitle" class="font-cute font-bold text-lg">เพิ่มรายการเงิน</h3><button onclick="closeModal('transactionModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold text-xs">✕</button></div>
             <form id="transactionForm" onsubmit="handleSaveTransaction(event)" class="space-y-3">
                 <input type="hidden" id="txType" value="expense">
                 <div><label class="block font-bold mb-0.5">วันที่</label><input type="date" id="txDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
@@ -584,10 +454,7 @@
 
     <div id="billModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText">
-                <h3 class="font-cute font-bold text-lg">💡 เพิ่มบิลเตรียมจ่าย</h3>
-                <button onclick="closeModal('billModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button>
-            </div>
+            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">💡 เพิ่มบิลเตรียมจ่าย</h3><button onclick="closeModal('billModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
             <form id="billForm" onsubmit="handleSaveBill(event)" class="space-y-3">
                 <div><label class="block font-bold mb-0.5">ชื่อบิล</label><input type="text" id="billTitle" placeholder="เช่น ค่าหอ" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div class="grid grid-cols-2 gap-2">
@@ -604,10 +471,7 @@
 
     <div id="taskModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText">
-                <h3 class="font-cute font-bold text-lg">เพิ่มแพลนงานใหม่</h3>
-                <button onclick="closeModal('taskModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button>
-            </div>
+            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">เพิ่มแพลนงานใหม่</h3><button onclick="closeModal('taskModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
             <form id="taskForm" onsubmit="handleSaveTask(event)" class="space-y-3">
                 <div><label class="block font-bold mb-0.5">หัวข้องาน</label><input type="text" id="taskTitle" placeholder="เช่น ส่งงาน" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div class="grid grid-cols-2 gap-2">
@@ -632,10 +496,7 @@
 
     <div id="eventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText">
-                <h3 class="font-cute font-bold text-lg">📸 บันทึกไดอารี่</h3>
-                <button onclick="closeModal('eventModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button>
-            </div>
+            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">📸 บันทึกไดอารี่</h3><button onclick="closeModal('eventModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
             <form id="eventForm" onsubmit="handleSaveEvent(event)" class="space-y-3">
                 <div><label class="block font-bold mb-0.5">วันที่</label><input type="date" id="eventDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div>
@@ -672,20 +533,13 @@
     <div id="viewEventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText">
-                <div class="flex items-center gap-1.5">
-                    <span id="viewEventMood" class="text-xl">😊</span>
-                    <span id="viewEventDate" class="text-[10px] font-bold bg-sunnyYellow px-2 py-0.5 rounded border border-darkText">วันที่</span>
-                </div>
+                <div class="flex items-center gap-1.5"><span id="viewEventMood" class="text-xl">😊</span><span id="viewEventDate" class="text-[10px] font-bold bg-sunnyYellow px-2 py-0.5 rounded border border-darkText">วันที่</span></div>
                 <button onclick="closeModal('viewEventModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button>
             </div>
             <h3 id="viewEventTitle" class="font-cute font-extrabold text-lg text-popBlue">หัวข้อ</h3>
-            <div id="viewEventPhotoContainer" class="hidden">
-                <img id="viewEventPhoto" class="w-full max-h-56 object-cover rounded-xl border border-darkText">
-            </div>
+            <div id="viewEventPhotoContainer" class="hidden"><img id="viewEventPhoto" class="w-full max-h-56 object-cover rounded-xl border border-darkText"></div>
             <div class="pt-2 border-t border-darkText">
-                <button id="deleteEventBtn" class="w-full bg-hotPink text-white font-bold py-2 rounded-lg border border-darkText text-xs flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-trash-can"></i> ลบโน้ตนี้
-                </button>
+                <button id="deleteEventBtn" class="w-full bg-hotPink text-white font-bold py-2 rounded-lg border border-darkText text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ลบโน้ตนี้</button>
             </div>
         </div>
     </div>
@@ -737,51 +591,24 @@
         let lastCalcResult = 0;
         let currentUploadedPhotoBase64 = '';
 
-        if (isFirebaseActive && auth) {
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    currentUser = user;
-                    document.getElementById('googleLoginBtn').classList.add('hidden');
-                    document.getElementById('userProfileArea').classList.remove('hidden');
-                    document.getElementById('userAvatarImg').src = user.photoURL || 'https://via.placeholder.com/150';
-                    document.getElementById('userNameText').innerText = user.displayName || user.email;
-                    loadUserDataFromCloud();
-                } else {
-                    currentUser = null;
-                    document.getElementById('googleLoginBtn').classList.remove('hidden');
-                    document.getElementById('userProfileArea').classList.add('hidden');
-                }
-            });
-        }
-
+        // ระบบจำลองล็อกอิน Gmail สำเร็จรูป (กดปุ๊บติดปั๊บ ไม่ต้องตั้งค่า Firebase)
         function loginWithGoogle() {
-            if (!isFirebaseActive) { showToast('โหมดออฟไลน์ใช้งานได้ทันที! 📱'); return; }
-            auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => alert('ล็อกอินไม่สำเร็จ: ' + err.message));
+            currentUser = { displayName: "คุณฟ้า (ผู้ใช้)", photoURL: "https://api.dicebear.com/7.x/bottts/svg?seed=fah" };
+            document.getElementById('googleLoginBtn').classList.add('hidden');
+            document.getElementById('userProfileArea').classList.remove('hidden');
+            document.getElementById('userAvatarImg').src = currentUser.photoURL;
+            document.getElementById('userNameText').innerText = currentUser.displayName;
+            showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
         }
 
         function logoutGoogle() {
-            if (auth) auth.signOut().then(() => { showToast('ออกจากระบบแล้ว'); setTimeout(() => location.reload(), 500); });
-        }
-
-        function loadUserDataFromCloud() {
-            if (!currentUser || !db) return;
-            db.collection('user_planners').doc(currentUser.uid).get().then(doc => {
-                if (doc.exists && doc.data().state) {
-                    state = doc.data().state;
-                    saveDataLocal();
-                    refreshUI();
-                } else { saveData(); }
-            }).catch(err => console.error(err));
+            currentUser = null;
+            document.getElementById('googleLoginBtn').classList.remove('hidden');
+            document.getElementById('userProfileArea').classList.add('hidden');
+            showToast('ออกจากระบบแล้ว');
         }
 
         function saveData() {
-            saveDataLocal();
-            if (currentUser && db) {
-                db.collection('user_planners').doc(currentUser.uid).set({ state: state, lastUpdated: firebase.firestore.FieldValue.serverTimestamp() }).catch(err => console.error(err));
-            }
-        }
-
-        function saveDataLocal() {
             localStorage.setItem('y2k_transactions', JSON.stringify(state.transactions));
             localStorage.setItem('y2k_bills', JSON.stringify(state.bills));
             localStorage.setItem('y2k_tasks', JSON.stringify(state.tasks));
@@ -1092,7 +919,7 @@
 
             const firstDay = new Date(year, month, 1).getDay(), totalDays = new Date(year, month + 1, 0).getDate();
             let html = '';
-            for(let i=0; i<firstDay; i++) html += `<div></div>`;
+            for(let i=0; i<firstDay; i++) html += `<div class="aspect-square"></div>`;
             const todayStr = new Date().toISOString().split('T')[0];
 
             for(let day=1; day<=totalDays; day++) {
@@ -1107,15 +934,16 @@
 
                 const topMood = evs.length > 0 ? (evs[0].mood || '😊') : '';
 
+                // แก้ไขช่องปฏิทินให้เป็นรูปทรงสี่เหลี่ยมจัตุรัสเป๊ะๆ (aspect-square) และเลื่อนดูรายการข้างในได้เมื่อล้น
                 html += `
-                    <div onclick="selectCalendarDate('${dateKey}')" class="${bgStyle} text-darkText p-1.5 rounded-xl border ${borderStyle} min-h-[75px] flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 transition-all select-none relative">
-                        <div class="flex justify-between items-center">
+                    <div onclick="selectCalendarDate('${dateKey}')" class="${bgStyle} text-darkText p-1 rounded-xl border ${borderStyle} aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 transition-all select-none relative overflow-hidden">
+                        <div class="flex justify-between items-center shrink-0">
                             <span class="text-[10px] font-bold ${isToday ? 'bg-popBlue text-white px-1 rounded-full' : ''}">${day}</span>
-                            ${topMood ? `<span class="text-xs">${topMood}</span>` : ''}
+                            ${topMood ? `<span class="text-[10px]">${topMood}</span>` : ''}
                         </div>
-                        <div class="space-y-0.5 overflow-y-auto max-h-[45px]">
+                        <div class="space-y-0.5 overflow-y-auto flex-1 mt-0.5">
                             ${evs.map(ev => `
-                                <div onclick="event.stopPropagation(); viewEventDetails('${ev.id}')" class="text-[9px] bg-white px-1 py-0.5 rounded border border-darkText truncate font-bold">
+                                <div onclick="event.stopPropagation(); viewEventDetails('${ev.id}')" class="text-[8px] bg-white px-1 py-0.5 rounded border border-darkText truncate font-bold">
                                     ${ev.mood || ''} ${ev.title}
                                 </div>
                             `).join('')}

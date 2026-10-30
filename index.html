@@ -101,6 +101,37 @@
             background-color: #FFDD00 !important;
             transform: scale(1.15);
         }
+
+        /* Header icons only: consistent rounded icon shapes */
+        .topbar-icon {
+            width: 1.2rem;
+            height: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 1.2rem;
+            border-radius: 0.38rem;
+            background: rgba(255, 255, 255, 0.16);
+            font-size: 0.72rem;
+            line-height: 1;
+            vertical-align: middle;
+        }
+        .topbar-icon.brand-icon {
+            background: rgba(255, 255, 255, 0.92);
+            color: #EA4335;
+        }
+        .header-nav-icon {
+            width: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            line-height: 1;
+            opacity: 0.96;
+        }
+        #nav-dashboard .header-nav-icon {
+            color: inherit;
+        }
     </style>
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative pb-20">
@@ -117,14 +148,14 @@
     <!-- TOP BAR: THEME, BACKUP, AUTH -->
     <div class="bg-darkText text-white px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold w-full">
         <div class="flex items-center gap-1 flex-wrap">
-            <span>🎨</span>
+            <span class="topbar-icon" aria-hidden="true"><i class="fa-solid fa-palette"></i></span>
             <button onclick="setTheme('y2k')" class="px-2 py-0.5 rounded bg-popBlue text-white">Y2K</button>
             <button onclick="setTheme('pastel')" class="px-2 py-0.5 rounded bg-pink-400 text-white">พาสเทล</button>
             <button onclick="setTheme('dark')" class="px-2 py-0.5 rounded bg-gray-800 text-white">ดาร์ก</button>
             <button onclick="setTheme('minimal')" class="px-2 py-0.5 rounded bg-gray-300 text-darkText">มินิมอล</button>
             <span class="mx-1 opacity-40">|</span>
-            <button onclick="exportBackup()" class="px-2 py-0.5 rounded bg-limeGreen text-darkText">⬇ สำรองข้อมูล</button>
-            <label class="px-2 py-0.5 rounded bg-sunnyYellow text-darkText cursor-pointer">⬆ คืนค่า
+            <button onclick="exportBackup()" class="px-2 py-0.5 rounded bg-limeGreen text-darkText"><i class="fa-solid fa-cloud-arrow-down mr-1" aria-hidden="true"></i> สำรองข้อมูล</button>
+            <label class="px-2 py-0.5 rounded bg-sunnyYellow text-darkText cursor-pointer"><i class="fa-solid fa-cloud-arrow-up mr-1" aria-hidden="true"></i> คืนค่า
                 <input type="file" accept="application/json,.json" onchange="importBackup(event)" class="hidden">
             </label>
         </div>
@@ -132,7 +163,7 @@
         <div class="flex items-center gap-2">
             <span id="syncStatus" class="text-[10px] opacity-80">กำลังเตรียม...</span>
             <button id="googleLoginBtn" onclick="loginWithGoogle()" class="px-2.5 py-0.5 rounded bg-white text-darkText border border-darkText flex items-center gap-1 font-bold text-[11px]">
-                <i class="fa-brands fa-google text-red-500"></i> ล็อกอิน Gmail
+                <span class="topbar-icon brand-icon"><i class="fa-brands fa-google"></i></span> ล็อกอิน Gmail
             </button>
             <div id="userProfileArea" class="hidden flex items-center gap-1.5 bg-white/20 px-2 py-0.5 rounded">
                 <img id="userAvatarImg" class="w-5 h-5 rounded-full" src="" alt="">
@@ -149,16 +180,16 @@
                 ✨ Y2K PLANNER
             </div>
             <nav class="flex flex-wrap items-center justify-center gap-1 bg-white/10 p-1 rounded-xl border border-darkText">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs bg-limeGreen text-darkText border border-darkText shadow-sm flex items-center gap-1"><i class="fa-solid fa-chart-pie"></i> แดชบอร์ด</button>
-                <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-wallet"></i> รายรับ-รายจ่าย</button>
-                <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-file-invoice-dollar"></i> เตรียมจ่าย</button>
-                <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-list-check"></i> แพลนเนอร์</button>
-                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-calendar-days"></i> ปฏิทิน</button>
-                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-calculator"></i> คำนวณ</button>
-                <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-paw"></i> สัตว์เลี้ยง</button>
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs bg-limeGreen text-darkText border border-darkText shadow-sm flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-house"></i></span> แดชบอร์ด</button>
+                <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-arrow-right-arrow-left"></i></span> รายรับ-รายจ่าย</button>
+                <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-receipt"></i></span> เตรียมจ่าย</button>
+                <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-list-check"></i></span> แพลนเนอร์</button>
+                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-regular fa-calendar"></i></span> ปฏิทิน</button>
+                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-calculator"></i></span> คำนวณ</button>
+                <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-paw"></i></span> สัตว์เลี้ยง</button>
             </nav>
             <button onclick="openModal('quickAddModal')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center gap-1.5">
-                <i class="fa-solid fa-plus"></i> เพิ่มด่วน
+                <span class="header-nav-icon"><i class="fa-solid fa-plus"></i></span> เพิ่มด่วน
             </button>
         </div>
     </header>
@@ -656,6 +687,7 @@
 
     // ================= FIREBASE: AUTH + CLOUD SYNC =================
     let auth = null, db = null, currentUser = null, isFirebaseActive = false, syncTimer = null;
+    let googleLoginInProgress = false;
 
     function setSyncStatus(text) { $('syncStatus').innerText = text; }
 
@@ -732,10 +764,27 @@
     }
 
     async function loginWithGoogle() {
+        // ป้องกันการเปิด Google popup ซ้อนกันจากการกดซ้ำ
+        if (googleLoginInProgress) return;
+
         if (!isFirebaseActive || !auth) {
             alert('Firebase ยังไม่พร้อม กรุณารีเฟรชหน้าเว็บแล้วลองใหม่');
             return;
         }
+
+        if (auth.currentUser) {
+            currentUser = auth.currentUser;
+            renderAuthUI();
+            setSyncStatus('เชื่อมต่อ Gmail อยู่แล้ว');
+            return;
+        }
+
+        googleLoginInProgress = true;
+        const loginButton = $('googleLoginBtn');
+        const originalButtonHTML = loginButton.innerHTML;
+        loginButton.disabled = true;
+        loginButton.classList.add('opacity-60', 'cursor-not-allowed');
+        loginButton.innerHTML = '<i class="fa-brands fa-google text-red-500"></i> กำลังเชื่อมต่อ...';
 
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
@@ -756,12 +805,15 @@
         } catch (error) {
             console.error('Google Login Error:', error);
 
-            if (error.code === 'auth/popup-closed-by-user') {
-                setSyncStatus('ยกเลิกการล็อกอิน');
+            if (
+                error.code === 'auth/popup-closed-by-user' ||
+                error.code === 'auth/cancelled-popup-request'
+            ) {
+                setSyncStatus('การล็อกอินถูกยกเลิก กรุณากดใหม่อีกครั้ง');
                 return;
             }
 
-            // ถ้า Popup ถูกบล็อก ให้ลอง Redirect เป็นทางสำรอง
+            // ถ้า Popup ถูกบล็อกหรือสภาพแวดล้อมไม่รองรับ ให้ลอง Redirect
             if (
                 error.code === 'auth/popup-blocked' ||
                 error.code === 'auth/operation-not-supported-in-this-environment'
@@ -787,6 +839,12 @@
 
             setSyncStatus('ล็อกอินไม่สำเร็จ ⚠️');
             alert('ล็อกอินไม่สำเร็จ: ' + message);
+
+        } finally {
+            googleLoginInProgress = false;
+            loginButton.disabled = false;
+            loginButton.classList.remove('opacity-60', 'cursor-not-allowed');
+            loginButton.innerHTML = originalButtonHTML;
         }
     }
 

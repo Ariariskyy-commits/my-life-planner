@@ -361,57 +361,69 @@
         </div>
     </div>
 
-    <!-- MAIN HEADER PLANNER CARD -->
+    <!-- MAIN HEADER PLANNER CARD (WITH COLLAPSE/EXPAND TOGGLE) -->
     <header class="bg-popBlue border-3 border-darkText text-darkText p-2.5 md:p-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-2" style="margin:8px 12px 0; width:calc(100% - 24px);">
         <div class="flex items-center justify-between gap-2">
             <div class="bg-limeGreen text-darkText font-cute font-extrabold text-sm sm:text-base px-3.5 py-1 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1.5 flex-1 max-w-[260px]">
                 <span>✨</span> Y2K PLANNER
             </div>
-            <div class="bg-white/90 border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-right flex items-center gap-1.5 min-w-0">
-                <div class="text-right truncate">
-                    <span class="text-[10px] sm:text-[11px] font-extrabold text-darkText block truncate" id="greetingText">สวัสดีตอนค่ำ 🌙</span>
-                    <span class="text-[8px] sm:text-[9px] font-bold text-gray-500 block truncate">* วันนี้ที่ดูยอดแล้ว</span>
+            
+            <div class="flex items-center gap-2">
+                <!-- ปุ่มซ่อน/แสดง (Collapsible Toggle) -->
+                <button onclick="togglePlannerHeader()" id="plannerToggleBtn" class="bg-white border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-xs font-extrabold flex items-center gap-1 hover:bg-sunnyYellow transition-all" title="ซ่อน/แสดงเมนู">
+                    <span id="plannerToggleText">ซ่อน</span>
+                    <i id="plannerToggleIcon" class="fa-solid fa-chevron-up text-xs"></i>
+                </button>
+
+                <div class="bg-white/90 border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-right flex items-center gap-1.5 min-w-0">
+                    <div class="text-right truncate">
+                        <span class="text-[10px] sm:text-[11px] font-extrabold text-darkText block truncate" id="greetingText">สวัสดีตอนค่ำ 🌙</span>
+                        <span class="text-[8px] sm:text-[9px] font-bold text-gray-500 block truncate">* วันนี้ที่ดูยอดแล้ว</span>
+                    </div>
+                    <i class="fa-solid fa-cloud text-gray-400 text-sm sm:text-base shrink-0"></i>
                 </div>
-                <i class="fa-solid fa-cloud text-gray-400 text-sm sm:text-base shrink-0"></i>
             </div>
         </div>
 
-        <div id="navGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn bg-limeGreen text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-house text-xs"></i> แดชบอร์ด</span>
-                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
-            </button>
-            <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-arrow-right-arrow-left text-popBlue text-xs"></i> รายรับ-รายจ่าย</span>
-                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
-            </button>
-            <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-receipt text-retroPurple text-xs"></i> เตรียมจ่าย</span>
+        <!-- ส่วนเนื้อหาที่จะถูกซ่อน/แสดง -->
+        <div id="plannerCollapsibleBody" class="space-y-2 transition-all">
+            <div id="navGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn bg-limeGreen text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-house text-xs"></i> แดชบอร์ด</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
+                </button>
+                <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-arrow-right-arrow-left text-popBlue text-xs"></i> รายรับ-รายจ่าย</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
+                </button>
+                <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-receipt text-retroPurple text-xs"></i> เตรียมจ่าย</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
+                </button>
+
+                <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-list-check text-sunnyYellow text-xs"></i> แพลนเนอร์</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
+                </button>
+                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                    <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-hotPink text-xs"></i> ปฏิทิน</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
+                </button>
+                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-calculator text-popBlue text-xs"></i> คำนวณ</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
+                </button>
+            </div>
+
+            <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn w-full bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-paw text-hotPink text-xs"></i> สัตว์เลี้ยง</span>
                 <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
             </button>
 
-            <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-list-check text-sunnyYellow text-xs"></i> แพลนเนอร์</span>
-                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
-            </button>
-            <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-hotPink text-xs"></i> ปฏิทิน</span>
-                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
-            </button>
-            <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-calculator text-popBlue text-xs"></i> คำนวณ</span>
-                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
+            <button onclick="openModal('quickAddModal')" class="w-full bg-hotPink text-white font-extrabold py-2 px-3 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center justify-center gap-1.5 hover:brightness-105 active:scale-[0.99] transition-all">
+                <i class="fa-solid fa-plus text-xs"></i> เพิ่มด่วน
             </button>
         </div>
-
-        <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn w-full bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-            <span class="flex items-center gap-1.5"><i class="fa-solid fa-paw text-hotPink text-xs"></i> สัตว์เลี้ยง</span>
-            <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
-        </button>
-
-        <button onclick="openModal('quickAddModal')" class="w-full bg-hotPink text-white font-extrabold py-2 px-3 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center justify-center gap-1.5 hover:brightness-105 active:scale-[0.99] transition-all">
-            <i class="fa-solid fa-plus text-xs"></i> เพิ่มด่วน
-        </button>
     </header>
 
     <main class="flex-1 w-full max-w-5xl mx-auto p-3 md:p-5 relative">
@@ -419,7 +431,7 @@
         <!-- DASHBOARD -->
         <section id="tab-dashboard" class="tab-content space-y-4">
             
-            <!-- การ์ดสีเหลือง: อารมณ์เดือนนี้ (จัดโครงสร้างให้หัวแมวอยู่ขวา และกล่องข้อความอยู่ซ้ายอย่างสมบูรณ์แบบ) -->
+            <!-- การ์ดสีเหลือง: อารมณ์เดือนนี้ -->
             <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm text-darkText">
                 <div class="flex items-center justify-between mb-2">
                     <span class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">📊 อารมณ์เดือนนี้</span>
@@ -427,7 +439,6 @@
                 </div>
                 
                 <div class="flex flex-row items-center justify-between gap-3">
-                    <!-- ฝั่งซ้าย: ข้อความเดือนและสรุปอารมณ์ -->
                     <div class="space-y-2 flex-1 min-w-0">
                         <h2 id="dashCalendarMonthMoodTitle" class="text-base sm:text-lg font-extrabold font-cute truncate">อารมณ์เดือนตุลาคม 2569</h2>
                         <div class="bg-white/90 border-2 border-darkText p-3 rounded-xl shadow-sm">
@@ -435,7 +446,6 @@
                         </div>
                     </div>
 
-                    <!-- ฝั่งขวา: หัวแมวใหญ่พร้อมเครื่องหมายตกใจสีแดง (Fix ให้อยู่ในบล็อกเดียวกันเสมอ) -->
                     <div class="relative cursor-pointer hover:scale-105 transition-all shrink-0 p-1 flex items-center justify-center" onclick="switchTab('pet')">
                         <div id="dashCatAvatar" class="text-5xl sm:text-6xl drop-shadow-md">🐱</div>
                         <span class="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-hotPink text-white font-extrabold text-[10px] sm:text-xs rounded-full border-2 border-darkText flex items-center justify-center animate-pulse shadow-sm">!</span>
@@ -932,7 +942,7 @@
     <script>
         const $ = id => document.getElementById(id);
         const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;n'}[c] || c));
+        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c));
         const money = n => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         function localDateKey(d = new Date()) {
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -957,7 +967,6 @@
             '12-10': 'วันรัฐธรรมนูญ',
             '12-31': 'วันสิ้นปี'
         };
-        // ===== วันหยุดที่เปลี่ยนตามปฏิทินจันทรคติ (เพิ่มปีใหม่ได้ที่นี่) =====
         const THAI_MOVABLE_HOLIDAYS = {
             '2025-02-12': 'วันมาฆบูชา',
             '2025-05-12': 'วันวิสาขบูชา',
@@ -1012,6 +1021,36 @@
             try { saved = localStorage.getItem('y2k_view'); } catch {}
             const auto = window.innerWidth <= 768 ? 'mobile' : 'desktop';
             setView(saved || auto, false);
+        }
+
+        // ===== ฟังก์ชันควบคุมการซ่อน/แสดงเมนูการ์ดสีน้ำเงิน =====
+        function togglePlannerHeader() {
+            state.headerCollapsed = !state.headerCollapsed;
+            saveData();
+            applyHeaderCollapseState();
+        }
+
+        function applyHeaderCollapseState() {
+            const body = $('plannerCollapsibleBody');
+            const toggleText = $('plannerToggleText');
+            const toggleIcon = $('plannerToggleIcon');
+            if (!body) return;
+
+            if (state.headerCollapsed) {
+                body.classList.add('hidden');
+                if (toggleText) toggleText.innerText = 'แสดง';
+                if (toggleIcon) {
+                    toggleIcon.classList.remove('fa-chevron-up');
+                    toggleIcon.classList.add('fa-chevron-down');
+                }
+            } else {
+                body.classList.remove('hidden');
+                if (toggleText) toggleText.innerText = 'ซ่อน';
+                if (toggleIcon) {
+                    toggleIcon.classList.remove('fa-chevron-down');
+                    toggleIcon.classList.add('fa-chevron-up');
+                }
+            }
         }
 
         let photoDbPromise = null;
@@ -1153,7 +1192,7 @@
             });
         }
 
-        const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show' };
+        const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show', headerCollapsed:'y2k_header_collapsed' };
         const DEFAULT_CATEGORIES = [
             "🍔 อาหาร/เครื่องดื่ม", "🛍️ ช้อปปิ้ง", "🚗 เดินทาง",
             "🎮 บันเทิง/เกม", "💡 บิล/ค่าใช้จ่าย", "💰 เงินเดือน/รายรับ", "✨ อื่นๆ"
@@ -1177,7 +1216,8 @@
             categories: readLS(KEYS.categories, DEFAULT_CATEGORIES),
             pet: Object.assign(makeDefaultPet(), readLS(KEYS.pet, {})),
             quickNotes: readLS(KEYS.quickNotes, []),
-            quickNoteShow: localStorage.getItem(KEYS.quickNoteShow) !== 'false'
+            quickNoteShow: localStorage.getItem(KEYS.quickNoteShow) !== 'false',
+            headerCollapsed: localStorage.getItem(KEYS.headerCollapsed) === 'true'
         };
         if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
 
@@ -1193,6 +1233,7 @@
                 localStorage.setItem(KEYS.theme, state.theme);
                 localStorage.setItem(KEYS.quickNotes, JSON.stringify(state.quickNotes));
                 localStorage.setItem(KEYS.quickNoteShow, String(state.quickNoteShow));
+                localStorage.setItem(KEYS.headerCollapsed, String(state.headerCollapsed));
             } catch (e) {
                 console.error(e);
                 showToast('บันทึกข้อมูลในเครื่องไม่สำเร็จ ⚠️');
@@ -1356,6 +1397,7 @@
                 theme: state.theme,
                 quickNotes: state.quickNotes,
                 quickNoteShow: state.quickNoteShow,
+                headerCollapsed: state.headerCollapsed,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
         }
@@ -1401,6 +1443,7 @@
             if (d.quickNotes !== undefined) state.quickNotes = d.quickNotes;
             else if (d.quickNote) { state.quickNotes = [d.quickNote]; }
             if (d.quickNoteShow !== undefined) state.quickNoteShow = d.quickNoteShow;
+            if (d.headerCollapsed !== undefined) state.headerCollapsed = d.headerCollapsed;
             saveLocal();
         }
 
@@ -1409,7 +1452,7 @@
                 app: 'y2k-planner', version: 3, exportedAt: new Date().toISOString(),
                 transactions: state.transactions, bills: state.bills, tasks: state.tasks,
                 events: state.events, calcHistory: state.calcHistory, categories: state.categories, pet: state.pet,
-                theme: state.theme, quickNotes: state.quickNotes, quickNoteShow: state.quickNoteShow
+                theme: state.theme, quickNotes: state.quickNotes, quickNoteShow: state.quickNoteShow, headerCollapsed: state.headerCollapsed
             };
         }
 
@@ -1653,6 +1696,7 @@
             setTheme(state.theme, false);
             $('petNameInput').value = state.pet.name;
             $('petAvatarSelect').value = state.pet.avatar;
+            applyHeaderCollapseState();
             renderDashboard(); renderTransactions(); renderBills(); renderTasks();
             renderCalendar(); renderEventsList(); updatePetStatus(); renderCalcHistory();
             renderQuickNotesWidget();

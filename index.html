@@ -364,17 +364,24 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 flex flex-col">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
                     <h3 class="font-cute font-bold text-base mb-3 flex items-center gap-2"><i class="fa-solid fa-chart-pie text-popBlue"></i> สัดส่วนรายจ่ายตามหมวดหมู่ (ทั้งหมด)</h3>
                     <div class="relative flex-1 flex items-center justify-center min-h-[220px]"><canvas id="expenseCategoryChart"></canvas></div>
                 </div>
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
+                    <h3 class="font-cute font-bold text-base mb-3 flex items-center gap-2"><i class="fa-solid fa-chart-bar text-retroPurple"></i> สัดส่วนบิลเตรียมจ่าย (ที่ต้องจ่าย)</h3>
+                    <div class="relative flex-1 flex items-center justify-center min-h-[220px]"><canvas id="billsCategoryChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-3 flex flex-col">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="font-cute font-bold text-base flex items-center gap-2"><i class="fa-solid fa-bolt text-sunnyYellow"></i> งานค้างอยู่</h3>
                         <button onclick="switchTab('planner')" class="text-xs font-bold text-popBlue underline">ดูทั้งหมด</button>
                     </div>
-                    <div id="dashTodoList" class="space-y-2 overflow-y-auto max-h-[240px] pr-1 text-xs"></div>
+                    <div id="dashTodoList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[240px] overflow-y-auto pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
@@ -426,10 +433,16 @@
         <!-- BILLS -->
         <section id="tab-bills" class="tab-content hidden space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย</h2>
-                <button onclick="openBillModal()" class="bg-retroPurple text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มบิล</button>
+                <div>
+                    <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย</h2>
+                    <p class="text-xs font-bold text-retroPurple mt-0.5" id="billsTotalSummaryText">ยอดรวมที่ต้องเตรียมจ่าย: ฿ 0.00</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openBillHistoryModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติจ่ายบิล</button>
+                    <button onclick="openBillModal()" class="bg-retroPurple text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มบิล</button>
+                </div>
             </div>
-            <p class="text-[11px] font-bold text-gray-500">กด "จ่าย" เพื่อบันทึกเป็นรายจ่ายอัตโนมัติ (กด "ยกเลิก" จะลบรายการนั้นออกด้วย)</p>
+            <p class="text-[11px] font-bold text-gray-500">กด "จ่าย" เพื่อบันทึกเป็นรายจ่ายอัตโนมัติ (พกดจ่ายแล้วบิลจะซ่อนจากหน้านี้ สามารถดูประวัติได้ที่ปุ่มด้านบน)</p>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="billsGrid"></div>
         </section>
 
@@ -654,6 +667,19 @@
                 <input type="hidden" id="billId" value="">
                 <div><label class="block font-bold mb-0.5">ชื่อบิล</label><input type="text" id="billTitle" placeholder="เช่น ค่าหอ" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div><label class="block font-bold mb-0.5">กำหนดจ่าย</label><input type="date" id="billDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
+                
+                <!-- ส่วนระบุงวด (กดก็ได้ ไม่กดก็ได้) -->
+                <div class="bg-offWhite p-2.5 rounded-xl border border-darkText space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer font-bold">
+                        <input type="checkbox" id="billUseInstallment" onchange="toggleInstallmentInput()" class="w-4 h-4 rounded accent-popBlue">
+                        <span>ระบุจำนวนงวด (ผ่อนชำระ)</span>
+                    </label>
+                    <div id="installmentInputs" class="grid grid-cols-2 gap-2 hidden">
+                        <div><label class="block text-[10px] font-bold mb-0.5">งวดที่</label><input type="number" min="1" id="billInstallmentCurrent" value="1" class="w-full bg-white border border-darkText rounded-lg px-2 py-1 outline-none"></div>
+                        <div><label class="block text-[10px] font-bold mb-0.5">จากทั้งหมดก่องวด</label><input type="number" min="1" id="billInstallmentTotal" value="3" class="w-full bg-white border border-darkText rounded-lg px-2 py-1 outline-none"></div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <div class="flex justify-between items-center mb-0.5">
@@ -669,6 +695,18 @@
                     <button type="submit" class="flex-1 bg-retroPurple text-white font-bold py-2 rounded-lg border border-darkText">บันทึก</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- BILL HISTORY MODAL -->
+    <div id="billHistoryModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
+        <div class="bg-white text-darkText w-full max-w-lg p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
+            <div class="flex justify-between items-center pb-2 border-b border-darkText">
+                <h3 class="font-cute font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-popBlue"></i> ประวัติการจ่ายบิล</h3>
+                <button onclick="closeModal('billHistoryModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button>
+            </div>
+            <p class="text-[11px] text-gray-500">รายการบิลที่คุณกด "จ่าย" ไปแล้ว สามารถกด "ยกเลิก" เพื่อให้นำกลับไปแสดงที่หน้าหลักได้</p>
+            <div id="billHistoryList" class="space-y-2 max-h-[350px] overflow-y-auto pr-1"></div>
         </div>
     </div>
 
@@ -799,7 +837,10 @@
             document.documentElement.setAttribute('data-view', view);
             document.querySelectorAll('.vs-btn').forEach(b => b.classList.toggle('vs-active', b.dataset.v === view));
             if (save) localStorage.setItem('y2k_view', view);
-            setTimeout(() => { if (expenseChartInstance) expenseChartInstance.resize(); }, 420);
+            setTimeout(() => { 
+                if (expenseChartInstance) expenseChartInstance.resize(); 
+                if (billsChartInstance) billsChartInstance.resize(); 
+            }, 420);
         }
 
         function initView() {
@@ -1494,10 +1535,17 @@
         }
 
         // ================= BILLS =================
+        function toggleInstallmentInput() {
+            const useInst = $('billUseInstallment').checked;
+            $('installmentInputs').classList.toggle('hidden', !useInst);
+        }
+
         function openBillModal(editId = null) {
             $('billForm').reset();
             $('billId').value = '';
             setDefaultDates();
+            $('billUseInstallment').checked = false;
+            $('installmentInputs').classList.add('hidden');
 
             if (editId) {
                 const b = state.bills.find(x => x.id === editId);
@@ -1507,6 +1555,12 @@
                     $('billDate').value = b.date;
                     updateCategorySelects(b.category || '💡 บิล/ค่าใช้จ่าย');
                     $('billAmount').value = b.amount;
+                    if (b.installment) {
+                        $('billUseInstallment').checked = true;
+                        $('installmentInputs').classList.remove('hidden');
+                        $('billInstallmentCurrent').value = b.installment.current || 1;
+                        $('billInstallmentTotal').value = b.installment.total || 3;
+                    }
                     $('billModalTitle').innerText = '✏️ แก้ไขบิลเตรียมจ่าย';
                 }
             } else {
@@ -1522,6 +1576,14 @@
             const amount = parseFloat($('billAmount').value);
             if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
 
+            let installment = null;
+            if ($('billUseInstallment').checked) {
+                installment = {
+                    current: parseInt($('billInstallmentCurrent').value) || 1,
+                    total: parseInt($('billInstallmentTotal').value) || 3
+                };
+            }
+
             if (id) {
                 const b = state.bills.find(x => x.id === id);
                 if (b) {
@@ -1529,6 +1591,7 @@
                     b.date = $('billDate').value;
                     b.category = $('billCategory').value;
                     b.amount = amount;
+                    b.installment = installment;
                 }
                 showToast('แก้ไขบิลสำเร็จ! ✨');
             } else {
@@ -1537,7 +1600,7 @@
                     title: $('billTitle').value.trim(),
                     date: $('billDate').value,
                     category: $('billCategory').value,
-                    amount, paid: false
+                    amount, installment, paid: false
                 });
                 showToast('เพิ่มบิลแล้ว!');
             }
@@ -1553,12 +1616,15 @@
             b.paid = !b.paid;
             if (b.paid) {
                 b.txId = 'tx_bill_' + b.id;
-                state.transactions.unshift({ id: b.txId, date: localDateKey(), title: 'จ่าย: ' + b.title, category: b.category || '💡 บิล/ค่าใช้จ่าย', amount: b.amount, type: 'expense' });
+                const now = new Date();
+                b.paidAt = `${localDateKey(now)} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                state.transactions.unshift({ id: b.txId, date: localDateKey(now), title: 'จ่าย: ' + b.title, category: b.category || '💡 บิล/ค่าใช้จ่าย', amount: b.amount, type: 'expense' });
             } else if (b.txId) {
                 state.transactions = state.transactions.filter(t => t.id !== b.txId);
                 delete b.txId;
+                delete b.paidAt;
             }
-            saveData(); refreshUI(); showToast(b.paid ? 'จ่ายบิลแล้ว และบันทึกรายจ่ายให้แล้ว 💸' : 'ยกเลิกการจ่ายแล้ว');
+            saveData(); refreshUI(); showToast(b.paid ? 'จ่ายบิลแล้ว (ซ่อนจากหน้าหลัก) 💸' : 'ยกเลิกการจ่ายแล้ว');
         }
 
         function deleteBill(id) {
@@ -1566,16 +1632,50 @@
             saveData(); refreshUI(); showToast('ลบบิลแล้ว');
         }
 
-        function renderBills() {
-            const grid = $('billsGrid');
-            $('dashPendingBills').innerText = state.bills.filter(b => !b.paid).length + ' รายการ';
-            if (!state.bills.length) {
-                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">ไม่มีบิลเตรียมจ่าย 💡</div>`;
+        function openBillHistoryModal() {
+            renderBillHistory();
+            openModal('billHistoryModal');
+        }
+
+        function renderBillHistory() {
+            const listContainer = $('billHistoryList');
+            const paidBills = state.bills.filter(b => b.paid);
+            if (!paidBills.length) {
+                listContainer.innerHTML = `<div class="text-center py-6 text-gray-400 text-xs">ยังไม่มีประวัติการจ่ายบิล ✨</div>`;
                 return;
             }
-            const sorted = [...state.bills].sort((a, b) => (a.paid - b.paid) || a.date.localeCompare(b.date));
-            grid.innerHTML = sorted.map(b => `
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2 ${b.paid ? 'opacity-60' : ''}">
+            listContainer.innerHTML = paidBills.map(b => `
+                <div class="bg-offWhite text-darkText p-3 rounded-xl border border-darkText flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold bg-green-600 text-white px-2 py-0.5 rounded">จ่ายแล้ว</span>
+                            <span class="text-[10px] font-bold text-gray-500">🕐 ${esc(b.paidAt || 'ไม่ระบุเวลา')}</span>
+                        </div>
+                        <h4 class="font-bold text-sm mt-1">${esc(b.title)} ${b.installment ? `(งวด ${b.installment.current}/${b.installment.total})` : ''}</h4>
+                        <span class="text-[10px] text-gray-500">${esc(b.category || '💡 บิล/ค่าใช้จ่าย')} · กำหนดเดิม: ${esc(b.date)}</span>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                        <span class="font-extrabold text-hotPink text-sm">฿ ${money(b.amount)}</span>
+                        <button onclick="toggleBillPaid('${b.id}'); renderBillHistory();" class="px-2.5 py-1 bg-sunnyYellow text-darkText font-bold text-[10px] rounded border border-darkText">ยกเลิกการจ่าย</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        function renderBills() {
+            const activeBills = state.bills.filter(b => !b.paid);
+            $('dashPendingBills').innerText = activeBills.length + ' รายการ';
+            
+            let totalAmount = 0;
+            activeBills.forEach(b => totalAmount += Number(b.amount || 0));
+            $('billsTotalSummaryText').innerText = `ยอดรวมที่ต้องเตรียมจ่าย: ฿ ${money(totalAmount)}`;
+
+            const grid = $('billsGrid');
+            if (!activeBills.length) {
+                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">เย้! ไม่มีบิลค้างจ่ายแล้ว 🎉</div>`;
+                return;
+            }
+            grid.innerHTML = activeBills.map(b => `
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2">
                     <div class="flex justify-between items-start">
                         <span class="text-[10px] font-bold bg-retroPurple text-white px-2 py-0.5 rounded">${esc(b.date)}</span>
                         <div class="flex items-center gap-1.5">
@@ -1584,13 +1684,13 @@
                         </div>
                     </div>
                     <div class="flex justify-between items-center">
-                        <h4 class="font-bold text-sm">${esc(b.title)}</h4>
+                        <h4 class="font-bold text-sm">${esc(b.title)} ${b.installment ? `<span class="text-[10px] text-popBlue font-extrabold">(งวด ${b.installment.current}/${b.installment.total})</span>` : ''}</h4>
                         <span class="text-[10px] bg-offWhite px-2 py-0.5 rounded border border-darkText">${esc(b.category || '💡 บิล/ค่าใช้จ่าย')}</span>
                     </div>
                     <span class="text-base font-extrabold text-hotPink block">฿ ${money(b.amount)}</span>
                     <div class="pt-2 border-t border-darkText flex justify-between items-center text-xs">
-                        <span class="font-bold ${b.paid ? 'text-green-600' : 'text-orange-500'}">${b.paid ? '✔️ จ่ายแล้ว' : '⏳ รอจ่าย'}</span>
-                        <button onclick="toggleBillPaid('${b.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold border border-darkText ${b.paid ? 'bg-offWhite text-darkText' : 'bg-limeGreen text-darkText'}">${b.paid ? 'ยกเลิก' : 'จ่าย'}</button>
+                        <span class="font-bold text-orange-500">⏳ รอจ่าย</span>
+                        <button onclick="toggleBillPaid('${b.id}')" class="px-2.5 py-1 rounded text-[10px] font-bold border border-darkText bg-limeGreen text-darkText">จ่าย</button>
                     </div>
                 </div>`).join('');
         }
@@ -1993,17 +2093,20 @@
 
             const pending = state.tasks.filter(t => t.status !== 'done');
             $('dashTodoList').innerHTML = pending.length
-                ? pending.slice(0, 8).map(t => `
-                    <div class="bg-offWhite text-darkText p-2 rounded-lg border border-darkText flex justify-between items-center gap-2">
+                ? pending.slice(0, 6).map(t => `
+                    <div class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText flex justify-between items-center gap-2">
                         <span class="font-bold truncate">${esc(t.title)}</span>
-                        <span class="text-[9px] shrink-0 ${t.status === 'progress' ? 'text-popBlue' : 'text-gray-500'}">${t.status === 'progress' ? 'กำลังทำ' : 'ต้องทำ'}</span>
+                        <span class="text-[9px] px-2 py-0.5 rounded border border-darkText shrink-0 ${t.status === 'progress' ? 'bg-popBlue text-white' : 'bg-sunnyYellow text-darkText'}">${t.status === 'progress' ? 'กำลังทำ' : 'ต้องทำ'}</span>
                     </div>`).join('')
-                : `<div class="text-center py-8 text-gray-400">ไม่มีงานค้างอยู่ 🎉</div>`;
+                : `<div class="col-span-full text-center py-8 text-gray-400">ไม่มีงานค้างอยู่ 🎉</div>`;
 
             renderExpenseChart();
+            renderBillsChart();
         }
 
         let expenseChartInstance = null;
+        let billsChartInstance = null;
+
         function renderExpenseChart() {
             const canvas = $('expenseCategoryChart');
             if (!canvas || typeof Chart === 'undefined') return;
@@ -2019,6 +2122,27 @@
                     datasets: [{ data: values, backgroundColor: ['#FF007F', '#0055FF', '#CCFF00', '#FFDD00', '#9D00FF', '#FF8A00', '#00C2A8'], borderWidth: 2, borderColor: '#1A1A1A' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function renderBillsChart() {
+            const canvas = $('billsCategoryChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+            const map = {};
+            state.bills.filter(b => !b.paid).forEach(b => {
+                const cat = b.category || '💡 บิล/ค่าใช้จ่าย';
+                map[cat] = (map[cat] || 0) + b.amount;
+            });
+            const labels = Object.keys(map).length ? Object.keys(map) : ['ไม่มีบิลค้างจ่าย'];
+            const values = Object.keys(map).length ? Object.values(map) : [1];
+            if (billsChartInstance) billsChartInstance.destroy();
+            billsChartInstance = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{ label: 'ยอดเตรียมจ่าย (฿)', data: values, backgroundColor: '#9D00FF', borderWidth: 2, borderColor: '#1A1A1A', borderRadius: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
             });
         }
 

@@ -241,43 +241,34 @@
         html[data-view="mobile"] .lg\:flex-row,
         html[data-view="mobile"] .md\:flex-row { flex-direction: column !important; }
 
-        /* ===== เมนูการ์ดหน้าหลัก: 3 คอลัมน์ทุกมุมมอง (แก้ให้เหมือนภาพ) ===== */
+        /* ===== เมนูการ์ดหน้าหลัก: 3 คอลัมน์ทุกมุมมอง ===== */
         #navGrid,
         html[data-view="mobile"] #navGrid,
         html[data-view="tablet"] #navGrid,
         html[data-view="desktop"] #navGrid {
             grid-template-columns: repeat(3, minmax(0,1fr)) !important;
-            gap: 8px !important;
+            gap: 6px !important;
         }
         #navGrid > button {
             min-width: 0;
-            padding: 0.55rem 0.5rem !important;
-            font-size: 0.7rem !important;
-            line-height: 1.25 !important;
+            padding: 0.4rem 0.45rem !important;
+            font-size: 0.68rem !important;
+            line-height: 1.2 !important;
         }
         #navGrid > button > span {
             min-width: 0;
-            gap: 0.35rem !important;
+            gap: 0.3rem !important;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         #navGrid > button > span > i {
             flex-shrink: 0;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
         #navGrid > button > i:last-child {
             flex-shrink: 0;
-            font-size: 0.6rem !important;
-        }
-        @media (max-width: 640px) {
-            #navGrid { gap: 6px !important; }
-            #navGrid > button {
-                padding: 0.45rem 0.4rem !important;
-                font-size: 0.64rem !important;
-            }
-            #navGrid > button > span { gap: 0.25rem !important; }
-            #navGrid > button > span > i { font-size: 0.72rem; }
+            font-size: 0.55rem !important;
         }
 
         @media (max-width: 768px) {
@@ -370,63 +361,63 @@
         </div>
     </div>
 
-    <!-- MAIN HEADER PLANNER CARD (ปรับสัดส่วนใหม่ตามเรฟเป๊ะๆ: แดชบอร์ดเขียวสว่าง + เมนูการ์ด 3 แถว + ปุ่มเพิ่มด่วนชมพู) -->
-    <header class="bg-popBlue border-3 border-darkText text-darkText p-3.5 md:p-4 shadow-[0_4px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-3" style="margin:10px 12px 0; width:calc(100% - 24px);">
+    <!-- MAIN HEADER PLANNER CARD (ปรับลดขนาดกรอบสีน้ำเงินให้กะทัดรัด ไม่กินพื้นที่) -->
+    <header class="bg-popBlue border-3 border-darkText text-darkText p-2.5 md:p-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-2" style="margin:8px 12px 0; width:calc(100% - 24px);">
         
-        <!-- แถวบน: โลโก้ Y2K และ สถานะสวัสดีตอนค่ำ -->
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-2.5">
-            <div class="bg-limeGreen text-darkText font-cute font-extrabold text-xl px-3.5 py-1 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1.5">
+        <!-- แถวบน: โลโก้ Y2K และ สถานะสวัสดีตอนค่ำ (ย่อขนาดให้กระชับ) -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div class="bg-limeGreen text-darkText font-cute font-extrabold text-base px-3 py-0.5 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1.5">
                 <span>✨</span> Y2K PLANNER
             </div>
-            <div class="bg-white/90 border-2 border-darkText px-3 py-1 rounded-xl shadow-sm text-right flex items-center gap-2">
+            <div class="bg-white/90 border-2 border-darkText px-2.5 py-0.5 rounded-xl shadow-sm text-right flex items-center gap-1.5">
                 <div class="text-right">
-                    <span class="text-xs font-extrabold text-darkText block" id="greetingText">สวัสดีตอนค่ำ 🌙</span>
-                    <span class="text-[10px] font-bold text-gray-500 block">* วันนี้ที่ดูยอดแล้ว</span>
+                    <span class="text-[11px] font-extrabold text-darkText block" id="greetingText">สวัสดีตอนค่ำ 🌙</span>
+                    <span class="text-[9px] font-bold text-gray-500 block">* วันนี้ที่ดูยอดแล้ว</span>
                 </div>
-                <i class="fa-solid fa-cloud text-gray-400 text-lg"></i>
+                <i class="fa-solid fa-cloud text-gray-400 text-base"></i>
             </div>
         </div>
 
-        <!-- เมนูปุ่มกดการ์ดขนาดใหญ่ (จัดเรียง 3 แถว สัดส่วนเหมือนเรฟเป๊ะ) -->
-        <div id="navGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+        <!-- เมนูปุ่มกดการ์ดขนาดใหญ่ (จัดเรียง 3 แถว ย่อ padding ให้เล็กลง) -->
+        <div id="navGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
             <!-- แถวที่ 1: แดชบอร์ด, รายรับ-รายจ่าย, เตรียมจ่าย -->
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn bg-limeGreen text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
-                <span class="flex items-center gap-2"><i class="fa-solid fa-house text-sm"></i> แดชบอร์ด</span>
-                <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn bg-limeGreen text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-house text-xs"></i> แดชบอร์ด</span>
+                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
             </button>
-            <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn bg-white text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
-                <span class="flex items-center gap-2"><i class="fa-solid fa-arrow-right-arrow-left text-popBlue text-sm"></i> รายรับ-รายจ่าย</span>
-                <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+            <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-arrow-right-arrow-left text-popBlue text-xs"></i> รายรับ-รายจ่าย</span>
+                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
             </button>
-            <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn bg-white text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
-                <span class="flex items-center gap-2"><i class="fa-solid fa-receipt text-retroPurple text-sm"></i> เตรียมจ่าย</span>
-                <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+            <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-receipt text-retroPurple text-xs"></i> เตรียมจ่าย</span>
+                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
             </button>
 
             <!-- แถวที่ 2: แพลนเนอร์, ปฏิทิน, คำนวณ -->
-            <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn bg-white text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
-                <span class="flex items-center gap-2"><i class="fa-solid fa-list-check text-sunnyYellow text-sm"></i> แพลนเนอร์</span>
-                <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+            <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-list-check text-sunnyYellow text-xs"></i> แพลนเนอร์</span>
+                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
             </button>
-            <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn bg-white text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
-                <span class="flex items-center gap-2"><i class="fa-regular fa-calendar text-hotPink text-sm"></i> ปฏิทิน</span>
-                <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+            <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-hotPink text-xs"></i> ปฏิทิน</span>
+                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
             </button>
-            <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn bg-white text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.02] transition-all">
-                <span class="flex items-center gap-2"><i class="fa-solid fa-calculator text-popBlue text-sm"></i> คำนวณ</span>
-                <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+            <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-calculator text-popBlue text-xs"></i> คำนวณ</span>
+                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
             </button>
         </div>
 
-        <!-- แถวที่ 3: สัตว์เลี้ยง (เต็มแถว) -->
-        <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn w-full bg-white text-darkText border-2 border-darkText p-2.5 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-            <span class="flex items-center gap-2"><i class="fa-solid fa-paw text-hotPink text-sm"></i> สัตว์เลี้ยง</span>
-            <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+        <!-- แถวที่ 3: สัตว์เลี้ยง (เต็มแถว ย่อขนาด) -->
+        <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn w-full bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-paw text-hotPink text-xs"></i> สัตว์เลี้ยง</span>
+            <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
         </button>
 
-        <!-- ปุ่มเพิ่มด่วนสีชมพูขอบดำหนา -->
-        <button onclick="openModal('quickAddModal')" class="w-full bg-hotPink text-white font-extrabold p-3 rounded-xl border-2 border-darkText shadow-sm text-sm flex items-center justify-center gap-2 hover:brightness-105 active:scale-[0.99] transition-all">
-            <i class="fa-solid fa-plus text-base"></i> เพิ่มด่วน
+        <!-- ปุ่มเพิ่มด่วนสีชมพูขอบดำหนา (ย่อขนาดให้กะทัดรัด) -->
+        <button onclick="openModal('quickAddModal')" class="w-full bg-hotPink text-white font-extrabold py-2 px-3 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center justify-center gap-1.5 hover:brightness-105 active:scale-[0.99] transition-all">
+            <i class="fa-solid fa-plus text-xs"></i> เพิ่มด่วน
         </button>
     </header>
 

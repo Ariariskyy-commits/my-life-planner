@@ -258,37 +258,43 @@
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
-    <!-- FLOATING PET & QUICK NOTES WIDGET -->
+    <!-- FLOATING PET & QUICK NOTES WIDGET (MINIMALIST TOGGLE) -->
     <div id="floatingPetWidget" class="fixed bottom-3 left-3 z-[9999] flex flex-col items-start gap-1.5 select-none max-w-[240px]">
-        <!-- ปุ่มเปิดกล่องโน้ตด่วน (แสดงเฉพาะตอนซ่อนกล่องโน้ตหลัก) -->
-        <button id="floatingQuickNoteShowBtn" onclick="toggleQuickNoteListVisibility()" class="hidden bg-sunnyYellow border-2 border-darkText rounded-xl px-2.5 py-1.5 shadow-md text-[10px] font-extrabold text-darkText flex items-center gap-1.5 hover:scale-105 transition-all">
-            <i class="fa-solid fa-note-sticky text-hotPink"></i> เปิดโน้ตด่วนสัตว์เลี้ยง 📌
-        </button>
-
-        <!-- กล่องโน้ตด่วนลอย (ซ่อน/เปิดได้อิสระ) -->
-        <div id="floatingQuickNoteBox" class="bg-sunnyYellow border-2 border-darkText rounded-xl p-2.5 shadow-md w-full relative space-y-2">
-            <div class="flex justify-between items-center border-b border-darkText/20 pb-1">
-                <span class="text-[10px] font-extrabold text-darkText flex items-center gap-1">
-                    <i class="fa-solid fa-note-sticky text-hotPink"></i> โน้ตด่วนสัตว์เลี้ยง
-                </span>
-                <div class="flex items-center gap-1">
-                    <button onclick="openQuickNoteModal()" class="text-[9px] bg-white border border-darkText px-2 py-0.5 rounded font-bold hover:bg-limeGreen transition-all">+ เพิ่ม</button>
-                    <button onclick="toggleQuickNoteListVisibility()" class="w-5 h-5 bg-white border border-darkText rounded text-[10px] font-bold flex items-center justify-center hover:bg-hotPink hover:text-white transition-all" title="ซ่อนโน้ตด่วน">✕</button>
-                </div>
-            </div>
-            <div id="floatingQuickNotesList" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
+        
+        <!-- รูปแบบตอนย่อ (เหลือแค่วงกลมรูปสัตว์เลี้ยงมินิมอล พร้อมจุดแดงแจ้งเตือนโน้ต) -->
+        <div id="floatingMinimizedBtn" onclick="toggleQuickNoteListVisibility()" class="hidden relative bg-sunnyYellow border-2 border-darkText w-12 h-12 rounded-full shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-all" title="เปิดโน้ตด่วนและสัตว์เลี้ยง">
+            <span id="minimizedPetAvatar" class="text-xl">🐱</span>
+            <!-- จุดแดงเตือน (Badge) ถ้ามีโน้ตด่วน -->
+            <span id="quickNoteBadge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-hotPink text-white font-extrabold text-[9px] rounded-full border border-darkText flex items-center justify-center animate-pulse">!</span>
         </div>
 
-        <!-- ตัวสัตว์เลี้ยง (กดเพื่อสลับไปหน้าสัตว์เลี้ยง) -->
-        <div class="bg-sunnyYellow border-2 border-darkText rounded-xl px-2.5 py-1.5 shadow-sm flex items-center justify-between gap-2 cursor-pointer hover:scale-105 transition-all w-full" onclick="switchTab('pet')">
-            <div class="flex items-center gap-1.5 overflow-hidden">
-                <div id="petAvatar" class="text-base bg-white w-6 h-6 rounded-lg border border-darkText flex items-center justify-center shrink-0">🐱</div>
-                <div class="overflow-hidden pr-0.5">
-                    <span id="floatingPetName" class="text-[9px] font-extrabold text-darkText block truncate">สัตว์เลี้ยง</span>
-                    <p id="petSpeechBubble" class="text-[9px] font-bold text-hotPink truncate">ยินดีต้อนรับ! 💰</p>
+        <!-- รูปแบบตอนกางออก (เต็มรูปแบบ) -->
+        <div id="floatingExpandedContainer" class="w-full space-y-1.5">
+            <!-- กล่องโน้ตด่วนลอย -->
+            <div id="floatingQuickNoteBox" class="bg-sunnyYellow border-2 border-darkText rounded-xl p-2.5 shadow-md w-full relative space-y-2">
+                <div class="flex justify-between items-center border-b border-darkText/20 pb-1">
+                    <span class="text-[10px] font-extrabold text-darkText flex items-center gap-1">
+                        <i class="fa-solid fa-note-sticky text-hotPink"></i> โน้ตด่วนสัตว์เลี้ยง
+                    </span>
+                    <div class="flex items-center gap-1">
+                        <button onclick="openQuickNoteModal()" class="text-[9px] bg-white border border-darkText px-2 py-0.5 rounded font-bold hover:bg-limeGreen transition-all">+ เพิ่ม</button>
+                        <button onclick="toggleQuickNoteListVisibility()" class="w-5 h-5 bg-white border border-darkText rounded text-[10px] font-bold flex items-center justify-center hover:bg-hotPink hover:text-white transition-all" title="ย่อเป็นวงกลมมินิมอล">✕</button>
+                    </div>
                 </div>
+                <div id="floatingQuickNotesList" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
             </div>
-            <span class="text-[10px] font-bold text-darkText opacity-60">🐾</span>
+
+            <!-- ตัวสัตว์เลี้ยง (กดเพื่อสลับไปหน้าสัตว์เลี้ยง) -->
+            <div class="bg-sunnyYellow border-2 border-darkText rounded-xl px-2.5 py-1.5 shadow-sm flex items-center justify-between gap-2 cursor-pointer hover:scale-105 transition-all w-full" onclick="switchTab('pet')">
+                <div class="flex items-center gap-1.5 overflow-hidden">
+                    <div id="petAvatar" class="text-base bg-white w-6 h-6 rounded-lg border border-darkText flex items-center justify-center shrink-0">🐱</div>
+                    <div class="overflow-hidden pr-0.5">
+                        <span id="floatingPetName" class="text-[9px] font-extrabold text-darkText block truncate">สัตว์เลี้ยง</span>
+                        <p id="petSpeechBubble" class="text-[9px] font-bold text-hotPink truncate">ยินดีต้อนรับ! 💰</p>
+                    </div>
+                </div>
+                <span class="text-[10px] font-bold text-darkText opacity-60">🐾</span>
+            </div>
         </div>
     </div>
 
@@ -1379,29 +1385,36 @@
         }
 
         function renderQuickNotesWidget() {
-            const box = $('floatingQuickNoteBox');
-            const showBtn = $('floatingQuickNoteShowBtn');
+            const expandedContainer = $('floatingExpandedContainer');
+            const minimizedBtn = $('floatingMinimizedBtn');
             const listContainer = $('floatingQuickNotesList');
+            const badge = $('quickNoteBadge');
 
             if (!Array.isArray(state.quickNotes)) state.quickNotes = [];
+            const hasNotes = state.quickNotes.length > 0;
 
-            if (!state.quickNotes.length) {
-                box.classList.add('hidden');
-                showBtn.classList.add('hidden');
-                return;
+            // แสดงจุดแดงเตือนถ้ามีโน้ตด่วน
+            if (hasNotes) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
             }
 
             if (state.quickNoteShow) {
-                box.classList.remove('hidden');
-                showBtn.classList.add('hidden');
-                listContainer.innerHTML = state.quickNotes.map(n => `
-                    <div class="bg-white/90 text-darkText p-1.5 rounded border border-darkText/20 flex items-start justify-between gap-1 text-[11px] font-bold">
-                        <span class="break-words flex-1 leading-snug">${esc(n.text)}</span>
-                        <button onclick="deleteQuickNote('${n.id}')" class="text-gray-400 hover:text-hotPink shrink-0 px-1 text-xs" title="ลบโน้ตนี้">✕</button>
-                    </div>`).join('');
+                expandedContainer.classList.remove('hidden');
+                minimizedBtn.classList.add('hidden');
+                if (!hasNotes) {
+                    listContainer.innerHTML = `<div class="text-center py-2 text-darkText/60 text-[10px]">ยังไม่มีโน้ตด่วน กด "+ เพิ่ม" ได้เลย ✨</div>`;
+                } else {
+                    listContainer.innerHTML = state.quickNotes.map(n => `
+                        <div class="bg-white/90 text-darkText p-1.5 rounded border border-darkText/20 flex items-start justify-between gap-1 text-[11px] font-bold">
+                            <span class="break-words flex-1 leading-snug">${esc(n.text)}</span>
+                            <button onclick="deleteQuickNote('${n.id}')" class="text-gray-400 hover:text-hotPink shrink-0 px-1 text-xs" title="ลบโน้ตนี้">✕</button>
+                        </div>`).join('');
+                }
             } else {
-                box.classList.add('hidden');
-                showBtn.classList.remove('hidden');
+                expandedContainer.classList.add('hidden');
+                minimizedBtn.classList.remove('hidden');
             }
         }
 
@@ -1433,7 +1446,7 @@
             state.pet.speechHistory = [];
             saveData();
             renderPetSpeechHistory();
-            showToast('ล้างประวัติแชทสัตว์เลี้ยงแล้ว');
+            showToast('ลบประวัติแชทสัตว์เลี้ยงแล้ว');
         }
 
         function calcNetBalance() {
@@ -1460,6 +1473,7 @@
             $('floatingPetName').innerText = pName;
             $('petHeaderTitle').innerText = `${pName} (Tamagotchi)`;
             $('petAvatar').innerText = avatar;
+            $('minimizedPetAvatar').innerText = avatar;
             $('petBigAvatar').innerText = avatar;
             $('calPetAvatar').innerText = avatar;
             $('petBigName').innerText = `${pName} (${moodText})`;

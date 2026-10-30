@@ -208,12 +208,14 @@
         }
         .vs-btn i { font-size: .75rem; }
 
-        /* ===== กรอบแอป ===== */
+        /* ===== กรอบแอป (Sticky Footer Layout) ===== */
         #appFrame {
             margin: 0 auto;
             min-height: 100vh;
             width: 100%;
             background: var(--bg-color, #F9F9FB);
+            display: flex;
+            flex-direction: column;
             transition: max-width .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease;
         }
         html[data-view="desktop"] #appFrame { max-width: 1600px; }
@@ -254,7 +256,7 @@
         }
     </style>
 </head>
-<body class="theme-y2k min-h-screen flex flex-col relative pb-20">
+<body class="theme-y2k min-h-screen flex flex-col relative">
 
     <!-- FLOATING PET -->
     <div id="floatingPet" class="fixed bottom-3 left-3 z-[9999] bg-sunnyYellow border-2 border-darkText rounded-xl px-2 py-1 shadow-sm flex items-center gap-1.5 cursor-pointer select-none hover:scale-105 transition-all max-w-[160px]" onclick="switchTab('pet')">
@@ -598,7 +600,7 @@
         </section>
     </main>
 
-    <footer class="bg-darkText text-white py-4 px-3 mt-8 border-t-2 border-darkText text-center text-xs w-full">
+    <footer class="bg-darkText text-white py-4 px-3 mt-auto border-t-2 border-darkText text-center text-xs w-full">
         <p>✨ Y2K Playful Life Planner 🚀</p>
     </footer>
 
@@ -1253,7 +1255,7 @@
 
         function setTheme(themeName, save = true) {
             state.theme = themeName;
-            document.body.className = `theme-${themeName} min-h-screen flex flex-col relative pb-20`;
+            document.body.className = `theme-${themeName} min-h-screen flex flex-col relative`;
             if (save) saveData();
         }
 

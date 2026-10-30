@@ -361,10 +361,8 @@
         </div>
     </div>
 
-    <!-- MAIN HEADER PLANNER CARD (ชื่อแอปยาวเต็มพื้นที่ตามบรีฟ) -->
+    <!-- MAIN HEADER PLANNER CARD -->
     <header class="bg-popBlue border-3 border-darkText text-darkText p-2.5 md:p-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-2" style="margin:8px 12px 0; width:calc(100% - 24px);">
-        
-        <!-- แถวบน: โลโก้ Y2K ยาวเต็ม และสถานะสวัสดีตอนค่ำ -->
         <div class="flex items-center justify-between gap-2">
             <div class="bg-limeGreen text-darkText font-cute font-extrabold text-sm sm:text-base px-3.5 py-1 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1.5 flex-1 max-w-[260px]">
                 <span>✨</span> Y2K PLANNER
@@ -378,7 +376,6 @@
             </div>
         </div>
 
-        <!-- เมนูปุ่มกดการ์ดขนาดใหญ่ (จัดเรียง 3 คอลัมน์) -->
         <div id="navGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
             <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn bg-limeGreen text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
                 <span class="flex items-center gap-1.5"><i class="fa-solid fa-house text-xs"></i> แดชบอร์ด</span>
@@ -422,30 +419,31 @@
         <!-- DASHBOARD -->
         <section id="tab-dashboard" class="tab-content space-y-4">
             
-            <!-- การ์ดสีเหลือง: อารมณ์เดือนนี้ (ดีไซน์ตรงตามภาพตัวอย่างเป๊ะ) -->
-            <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-darkText">
-                <div class="flex items-center justify-between">
+            <!-- การ์ดสีเหลือง: อารมณ์เดือนนี้ (จัดโครงสร้างให้หัวแมวอยู่ขวา และกล่องข้อความอยู่ซ้ายอย่างสมบูรณ์แบบ) -->
+            <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm text-darkText">
+                <div class="flex items-center justify-between mb-2">
                     <span class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">📊 อารมณ์เดือนนี้</span>
                     <button onclick="switchTab('calendar')" class="text-[10px] font-extrabold bg-white border border-darkText px-3 py-1 rounded-lg shadow-sm hover:bg-limeGreen transition-all">ดูทั้งหมด ›</button>
                 </div>
                 
-                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div class="space-y-2 flex-1 w-full">
-                        <h2 id="dashCalendarMonthMoodTitle" class="text-base sm:text-lg font-extrabold font-cute">อารมณ์เดือนตุลาคม 2569</h2>
+                <div class="flex flex-row items-center justify-between gap-3">
+                    <!-- ฝั่งซ้าย: ข้อความเดือนและสรุปอารมณ์ -->
+                    <div class="space-y-2 flex-1 min-w-0">
+                        <h2 id="dashCalendarMonthMoodTitle" class="text-base sm:text-lg font-extrabold font-cute truncate">อารมณ์เดือนตุลาคม 2569</h2>
                         <div class="bg-white/90 border-2 border-darkText p-3 rounded-xl shadow-sm">
-                            <p id="dashCalendarMonthMoodSummary" class="font-bold text-xs text-darkText">เดือนนี้แฮปปี้สุดๆ ไปเลย! (1 วัน) 🌸</p>
+                            <p id="dashCalendarMonthMoodSummary" class="font-bold text-xs text-darkText leading-relaxed">เดือนนี้แฮปปี้สุดๆ ไปเลย! (1 วัน) 🌸</p>
                         </div>
                     </div>
 
-                    <!-- ฝั่งขวา: หัวแมวใหญ่พร้อมเครื่องหมายตกใจเด่นๆ เหมือนภาพตัวอย่าง -->
-                    <div class="relative cursor-pointer hover:scale-105 transition-all shrink-0 p-2" onclick="switchTab('pet')">
+                    <!-- ฝั่งขวา: หัวแมวใหญ่พร้อมเครื่องหมายตกใจสีแดง (Fix ให้อยู่ในบล็อกเดียวกันเสมอ) -->
+                    <div class="relative cursor-pointer hover:scale-105 transition-all shrink-0 p-1 flex items-center justify-center" onclick="switchTab('pet')">
                         <div id="dashCatAvatar" class="text-5xl sm:text-6xl drop-shadow-md">🐱</div>
-                        <span class="absolute top-0 right-0 w-6 h-6 bg-hotPink text-white font-extrabold text-xs rounded-full border-2 border-darkText flex items-center justify-center animate-pulse shadow-sm">!</span>
+                        <span class="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-hotPink text-white font-extrabold text-[10px] sm:text-xs rounded-full border-2 border-darkText flex items-center justify-center animate-pulse shadow-sm">!</span>
                     </div>
                 </div>
             </div>
 
-            <!-- การ์ดคำทักทายสัตว์เลี้ยง (กล่องคำพูดตามบรีฟ) -->
+            <!-- การ์ดคำทักทายสัตว์เลี้ยง -->
             <div class="bg-white text-darkText p-3 rounded-2xl border-2 border-darkText shadow-sm flex items-center justify-between gap-3 cursor-pointer hover:bg-offWhite transition-all" onclick="switchTab('pet')">
                 <div class="flex items-center gap-2 overflow-hidden">
                     <div class="w-8 h-8 bg-sunnyYellow rounded-xl border-2 border-darkText flex items-center justify-center text-base shrink-0 shadow-sm">🐾</div>
@@ -934,7 +932,7 @@
     <script>
         const $ = id => document.getElementById(id);
         const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;n'}[c] || c));
         const money = n => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         function localDateKey(d = new Date()) {
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;

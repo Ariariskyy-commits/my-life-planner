@@ -1,9 +1,9 @@
-const CACHE = 'y2k-planner-v8';
+const CACHE = 'y2k-planner-v9';
 const ASSETS = [
     './',
     './index.html',
     './manifest.json',
-    './icon.jpg'
+    './icon.png'
 ];
 
 self.addEventListener('install', event => {
@@ -22,7 +22,6 @@ self.addEventListener('activate', event => {
     );
 });
 
-// network-first: ออนไลน์ได้ของใหม่เสมอ ออฟไลน์ใช้ cache
 self.addEventListener('fetch', event => {
     const req = event.request;
     if (req.method !== 'GET') return;

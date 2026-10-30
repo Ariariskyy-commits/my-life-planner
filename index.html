@@ -216,10 +216,8 @@
             background: var(--bg-color, #F9F9FB);
             transition: max-width .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease;
         }
-        /* คอม: กว้างเกือบเต็มจอ ไม่มีพื้นที่ว่างเยอะ */
         html[data-view="desktop"] #appFrame { max-width: 1600px; }
 
-        /* แท็บเล็ต: ขนาดใกล้ iPad */
         html[data-view="tablet"] #appFrame,
         html[data-view="mobile"] #appFrame {
             border-left: 2px solid #1A1A1A;
@@ -233,14 +231,12 @@
         html[data-view="mobile"] body { background-color: #DDE3EE !important; }
         html[data-view="tablet"].theme-dark body, html[data-view="mobile"] body.theme-dark { background-color: #0a0a0a !important; }
 
-        /* จัดเลย์เอาต์ให้เหมาะกับกรอบแท็บเล็ต (กว้างขึ้นแล้ว จึงคงหลายคอลัมน์ไว้) */
         html[data-view="tablet"] .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
         html[data-view="tablet"] .md\:grid-cols-2.lg\:grid-cols-3 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
         html[data-view="tablet"] .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)) !important; }
         html[data-view="tablet"] .lg\:flex-row { flex-direction: row !important; }
         html[data-view="tablet"] .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
 
-        /* จัดเลย์เอาต์ให้เหมาะกับกรอบมือถือ */
         html[data-view="mobile"] .lg\:grid-cols-3,
         html[data-view="mobile"] .md\:grid-cols-2,
         html[data-view="mobile"] .md\:grid-cols-3 { grid-template-columns: minmax(0,1fr) !important; }
@@ -249,7 +245,6 @@
         html[data-view="mobile"] .lg\:flex-row,
         html[data-view="mobile"] .md\:flex-row { flex-direction: column !important; }
 
-        /* บนมือถือจริง ให้กว้างเต็มจอเสมอ */
         @media (max-width: 768px) {
             html[data-view] #appFrame { max-width: 100% !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; }
             html[data-view] body { background-color: var(--bg-color, #F9F9FB) !important; }
@@ -272,7 +267,7 @@
 
     <div id="appFrame">
 
-    <!-- TOP BAR: THEME, VIEW, BACKUP, AUTH -->
+    <!-- TOP BAR -->
     <div class="topbar text-white flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold w-full">
         <div class="flex items-center gap-1.5 flex-wrap">
             <i class="fa-solid fa-palette tb-icon" aria-hidden="true"></i>
@@ -711,12 +706,13 @@
                 </div>
                 <div><label class="block font-bold mb-0.5">หัวข้อโน้ต</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้มีความสุข 🌸" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div>
-                    <label class="block font-bold mb-0.5">แนบรูป (เก็บในเครื่องนี้เท่านั้น)</label>
+                    <label class="block font-bold mb-0.5">แนบรูป</label>
                     <label class="flex flex-col items-center justify-center w-full p-3 bg-offWhite border border-dashed border-darkText rounded-xl cursor-pointer text-center">
                         <i class="fa-solid fa-camera text-xl text-popBlue mb-1"></i>
                         <span class="text-[10px] font-bold text-gray-600">กดเพื่อเลือกรูปภาพ</span>
                         <input type="file" id="eventPhotoInput" accept="image/*" onchange="handlePhotoSelection(event)" class="hidden">
                     </label>
+                    <p id="photoHint" class="text-[10px] text-gray-500 mt-1"></p>
                     <div id="photoPreviewArea" class="hidden relative mt-2">
                         <img id="eventPhotoPreview" class="w-full h-32 object-cover rounded-lg border border-darkText">
                         <button type="button" onclick="removeSelectedPhoto()" class="absolute top-1 right-1 bg-hotPink text-white w-6 h-6 rounded-full border border-darkText text-[10px]">✕</button>
@@ -724,7 +720,7 @@
                 </div>
                 <div class="pt-1 flex gap-2">
                     <button type="button" onclick="closeModal('eventModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
-                    <button type="submit" class="flex-1 bg-retroPurple text-white font-bold py-2 rounded-lg border border-darkText">บันทึก</button>
+                    <button type="submit" id="eventSubmitBtn" class="flex-1 bg-retroPurple text-white font-bold py-2 rounded-lg border border-darkText">บันทึก</button>
                 </div>
             </form>
         </div>
@@ -738,6 +734,7 @@
             </div>
             <h3 id="viewEventTitle" class="font-cute font-extrabold text-lg text-popBlue"></h3>
             <div id="viewEventPhotoContainer" class="hidden"><img id="viewEventPhoto" class="w-full max-h-56 object-cover rounded-xl border border-darkText"></div>
+            <p id="viewEventPhotoNote" class="hidden text-[10px] text-gray-500"></p>
             <div class="pt-2 border-t border-darkText">
                 <button id="deleteEventBtn" class="w-full bg-hotPink text-white font-bold py-2 rounded-lg border border-darkText text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ลบโน้ตนี้</button>
             </div>
@@ -757,11 +754,15 @@
     const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const money = n => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    // วันที่ตามเวลาท้องถิ่น (แก้บั๊ก toISOString ที่ให้วันที่ผิดช่วงเช้าในไทย)
     function localDateKey(d = new Date()) {
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
     const thisMonthKey = () => localDateKey().slice(0, 7);
+
+    // ค่าคงที่ของรูป: ย่อด้านยาวสุดเป็น 1024px, Firestore เก็บเอกสารได้ไม่เกิน 1 MiB จึงจำกัดความยาว base64
+    const MAX_PHOTO_PX = 1024;
+    const MAX_PHOTO_CHARS = 900000;
+    const CLOUD_TIMEOUT_MS = 20000;
 
     function showToast(message) {
         $('toastMessage').innerText = message;
@@ -774,13 +775,20 @@
     function openModal(id) { $(id).classList.remove('hidden'); $(id).classList.add('flex'); }
     function closeModal(id) { $(id).classList.add('hidden'); $(id).classList.remove('flex'); }
 
-    // ================= VIEW SWITCHER (เดสก์ท็อป / แท็บเล็ต / มือถือ) =================
+    function withTimeout(promise, ms, msg) {
+        let timer;
+        return Promise.race([
+            promise,
+            new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(msg)), ms); })
+        ]).finally(() => clearTimeout(timer));
+    }
+
+    // ================= VIEW SWITCHER =================
     function setView(view, save = true) {
         if (!['desktop', 'tablet', 'mobile'].includes(view)) view = 'desktop';
         document.documentElement.setAttribute('data-view', view);
         document.querySelectorAll('.vs-btn').forEach(b => b.classList.toggle('vs-active', b.dataset.v === view));
         if (save) localStorage.setItem('y2k_view', view);
-        // ให้กราฟปรับขนาดตามกรอบใหม่หลังแอนิเมชันจบ
         setTimeout(() => { if (expenseChartInstance) expenseChartInstance.resize(); }, 420);
     }
 
@@ -791,9 +799,152 @@
         setView(saved || auto, false);
     }
 
+    // ================= PHOTO STORAGE (IndexedDB = แคชในเครื่อง, Firestore = ซิงก์ข้ามเครื่อง) =================
+    let photoDbPromise = null;
+    function photoDB() {
+        if (!photoDbPromise) {
+            photoDbPromise = new Promise((resolve, reject) => {
+                if (!('indexedDB' in window)) return reject(new Error('เบราว์เซอร์นี้ไม่รองรับการเก็บรูป'));
+                const req = indexedDB.open('y2k_photos', 1);
+                req.onupgradeneeded = () => req.result.createObjectStore('photos', { keyPath: 'id' });
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => { photoDbPromise = null; reject(req.error); };
+            });
+        }
+        return photoDbPromise;
+    }
+
+    async function idbTx(mode, fn) {
+        const db = await photoDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction('photos', mode);
+            const req = fn(tx.objectStore('photos'));
+            let result;
+            if (req) req.onsuccess = () => { result = req.result; };
+            tx.oncomplete = () => resolve(result);
+            tx.onerror = () => reject(tx.error || new Error('บันทึกรูปในเครื่องไม่สำเร็จ'));
+            tx.onabort = () => reject(tx.error || new Error('บันทึกรูปในเครื่องไม่สำเร็จ (พื้นที่อาจเต็ม)'));
+        });
+    }
+
+    async function savePhotoLocal(id, data, synced) {
+        await idbTx('readwrite', s => s.put({ id, data, synced, createdAt: Date.now() }));
+    }
+
+    async function markPhotoSynced(id) {
+        const rec = await idbTx('readonly', s => s.get(id));
+        if (rec) await idbTx('readwrite', s => s.put({ ...rec, synced: true }));
+    }
+
+    function photosCol(uid) {
+        return db.collection('users').doc(uid).collection('photos');
+    }
+
+    async function uploadPhoto(id, data) {
+        await withTimeout(
+            photosCol(currentUser.uid).doc(id).set({
+                data,
+                eventId: id,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }),
+            CLOUD_TIMEOUT_MS,
+            'อัปโหลดรูปขึ้นคลาวด์ไม่สำเร็จ (ตรวจสอบอินเทอร์เน็ต)'
+        );
+    }
+
+    // ดึงรูป: ถ้าไม่มีในเครื่องและล็อกอินอยู่ จะดึงจากคลาวด์แล้วแคชไว้ในเครื่อง
+    async function getPhotoData(eventId) {
+        const rec = await idbTx('readonly', s => s.get(eventId));
+        if (rec && rec.data) return rec.data;
+        if (!currentUser || !isFirebaseActive) return null;
+        const snap = await withTimeout(
+            photosCol(currentUser.uid).doc(eventId).get(),
+            CLOUD_TIMEOUT_MS,
+            'โหลดรูปจากคลาวด์ไม่สำเร็จ'
+        );
+        if (!snap.exists) return null;
+        const data = snap.data().data;
+        await savePhotoLocal(eventId, data, true);
+        return data;
+    }
+
+    async function deletePhotoEverywhere(id) {
+        try { await idbTx('readwrite', s => s.delete(id)); } catch (e) { console.warn(e); }
+        if (currentUser && isFirebaseActive) {
+            try {
+                await withTimeout(photosCol(currentUser.uid).doc(id).delete(), CLOUD_TIMEOUT_MS, 'ลบรูปบนคลาวด์ไม่สำเร็จ');
+            } catch (e) { console.warn(e); }
+        }
+    }
+
+    // อัปโหลดรูปที่ยังไม่ได้ซิงก์ (เช่น บันทึกตอนยังไม่ได้ล็อกอิน)
+    async function syncPendingPhotos() {
+        if (!currentUser || !isFirebaseActive) return;
+        try {
+            const all = (await idbTx('readonly', s => s.getAll())) || [];
+            for (const rec of all) {
+                if (rec.synced) continue;
+                const ev = state.events.find(e => e.id === rec.id);
+                if (!ev || !ev.hasPhoto) continue;
+                try {
+                    await uploadPhoto(rec.id, rec.data);
+                    await markPhotoSynced(rec.id);
+                } catch (e) { console.warn('sync photo failed:', e); }
+            }
+        } catch (e) { console.warn(e); }
+    }
+
+    // ย้ายรูปเก่า (ที่เคยเก็บใน localStorage หรือฝังใน event) มาไว้ IndexedDB
+    async function migrateLegacyPhotos() {
+        let changed = false;
+        for (const ev of state.events) {
+            if (ev.photo) {
+                await savePhotoLocal(ev.id, ev.photo, false);
+                ev.hasPhoto = true;
+                delete ev.photo;
+                changed = true;
+            }
+        }
+        const legacyKeys = Object.keys(localStorage).filter(k => k.startsWith('y2k_photo_'));
+        for (const k of legacyKeys) {
+            const id = k.slice('y2k_photo_'.length);
+            const v = localStorage.getItem(k);
+            if (v) await savePhotoLocal(id, v, false);
+            localStorage.removeItem(k);
+        }
+        if (changed) saveLocal();
+    }
+
+    // บีบอัดรูป: 1024px คุณภาพ 0.8 ถ้าใหญ่เกินที่ Firestore รับได้จะลดคุณภาพอัตโนมัติ
+    function compressImage(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = () => reject(new Error('อ่านไฟล์รูปไม่ได้'));
+            reader.onload = () => {
+                const img = new Image();
+                img.onerror = () => reject(new Error('ไฟล์นี้ไม่ใช่รูปภาพที่ใช้ได้'));
+                img.onload = () => {
+                    const scale = Math.min(1, MAX_PHOTO_PX / Math.max(img.width, img.height));
+                    const w = Math.round(img.width * scale);
+                    const h = Math.round(img.height * scale);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    for (const q of [0.8, 0.65, 0.5]) {
+                        const url = canvas.toDataURL('image/jpeg', q);
+                        if (url.length <= MAX_PHOTO_CHARS) return resolve(url);
+                    }
+                    reject(new Error('รูปนี้มีรายละเอียดมากเกินไป ลองเลือกรูปอื่นที่เล็กกว่า'));
+                };
+                img.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
     // ================= STATE & STORAGE =================
     const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme' };
-    const photoKey = id => 'y2k_photo_' + id;
     const makeDefaultPet = () => ({
         name: 'น้องสัตว์เลี้ยง', avatar: '🐱',
         speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭',
@@ -814,15 +965,6 @@
     };
     if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
 
-    // ย้ายรูปเก่าที่เคยฝังใน event ออกไปเก็บแยก (ลดขนาดข้อมูลหลัก)
-    state.events.forEach(ev => {
-        if (ev.photo) {
-            try { localStorage.setItem(photoKey(ev.id), ev.photo); } catch {}
-            ev.hasPhoto = true;
-            delete ev.photo;
-        }
-    });
-
     function saveLocal() {
         try {
             localStorage.setItem(KEYS.transactions, JSON.stringify(state.transactions));
@@ -834,7 +976,7 @@
             localStorage.setItem(KEYS.theme, state.theme);
         } catch (e) {
             console.error(e);
-            showToast('พื้นที่เครื่องเต็ม ⚠️ ลองลบรูปโน้ตบางอันออก');
+            showToast('บันทึกข้อมูลในเครื่องไม่สำเร็จ ⚠️ กรุณาลองใหม่');
         }
     }
 
@@ -854,20 +996,13 @@
             setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
             return;
         }
-
         try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
             db = firebase.firestore();
 
-            // จดจำสถานะการเข้าสู่ระบบในอุปกรณ์
             try {
-                await auth.setPersistence(
-                    firebase.auth.Auth.Persistence.LOCAL
-                );
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
             } catch (persistenceError) {
                 console.warn('Firebase persistence warning:', persistenceError);
             }
@@ -879,10 +1014,7 @@
                     const isNewUser = !currentUser || currentUser.uid !== user.uid;
                     currentUser = user;
                     renderAuthUI();
-
-                    if (isNewUser) {
-                        await pullFromCloud(user.uid);
-                    }
+                    if (isNewUser) await pullFromCloud(user.uid);
                 } else {
                     currentUser = null;
                     renderAuthUI();
@@ -890,7 +1022,6 @@
                 }
             });
 
-            // รองรับผลลัพธ์ Redirect ที่อาจเริ่มไว้ก่อนหน้านี้
             try {
                 const result = await auth.getRedirectResult();
                 if (result && result.user) {
@@ -903,7 +1034,6 @@
             }
 
             setSyncStatus('พร้อมเชื่อมต่อ Gmail');
-
         } catch (error) {
             console.error('Firebase initialization error:', error);
             isFirebaseActive = false;
@@ -922,14 +1052,11 @@
     }
 
     async function loginWithGoogle() {
-        // ป้องกันการเปิด Google popup ซ้อนกันจากการกดซ้ำ
         if (googleLoginInProgress) return;
-
         if (!isFirebaseActive || !auth) {
             alert('Firebase ยังไม่พร้อม กรุณารีเฟรชหน้าเว็บแล้วลองใหม่');
             return;
         }
-
         if (auth.currentUser) {
             currentUser = auth.currentUser;
             renderAuthUI();
@@ -949,33 +1076,22 @@
 
         try {
             setSyncStatus('กำลังเชื่อมต่อ Gmail...');
-
-            // เริ่มจาก Popup เมื่อเปิดเว็บผ่าน Chrome โดยตรง
             const result = await auth.signInWithPopup(provider);
-
             if (result && result.user) {
                 currentUser = result.user;
                 renderAuthUI();
                 await pullFromCloud(result.user.uid);
                 showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
             }
-
         } catch (error) {
             console.error('Google Login Error:', error);
 
-            if (
-                error.code === 'auth/popup-closed-by-user' ||
-                error.code === 'auth/cancelled-popup-request'
-            ) {
+            if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
                 setSyncStatus('การล็อกอินถูกยกเลิก กรุณากดใหม่อีกครั้ง');
                 return;
             }
 
-            // ถ้า Popup ถูกบล็อกหรือสภาพแวดล้อมไม่รองรับ ให้ลอง Redirect
-            if (
-                error.code === 'auth/popup-blocked' ||
-                error.code === 'auth/operation-not-supported-in-this-environment'
-            ) {
+            if (error.code === 'auth/popup-blocked' || error.code === 'auth/operation-not-supported-in-this-environment') {
                 try {
                     await auth.signInWithRedirect(provider);
                     return;
@@ -988,16 +1104,13 @@
             }
 
             let message = error.message || 'เกิดข้อผิดพลาด';
-
             if (error.code === 'auth/unauthorized-domain') {
                 message = 'โดเมนเว็บไซต์ยังไม่ได้รับอนุญาตใน Firebase';
             } else if (error.code === 'auth/network-request-failed') {
                 message = 'อินเทอร์เน็ตมีปัญหา กรุณาลองใหม่';
             }
-
             setSyncStatus('ล็อกอินไม่สำเร็จ ⚠️');
             alert('ล็อกอินไม่สำเร็จ: ' + message);
-
         } finally {
             googleLoginInProgress = false;
             loginButton.disabled = false;
@@ -1018,12 +1131,13 @@
         syncTimer = setTimeout(pushToCloud, 800);
     }
 
+    // ข้อมูลหลักไม่รวมรูป (รูปแยกเป็นเอกสารของตัวเอง)
     function cloudPayload() {
         return {
             transactions: state.transactions,
             bills: state.bills,
             tasks: state.tasks,
-            events: state.events,           // ไม่มีรูปภาพ (รูปเก็บในเครื่อง)
+            events: state.events,
             calcHistory: state.calcHistory,
             pet: state.pet,
             theme: state.theme,
@@ -1047,14 +1161,14 @@
         try {
             const snap = await db.collection('users').doc(uid).get();
             if (snap.exists) {
-                // สำรองข้อมูลในเครื่องก่อนเขียนทับ
-                try { localStorage.setItem('y2k_backup_before_cloud', JSON.stringify(collectAll())); } catch {}
+                try { localStorage.setItem('y2k_backup_before_cloud', JSON.stringify(collectMeta())); } catch {}
                 applyRemote(snap.data());
                 setSyncStatus('โหลดจากคลาวด์แล้ว ☁️');
             } else {
-                await pushToCloud(); // ผู้ใช้ใหม่: อัปโหลดข้อมูลในเครื่องขึ้นไป
+                await pushToCloud();
             }
             refreshUI();
+            syncPendingPhotos();
         } catch (err) {
             console.error(err);
             setSyncStatus('โหลดข้อมูลไม่สำเร็จ ⚠️');
@@ -1073,54 +1187,71 @@
     }
 
     // ================= BACKUP / RESTORE =================
-    function collectAll() {
-        const photos = {};
-        state.events.forEach(ev => {
-            if (ev.hasPhoto) {
-                const p = localStorage.getItem(photoKey(ev.id));
-                if (p) photos[ev.id] = p;
-            }
-        });
+    function collectMeta() {
         return {
-            app: 'y2k-planner', version: 2, exportedAt: new Date().toISOString(),
+            app: 'y2k-planner', version: 3, exportedAt: new Date().toISOString(),
             transactions: state.transactions, bills: state.bills, tasks: state.tasks,
             events: state.events, calcHistory: state.calcHistory, pet: state.pet,
-            theme: state.theme, photos
+            theme: state.theme
         };
     }
 
-    function exportBackup() {
-        const blob = new Blob([JSON.stringify(collectAll(), null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `y2k-backup-${localDateKey()}.json`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1500);
-        showToast('ดาวน์โหลดไฟล์สำรองแล้ว 💾');
+    // ไฟล์สำรองรวมรูปทั้งหมดด้วย
+    async function collectAll() {
+        const photos = {};
+        for (const ev of state.events) {
+            if (!ev.hasPhoto) continue;
+            try {
+                const d = await getPhotoData(ev.id);
+                if (d) photos[ev.id] = d;
+            } catch (e) { console.warn('backup photo skipped:', ev.id, e); }
+        }
+        return { ...collectMeta(), photos };
     }
 
-    function importBackup(e) {
+    async function exportBackup() {
+        showToast('กำลังเตรียมไฟล์สำรอง...');
+        try {
+            const data = await collectAll();
+            const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `y2k-backup-${localDateKey()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+            showToast('ดาวน์โหลดไฟล์สำรองแล้ว 💾');
+        } catch (err) {
+            console.error(err);
+            alert('สร้างไฟล์สำรองไม่สำเร็จ: ' + err.message);
+        }
+    }
+
+    async function importBackup(e) {
         const file = e.target.files[0];
         e.target.value = '';
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-            let d;
-            try { d = JSON.parse(reader.result); } catch { return showToast('ไฟล์ไม่ถูกต้อง'); }
-            if (d.app !== 'y2k-planner') return showToast('ไม่ใช่ไฟล์สำรองของแอปนี้');
-            if (!confirm('แทนที่ข้อมูลปัจจุบันด้วยไฟล์สำรองนี้?')) return;
-            applyRemote(d);
-            Object.entries(d.photos || {}).forEach(([id, p]) => {
-                try { localStorage.setItem(photoKey(id), p); } catch {}
-            });
-            refreshUI();
-            saveData();
-            showToast('คืนค่าข้อมูลสำเร็จ! ✨');
-        };
-        reader.readAsText(file);
+
+        let d;
+        try { d = JSON.parse(await file.text()); } catch { return showToast('ไฟล์ไม่ถูกต้อง'); }
+        if (d.app !== 'y2k-planner') return showToast('ไม่ใช่ไฟล์สำรองของแอปนี้');
+        if (!confirm('แทนที่ข้อมูลปัจจุบันด้วยไฟล์สำรองนี้?')) return;
+
+        try {
+            for (const [id, data] of Object.entries(d.photos || {})) {
+                await savePhotoLocal(id, data, false);
+            }
+        } catch (err) {
+            return alert('คืนค่ารูปไม่สำเร็จ: ' + err.message + '\n(ข้อมูลเดิมยังอยู่ครบ)');
+        }
+
+        applyRemote(d);
+        refreshUI();
+        saveData();
+        syncPendingPhotos();
+        showToast('คืนค่าข้อมูลสำเร็จ! ✨');
     }
 
     // ================= THEME & PET =================
@@ -1313,7 +1444,6 @@
         if (!b) return;
         b.paid = !b.paid;
         if (b.paid) {
-            // จ่ายแล้ว -> บันทึกเป็นรายจ่ายอัตโนมัติ
             b.txId = 'tx_bill_' + b.id;
             state.transactions.unshift({ id: b.txId, date: localDateKey(), title: 'จ่าย: ' + b.title, category: 'บิล/ค่าใช้จ่าย', amount: b.amount, type: 'expense' });
         } else if (b.txId) {
@@ -1400,7 +1530,7 @@
     let currentCalendarDate = new Date();
     let selectedCalendarDate = null;
     let selectedMood = '😊';
-    let currentUploadedPhotoBase64 = '';
+    let pendingPhotoData = '';
 
     function selectMoodEmoji(emoji) {
         selectedMood = emoji;
@@ -1409,57 +1539,76 @@
         if (btn) btn.classList.add('mood-btn-selected');
     }
 
+    function setEventBusy(busy, text) {
+        const btn = $('eventSubmitBtn');
+        btn.disabled = busy;
+        btn.classList.toggle('opacity-60', busy);
+        btn.innerText = busy ? (text || 'กำลังบันทึก...') : 'บันทึก';
+    }
+
     function openEventModal(presetDate) {
         $('eventForm').reset();
         setDefaultDates();
         selectMoodEmoji('😊');
         removeSelectedPhoto();
+        $('photoHint').innerText = currentUser
+            ? 'รูปจะซิงก์ไปยัง Gmail ของคุณ ปรับขนาดอัตโนมัติ'
+            : 'ยังไม่ได้ล็อกอิน Gmail รูปจะเก็บในเครื่องนี้เท่านั้น';
         $('eventDate').value = presetDate || selectedCalendarDate || localDateKey();
         openModal('eventModal');
     }
 
-    function handlePhotoSelection(event) {
+    async function handlePhotoSelection(event) {
         const file = event.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-            const img = new Image();
-            img.onload = () => {
-                const maxW = 640;
-                const scale = Math.min(1, maxW / img.width);
-                const canvas = document.createElement('canvas');
-                canvas.width = Math.round(img.width * scale);
-                canvas.height = Math.round(img.height * scale);
-                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                currentUploadedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.65);
-                $('eventPhotoPreview').src = currentUploadedPhotoBase64;
-                $('photoPreviewArea').classList.remove('hidden');
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
+        setEventBusy(true, 'กำลังย่อรูป...');
+        try {
+            pendingPhotoData = await compressImage(file);
+            $('eventPhotoPreview').src = pendingPhotoData;
+            $('photoPreviewArea').classList.remove('hidden');
+        } catch (err) {
+            pendingPhotoData = '';
+            $('photoPreviewArea').classList.add('hidden');
+            alert('ใช้รูปนี้ไม่ได้: ' + err.message);
+        } finally {
+            setEventBusy(false);
+        }
     }
 
     function removeSelectedPhoto() {
-        currentUploadedPhotoBase64 = '';
+        pendingPhotoData = '';
         $('eventPhotoInput').value = '';
         $('photoPreviewArea').classList.add('hidden');
     }
 
-    function handleSaveEvent(e) {
+    // บันทึกโน้ต: ถ้ามีรูปแล้วบันทึกรูปไม่สำเร็จ โน้ตจะไม่ถูกบันทึกเลย
+    async function handleSaveEvent(e) {
         e.preventDefault();
         const id = 'ev_' + Date.now();
-        let hasPhoto = false;
-        if (currentUploadedPhotoBase64) {
-            try {
-                localStorage.setItem(photoKey(id), currentUploadedPhotoBase64);
-                hasPhoto = true;
-            } catch {
-                showToast('พื้นที่เต็ม บันทึกโน้ตโดยไม่มีรูป');
-            }
-        }
         const date = $('eventDate').value;
-        state.events.unshift({ id, date, mood: selectedMood, title: $('eventTitle').value.trim(), hasPhoto });
+        const title = $('eventTitle').value.trim();
+        let hasPhoto = false;
+
+        if (pendingPhotoData) {
+            setEventBusy(true);
+            try {
+                await savePhotoLocal(id, pendingPhotoData, false);
+                if (currentUser && isFirebaseActive) {
+                    await uploadPhoto(id, pendingPhotoData);
+                    await markPhotoSynced(id);
+                }
+                hasPhoto = true;
+            } catch (err) {
+                console.error(err);
+                try { await idbTx('readwrite', s => s.delete(id)); } catch {}
+                setEventBusy(false);
+                alert('บันทึกรูปไม่สำเร็จ โน้ตนี้ยังไม่ถูกบันทึก\nสาเหตุ: ' + err.message + '\n\nลองใหม่อีกครั้ง หรือเลือกรูปที่มีขนาดเล็กกว่า');
+                return;
+            }
+            setEventBusy(false);
+        }
+
+        state.events.unshift({ id, date, mood: selectedMood, title, hasPhoto });
         saveData();
         closeModal('eventModal');
         selectCalendarDate(date);
@@ -1472,22 +1621,43 @@
         renderEventsList();
     }
 
-    function viewEventDetails(eventId) {
+    async function viewEventDetails(eventId) {
         const ev = state.events.find(e => e.id === eventId);
         if (!ev) return;
         $('viewEventMood').innerText = ev.mood || '😊';
         $('viewEventDate').innerText = ev.date;
         $('viewEventTitle').innerText = ev.title;
-        const photo = ev.hasPhoto ? localStorage.getItem(photoKey(ev.id)) : null;
-        if (photo) { $('viewEventPhoto').src = photo; $('viewEventPhotoContainer').classList.remove('hidden'); }
-        else { $('viewEventPhotoContainer').classList.add('hidden'); }
-        $('deleteEventBtn').onclick = () => { deleteEvent(ev.id); closeModal('viewEventModal'); };
+        $('viewEventPhotoContainer').classList.add('hidden');
+        $('viewEventPhotoNote').classList.add('hidden');
+        $('deleteEventBtn').onclick = async () => {
+            await deleteEvent(ev.id);
+            closeModal('viewEventModal');
+        };
         openModal('viewEventModal');
+
+        if (!ev.hasPhoto) return;
+
+        const note = $('viewEventPhotoNote');
+        note.innerText = 'กำลังโหลดรูป...';
+        note.classList.remove('hidden');
+        try {
+            const data = await getPhotoData(ev.id);
+            if (data) {
+                $('viewEventPhoto').src = data;
+                $('viewEventPhotoContainer').classList.remove('hidden');
+                note.classList.add('hidden');
+            } else {
+                note.innerText = 'ไม่พบรูปของโน้ตนี้ในเครื่อง ลองล็อกอิน Gmail เพื่อดึงรูปจากคลาวด์';
+            }
+        } catch (err) {
+            note.innerText = 'โหลดรูปไม่สำเร็จ: ' + err.message;
+        }
     }
 
-    function deleteEvent(id) {
+    async function deleteEvent(id) {
+        const ev = state.events.find(x => x.id === id);
+        if (ev && ev.hasPhoto) await deletePhotoEverywhere(id);
         state.events = state.events.filter(x => x.id !== id);
-        try { localStorage.removeItem(photoKey(id)); } catch {}
         saveData(); renderCalendar(); renderEventsList(); showToast('ลบโน้ตแล้ว');
     }
 
@@ -1577,7 +1747,7 @@
         sb.innerHTML = addBtn + list.map(ev => `
             <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1 cursor-pointer hover:bg-white text-xs">
                 <div class="flex justify-between items-center text-[10px]">
-                    <span>${ev.mood || '😊'} <b>${esc(ev.date)}</b></span>
+                    <span>${ev.mood || '😊'} <b>${esc(ev.date)}</b>${ev.hasPhoto ? ' 📷' : ''}</span>
                     <i class="fa-solid fa-chevron-right text-gray-400"></i>
                 </div>
                 <h4 class="font-bold text-popBlue truncate">${esc(ev.title)}</h4>
@@ -1600,7 +1770,6 @@
 
     function calcCalculate() {
         const expr = calcExpr.replace(/×/g, '*').replace(/÷/g, '/');
-        // อนุญาตเฉพาะตัวเลขและเครื่องหมายคำนวณ
         if (!/^[0-9+\-*/%.() ]+$/.test(expr)) return calcError();
         try {
             const res = Function('"use strict"; return (' + expr + ')')();
@@ -1699,11 +1868,16 @@
     }
 
     // ================= INIT =================
-    window.addEventListener('load', () => {
+    window.addEventListener('load', async () => {
         initView();
+        // ขอให้เบราว์เซอร์เก็บข้อมูลไว้อย่างถาวร ลดโอกาสที่เบราว์เซอร์จะลบรูปเอง
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().catch(() => {});
+        }
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW error:', err));
         }
+        try { await migrateLegacyPhotos(); } catch (e) { console.warn('migrate photos:', e); }
         setDefaultDates();
         refreshUI();
         initFirebase();

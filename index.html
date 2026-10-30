@@ -364,7 +364,7 @@
     <!-- MAIN HEADER PLANNER CARD (WITH COLLAPSE/EXPAND TOGGLE) -->
     <header class="bg-popBlue border-3 border-darkText text-darkText p-2.5 md:p-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-2" style="margin:8px 12px 0; width:calc(100% - 24px);">
         
-        <!-- AI SMART COMMAND BAR (SUPER SMARTER!) -->
+        <!-- AI SMART COMMAND BAR -->
         <div class="bg-white/95 border-2 border-darkText p-2 rounded-xl shadow-sm flex items-center gap-2">
             <span class="text-base shrink-0 animate-bounce">🤖</span>
             <div class="flex-1 relative">
@@ -397,7 +397,19 @@
             </div>
         </div>
 
-        <!-- ส่วนเนื้อหาที่จะถูกซ่อน/แสดง -->
+        <!-- โหมดตอนซ่อน (จะแปลงร่างเป็นไอคอนอิโมจิกลมๆ ลัดไปแต่ละหน้าทันที!) -->
+        <div id="plannerMinimizedBar" class="hidden flex items-center justify-center gap-2 py-1 overflow-x-auto">
+            <button onclick="switchTab('dashboard')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="แดชบอร์ด">📊</button>
+            <button onclick="switchTab('finance')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="รายรับ-รายจ่าย">💸</button>
+            <button onclick="switchTab('bills')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="เตรียมจ่าย">💡</button>
+            <button onclick="switchTab('planner')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="แพลนเนอร์">📋</button>
+            <button onclick="switchTab('calendar')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="ปฏิทิน">🗓️</button>
+            <button onclick="switchTab('calculator')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="คำนวณ">🧮</button>
+            <button onclick="switchTab('pet')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="สัตว์เลี้ยง">🐾</button>
+            <button onclick="openModal('quickAddModal')" class="w-9 h-9 bg-hotPink text-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-xs font-extrabold hover:scale-110 transition-all shrink-0" title="เพิ่มด่วน">+</button>
+        </div>
+
+        <!-- ส่วนเนื้อหาหลักที่จะถูกซ่อน/แสดง -->
         <div id="plannerCollapsibleBody" class="space-y-2 transition-all">
             <div id="navGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
                 <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn bg-limeGreen text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
@@ -1037,7 +1049,7 @@
             setView(saved || auto, false);
         }
 
-        // ===== ระบบ AI Smart Command (ฉลาดสุดๆ เข้าปฏิทินและแพลนเนอร์ทันที) =====
+        // ===== ระบบ AI Smart Command =====
         function executeAiCommand() {
             const input = $('aiCommandInput');
             const text = input.value.trim();
@@ -1049,7 +1061,6 @@
             const numMatch = text.match(/(\d+[\d,]*\.?\d*)/);
             const amount = numMatch ? parseFloat(numMatch[0].replace(/,/g, '')) : 0;
 
-            // 1. ตรวจสอบว่าเป็นรายรับ
             if (lower.includes('เงินเดือน') || lower.includes('รายรับ') || lower.includes('ได้เงิน') || lower.includes('ขายของ') || lower.includes('โบนัส')) {
                 const title = text.replace(numMatch ? numMatch[0] : '', '').replace(/เงินเดือน|รายรับ|ได้เงิน|ขายของ|โบนัส|พรุ่งนี้|มะรืนนี้|เมื่อวาน/g, '').trim() || 'รายรับจาก AI';
                 state.transactions.unshift({
@@ -1060,7 +1071,6 @@
                     amount: amount > 0 ? amount : 1000,
                     type: 'income'
                 });
-                // บันทึกลงปฏิทิน (Events) ด้วย
                 state.events.unshift({
                     id: 'ev_' + Date.now(),
                     date: targetDate,
@@ -1075,7 +1085,6 @@
                 return;
             }
 
-            // 2. ตรวจสอบว่าเป็นบิลเตรียมจ่าย (Bills)
             if (lower.includes('บิล') || lower.includes('ค่าเน็ต') || lower.includes('ค่าหอ') || lower.includes('ค่าไฟ') || lower.includes('ค่าน้ำ') || lower.includes('จ่าย')) {
                 const title = text.replace(numMatch ? numMatch[0] : '', '').replace(/บิล|เตรียมจ่าย|จ่าย|พรุ่งนี้|มะรืนนี้/g, '').trim() || 'บิลจาก AI';
                 state.bills.unshift({
@@ -1086,7 +1095,6 @@
                     amount: amount > 0 ? amount : 500,
                     paid: false
                 });
-                // บันทึกลงปฏิทิน (Events) ด้วย
                 state.events.unshift({
                     id: 'ev_' + Date.now(),
                     date: targetDate,
@@ -1101,7 +1109,6 @@
                 return;
             }
 
-            // 3. ตรวจสอบว่าเป็นงาน / แพลนเนอร์ (Tasks)
             if (lower.includes('งาน') || lower.includes('ส่ง') || lower.includes('ประชุม') || lower.includes('ทำ') || lower.includes('พรุ่งนี้') || lower.includes('อีก')) {
                 state.tasks.unshift({
                     id: 't_' + Date.now(),
@@ -1110,7 +1117,6 @@
                     status: 'todo',
                     desc: 'สร้างโดย AI Assistant'
                 });
-                // บันทึกลงปฏิทิน (Events) ด้วยเพื่อให้โชว์ในปฏิทิน
                 state.events.unshift({
                     id: 'ev_' + Date.now(),
                     date: targetDate,
@@ -1125,7 +1131,6 @@
                 return;
             }
 
-            // 4. ค่าเริ่มต้น: บันทึกเป็นรายจ่าย + ลงปฏิทิน
             const title = text.replace(numMatch ? numMatch[0] : '', '').trim() || text;
             state.transactions.unshift({
                 id: 'tx_' + Date.now(),
@@ -1156,12 +1161,14 @@
 
         function applyHeaderCollapseState() {
             const body = $('plannerCollapsibleBody');
+            const minimizedBar = $('plannerMinimizedBar');
             const toggleText = $('plannerToggleText');
             const toggleIcon = $('plannerToggleIcon');
-            if (!body) return;
+            if (!body || !minimizedBar) return;
 
             if (state.headerCollapsed) {
                 body.classList.add('hidden');
+                minimizedBar.classList.remove('hidden'); // แสดงไอคอนอิโมจิลัดตอนซ่อน
                 if (toggleText) toggleText.innerText = 'แสดง';
                 if (toggleIcon) {
                     toggleIcon.classList.remove('fa-chevron-up');
@@ -1169,6 +1176,7 @@
                 }
             } else {
                 body.classList.remove('hidden');
+                minimizedBar.classList.add('hidden'); // ซ่อนแถบไอคอนเมื่อกางออกเต็ม
                 if (toggleText) toggleText.innerText = 'ซ่อน';
                 if (toggleIcon) {
                     toggleIcon.classList.remove('fa-chevron-down');

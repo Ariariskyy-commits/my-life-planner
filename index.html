@@ -57,7 +57,6 @@
     </script>
 
     <style>
-        /* utilities ที่ Tailwind CDN ไม่มีให้ */
         .border-3 { border-width: 3px; }
         .border-b-3 { border-bottom-width: 3px; }
 
@@ -84,7 +83,6 @@
         body.theme-dark   { --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0; }
         body.theme-minimal{ --bg-color: #F4F4F0; --card-bg: #FFFFFF; --text-color: #2C2C2C; }
 
-        /* ธีมมืด: ทำให้การ์ดและช่องกรอกเป็นสีมืดจริง */
         body.theme-dark .bg-white { background-color: var(--card-bg) !important; }
         body.theme-dark .bg-white.text-darkText,
         body.theme-dark .bg-offWhite.text-darkText { color: var(--text-color) !important; }
@@ -104,7 +102,6 @@
             transform: scale(1.15);
         }
 
-        /* ===== ความนุ่มของทั้งเว็บ ===== */
         button:not(.tb-btn):not(.mood-btn):not(.vs-btn):hover {
             transform: translateY(-1px);
         }
@@ -130,7 +127,6 @@
             to   { opacity: 1; transform: none; }
         }
 
-        /* ===== แถบบนสุดแบบแคปซูลลอย ===== */
         .topbar {
             margin: 10px 12px 0;
             padding: 8px 12px !important;
@@ -179,7 +175,6 @@
             transform: scale(.96);
         }
 
-        /* ===== ปุ่มสลับมุมมอง ===== */
         .vs-wrap {
             display: inline-flex;
             align-items: center;
@@ -208,7 +203,6 @@
         }
         .vs-btn i { font-size: .75rem; }
 
-        /* ===== กรอบแอป (Sticky Footer Layout ที่สมบูรณ์) ===== */
         #appFrame {
             margin: 0 auto;
             min-height: 100vh;
@@ -261,16 +255,14 @@
     <!-- FLOATING PET & QUICK NOTES WIDGET (MINIMALIST TOGGLE) -->
     <div id="floatingPetWidget" class="fixed bottom-3 left-3 z-[9999] flex flex-col items-start gap-1.5 select-none max-w-[240px]">
         
-        <!-- รูปแบบตอนย่อ (เหลือแค่วงกลมรูปสัตว์เลี้ยงมินิมอล พร้อมจุดแดงแจ้งเตือนโน้ต) -->
+        <!-- รูปแบบตอนย่อ -->
         <div id="floatingMinimizedBtn" onclick="toggleQuickNoteListVisibility()" class="hidden relative bg-sunnyYellow border-2 border-darkText w-12 h-12 rounded-full shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-all" title="เปิดโน้ตด่วนและสัตว์เลี้ยง">
             <span id="minimizedPetAvatar" class="text-xl">🐱</span>
-            <!-- จุดแดงเตือน (Badge) ถ้ามีโน้ตด่วน -->
             <span id="quickNoteBadge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-hotPink text-white font-extrabold text-[9px] rounded-full border border-darkText flex items-center justify-center animate-pulse">!</span>
         </div>
 
-        <!-- รูปแบบตอนกางออก (เต็มรูปแบบ) -->
+        <!-- รูปแบบตอนกางออก -->
         <div id="floatingExpandedContainer" class="w-full space-y-1.5">
-            <!-- กล่องโน้ตด่วนลอย -->
             <div id="floatingQuickNoteBox" class="bg-sunnyYellow border-2 border-darkText rounded-xl p-2.5 shadow-md w-full relative space-y-2">
                 <div class="flex justify-between items-center border-b border-darkText/20 pb-1">
                     <span class="text-[10px] font-extrabold text-darkText flex items-center gap-1">
@@ -284,7 +276,6 @@
                 <div id="floatingQuickNotesList" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
             </div>
 
-            <!-- ตัวสัตว์เลี้ยง (กดเพื่อสลับไปหน้าสัตว์เลี้ยง) -->
             <div class="bg-sunnyYellow border-2 border-darkText rounded-xl px-2.5 py-1.5 shadow-sm flex items-center justify-between gap-2 cursor-pointer hover:scale-105 transition-all w-full" onclick="switchTab('pet')">
                 <div class="flex items-center gap-1.5 overflow-hidden">
                     <div id="petAvatar" class="text-base bg-white w-6 h-6 rounded-lg border border-darkText flex items-center justify-center shrink-0">🐱</div>
@@ -340,22 +331,22 @@
         </div>
     </div>
 
-    <!-- HEADER NAV -->
-    <header class="bg-popBlue border-2 border-darkText text-white px-3 py-2.5 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0" style="margin:10px 12px 0; width:calc(100% - 24px);">
+    <!-- HEADER NAV (จัดระเบียบปุ่มเมนูให้เรียบร้อย สวยงาม ไม่อัดแน่นและอยู่ในแนวเดียวกัน) -->
+    <header class="bg-popBlue border-2 border-darkText text-white px-4 py-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0" style="margin:10px 12px 0; width:calc(100% - 24px);">
         <div class="w-full flex flex-col lg:flex-row items-center justify-between gap-3">
-            <div class="bg-limeGreen text-darkText font-cute font-bold text-xl px-2.5 py-0.5 rounded-xl border-2 border-darkText shadow-sm -rotate-2">
+            <div class="bg-limeGreen text-darkText font-cute font-bold text-xl px-3 py-1 rounded-xl border-2 border-darkText shadow-sm -rotate-2">
                 ✨ Y2K PLANNER
             </div>
-            <nav class="flex flex-wrap items-center justify-center gap-1 bg-white/10 p-1 rounded-xl border border-darkText">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs bg-limeGreen text-darkText border border-darkText shadow-sm flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-house"></i></span> แดชบอร์ด</button>
-                <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-arrow-right-arrow-left"></i></span> รายรับ-รายจ่าย</button>
-                <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-receipt"></i></span> เตรียมจ่าย</button>
-                <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-list-check"></i></span> แพลนเนอร์</button>
-                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-regular fa-calendar"></i></span> ปฏิทิน</button>
-                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-calculator"></i></span> คำนวณ</button>
-                <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-paw"></i></span> สัตว์เลี้ยง</button>
+            <nav class="flex flex-wrap items-center justify-center gap-2 bg-white/10 p-2 rounded-xl border border-darkText">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs bg-limeGreen text-darkText border border-darkText shadow-sm flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-solid fa-house"></i></span> แดชบอร์ด</button>
+                <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-solid fa-arrow-right-arrow-left"></i></span> รายรับ-รายจ่าย</button>
+                <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-solid fa-receipt"></i></span> เตรียมจ่าย</button>
+                <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-solid fa-list-check"></i></span> แพลนเนอร์</button>
+                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-regular fa-calendar"></i></span> ปฏิทิน</button>
+                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-solid fa-calculator"></i></span> คำนวณ</button>
+                <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1.5"><span class="header-nav-icon"><i class="fa-solid fa-paw"></i></span> สัตว์เลี้ยง</button>
             </nav>
-            <button onclick="openModal('quickAddModal')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center gap-1.5">
+            <button onclick="openModal('quickAddModal')" class="bg-hotPink text-white font-bold px-3.5 py-2 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center gap-1.5">
                 <span class="header-nav-icon"><i class="fa-solid fa-plus"></i></span> เพิ่มด่วน
             </button>
         </div>
@@ -710,7 +701,6 @@
                 <div><label class="block font-bold mb-0.5">ชื่อบิล</label><input type="text" id="billTitle" placeholder="เช่น ค่าหอ" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div><label class="block font-bold mb-0.5">กำหนดจ่าย</label><input type="date" id="billDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 
-                <!-- ส่วนระบุงวด (กดก็ได้ ไม่กดก็ได้) -->
                 <div class="bg-offWhite p-2.5 rounded-xl border border-darkText space-y-2">
                     <label class="flex items-center gap-2 cursor-pointer font-bold">
                         <input type="checkbox" id="billUseInstallment" onchange="toggleInstallmentInput()" class="w-4 h-4 rounded accent-popBlue">
@@ -840,7 +830,6 @@
     </div>
 
     <script>
-        // ================= UTILITIES =================
         const $ = id => document.getElementById(id);
         const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
         const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -873,7 +862,6 @@
             ]).finally(() => clearTimeout(timer));
         }
 
-        // ================= VIEW SWITCHER =================
         function setView(view, save = true) {
             if (!['desktop', 'tablet', 'mobile'].includes(view)) view = 'desktop';
             document.documentElement.setAttribute('data-view', view);
@@ -892,7 +880,6 @@
             setView(saved || auto, false);
         }
 
-        // ================= PHOTO STORAGE (IndexedDB & Firestore) =================
         let photoDbPromise = null;
         function photoDB() {
             if (!photoDbPromise) {
@@ -1032,7 +1019,6 @@
             });
         }
 
-        // ================= STATE & STORAGE =================
         const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show' };
         const DEFAULT_CATEGORIES = [
             "🍔 อาหาร/เครื่องดื่ม", "🛍️ ช้อปปิ้ง", "🚗 เดินทาง",
@@ -1084,7 +1070,6 @@
             scheduleCloudSave();
         }
 
-        // ================= FIREBASE: AUTH + CLOUD SYNC =================
         let auth = null, db = null, currentUser = null, isFirebaseActive = false, syncTimer = null;
         let googleLoginInProgress = false;
 
@@ -1285,7 +1270,6 @@
             saveLocal();
         }
 
-        // ================= BACKUP / RESTORE =================
         function collectMeta() {
             return {
                 app: 'y2k-planner', version: 3, exportedAt: new Date().toISOString(),
@@ -1352,7 +1336,6 @@
             showToast('คืนค่าข้อมูลสำเร็จ! ✨');
         }
 
-        // ================= QUICK NOTES WIDGET =================
         function openQuickNoteModal() {
             $('quickNoteForm').reset();
             openModal('quickNoteModal');
@@ -1393,7 +1376,6 @@
             if (!Array.isArray(state.quickNotes)) state.quickNotes = [];
             const hasNotes = state.quickNotes.length > 0;
 
-            // แสดงจุดแดงเตือนถ้ามีโน้ตด่วน
             if (hasNotes) {
                 badge.classList.remove('hidden');
             } else {
@@ -1418,7 +1400,6 @@
             }
         }
 
-        // ================= THEME & PET =================
         const PET_MOOD_FACES = {
             '🐱': { sad: '😿', low: '😾', good: '😺', rich: '😻' },
             '🐶': { sad: '🥺', low: '🐕', good: '🐶', rich: '🐶✨' },
@@ -1506,7 +1487,6 @@
                 </div>`).join('');
         }
 
-        // ================= NAVIGATION =================
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1541,7 +1521,6 @@
             renderQuickNotesWidget();
         }
 
-        // ================= FINANCE =================
         function updateCategorySelects(selectedVal = '') {
             const cats = state.categories || DEFAULT_CATEGORIES;
             const html = cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
@@ -1668,7 +1647,6 @@
                 </tr>`).join('');
         }
 
-        // ================= BILLS =================
         function toggleInstallmentInput() {
             const useInst = $('billUseInstallment').checked;
             $('installmentInputs').classList.toggle('hidden', !useInst);
@@ -1832,7 +1810,6 @@
                 </div>`).join('');
         }
 
-        // ================= PLANNER =================
         function openTaskModal(editId = null) {
             $('taskForm').reset();
             $('taskId').value = '';
@@ -1919,7 +1896,6 @@
             $('dashPendingTasks').innerText = state.tasks.filter(t => t.status !== 'done').length + ' รายการ';
         }
 
-        // ================= CALENDAR & DIARY =================
         let currentCalendarDate = new Date();
         let selectedCalendarDate = null;
         let selectedMood = '😊';
@@ -2146,7 +2122,6 @@
                 </div>`).join('');
         }
 
-        // ================= CALCULATOR =================
         let calcExpr = '0';
         let lastCalcResult = 0;
 
@@ -2248,7 +2223,6 @@
             $('txTitle').value = noteDesc;
         }
 
-        // ================= DASHBOARD =================
         function renderDashboard() {
             const { inc, exp, net } = calcNetBalance();
             const month = thisMonthKey();
@@ -2316,7 +2290,6 @@
             });
         }
 
-        // ================= INIT =================
         window.addEventListener('load', async () => {
             initView();
             if (navigator.storage && navigator.storage.persist) {

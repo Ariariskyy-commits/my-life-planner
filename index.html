@@ -361,15 +361,15 @@
         </div>
     </div>
 
-    <!-- MAIN HEADER PLANNER CARD (ปรับกรอบน้ำเงิน: ชื่อแอปและสวัสดีตอนค่ำอยู่บรรทัดเดียวกัน) -->
+    <!-- MAIN HEADER PLANNER CARD (ชื่อแอปยาวเต็มพื้นที่ตามบรีฟ) -->
     <header class="bg-popBlue border-3 border-darkText text-darkText p-2.5 md:p-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-2" style="margin:8px 12px 0; width:calc(100% - 24px);">
         
-        <!-- แถวบน: โลโก้ Y2K และ สถานะสวัสดีตอนค่ำ อยู่บรรทัดเดียวกัน -->
+        <!-- แถวบน: โลโก้ Y2K ยาวเต็ม และสถานะสวัสดีตอนค่ำ -->
         <div class="flex items-center justify-between gap-2">
-            <div class="bg-limeGreen text-darkText font-cute font-extrabold text-sm sm:text-base px-2.5 py-1 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1 shrink-0">
+            <div class="bg-limeGreen text-darkText font-cute font-extrabold text-sm sm:text-base px-3.5 py-1 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1.5 flex-1 max-w-[260px]">
                 <span>✨</span> Y2K PLANNER
             </div>
-            <div class="bg-white/90 border-2 border-darkText px-2 py-1 rounded-xl shadow-sm text-right flex items-center gap-1.5 min-w-0">
+            <div class="bg-white/90 border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-right flex items-center gap-1.5 min-w-0">
                 <div class="text-right truncate">
                     <span class="text-[10px] sm:text-[11px] font-extrabold text-darkText block truncate" id="greetingText">สวัสดีตอนค่ำ 🌙</span>
                     <span class="text-[8px] sm:text-[9px] font-bold text-gray-500 block truncate">* วันนี้ที่ดูยอดแล้ว</span>
@@ -378,9 +378,8 @@
             </div>
         </div>
 
-        <!-- เมนูปุ่มกดการ์ดขนาดใหญ่ (จัดเรียง 3 แถว) -->
+        <!-- เมนูปุ่มกดการ์ดขนาดใหญ่ (จัดเรียง 3 คอลัมน์) -->
         <div id="navGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
-            <!-- แถวที่ 1: แดชบอร์ด, รายรับ-รายจ่าย, เตรียมจ่าย -->
             <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn bg-limeGreen text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
                 <span class="flex items-center gap-1.5"><i class="fa-solid fa-house text-xs"></i> แดชบอร์ด</span>
                 <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
@@ -394,7 +393,6 @@
                 <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
             </button>
 
-            <!-- แถวที่ 2: แพลนเนอร์, ปฏิทิน, คำนวณ -->
             <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
                 <span class="flex items-center gap-1.5"><i class="fa-solid fa-list-check text-sunnyYellow text-xs"></i> แพลนเนอร์</span>
                 <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
@@ -409,13 +407,11 @@
             </button>
         </div>
 
-        <!-- แถวที่ 3: สัตว์เลี้ยง (เต็มแถว) -->
         <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn w-full bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
             <span class="flex items-center gap-1.5"><i class="fa-solid fa-paw text-hotPink text-xs"></i> สัตว์เลี้ยง</span>
             <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
         </button>
 
-        <!-- ปุ่มเพิ่มด่วนสีชมพูขอบดำหนา -->
         <button onclick="openModal('quickAddModal')" class="w-full bg-hotPink text-white font-extrabold py-2 px-3 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center justify-center gap-1.5 hover:brightness-105 active:scale-[0.99] transition-all">
             <i class="fa-solid fa-plus text-xs"></i> เพิ่มด่วน
         </button>
@@ -425,28 +421,40 @@
 
         <!-- DASHBOARD -->
         <section id="tab-dashboard" class="tab-content space-y-4">
-            <!-- ปรับกรอบสีเหลืองด้านล่างให้ดีไซน์อินเตอร์เหมือนภาพขวา มีสถานะแมวและอารมณ์เดือน -->
-            <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 text-darkText">
-                <div class="space-y-1.5 flex-1 w-full">
-                    <div class="flex items-center justify-between">
-                        <span class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">📊 อารมณ์เดือนนี้</span>
-                        <button onclick="switchTab('calendar')" class="text-[10px] font-extrabold bg-white border border-darkText px-2.5 py-0.5 rounded-lg shadow-sm hover:bg-limeGreen transition-all">ดูทั้งหมด ›</button>
+            
+            <!-- การ์ดสีเหลือง: อารมณ์เดือนนี้ (ดีไซน์ตรงตามภาพตัวอย่างเป๊ะ) -->
+            <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-darkText">
+                <div class="flex items-center justify-between">
+                    <span class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">📊 อารมณ์เดือนนี้</span>
+                    <button onclick="switchTab('calendar')" class="text-[10px] font-extrabold bg-white border border-darkText px-3 py-1 rounded-lg shadow-sm hover:bg-limeGreen transition-all">ดูทั้งหมด ›</button>
+                </div>
+                
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="space-y-2 flex-1 w-full">
+                        <h2 id="dashCalendarMonthMoodTitle" class="text-base sm:text-lg font-extrabold font-cute">อารมณ์เดือนตุลาคม 2569</h2>
+                        <div class="bg-white/90 border-2 border-darkText p-3 rounded-xl shadow-sm">
+                            <p id="dashCalendarMonthMoodSummary" class="font-bold text-xs text-darkText">เดือนนี้แฮปปี้สุดๆ ไปเลย! (1 วัน) 🌸</p>
+                        </div>
                     </div>
-                    <h2 id="dashCalendarMonthMoodTitle" class="text-base sm:text-lg font-extrabold font-cute">อารมณ์เดือนตุลาคม 2569</h2>
-                    <div class="bg-white/90 border-2 border-darkText p-2.5 rounded-xl shadow-sm">
-                        <p id="dashCalendarMonthMoodSummary" class="font-bold text-xs text-darkText">เดือนนี้แฮปปี้สุดๆ ไปเลย! (1 วัน) 🌸</p>
+
+                    <!-- ฝั่งขวา: หัวแมวใหญ่พร้อมเครื่องหมายตกใจเด่นๆ เหมือนภาพตัวอย่าง -->
+                    <div class="relative cursor-pointer hover:scale-105 transition-all shrink-0 p-2" onclick="switchTab('pet')">
+                        <div id="dashCatAvatar" class="text-5xl sm:text-6xl drop-shadow-md">🐱</div>
+                        <span class="absolute top-0 right-0 w-6 h-6 bg-hotPink text-white font-extrabold text-xs rounded-full border-2 border-darkText flex items-center justify-center animate-pulse shadow-sm">!</span>
                     </div>
                 </div>
-                <div class="flex items-center gap-2 cursor-pointer hover:scale-105 transition-all shrink-0 bg-white/80 p-2.5 rounded-2xl border-2 border-darkText shadow-sm" onclick="switchTab('pet')">
-                    <div class="relative">
-                        <div id="dashCatAvatar" class="text-4xl">🐱</div>
-                        <span class="absolute -top-1 -right-1 w-4 h-4 bg-hotPink text-white font-extrabold text-[9px] rounded-full border border-darkText flex items-center justify-center animate-pulse">!</span>
-                    </div>
-                    <div class="text-left">
-                        <span class="text-[10px] font-extrabold text-popBlue block flex items-center gap-1">คำทักทายวันนี้ 🐾</span>
-                        <p id="dashCatSpeechText" class="text-[11px] font-bold text-hotPink mt-0.5 max-w-[140px] truncate">เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭</p>
+            </div>
+
+            <!-- การ์ดคำทักทายสัตว์เลี้ยง (กล่องคำพูดตามบรีฟ) -->
+            <div class="bg-white text-darkText p-3 rounded-2xl border-2 border-darkText shadow-sm flex items-center justify-between gap-3 cursor-pointer hover:bg-offWhite transition-all" onclick="switchTab('pet')">
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <div class="w-8 h-8 bg-sunnyYellow rounded-xl border-2 border-darkText flex items-center justify-center text-base shrink-0 shadow-sm">🐾</div>
+                    <div class="overflow-hidden">
+                        <span class="text-[10px] font-extrabold text-popBlue block">คำทักทายวันนี้ 🐾</span>
+                        <p id="dashCatSpeechText" class="text-xs font-bold text-hotPink truncate">เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭</p>
                     </div>
                 </div>
+                <i class="fa-solid fa-chevron-right text-xs opacity-60 shrink-0"></i>
             </div>
 
             <!-- ยอดเงินสุทธิคงเหลือ -->
@@ -1477,7 +1485,6 @@
             state.quickNotes.unshift({ id: 'qn_' + Date.now(), text });
             state.quickNoteShow = true;
             saveData();
-            closeModal('quickNoteModal');
             renderQuickNotesWidget();
             showToast('เพิ่มโน้ตด่วนแล้ว! 📌');
         }

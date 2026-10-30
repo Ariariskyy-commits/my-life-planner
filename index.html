@@ -2,29 +2,32 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Y2K Playful Life Planner - รายรับรายจ่าย แพลนเนอร์ & สัตว์เลี้ยงส่วนตัว</title>
-    
-    <!-- PWA Settings & App Icon -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Y2K Playful Life Planner</title>
+
+    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link id="appleIcon" rel="apple-touch-icon" href="icon.svg">
     <meta name="theme-color" content="#0055FF">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="./icon.jpg">
+    <meta name="apple-mobile-web-app-title" content="Y2K Planner">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-    <!-- Tailwind CSS & Fonts & Icons -->
+    <!-- Tailwind, Fonts, Icons, Chart.js (pinned) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (pinned) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // กำหนดค่า Firebase ของคุณตรงนี้ (ถ้ามี) หรือปล่อยไว้ใช้โหมดจำลอง
+        // ===== ตั้งค่า Firebase (กรอกครั้งเดียว ค่าจาก Firebase Console > Project settings) =====
+        // ถ้ายังไม่กรอก แอปจะทำงานแบบเครื่องเดียว (ข้อมูลอยู่ในเครื่อง) ไม่มีการล็อกอินปลอม
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -33,33 +36,14 @@
             messagingSenderId: "YOUR_SENDER_ID",
             appId: "YOUR_APP_ID"
         };
-
-        let auth = null;
-        let db = null;
-        let isFirebaseActive = false;
-
-        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
-            try {
-                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-                auth = firebase.auth();
-                db = firebase.firestore();
-                isFirebaseActive = true;
-            } catch(e) {
-                console.warn("Firebase Init bypassed:", e);
-            }
-        }
+        const IS_CONFIGURED = !!firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("YOUR_");
 
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        popBlue: '#0055FF',
-                        limeGreen: '#CCFF00',
-                        hotPink: '#FF007F',
-                        sunnyYellow: '#FFDD00',
-                        retroPurple: '#9D00FF',
-                        darkText: '#1A1A1A',
-                        offWhite: '#F9F9FB'
+                        popBlue: '#0055FF', limeGreen: '#CCFF00', hotPink: '#FF007F',
+                        sunnyYellow: '#FFDD00', retroPurple: '#9D00FF', darkText: '#1A1A1A', offWhite: '#F9F9FB'
                     },
                     fontFamily: {
                         sans: ['Prompt', 'sans-serif'],
@@ -67,25 +51,43 @@
                     }
                 }
             }
-        }
+        };
     </script>
+
     <style>
+        /* utilities ที่ Tailwind CDN ไม่มีให้ */
+        .border-3 { border-width: 3px; }
+        .border-b-3 { border-bottom-width: 3px; }
+
         html, body {
-            width: 100% !important;
-            min-height: 100vh !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow-x: hidden !important;
+            width: 100%;
+            margin: 0;
+            overflow-x: hidden;
             font-family: 'Prompt', sans-serif;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
             background-color: var(--bg-color, #F9F9FB);
             color: var(--text-color, #1A1A1A);
-            box-sizing: border-box !important;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
         }
 
-        body.theme-y2k { --bg-color: #F9F9FB; --card-bg: #FFFFFF; --text-color: #1A1A1A; }
+        body.theme-y2k    { --bg-color: #F9F9FB; --card-bg: #FFFFFF; --text-color: #1A1A1A; }
         body.theme-pastel { --bg-color: #FFF0F5; --card-bg: #FFFFFF; --text-color: #4A4045; }
-        body.theme-dark { --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0; }
-        body.theme-minimal { --bg-color: #F4F4F0; --card-bg: #FFFFFF; --text-color: #2C2C2C; }
+        body.theme-dark   { --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0; }
+        body.theme-minimal{ --bg-color: #F4F4F0; --card-bg: #FFFFFF; --text-color: #2C2C2C; }
+
+        /* ธีมมืด: ทำให้การ์ดและช่องกรอกเป็นสีมืดจริง */
+        body.theme-dark .bg-white { background-color: var(--card-bg) !important; }
+        body.theme-dark .bg-white.text-darkText,
+        body.theme-dark .bg-offWhite.text-darkText { color: var(--text-color) !important; }
+        body.theme-dark .bg-offWhite { background-color: #2A2A2A !important; }
+        body.theme-dark input, body.theme-dark select, body.theme-dark textarea,
+        body.theme-dark td, body.theme-dark th { color: var(--text-color); }
+        body.theme-dark .border-darkText { border-color: #5a5a5a !important; }
+        body.theme-dark .text-gray-500, body.theme-dark .text-gray-400, body.theme-dark .text-gray-600 { color: #aaa !important; }
 
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #eee; }
@@ -101,47 +103,48 @@
 <body class="theme-y2k min-h-screen flex flex-col relative pb-20">
 
     <!-- FLOATING PET -->
-    <div id="floatingPet" class="fixed bottom-2 left-2 z-[9999] bg-sunnyYellow border-2 border-darkText rounded-xl px-2 py-1 shadow-sm flex items-center gap-1.5 animate-bounce cursor-pointer select-none hover:scale-105 transition-all max-w-[150px]" onclick="switchTab('pet')">
-        <div id="petAvatar" class="text-base bg-white w-5 h-5 rounded-lg border border-darkText flex items-center justify-center shrink-0">🐱</div>
+    <div id="floatingPet" class="fixed bottom-3 left-3 z-[9999] bg-sunnyYellow border-2 border-darkText rounded-xl px-2 py-1 shadow-sm flex items-center gap-1.5 cursor-pointer select-none hover:scale-105 transition-all max-w-[160px]" onclick="switchTab('pet')">
+        <div id="petAvatar" class="text-base bg-white w-6 h-6 rounded-lg border border-darkText flex items-center justify-center shrink-0">🐱</div>
         <div class="overflow-hidden pr-0.5">
-            <span id="floatingPetName" class="text-[8px] font-extrabold text-darkText block truncate">สัตว์เลี้ยง</span>
-            <p id="petSpeechBubble" class="text-[8px] font-bold text-hotPink truncate">ยินดีต้อนรับ! 💰</p>
+            <span id="floatingPetName" class="text-[9px] font-extrabold text-darkText block truncate">สัตว์เลี้ยง</span>
+            <p id="petSpeechBubble" class="text-[9px] font-bold text-hotPink truncate">ยินดีต้อนรับ! 💰</p>
         </div>
     </div>
 
-    <!-- THEME & AUTH BAR -->
+    <!-- TOP BAR: THEME, BACKUP, AUTH -->
     <div class="bg-darkText text-white px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold w-full">
         <div class="flex items-center gap-1 flex-wrap">
-            <span>🎨 ธีม:</span>
+            <span>🎨</span>
             <button onclick="setTheme('y2k')" class="px-2 py-0.5 rounded bg-popBlue text-white">Y2K</button>
             <button onclick="setTheme('pastel')" class="px-2 py-0.5 rounded bg-pink-400 text-white">พาสเทล</button>
             <button onclick="setTheme('dark')" class="px-2 py-0.5 rounded bg-gray-800 text-white">ดาร์ก</button>
             <button onclick="setTheme('minimal')" class="px-2 py-0.5 rounded bg-gray-300 text-darkText">มินิมอล</button>
+            <span class="mx-1 opacity-40">|</span>
+            <button onclick="exportBackup()" class="px-2 py-0.5 rounded bg-limeGreen text-darkText">⬇ สำรองข้อมูล</button>
+            <label class="px-2 py-0.5 rounded bg-sunnyYellow text-darkText cursor-pointer">⬆ คืนค่า
+                <input type="file" accept="application/json,.json" onchange="importBackup(event)" class="hidden">
+            </label>
         </div>
-        
+
         <div class="flex items-center gap-2">
-            <div id="authContainer">
-                <button id="googleLoginBtn" onclick="loginWithGoogle()" class="px-2.5 py-0.5 rounded bg-white text-darkText border border-darkText flex items-center gap-1 font-bold text-[11px]">
-                    <i class="fa-brands fa-google text-red-500"></i> ล็อกอิน Gmail
-                </button>
-                <div id="userProfileArea" class="hidden flex items-center gap-1.5 bg-white/20 px-2 py-0.5 rounded">
-                    <img id="userAvatarImg" class="w-5 h-5 rounded-full" src="" alt="User">
-                    <span id="userNameText" class="text-[11px] font-bold text-limeGreen"></span>
-                    <button onclick="logoutGoogle()" class="text-[9px] bg-hotPink text-white px-1.5 py-0.2 rounded">ออก</button>
-                </div>
+            <span id="syncStatus" class="text-[10px] opacity-80">กำลังเตรียม...</span>
+            <button id="googleLoginBtn" onclick="loginWithGoogle()" class="px-2.5 py-0.5 rounded bg-white text-darkText border border-darkText flex items-center gap-1 font-bold text-[11px]">
+                <i class="fa-brands fa-google text-red-500"></i> ล็อกอิน Gmail
+            </button>
+            <div id="userProfileArea" class="hidden flex items-center gap-1.5 bg-white/20 px-2 py-0.5 rounded">
+                <img id="userAvatarImg" class="w-5 h-5 rounded-full" src="" alt="">
+                <span id="userNameText" class="text-[11px] font-bold text-limeGreen max-w-[100px] truncate"></span>
+                <button onclick="logoutGoogle()" class="text-[9px] bg-hotPink text-white px-1.5 py-0.5 rounded">ออก</button>
             </div>
         </div>
     </div>
 
-    <!-- TOP HEADER NAVBAR -->
+    <!-- HEADER NAV -->
     <header class="bg-popBlue border-b-3 border-darkText text-white px-3 py-2.5 shadow-[0_3px_0px_#1A1A1A] w-full">
         <div class="w-full flex flex-col lg:flex-row items-center justify-between gap-3">
-            <div class="flex items-center space-x-2">
-                <div class="bg-limeGreen text-darkText font-cute font-bold text-xl px-2.5 py-0.5 rounded-xl border-2 border-darkText shadow-sm transform -rotate-2">
-                    ✨ Y2K PLANNER
-                </div>
+            <div class="bg-limeGreen text-darkText font-cute font-bold text-xl px-2.5 py-0.5 rounded-xl border-2 border-darkText shadow-sm -rotate-2">
+                ✨ Y2K PLANNER
             </div>
-
             <nav class="flex flex-wrap items-center justify-center gap-1 bg-white/10 p-1 rounded-xl border border-darkText">
                 <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs bg-limeGreen text-darkText border border-darkText shadow-sm flex items-center gap-1"><i class="fa-solid fa-chart-pie"></i> แดชบอร์ด</button>
                 <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-wallet"></i> รายรับ-รายจ่าย</button>
@@ -151,19 +154,15 @@
                 <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-calculator"></i> คำนวณ</button>
                 <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><i class="fa-solid fa-paw"></i> สัตว์เลี้ยง</button>
             </nav>
-
-            <div class="flex items-center">
-                <button onclick="openModal('quickAddModal')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus"></i> เพิ่มด่วน
-                </button>
-            </div>
+            <button onclick="openModal('quickAddModal')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-plus"></i> เพิ่มด่วน
+            </button>
         </div>
     </header>
 
-    <!-- MAIN CONTAINER -->
     <main class="flex-1 w-full max-w-5xl mx-auto p-3 md:p-5 relative">
 
-        <!-- TAB 1: DASHBOARD -->
+        <!-- DASHBOARD -->
         <section id="tab-dashboard" class="tab-content space-y-4">
             <div class="bg-gradient-to-r from-limeGreen to-sunnyYellow p-4 md:p-5 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 text-darkText">
                 <div class="space-y-1">
@@ -171,7 +170,7 @@
                     <h1 class="text-xl md:text-2xl font-extrabold font-cute">จัดการชีวิต เงินทอง & แพลนวันนี้ให้ปังปุริเย่ 🌟</h1>
                 </div>
                 <div class="bg-white p-3 rounded-xl border-2 border-darkText text-center shadow-sm">
-                    <span class="text-[10px] font-bold text-gray-500 block">ยอดเงินสุทธิคงเหลือ</span>
+                    <span class="text-[10px] font-bold text-gray-500 block">ยอดเงินสุทธิคงเหลือ (ทั้งหมด)</span>
                     <span id="dashNetBalance" class="text-xl font-extrabold text-popBlue">฿ 0.00</span>
                 </div>
             </div>
@@ -190,29 +189,27 @@
                     <div class="w-9 h-9 bg-retroPurple/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-retroPurple"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                 </div>
                 <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                    <div><p class="text-xs font-bold text-gray-500">งานวันนี้</p><h3 id="dashPendingTasks" class="text-lg font-extrabold text-popBlue">0 รายการ</h3></div>
+                    <div><p class="text-xs font-bold text-gray-500">งานค้างอยู่</p><h3 id="dashPendingTasks" class="text-lg font-extrabold text-popBlue">0 รายการ</h3></div>
                     <div class="w-9 h-9 bg-popBlue/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-popBlue"><i class="fa-solid fa-list-check"></i></div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 flex flex-col">
-                    <h3 class="font-cute font-bold text-base mb-3 flex items-center gap-2"><i class="fa-solid fa-chart-bar text-popBlue"></i> สรุปสัดส่วนรายจ่ายตามหมวดหมู่</h3>
-                    <div class="relative flex-1 flex items-center justify-center min-h-[200px]"><canvas id="expenseCategoryChart" class="max-h-[220px]"></canvas></div>
+                    <h3 class="font-cute font-bold text-base mb-3 flex items-center gap-2"><i class="fa-solid fa-chart-pie text-popBlue"></i> สัดส่วนรายจ่ายตามหมวดหมู่ (ทั้งหมด)</h3>
+                    <div class="relative flex-1 flex items-center justify-center min-h-[220px]"><canvas id="expenseCategoryChart"></canvas></div>
                 </div>
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
                     <div class="flex items-center justify-between mb-3">
-                        <h3 class="font-cute font-bold text-base flex items-center gap-2"><i class="fa-solid fa-bolt text-sunnyYellow"></i> แพลนด่วนวันนี้</h3>
+                        <h3 class="font-cute font-bold text-base flex items-center gap-2"><i class="fa-solid fa-bolt text-sunnyYellow"></i> งานค้างอยู่</h3>
                         <button onclick="switchTab('planner')" class="text-xs font-bold text-popBlue underline">ดูทั้งหมด</button>
                     </div>
-                    <div id="dashTodoList" class="space-y-2 overflow-y-auto max-h-[200px] pr-1 text-xs">
-                        <div class="text-center py-8 text-gray-400">ไม่มีรายการแพลนเนอร์ค้างอยู่ 🎉</div>
-                    </div>
+                    <div id="dashTodoList" class="space-y-2 overflow-y-auto max-h-[240px] pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
 
-        <!-- TAB 2: FINANCE -->
+        <!-- FINANCE -->
         <section id="tab-finance" class="tab-content hidden space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
                 <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-wallet text-popBlue"></i> บันทึกรายรับ - รายจ่าย</h2>
@@ -221,13 +218,11 @@
                     <button onclick="openTransactionModal('expense')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-minus-circle"></i> เพิ่มรายจ่าย</button>
                 </div>
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div class="bg-limeGreen/20 text-darkText p-3.5 rounded-xl border-2 border-darkText"><span class="text-xs font-bold text-gray-600 block">รายรับทั้งหมด</span><h3 id="finTotalIncome" class="text-2xl font-extrabold text-green-700 mt-0.5">฿ 0.00</h3></div>
                 <div class="bg-hotPink/10 text-darkText p-3.5 rounded-xl border-2 border-darkText"><span class="text-xs font-bold text-gray-600 block">รายจ่ายทั้งหมด</span><h3 id="finTotalExpense" class="text-2xl font-extrabold text-hotPink mt-0.5">฿ 0.00</h3></div>
                 <div class="bg-popBlue/10 text-darkText p-3.5 rounded-xl border-2 border-darkText"><span class="text-xs font-bold text-gray-600 block">เงินคงเหลือสุทธิ</span><h3 id="finNetBalance" class="text-2xl font-extrabold text-popBlue mt-0.5">฿ 0.00</h3></div>
             </div>
-
             <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
                     <h3 class="font-cute font-bold text-base">ประวัติรายการเงิน</h3>
@@ -243,7 +238,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-xs">
                         <thead>
-                            <tr class="bg-offWhite border-b-2 border-darkText font-bold uppercase">
+                            <tr class="bg-offWhite border-b-2 border-darkText font-bold">
                                 <th class="p-2.5 border-r border-darkText">วันที่</th>
                                 <th class="p-2.5 border-r border-darkText">ประเภท</th>
                                 <th class="p-2.5 border-r border-darkText">หมวดหมู่</th>
@@ -258,16 +253,17 @@
             </div>
         </section>
 
-        <!-- TAB 3: UPCOMING BILLS -->
+        <!-- BILLS -->
         <section id="tab-bills" class="tab-content hidden space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
                 <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย</h2>
                 <button onclick="openBillModal()" class="bg-retroPurple text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มบิล</button>
             </div>
+            <p class="text-[11px] font-bold text-gray-500">กด "จ่าย" เพื่อบันทึกเป็นรายจ่ายอัตโนมัติ (กด "ยกเลิก" จะลบรายการนั้นออกด้วย)</p>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="billsGrid"></div>
         </section>
 
-        <!-- TAB 4: PLANNER -->
+        <!-- PLANNER -->
         <section id="tab-planner" class="tab-content hidden space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
                 <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-list-check text-popBlue"></i> แพลนเนอร์</h2>
@@ -289,7 +285,7 @@
             </div>
         </section>
 
-        <!-- TAB 5: CALENDAR & DIARY -->
+        <!-- CALENDAR -->
         <section id="tab-calendar" class="tab-content hidden space-y-4">
             <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-darkText">
                 <div class="space-y-1 flex-1">
@@ -301,16 +297,17 @@
                     <div id="calPetAvatar" class="text-3xl bg-sunnyYellow/30 w-11 h-11 rounded-xl border border-darkText flex items-center justify-center">🐱</div>
                     <div>
                         <span class="text-[10px] font-extrabold text-popBlue block">คำทักทายวันนี้ 🐾</span>
-                        <p id="calPetSpeechText" class="text-[11px] font-bold text-hotPink mt-0.5">"จิ้มเลือกวันที่ได้เลย!"</p>
+                        <p id="calPetSpeechText" class="text-[11px] font-bold text-hotPink mt-0.5">จิ้มเลือกวันที่ได้เลย!</p>
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h3 id="calMonthYearLabel" class="font-cute font-extrabold text-xl">ตุลาคม 2569</h3>
-                        <div class="flex gap-1.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <h3 id="calMonthYearLabel" class="font-cute font-extrabold text-xl">เดือน</h3>
+                        <div class="flex gap-1.5 items-center">
+                            <button onclick="openEventModal()" class="bg-retroPurple text-white font-bold px-2.5 py-1.5 rounded-lg border border-darkText text-[11px] flex items-center gap-1"><i class="fa-solid fa-plus"></i> ไดอารี่</button>
                             <button onclick="changeMonth(-1)" class="w-8 h-8 bg-offWhite border border-darkText rounded-lg font-bold flex items-center justify-center text-xs"><i class="fa-solid fa-chevron-left"></i></button>
                             <button onclick="changeMonth(1)" class="w-8 h-8 bg-offWhite border border-darkText rounded-lg font-bold flex items-center justify-center text-xs"><i class="fa-solid fa-chevron-right"></i></button>
                         </div>
@@ -323,18 +320,18 @@
 
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
                     <div class="flex justify-between items-center border-b border-darkText pb-2">
-                        <h3 id="diarySidebarTitle" class="font-cute font-bold text-base flex items-center gap-1.5"><i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด</h3>
-                        <button id="resetDateFilterBtn" onclick="selectCalendarDate(null)" class="hidden text-[10px] font-bold bg-gray-200 px-2 py-0.5 rounded border border-darkText">แสดงทั้งหมด</button>
+                        <h3 id="diarySidebarTitle" class="font-cute font-bold text-base flex items-center gap-1.5"></h3>
+                        <button id="resetDateFilterBtn" onclick="selectCalendarDate(null)" class="hidden text-[10px] font-bold bg-gray-200 text-darkText px-2 py-0.5 rounded border border-darkText">แสดงทั้งหมด</button>
                     </div>
-                    <div id="eventsListSidebar" class="space-y-2 overflow-y-auto max-h-[280px] flex-1 pr-1 text-xs"></div>
+                    <div id="eventsListSidebar" class="space-y-2 overflow-y-auto max-h-[300px] flex-1 pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
 
-        <!-- TAB 6: CALCULATOR -->
+        <!-- CALCULATOR -->
         <section id="tab-calculator" class="tab-content hidden space-y-4">
             <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2 mb-1"><i class="fa-solid fa-calculator text-popBlue"></i> เครื่องคิดเลขการเงิน</h2>
+                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-calculator text-popBlue"></i> เครื่องคิดเลขการเงิน</h2>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col items-center">
@@ -363,35 +360,37 @@
                     </div>
                 </div>
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col space-y-3">
-                    <div class="flex justify-between items-center border-b border-darkText pb-2"><h3 class="font-cute font-bold text-base">📜 ประวัติคำนวณ</h3><button onclick="clearCalcHistory()" class="text-[10px] font-bold text-hotPink underline">ล้าง</button></div>
+                    <div class="flex justify-between items-center border-b border-darkText pb-2">
+                        <h3 class="font-cute font-bold text-base">📜 ประวัติคำนวณ</h3>
+                        <button onclick="clearCalcHistory()" class="text-[10px] font-bold text-hotPink underline">ล้าง</button>
+                    </div>
                     <div class="bg-offWhite p-3 rounded-xl border border-darkText space-y-2 text-xs">
-                        <label class="block font-bold">ผลลัพธ์ล่าสุด (<span id="latestCalcVal" class="text-popBlue font-extrabold">0</span>):</label>
-                        <input type="text" id="calcNoteDesc" placeholder="รายละเอียด เช่น ค่าข้าว" class="w-full bg-white border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium">
+                        <label class="block font-bold">ผลลัพธ์ล่าสุด (<span id="latestCalcVal" class="text-popBlue font-extrabold">0</span>)</label>
+                        <input type="text" id="calcNoteDesc" placeholder="รายละเอียด เช่น ค่าข้าว" class="w-full bg-white border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium text-darkText">
                         <div class="grid grid-cols-3 gap-1.5">
-                            <button onclick="saveCalcAsNote()" class="bg-retroPurple text-white font-bold py-1.5 rounded-lg border border-darkText text-[10px]">โน้ต</button>
-                            <button onclick="saveCalcAsExpense('expense')" class="bg-hotPink text-white font-bold py-1.5 rounded-lg border border-darkText text-[10px]">จ่าย</button>
-                            <button onclick="saveCalcAsExpense('income')" class="bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px]">รับ</button>
+                            <button onclick="saveCalcAsNote()" class="bg-retroPurple text-white font-bold py-1.5 rounded-lg border border-darkText text-[10px]">บันทึกโน้ต</button>
+                            <button onclick="saveCalcAsExpense('expense')" class="bg-hotPink text-white font-bold py-1.5 rounded-lg border border-darkText text-[10px]">บันทึกจ่าย</button>
+                            <button onclick="saveCalcAsExpense('income')" class="bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px]">บันทึกรับ</button>
                         </div>
                     </div>
-                    <div id="calcHistoryList" class="space-y-1.5 overflow-y-auto max-h-[160px] flex-1 pr-1 text-xs"></div>
+                    <div id="calcHistoryList" class="space-y-1.5 overflow-y-auto max-h-[180px] flex-1 pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
 
-        <!-- TAB 7: TAMAGOTCHI PET -->
+        <!-- PET -->
         <section id="tab-pet" class="tab-content hidden space-y-4">
             <div class="bg-gradient-to-r from-sunnyYellow to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-darkText">
                 <div class="space-y-1 text-center md:text-left">
                     <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">🐾 สัตว์เลี้ยงการเงิน</div>
-                    <h2 id="petHeaderTitle" class="text-2xl font-extrabold font-cute">สัตว์เลี้ยงการเงิน (Tamagotchi)</h2>
+                    <h2 id="petHeaderTitle" class="text-2xl font-extrabold font-cute">สัตว์เลี้ยงการเงิน</h2>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border-2 border-darkText text-center min-w-[185px]">
+                <div class="bg-white p-4 rounded-2xl border-2 border-darkText text-center min-w-[185px] text-darkText">
                     <div id="petBigAvatar" class="text-5xl mb-1 animate-bounce">🐱</div>
                     <h3 id="petBigName" class="font-cute font-bold text-sm">สัตว์เลี้ยงของคุณ</h3>
                     <p id="petBigStatusText" class="text-[10px] font-bold text-popBlue mt-0.5">สถานะ...</p>
                 </div>
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
                     <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ตั้งค่าสัตว์เลี้ยง</h3>
@@ -410,28 +409,25 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
                     <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">สถานะตามเงินจริง</h3>
                     <div class="space-y-3 text-xs">
                         <div>
-                            <div class="flex justify-between font-bold mb-0.5"><span>ความอิ่มเอม</span><span id="petHungerVal">0%</span></div>
-                            <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden"><div id="petHungerBar" class="bg-limeGreen h-full w-[0%]"></div></div>
+                            <div class="flex justify-between font-bold mb-0.5"><span>ความอิ่ม</span><span id="petHungerVal">0%</span></div>
+                            <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden"><div id="petHungerBar" class="bg-limeGreen h-full w-[0%] transition-all"></div></div>
                         </div>
                         <div>
                             <div class="flex justify-between font-bold mb-0.5"><span>ความสุข</span><span id="petHappyVal">0%</span></div>
-                            <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden"><div id="petHappyBar" class="bg-sunnyYellow h-full w-[0%]"></div></div>
+                            <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden"><div id="petHappyBar" class="bg-sunnyYellow h-full w-[0%] transition-all"></div></div>
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
                     <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ประวัติคำพูด</h3>
-                    <div id="petSpeechHistory" class="space-y-2 overflow-y-auto max-h-[140px] flex-1 pr-1 text-xs"></div>
+                    <div id="petSpeechHistory" class="space-y-2 overflow-y-auto max-h-[160px] flex-1 pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
-
     </main>
 
     <footer class="bg-darkText text-white py-4 px-3 mt-8 border-t-2 border-darkText text-center text-xs w-full">
@@ -439,20 +435,20 @@
     </footer>
 
     <!-- MODALS -->
-    <div id="quickAddModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative">
+    <div id="quickAddModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3">
             <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">⚡ เพิ่มรายการด่วน</h3><button onclick="closeModal('quickAddModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold text-xs">✕</button></div>
             <div class="grid grid-cols-2 gap-2 text-xs font-bold">
-                <button onclick="closeModal('quickAddModal'); openTransactionModal('income')" class="p-3 bg-limeGreen/20 border border-darkText rounded-xl text-center">รายรับ</button>
-                <button onclick="closeModal('quickAddModal'); openTransactionModal('expense')" class="p-3 bg-hotPink/20 border border-darkText rounded-xl text-center">รายจ่าย</button>
-                <button onclick="closeModal('quickAddModal'); openBillModal()" class="p-3 bg-retroPurple/20 border border-darkText rounded-xl text-center">เตรียมจ่าย</button>
-                <button onclick="closeModal('quickAddModal'); openTaskModal()" class="p-3 bg-sunnyYellow/30 border border-darkText rounded-xl text-center">แพลนงาน</button>
+                <button onclick="closeModal('quickAddModal'); openTransactionModal('income')" class="p-3 bg-limeGreen/20 border border-darkText rounded-xl">รายรับ</button>
+                <button onclick="closeModal('quickAddModal'); openTransactionModal('expense')" class="p-3 bg-hotPink/20 border border-darkText rounded-xl">รายจ่าย</button>
+                <button onclick="closeModal('quickAddModal'); openBillModal()" class="p-3 bg-retroPurple/20 border border-darkText rounded-xl">เตรียมจ่าย</button>
+                <button onclick="closeModal('quickAddModal'); openTaskModal()" class="p-3 bg-sunnyYellow/30 border border-darkText rounded-xl">แพลนงาน</button>
             </div>
         </div>
     </div>
 
-    <div id="transactionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
+    <div id="transactionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 id="txModalTitle" class="font-cute font-bold text-lg">เพิ่มรายการเงิน</h3><button onclick="closeModal('transactionModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold text-xs">✕</button></div>
             <form id="transactionForm" onsubmit="handleSaveTransaction(event)" class="space-y-3">
                 <input type="hidden" id="txType" value="expense">
@@ -471,40 +467,40 @@
                             <option value="อื่นๆ">✨ อื่นๆ</option>
                         </select>
                     </div>
-                    <div><label class="block font-bold mb-0.5">จำนวน (฿)</label><input type="number" step="0.01" id="txAmount" placeholder="0.00" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
+                    <div><label class="block font-bold mb-0.5">จำนวน (฿)</label><input type="number" step="0.01" min="0" id="txAmount" placeholder="0.00" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 </div>
                 <div class="pt-1 flex gap-2">
-                    <button type="button" onclick="closeModal('transactionModal')" class="flex-1 bg-gray-200 font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
+                    <button type="button" onclick="closeModal('transactionModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
                     <button type="submit" class="flex-1 bg-popBlue text-white font-bold py-2 rounded-lg border border-darkText">บันทึก</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="billModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
+    <div id="billModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">💡 เพิ่มบิลเตรียมจ่าย</h3><button onclick="closeModal('billModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
             <form id="billForm" onsubmit="handleSaveBill(event)" class="space-y-3">
                 <div><label class="block font-bold mb-0.5">ชื่อบิล</label><input type="text" id="billTitle" placeholder="เช่น ค่าหอ" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div class="grid grid-cols-2 gap-2">
                     <div><label class="block font-bold mb-0.5">กำหนดจ่าย</label><input type="date" id="billDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                    <div><label class="block font-bold mb-0.5">จำนวน (฿)</label><input type="number" step="0.01" id="billAmount" placeholder="0.00" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
+                    <div><label class="block font-bold mb-0.5">จำนวน (฿)</label><input type="number" step="0.01" min="0" id="billAmount" placeholder="0.00" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 </div>
                 <div class="pt-1 flex gap-2">
-                    <button type="button" onclick="closeModal('billModal')" class="flex-1 bg-gray-200 font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
+                    <button type="button" onclick="closeModal('billModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
                     <button type="submit" class="flex-1 bg-retroPurple text-white font-bold py-2 rounded-lg border border-darkText">บันทึก</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="taskModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
+    <div id="taskModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">เพิ่มแพลนงานใหม่</h3><button onclick="closeModal('taskModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
             <form id="taskForm" onsubmit="handleSaveTask(event)" class="space-y-3">
                 <div><label class="block font-bold mb-0.5">หัวข้องาน</label><input type="text" id="taskTitle" placeholder="เช่น ส่งงาน" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div class="grid grid-cols-2 gap-2">
-                    <div><label class="block font-bold mb-0.5">กำหนด</label><input type="date" id="taskDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
+                    <div><label class="block font-bold mb-0.5">กำหนด</label><input type="date" id="taskDate" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                     <div>
                         <label class="block font-bold mb-0.5">สถานะ</label>
                         <select id="taskStatus" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none">
@@ -516,15 +512,15 @@
                 </div>
                 <div><label class="block font-bold mb-0.5">รายละเอียด</label><textarea id="taskDesc" rows="2" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></textarea></div>
                 <div class="pt-1 flex gap-2">
-                    <button type="button" onclick="closeModal('taskModal')" class="flex-1 bg-gray-200 font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
+                    <button type="button" onclick="closeModal('taskModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
                     <button type="submit" class="flex-1 bg-sunnyYellow text-darkText font-bold py-2 rounded-lg border border-darkText">บันทึก</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="eventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
+    <div id="eventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">📸 บันทึกไดอารี่</h3><button onclick="closeModal('eventModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
             <form id="eventForm" onsubmit="handleSaveEvent(event)" class="space-y-3">
                 <div><label class="block font-bold mb-0.5">วันที่</label><input type="date" id="eventDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
@@ -540,7 +536,7 @@
                 </div>
                 <div><label class="block font-bold mb-0.5">หัวข้อโน้ต</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้มีความสุข 🌸" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div>
-                    <label class="block font-bold mb-0.5">แนบรูป</label>
+                    <label class="block font-bold mb-0.5">แนบรูป (เก็บในเครื่องนี้เท่านั้น)</label>
                     <label class="flex flex-col items-center justify-center w-full p-3 bg-offWhite border border-dashed border-darkText rounded-xl cursor-pointer text-center">
                         <i class="fa-solid fa-camera text-xl text-popBlue mb-1"></i>
                         <span class="text-[10px] font-bold text-gray-600">กดเพื่อเลือกรูปภาพ</span>
@@ -552,20 +548,20 @@
                     </div>
                 </div>
                 <div class="pt-1 flex gap-2">
-                    <button type="button" onclick="closeModal('eventModal')" class="flex-1 bg-gray-200 font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
+                    <button type="button" onclick="closeModal('eventModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
                     <button type="submit" class="flex-1 bg-retroPurple text-white font-bold py-2 rounded-lg border border-darkText">บันทึก</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="viewEventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 relative text-xs">
+    <div id="viewEventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText">
-                <div class="flex items-center gap-1.5"><span id="viewEventMood" class="text-xl">😊</span><span id="viewEventDate" class="text-[10px] font-bold bg-sunnyYellow px-2 py-0.5 rounded border border-darkText">วันที่</span></div>
+                <div class="flex items-center gap-1.5"><span id="viewEventMood" class="text-xl">😊</span><span id="viewEventDate" class="text-[10px] font-bold bg-sunnyYellow text-darkText px-2 py-0.5 rounded border border-darkText"></span></div>
                 <button onclick="closeModal('viewEventModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button>
             </div>
-            <h3 id="viewEventTitle" class="font-cute font-extrabold text-lg text-popBlue">หัวข้อ</h3>
+            <h3 id="viewEventTitle" class="font-cute font-extrabold text-lg text-popBlue"></h3>
             <div id="viewEventPhotoContainer" class="hidden"><img id="viewEventPhoto" class="w-full max-h-56 object-cover rounded-xl border border-darkText"></div>
             <div class="pt-2 border-t border-darkText">
                 <button id="deleteEventBtn" class="w-full bg-hotPink text-white font-bold py-2 rounded-lg border border-darkText text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ลบโน้ตนี้</button>
@@ -573,552 +569,873 @@
         </div>
     </div>
 
-    <div id="toastNotification" class="fixed bottom-4 left-4 z-[10000] transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none text-xs">
-        <div class="bg-limeGreen text-darkText font-bold px-4 py-2.5 rounded-xl border-2 border-darkText shadow-sm flex items-center gap-2">
+    <div id="toastNotification" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[10001] transition-all duration-300 opacity-0 pointer-events-none text-xs">
+        <div class="bg-limeGreen text-darkText font-bold px-4 py-2.5 rounded-xl border-2 border-darkText shadow-sm flex items-center gap-2 whitespace-nowrap">
             <i class="fa-solid fa-circle-check text-base"></i>
             <span id="toastMessage">สำเร็จ!</span>
         </div>
     </div>
 
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
-            });
+    // ================= UTILITIES =================
+    const $ = id => document.getElementById(id);
+    const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const money = n => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // วันที่ตามเวลาท้องถิ่น (แก้บั๊ก toISOString ที่ให้วันที่ผิดช่วงเช้าในไทย)
+    function localDateKey(d = new Date()) {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    const thisMonthKey = () => localDateKey().slice(0, 7);
+
+    function showToast(message) {
+        $('toastMessage').innerText = message;
+        const t = $('toastNotification');
+        t.classList.remove('opacity-0');
+        t.classList.add('opacity-100');
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => { t.classList.add('opacity-0'); t.classList.remove('opacity-100'); }, 2300);
+    }
+    function openModal(id) { $(id).classList.remove('hidden'); $(id).classList.add('flex'); }
+    function closeModal(id) { $(id).classList.add('hidden'); $(id).classList.remove('flex'); }
+
+    // ================= STATE & STORAGE =================
+    const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme' };
+    const photoKey = id => 'y2k_photo_' + id;
+    const makeDefaultPet = () => ({
+        name: 'น้องสัตว์เลี้ยง', avatar: '🐱',
+        speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭',
+        speechHistory: [{ time: 'เริ่มต้น', text: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭' }]
+    });
+    function readLS(key, fallback) {
+        try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
+    }
+
+    let state = {
+        theme: localStorage.getItem(KEYS.theme) || 'y2k',
+        transactions: readLS(KEYS.transactions, []),
+        bills: readLS(KEYS.bills, []),
+        tasks: readLS(KEYS.tasks, []),
+        events: readLS(KEYS.events, []),
+        calcHistory: readLS(KEYS.calcHistory, []),
+        pet: Object.assign(makeDefaultPet(), readLS(KEYS.pet, {}))
+    };
+    if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
+
+    // ย้ายรูปเก่าที่เคยฝังใน event ออกไปเก็บแยก (ลดขนาดข้อมูลหลัก)
+    state.events.forEach(ev => {
+        if (ev.photo) {
+            try { localStorage.setItem(photoKey(ev.id), ev.photo); } catch {}
+            ev.hasPhoto = true;
+            delete ev.photo;
+        }
+    });
+
+    function saveLocal() {
+        try {
+            localStorage.setItem(KEYS.transactions, JSON.stringify(state.transactions));
+            localStorage.setItem(KEYS.bills, JSON.stringify(state.bills));
+            localStorage.setItem(KEYS.tasks, JSON.stringify(state.tasks));
+            localStorage.setItem(KEYS.events, JSON.stringify(state.events));
+            localStorage.setItem(KEYS.calcHistory, JSON.stringify(state.calcHistory));
+            localStorage.setItem(KEYS.pet, JSON.stringify(state.pet));
+            localStorage.setItem(KEYS.theme, state.theme);
+        } catch (e) {
+            console.error(e);
+            showToast('พื้นที่เครื่องเต็ม ⚠️ ลองลบรูปโน้ตบางอันออก');
+        }
+    }
+
+    function saveData() {
+        saveLocal();
+        scheduleCloudSave();
+    }
+
+    // ================= FIREBASE: AUTH + CLOUD SYNC =================
+    let auth = null, db = null, currentUser = null, isFirebaseActive = false, syncTimer = null;
+
+    function setSyncStatus(text) { $('syncStatus').innerText = text; }
+
+    function initFirebase() {
+        if (!IS_CONFIGURED) {
+            setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
+            return;
+        }
+        try {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            isFirebaseActive = true;
+        } catch (e) {
+            console.error(e);
+            setSyncStatus('ตั้งค่า Firebase ไม่ถูกต้อง ⚠️');
+            return;
         }
 
-        let currentUser = null;
-        let state = {
-            theme: localStorage.getItem('y2k_theme') || 'y2k',
-            transactions: JSON.parse(localStorage.getItem('y2k_transactions')) || [],
-            bills: JSON.parse(localStorage.getItem('y2k_bills')) || [],
-            tasks: JSON.parse(localStorage.getItem('y2k_tasks')) || [],
-            events: JSON.parse(localStorage.getItem('y2k_events')) || [],
-            calcHistory: JSON.parse(localStorage.getItem('y2k_calchistory')) || [],
-            pet: JSON.parse(localStorage.getItem('y2k_pet')) || {
-                name: 'น้องสัตว์เลี้ยง',
-                avatar: '🐱',
-                speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭',
-                speechHistory: [{ time: 'เริ่มต้น', text: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭' }]
-            }
-        };
-
-        const PET_MOOD_FACES = {
-            '🐱': { sad: '😿', low: '😾', good: '😺', rich: '😻' },
-            '🐶': { sad: '🥺', low: '🐕', good: '🐶', rich: '🐶✨' },
-            '🐰': { sad: '😭', low: '🐰', good: '🐰✨', rich: '🐇💖' },
-            '🐹': { sad: '🥺', low: '🐹', good: '🐹✨', rich: '🐹👑' },
-            '🐻': { sad: '🐻‍❄️', low: '🐻', good: '🧸', rich: '🐻✨' },
-            '🦆': { sad: '😭', low: '🦆', good: '🦆✨', rich: '🐣🌟' }
-        };
-
-        let currentCalendarDate = new Date();
-        let selectedCalendarDate = null;
-        let selectedMood = '😊';
-        let expenseChartInstance = null;
-        let currentCalcExpression = "0";
-        let lastCalcResult = 0;
-        let currentUploadedPhotoBase64 = '';
-
-        // ระบบล็อกอิน Gmail แบบปลอดภัย (รองรับทั้งโหมดจำลองและ Firebase Redirect ป้องกัน Popup ถูกบล็อก)
-        function loginWithGoogle() {
-            if (!isFirebaseActive || !auth) {
-                currentUser = { displayName: "คุณฟ้า (ผู้ใช้)", photoURL: "https://api.dicebear.com/7.x/bottts/svg?seed=fah" };
-                document.getElementById('googleLoginBtn').classList.add('hidden');
-                document.getElementById('userProfileArea').classList.remove('hidden');
-                document.getElementById('userAvatarImg').src = currentUser.photoURL;
-                document.getElementById('userNameText').innerText = currentUser.displayName;
-                showToast('ล็อกอินสำเร็จ! 🌟');
-                return;
-            }
-
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithRedirect(provider).catch(err => {
-                alert('ล็อกอินไม่สำเร็จ: ' + err.message);
-            });
-        }
-
-        function logoutGoogle() {
-            if (isFirebaseActive && auth) {
-                auth.signOut().then(() => {
-                    currentUser = null;
-                    document.getElementById('googleLoginBtn').classList.remove('hidden');
-                    document.getElementById('userProfileArea').classList.add('hidden');
-                    showToast('ออกจากระบบแล้ว');
-                });
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                const isNewUser = !currentUser || currentUser.uid !== user.uid;
+                currentUser = user;
+                renderAuthUI();
+                if (isNewUser) await pullFromCloud(user.uid);
             } else {
                 currentUser = null;
-                document.getElementById('googleLoginBtn').classList.remove('hidden');
-                document.getElementById('userProfileArea').classList.add('hidden');
-                showToast('ออกจากระบบแล้ว');
+                renderAuthUI();
+                setSyncStatus('ออกจากระบบแล้ว · ข้อมูลอยู่ในเครื่อง');
+            }
+        });
+
+        auth.getRedirectResult()
+            .then(res => { if (res.user) showToast('ล็อกอิน Gmail สำเร็จ! 🌟'); })
+            .catch(err => { console.error(err); if (err.code) alert('ล็อกอินไม่สำเร็จ: ' + err.message); });
+    }
+
+    function renderAuthUI() {
+        const logged = !!currentUser;
+        $('googleLoginBtn').classList.toggle('hidden', logged);
+        $('userProfileArea').classList.toggle('hidden', !logged);
+        if (logged) {
+            $('userAvatarImg').src = currentUser.photoURL || '';
+            $('userNameText').innerText = currentUser.displayName || currentUser.email || 'ผู้ใช้';
+        }
+    }
+
+    async function loginWithGoogle() {
+        if (!isFirebaseActive) {
+            alert('ยังไม่ได้ตั้งค่า Firebase\nให้กรอก firebaseConfig ในไฟล์ index.html ก่อน (ดูคู่มือการตั้งค่า)');
+            return;
+        }
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        try {
+            if (isMobile) await auth.signInWithRedirect(provider);
+            else await auth.signInWithPopup(provider);
+        } catch (err) {
+            // popup ถูกบล็อก -> ใช้ redirect แทน
+            if (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment') {
+                await auth.signInWithRedirect(provider);
+            } else if (err.code !== 'auth/popup-closed-by-user') {
+                alert('ล็อกอินไม่สำเร็จ: ' + err.message);
             }
         }
+    }
 
-        // ตรวจสอบสถานะและผลลัพธ์การล็อกอิน
-        if (isFirebaseActive && auth) {
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    currentUser = user;
-                    document.getElementById('googleLoginBtn').classList.add('hidden');
-                    document.getElementById('userProfileArea').classList.remove('hidden');
-                    document.getElementById('userAvatarImg').src = user.photoURL || 'https://via.placeholder.com/150';
-                    document.getElementById('userNameText').innerText = user.displayName || user.email;
-                }
-            });
+    async function logoutGoogle() {
+        if (!auth) return;
+        try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch (e) { console.error(e); }
+    }
 
-            auth.getRedirectResult().then(result => {
-                if (result.user) {
-                    showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
-                }
-            }).catch(err => {
-                console.error("Redirect auth error:", err);
-            });
+    function scheduleCloudSave() {
+        if (!currentUser || !db) return;
+        clearTimeout(syncTimer);
+        setSyncStatus('กำลังซิงก์...');
+        syncTimer = setTimeout(pushToCloud, 800);
+    }
+
+    function cloudPayload() {
+        return {
+            transactions: state.transactions,
+            bills: state.bills,
+            tasks: state.tasks,
+            events: state.events,           // ไม่มีรูปภาพ (รูปเก็บในเครื่อง)
+            calcHistory: state.calcHistory,
+            pet: state.pet,
+            theme: state.theme,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+    }
+
+    async function pushToCloud() {
+        if (!currentUser || !db) return;
+        try {
+            await db.collection('users').doc(currentUser.uid).set(cloudPayload());
+            setSyncStatus('ซิงก์แล้ว ☁️ ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }));
+        } catch (err) {
+            console.error(err);
+            setSyncStatus('ซิงก์ไม่สำเร็จ ⚠️');
         }
+    }
 
-        function saveData() {
-            localStorage.setItem('y2k_transactions', JSON.stringify(state.transactions));
-            localStorage.setItem('y2k_bills', JSON.stringify(state.bills));
-            localStorage.setItem('y2k_tasks', JSON.stringify(state.tasks));
-            localStorage.setItem('y2k_events', JSON.stringify(state.events));
-            localStorage.setItem('y2k_calchistory', JSON.stringify(state.calcHistory));
-            localStorage.setItem('y2k_pet', JSON.stringify(state.pet));
-            localStorage.setItem('y2k_theme', state.theme);
-        }
-
-        function refreshUI() {
-            setTheme(state.theme, false);
-            document.getElementById('petNameInput').value = state.pet.name || 'น้องสัตว์เลี้ยง';
-            document.getElementById('petAvatarSelect').value = state.pet.avatar || '🐱';
-            renderDashboard(); renderTransactions(); renderBills(); renderTasks(); renderCalendar(); renderEventsList(); updatePetStatus(); renderCalcHistory();
-        }
-
-        window.onload = function() { setDefaultDates(); refreshUI(); };
-
-        function selectMoodEmoji(emoji) {
-            selectedMood = emoji;
-            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('mood-btn-selected'));
-            const activeBtn = document.getElementById('mood-' + emoji);
-            if(activeBtn) activeBtn.classList.add('mood-btn-selected');
-        }
-
-        function handlePhotoSelection(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const maxW = 500;
-                    let w = img.width, h = img.height;
-                    if (w > maxW) { h = Math.round((h * maxW) / w); w = maxW; }
-                    canvas.width = w; canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    currentUploadedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                    document.getElementById('eventPhotoPreview').src = currentUploadedPhotoBase64;
-                    document.getElementById('photoPreviewArea').classList.remove('hidden');
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function removeSelectedPhoto() {
-            currentUploadedPhotoBase64 = '';
-            document.getElementById('eventPhotoInput').value = '';
-            document.getElementById('photoPreviewArea').classList.add('hidden');
-        }
-
-        function updatePetSettings() {
-            state.pet.name = document.getElementById('petNameInput').value.trim() || 'สัตว์เลี้ยง';
-            state.pet.avatar = document.getElementById('petAvatarSelect').value;
-            saveData(); updatePetStatus(); showToast('อัปเดตสัตว์เลี้ยงแล้ว! ✨');
-        }
-
-        function updatePetStatus() {
-            let totalIncome = 0, totalExpense = 0;
-            state.transactions.forEach(t => t.type === 'income' ? totalIncome += t.amount : totalExpense += t.amount);
-            let netBalance = totalIncome - totalExpense;
-
-            let hunger = 0, happiness = 0;
-            let selectedPetType = state.pet.avatar || '🐱';
-            let petFaces = PET_MOOD_FACES[selectedPetType] || PET_MOOD_FACES['🐱'];
-            let moodAvatar = petFaces.sad, moodText = '', defaultSpeech = '';
-
-            if (netBalance <= 0) {
-                hunger = 0; happiness = 0; moodAvatar = petFaces.sad;
-                moodText = 'หิวม๊าก 🥺'; defaultSpeech = 'เงินเป็น 0 แล้ว ช่วยเติมรายรับที! 😭';
-            } else if (netBalance < 1000) {
-                hunger = 40; happiness = 40; moodAvatar = petFaces.low;
-                moodText = 'ประหยัด...'; defaultSpeech = 'ประหยัดไว้ก่อนน้า 💸';
-            } else if (netBalance < 5000) {
-                hunger = 75; happiness = 75; moodAvatar = petFaces.good;
-                moodText = 'อิ่มสบาย 😊'; defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟';
+    async function pullFromCloud(uid) {
+        setSyncStatus('กำลังโหลดข้อมูล...');
+        try {
+            const snap = await db.collection('users').doc(uid).get();
+            if (snap.exists) {
+                // สำรองข้อมูลในเครื่องก่อนเขียนทับ
+                try { localStorage.setItem('y2k_backup_before_cloud', JSON.stringify(collectAll())); } catch {}
+                applyRemote(snap.data());
+                setSyncStatus('โหลดจากคลาวด์แล้ว ☁️');
             } else {
-                hunger = 100; happiness = 100; moodAvatar = petFaces.rich;
-                moodText = 'เศรษฐี! 🤑'; defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖';
+                await pushToCloud(); // ผู้ใช้ใหม่: อัปโหลดข้อมูลในเครื่องขึ้นไป
             }
-
-            state.pet.hunger = hunger; state.pet.happiness = happiness;
-            if(!state.pet.speech || state.pet.speech.includes('ยินดีต้อนรับ')) state.pet.speech = defaultSpeech;
-
-            const pName = state.pet.name || 'สัตว์เลี้ยง';
-            document.getElementById('floatingPetName').innerText = pName;
-            document.getElementById('petHeaderTitle').innerText = `${pName} (Tamagotchi)`;
-            document.getElementById('petAvatar').innerText = moodAvatar;
-            document.getElementById('petBigAvatar').innerText = moodAvatar;
-            document.getElementById('calPetAvatar').innerText = moodAvatar;
-            document.getElementById('petBigName').innerText = `${pName} (${moodText})`;
-            document.getElementById('petBigStatusText').innerText = `สุทธิ ฿${netBalance.toLocaleString()}`;
-            document.getElementById('petHungerVal').innerText = hunger + '%';
-            document.getElementById('petHungerBar').style.width = hunger + '%';
-            document.getElementById('petHappyVal').innerText = happiness + '%';
-            document.getElementById('petHappyBar').style.width = happiness + '%';
-            document.getElementById('petSpeechBubble').innerText = state.pet.speech;
-            renderPetSpeechHistory();
+            refreshUI();
+        } catch (err) {
+            console.error(err);
+            setSyncStatus('โหลดข้อมูลไม่สำเร็จ ⚠️');
         }
+    }
 
-        function triggerPetSpeech(text) {
-            state.pet.speech = text;
-            state.pet.speechHistory.unshift({ time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), text: text });
-            if(state.pet.speechHistory.length > 8) state.pet.speechHistory.pop();
+    function applyRemote(d) {
+        state.transactions = d.transactions || [];
+        state.bills = d.bills || [];
+        state.tasks = d.tasks || [];
+        state.events = d.events || [];
+        state.calcHistory = d.calcHistory || [];
+        state.pet = Object.assign(makeDefaultPet(), d.pet || {});
+        if (d.theme) state.theme = d.theme;
+        saveLocal();
+    }
+
+    // ================= BACKUP / RESTORE =================
+    function collectAll() {
+        const photos = {};
+        state.events.forEach(ev => {
+            if (ev.hasPhoto) {
+                const p = localStorage.getItem(photoKey(ev.id));
+                if (p) photos[ev.id] = p;
+            }
+        });
+        return {
+            app: 'y2k-planner', version: 2, exportedAt: new Date().toISOString(),
+            transactions: state.transactions, bills: state.bills, tasks: state.tasks,
+            events: state.events, calcHistory: state.calcHistory, pet: state.pet,
+            theme: state.theme, photos
+        };
+    }
+
+    function exportBackup() {
+        const blob = new Blob([JSON.stringify(collectAll(), null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `y2k-backup-${localDateKey()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+        showToast('ดาวน์โหลดไฟล์สำรองแล้ว 💾');
+    }
+
+    function importBackup(e) {
+        const file = e.target.files[0];
+        e.target.value = '';
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            let d;
+            try { d = JSON.parse(reader.result); } catch { return showToast('ไฟล์ไม่ถูกต้อง'); }
+            if (d.app !== 'y2k-planner') return showToast('ไม่ใช่ไฟล์สำรองของแอปนี้');
+            if (!confirm('แทนที่ข้อมูลปัจจุบันด้วยไฟล์สำรองนี้?')) return;
+            applyRemote(d);
+            Object.entries(d.photos || {}).forEach(([id, p]) => {
+                try { localStorage.setItem(photoKey(id), p); } catch {}
+            });
+            refreshUI();
             saveData();
-        }
+            showToast('คืนค่าข้อมูลสำเร็จ! ✨');
+        };
+        reader.readAsText(file);
+    }
 
-        function renderPetSpeechHistory() {
-            const hist = document.getElementById('petSpeechHistory');
-            if(!hist) return;
-            hist.innerHTML = state.pet.speechHistory.map(h => `
-                <div class="bg-offWhite p-2 rounded-lg border border-darkText text-[11px] flex items-center gap-2">
-                    <span>${state.pet.avatar || '🐾'}</span>
-                    <div><span class="text-[9px] text-gray-400">${h.time}</span><p class="font-bold text-hotPink">"${h.text}"</p></div>
+    // ================= THEME & PET =================
+    const PET_MOOD_FACES = {
+        '🐱': { sad: '😿', low: '😾', good: '😺', rich: '😻' },
+        '🐶': { sad: '🥺', low: '🐕', good: '🐶', rich: '🐶✨' },
+        '🐰': { sad: '😭', low: '🐰', good: '🐰✨', rich: '🐇💖' },
+        '🐹': { sad: '🥺', low: '🐹', good: '🐹✨', rich: '🐹👑' },
+        '🐻': { sad: '🐻‍❄️', low: '🐻', good: '🧸', rich: '🐻✨' },
+        '🦆': { sad: '😭', low: '🦆', good: '🦆✨', rich: '🐣🌟' }
+    };
+
+    function setTheme(themeName, save = true) {
+        state.theme = themeName;
+        document.body.className = `theme-${themeName} min-h-screen flex flex-col relative pb-20`;
+        if (save) saveData();
+    }
+
+    function updatePetSettings() {
+        state.pet.name = $('petNameInput').value.trim() || 'สัตว์เลี้ยง';
+        state.pet.avatar = $('petAvatarSelect').value;
+        saveData();
+        updatePetStatus();
+        showToast('อัปเดตสัตว์เลี้ยงแล้ว! ✨');
+    }
+
+    function calcNetBalance() {
+        let inc = 0, exp = 0;
+        state.transactions.forEach(t => t.type === 'income' ? inc += t.amount : exp += t.amount);
+        return { inc, exp, net: inc - exp };
+    }
+
+    function updatePetStatus() {
+        const { net } = calcNetBalance();
+        const faces = PET_MOOD_FACES[state.pet.avatar] || PET_MOOD_FACES['🐱'];
+        let hunger, happiness, avatar, moodText, defaultSpeech;
+
+        if (net <= 0)       { hunger = 0;   happiness = 0;   avatar = faces.sad;  moodText = 'หิวม๊าก 🥺';   defaultSpeech = 'เงินเป็น 0 แล้ว ช่วยเติมรายรับที! 😭'; }
+        else if (net < 1000){ hunger = 40;  happiness = 40;  avatar = faces.low;  moodText = 'ประหยัด...';    defaultSpeech = 'ประหยัดไว้ก่อนน้า 💸'; }
+        else if (net < 5000){ hunger = 75;  happiness = 75;  avatar = faces.good; moodText = 'อิ่มสบาย 😊';   defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟'; }
+        else                { hunger = 100; happiness = 100; avatar = faces.rich; moodText = 'เศรษฐี! 🤑';     defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖'; }
+
+        state.pet.hunger = hunger;
+        state.pet.happiness = happiness;
+        if (!state.pet.speech || state.pet.speech.includes('ยินดีต้อนรับ')) state.pet.speech = defaultSpeech;
+
+        const pName = state.pet.name || 'สัตว์เลี้ยง';
+        $('floatingPetName').innerText = pName;
+        $('petHeaderTitle').innerText = `${pName} (Tamagotchi)`;
+        $('petAvatar').innerText = avatar;
+        $('petBigAvatar').innerText = avatar;
+        $('calPetAvatar').innerText = avatar;
+        $('petBigName').innerText = `${pName} (${moodText})`;
+        $('petBigStatusText').innerText = `สุทธิ ฿${money(net)}`;
+        $('petHungerVal').innerText = hunger + '%';
+        $('petHungerBar').style.width = hunger + '%';
+        $('petHappyVal').innerText = happiness + '%';
+        $('petHappyBar').style.width = happiness + '%';
+        $('petSpeechBubble').innerText = state.pet.speech;
+        $('calPetSpeechText').innerText = state.pet.speech;
+        renderPetSpeechHistory();
+    }
+
+    function triggerPetSpeech(text) {
+        state.pet.speech = text;
+        state.pet.speechHistory.unshift({ time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), text });
+        if (state.pet.speechHistory.length > 8) state.pet.speechHistory.pop();
+    }
+
+    function renderPetSpeechHistory() {
+        $('petSpeechHistory').innerHTML = state.pet.speechHistory.map(h => `
+            <div class="bg-offWhite p-2 rounded-lg border border-darkText text-[11px] flex items-center gap-2">
+                <span>${esc(state.pet.avatar) || '🐾'}</span>
+                <div><span class="text-[9px] text-gray-400">${esc(h.time)}</span><p class="font-bold text-hotPink">"${esc(h.text)}"</p></div>
+            </div>`).join('');
+    }
+
+    // ================= NAVIGATION =================
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border', 'border-darkText');
+            btn.classList.add('text-white', 'hover:bg-white/20');
+        });
+        $('tab-' + tabId).classList.remove('hidden');
+        const active = $('nav-' + tabId);
+        if (active) {
+            active.classList.remove('text-white', 'hover:bg-white/20');
+            active.classList.add('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border', 'border-darkText');
+        }
+        if (tabId === 'dashboard') renderDashboard();
+        if (tabId === 'finance') renderTransactions();
+        if (tabId === 'bills') renderBills();
+        if (tabId === 'planner') renderTasks();
+        if (tabId === 'calendar') renderCalendar();
+        if (tabId === 'pet') updatePetStatus();
+    }
+
+    function setDefaultDates() {
+        const today = localDateKey();
+        ['txDate', 'billDate', 'taskDate', 'eventDate'].forEach(id => { if ($(id)) $(id).value = today; });
+    }
+
+    function refreshUI() {
+        setTheme(state.theme, false);
+        $('petNameInput').value = state.pet.name;
+        $('petAvatarSelect').value = state.pet.avatar;
+        renderDashboard(); renderTransactions(); renderBills(); renderTasks();
+        renderCalendar(); renderEventsList(); updatePetStatus(); renderCalcHistory();
+    }
+
+    // ================= FINANCE =================
+    function openTransactionModal(type) {
+        $('transactionForm').reset();
+        $('txType').value = type;
+        $('txModalTitle').innerText = type === 'income' ? '💰 เพิ่มรายรับ' : '💸 เพิ่มรายจ่าย';
+        setDefaultDates();
+        openModal('transactionModal');
+    }
+
+    function handleSaveTransaction(e) {
+        e.preventDefault();
+        const type = $('txType').value;
+        const amount = parseFloat($('txAmount').value);
+        if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
+        state.transactions.unshift({
+            id: 'tx_' + Date.now(),
+            date: $('txDate').value,
+            title: $('txTitle').value.trim(),
+            category: $('txCategory').value,
+            amount, type
+        });
+        triggerPetSpeech(type === 'income' ? `เย้! เงินเข้า +฿${money(amount)} 🎉` : `รายจ่าย -฿${money(amount)} 🥺`);
+        saveData();
+        closeModal('transactionModal');
+        refreshUI();
+        showToast('บันทึกสำเร็จ!');
+    }
+
+    function deleteTransaction(id) {
+        state.transactions = state.transactions.filter(t => t.id !== id);
+        saveData(); refreshUI(); showToast('ลบรายการแล้ว');
+    }
+
+    function renderTransactions() {
+        const filterType = $('finFilterType').value;
+        const search = $('finSearch').value.toLowerCase();
+        const { inc, exp, net } = calcNetBalance();
+        $('finTotalIncome').innerText = '฿ ' + money(inc);
+        $('finTotalExpense').innerText = '฿ ' + money(exp);
+        $('finNetBalance').innerText = '฿ ' + money(net);
+
+        const filtered = state.transactions.filter(t =>
+            (filterType === 'all' || t.type === filterType) &&
+            (t.title.toLowerCase().includes(search) || t.category.toLowerCase().includes(search)));
+
+        if (!filtered.length) {
+            $('transactionTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">ไม่พบรายการ 🔎</td></tr>`;
+            return;
+        }
+        $('transactionTableBody').innerHTML = filtered.map(t => `
+            <tr class="hover:bg-offWhite transition-all">
+                <td class="p-2.5 border-r border-darkText">${esc(t.date)}</td>
+                <td class="p-2.5 border-r border-darkText"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.type === 'income' ? 'bg-limeGreen/30 text-green-800' : 'bg-hotPink/20 text-hotPink'}">${t.type === 'income' ? 'รับ' : 'จ่าย'}</span></td>
+                <td class="p-2.5 border-r border-darkText">${esc(t.category)}</td>
+                <td class="p-2.5 border-r border-darkText font-bold">${esc(t.title)}</td>
+                <td class="p-2.5 border-r border-darkText text-right font-extrabold ${t.type === 'income' ? 'text-green-600' : 'text-hotPink'}">${t.type === 'income' ? '+' : '-'}฿ ${money(t.amount)}</td>
+                <td class="p-2.5 text-center"><button onclick="deleteTransaction('${t.id}')" class="text-hotPink hover:scale-110"><i class="fa-solid fa-trash-can"></i></button></td>
+            </tr>`).join('');
+    }
+
+    // ================= BILLS =================
+    function openBillModal() { $('billForm').reset(); setDefaultDates(); openModal('billModal'); }
+
+    function handleSaveBill(e) {
+        e.preventDefault();
+        const amount = parseFloat($('billAmount').value);
+        if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
+        state.bills.unshift({
+            id: 'bill_' + Date.now(),
+            title: $('billTitle').value.trim(),
+            date: $('billDate').value,
+            amount, paid: false
+        });
+        saveData(); closeModal('billModal'); refreshUI(); showToast('เพิ่มบิลแล้ว!');
+    }
+
+    function toggleBillPaid(id) {
+        const b = state.bills.find(x => x.id === id);
+        if (!b) return;
+        b.paid = !b.paid;
+        if (b.paid) {
+            // จ่ายแล้ว -> บันทึกเป็นรายจ่ายอัตโนมัติ
+            b.txId = 'tx_bill_' + b.id;
+            state.transactions.unshift({ id: b.txId, date: localDateKey(), title: 'จ่าย: ' + b.title, category: 'บิล/ค่าใช้จ่าย', amount: b.amount, type: 'expense' });
+        } else if (b.txId) {
+            state.transactions = state.transactions.filter(t => t.id !== b.txId);
+            delete b.txId;
+        }
+        saveData(); refreshUI(); showToast(b.paid ? 'จ่ายบิลแล้ว และบันทึกรายจ่ายให้แล้ว 💸' : 'ยกเลิกการจ่ายแล้ว');
+    }
+
+    function deleteBill(id) {
+        state.bills = state.bills.filter(x => x.id !== id);
+        saveData(); refreshUI(); showToast('ลบบิลแล้ว');
+    }
+
+    function renderBills() {
+        const grid = $('billsGrid');
+        $('dashPendingBills').innerText = state.bills.filter(b => !b.paid).length + ' รายการ';
+        if (!state.bills.length) {
+            grid.innerHTML = `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">ไม่มีบิลเตรียมจ่าย 💡</div>`;
+            return;
+        }
+        const sorted = [...state.bills].sort((a, b) => (a.paid - b.paid) || a.date.localeCompare(b.date));
+        grid.innerHTML = sorted.map(b => `
+            <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2 ${b.paid ? 'opacity-60' : ''}">
+                <div class="flex justify-between items-start">
+                    <span class="text-[10px] font-bold bg-retroPurple text-white px-2 py-0.5 rounded">${esc(b.date)}</span>
+                    <button onclick="deleteBill('${b.id}')" class="text-gray-400 hover:text-hotPink">✕</button>
                 </div>
-            `).join('');
-        }
-
-        function setTheme(themeName, save=true) {
-            state.theme = themeName;
-            document.body.className = `theme-${themeName} min-h-screen flex flex-col relative pb-20`;
-            if(save) saveData();
-        }
-
-        function setDefaultDates() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            ['txDate', 'billDate', 'taskDate', 'eventDate'].forEach(id => {
-                if(document.getElementById(id)) document.getElementById(id).value = todayStr;
-            });
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-limeGreen', 'text-darkText', 'shadow-sm');
-                btn.classList.add('text-white', 'hover:bg-white/20');
-            });
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            const activeBtn = document.getElementById('nav-' + tabId);
-            if(activeBtn) {
-                activeBtn.classList.remove('text-white', 'hover:bg-white/20');
-                activeBtn.classList.add('bg-limeGreen', 'text-darkText', 'shadow-sm');
-            }
-            if(tabId === 'dashboard') renderDashboard();
-            if(tabId === 'finance') renderTransactions();
-            if(tabId === 'bills') renderBills();
-            if(tabId === 'planner') renderTasks();
-            if(tabId === 'calendar') renderCalendar();
-            if(tabId === 'pet') updatePetStatus();
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toastNotification');
-            document.getElementById('toastMessage').innerText = message;
-            toast.classList.remove('-translate-y-24', 'opacity-0');
-            setTimeout(() => toast.classList.add('-translate-y-24', 'opacity-0'), 2500);
-        }
-
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        function openTransactionModal(type) {
-            document.getElementById('txType').value = type;
-            document.getElementById('txModalTitle').innerText = type === 'income' ? '💰 เพิ่มรายรับ' : '💸 เพิ่มรายจ่าย';
-            document.getElementById('transactionForm').reset();
-            setDefaultDates();
-            document.getElementById('txType').value = type;
-            openModal('transactionModal');
-        }
-
-        function handleSaveTransaction(e) {
-            e.preventDefault();
-            const type = document.getElementById('txType').value;
-            const amount = parseFloat(document.getElementById('txAmount').value);
-            state.transactions.unshift({
-                id: 'tx_' + Date.now(),
-                date: document.getElementById('txDate').value,
-                title: document.getElementById('txTitle').value,
-                category: document.getElementById('txCategory').value,
-                amount: amount, type: type
-            });
-            if(type === 'income') triggerPetSpeech(`เย้! เงินเข้า +฿${amount.toLocaleString()} 🎉`);
-            else triggerPetSpeech(`รายจ่าย -฿${amount.toLocaleString()} 🥺`);
-            saveData(); closeModal('transactionModal'); renderDashboard(); renderTransactions(); updatePetStatus(); showToast('บันทึกสำเร็จ!');
-        }
-
-        function deleteTransaction(id) {
-            state.transactions = state.transactions.filter(t => t.id !== id);
-            saveData(); renderDashboard(); renderTransactions(); updatePetStatus(); showToast('ลบรายการแล้ว');
-        }
-
-        function renderTransactions() {
-            const filterType = document.getElementById('finFilterType').value;
-            const search = document.getElementById('finSearch').value.toLowerCase();
-            const tbody = document.getElementById('transactionTableBody');
-            let totalIncome = 0, totalExpense = 0;
-            state.transactions.forEach(t => t.type === 'income' ? totalIncome += t.amount : totalExpense += t.amount);
-            document.getElementById('finTotalIncome').innerText = '฿ ' + totalIncome.toLocaleString();
-            document.getElementById('finTotalExpense').innerText = '฿ ' + totalExpense.toLocaleString();
-            document.getElementById('finNetBalance').innerText = '฿ ' + (totalIncome - totalExpense).toLocaleString();
-
-            const filtered = state.transactions.filter(t => (filterType === 'all' || t.type === filterType) && (t.title.toLowerCase().includes(search) || t.category.toLowerCase().includes(search)));
-            if(filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">ไม่พบรายการ 🔎</td></tr>`; return; }
-            tbody.innerHTML = filtered.map(t => `
-                <tr class="hover:bg-offWhite transition-all">
-                    <td class="p-2.5 border-r border-darkText">${t.date}</td>
-                    <td class="p-2.5 border-r border-darkText"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.type === 'income' ? 'bg-limeGreen/30 text-green-800' : 'bg-hotPink/20 text-hotPink'}">${t.type === 'income' ? 'รับ' : 'จ่าย'}</span></td>
-                    <td class="p-2.5 border-r border-darkText">${t.category}</td>
-                    <td class="p-2.5 border-r border-darkText font-bold">${t.title}</td>
-                    <td class="p-2.5 border-r border-darkText text-right font-extrabold ${t.type === 'income' ? 'text-green-600' : 'text-hotPink'}">${t.type === 'income' ? '+' : '-'}฿ ${t.amount.toLocaleString()}</td>
-                    <td class="p-2.5 text-center"><button onclick="deleteTransaction('${t.id}')" class="text-hotPink hover:scale-110"><i class="fa-solid fa-trash-can"></i></button></td>
-                </tr>
-            `).join('');
-        }
-
-        function openBillModal() { document.getElementById('billForm').reset(); setDefaultDates(); openModal('billModal'); }
-        function handleSaveBill(e) {
-            e.preventDefault();
-            state.bills.unshift({ id: 'bill_' + Date.now(), title: document.getElementById('billTitle').value, date: document.getElementById('billDate').value, amount: parseFloat(document.getElementById('billAmount').value), paid: false });
-            saveData(); closeModal('billModal'); renderBills(); renderDashboard(); showToast('เพิ่มบิลแล้ว!');
-        }
-        function toggleBillPaid(id) {
-            const b = state.bills.find(x => x.id === id);
-            if(b) { b.paid = !b.paid; saveData(); renderBills(); renderDashboard(); showToast('อัปเดตบิลแล้ว'); }
-        }
-        function deleteBill(id) { state.bills = state.bills.filter(x => x.id !== id); saveData(); renderBills(); renderDashboard(); showToast('ลบบิลแล้ว'); }
-        function renderBills() {
-            const grid = document.getElementById('billsGrid');
-            document.getElementById('dashPendingBills').innerText = state.bills.filter(b => !b.paid).length + ' รายการ';
-            if(state.bills.length === 0) { grid.innerHTML = `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">ไม่มีบิลเตรียมจ่าย 💡</div>`; return; }
-            grid.innerHTML = state.bills.map(b => `
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2 ${b.paid ? 'opacity-60 bg-gray-50' : ''}">
-                    <div class="flex justify-between items-start"><span class="text-[10px] font-bold bg-retroPurple text-white px-2 py-0.5 rounded">${b.date}</span><button onclick="deleteBill('${b.id}')" class="text-gray-400 hover:text-hotPink">✕</button></div>
-                    <h4 class="font-bold text-sm">${b.title}</h4>
-                    <span class="text-base font-extrabold text-hotPink">฿ ${b.amount.toLocaleString()}</span>
-                    <div class="pt-2 border-t flex justify-between items-center text-xs"><span class="font-bold ${b.paid ? 'text-green-600' : 'text-orange-500'}">${b.paid ? '✔️ จ่ายแล้ว' : '⏳ รอจ่าย'}</span><button onclick="toggleBillPaid('${b.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold border border-darkText ${b.paid ? 'bg-offWhite' : 'bg-limeGreen'}">${b.paid ? 'ยกเลิก' : 'จ่าย'}</button></div>
+                <h4 class="font-bold text-sm">${esc(b.title)}</h4>
+                <span class="text-base font-extrabold text-hotPink">฿ ${money(b.amount)}</span>
+                <div class="pt-2 border-t border-darkText flex justify-between items-center text-xs">
+                    <span class="font-bold ${b.paid ? 'text-green-600' : 'text-orange-500'}">${b.paid ? '✔️ จ่ายแล้ว' : '⏳ รอจ่าย'}</span>
+                    <button onclick="toggleBillPaid('${b.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold border border-darkText ${b.paid ? 'bg-offWhite text-darkText' : 'bg-limeGreen text-darkText'}">${b.paid ? 'ยกเลิก' : 'จ่าย'}</button>
                 </div>
-            `).join('');
-        }
+            </div>`).join('');
+    }
 
-        function openTaskModal() { document.getElementById('taskForm').reset(); setDefaultDates(); openModal('taskModal'); }
-        function handleSaveTask(e) {
-            e.preventDefault();
-            state.tasks.unshift({ id: 't_' + Date.now(), title: document.getElementById('taskTitle').value, date: document.getElementById('taskDate').value, status: document.getElementById('taskStatus').value, desc: document.getElementById('taskDesc').value });
-            saveData(); closeModal('taskModal'); renderTasks(); renderDashboard(); showToast('เพิ่มงานแล้ว!');
-        }
-        function updateTaskStatus(id, st) { const t = state.tasks.find(x => x.id === id); if(t) { t.status = st; saveData(); renderTasks(); renderDashboard(); } }
-        function deleteTask(id) { state.tasks = state.tasks.filter(x => x.id !== id); saveData(); renderTasks(); renderDashboard(); showToast('ลบงานแล้ว'); }
-        function renderTasks() {
-            ['todo', 'progress', 'done'].forEach(st => {
-                const list = state.tasks.filter(t => t.status === st);
-                document.getElementById('count' + st.charAt(0).toUpperCase() + st.slice(1)).innerText = list.length;
-                document.getElementById('list' + st.charAt(0).toUpperCase() + st.slice(1)).innerHTML = list.length ? list.map(t => `
-                    <div class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1">
-                        <div class="flex justify-between text-[10px] font-bold"><span>${t.date}</span><button onclick="deleteTask('${t.id}')" class="text-gray-400 hover:text-hotPink">✕</button></div>
-                        <h4 class="font-bold text-xs">${t.title}</h4>
-                        <div class="flex gap-1 pt-1">
-                            ${st !== 'todo' ? `<button onclick="updateTaskStatus('${t.id}', 'todo')" class="text-[9px] bg-sunnyYellow px-1 rounded border">To Do</button>` : ''}
-                            ${st !== 'progress' ? `<button onclick="updateTaskStatus('${t.id}', 'progress')" class="text-[9px] bg-popBlue text-white px-1 rounded border">Doing</button>` : ''}
-                            ${st !== 'done' ? `<button onclick="updateTaskStatus('${t.id}', 'done')" class="text-[9px] bg-limeGreen px-1 rounded border">Done</button>` : ''}
-                        </div>
+    // ================= PLANNER =================
+    function openTaskModal() { $('taskForm').reset(); setDefaultDates(); openModal('taskModal'); }
+
+    function handleSaveTask(e) {
+        e.preventDefault();
+        state.tasks.unshift({
+            id: 't_' + Date.now(),
+            title: $('taskTitle').value.trim(),
+            date: $('taskDate').value,
+            status: $('taskStatus').value,
+            desc: $('taskDesc').value.trim()
+        });
+        saveData(); closeModal('taskModal'); refreshUI(); showToast('เพิ่มงานแล้ว!');
+    }
+
+    function updateTaskStatus(id, st) {
+        const t = state.tasks.find(x => x.id === id);
+        if (t) { t.status = st; saveData(); refreshUI(); }
+    }
+
+    function deleteTask(id) {
+        state.tasks = state.tasks.filter(x => x.id !== id);
+        saveData(); refreshUI(); showToast('ลบงานแล้ว');
+    }
+
+    function renderTasks() {
+        const columns = { todo: ['listTodo', 'countTodo'], progress: ['listProgress', 'countProgress'], done: ['listDone', 'countDone'] };
+        Object.entries(columns).forEach(([st, [listId, countId]]) => {
+            const list = state.tasks.filter(t => t.status === st);
+            $(countId).innerText = list.length;
+            $(listId).innerHTML = list.length ? list.map(t => `
+                <div class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1">
+                    <div class="flex justify-between text-[10px] font-bold"><span>${esc(t.date) || 'ไม่มีกำหนด'}</span><button onclick="deleteTask('${t.id}')" class="text-gray-400 hover:text-hotPink">✕</button></div>
+                    <h4 class="font-bold text-xs">${esc(t.title)}</h4>
+                    ${t.desc ? `<p class="text-[10px] text-gray-500">${esc(t.desc)}</p>` : ''}
+                    <div class="flex gap-1 pt-1">
+                        ${st !== 'todo' ? `<button onclick="updateTaskStatus('${t.id}', 'todo')" class="text-[9px] bg-sunnyYellow text-darkText px-1 rounded border border-darkText">To Do</button>` : ''}
+                        ${st !== 'progress' ? `<button onclick="updateTaskStatus('${t.id}', 'progress')" class="text-[9px] bg-popBlue text-white px-1 rounded border border-darkText">Doing</button>` : ''}
+                        ${st !== 'done' ? `<button onclick="updateTaskStatus('${t.id}', 'done')" class="text-[9px] bg-limeGreen text-darkText px-1 rounded border border-darkText">Done</button>` : ''}
                     </div>
-                `).join('') : `<div class="text-center py-6 text-gray-400 text-[11px]">ไม่มีรายการ</div>`;
-            });
-            document.getElementById('dashPendingTasks').innerText = state.tasks.filter(t => t.status !== 'done').length + ' รายการ';
-        }
+                </div>`).join('') : `<div class="text-center py-6 text-gray-400 text-[11px]">ไม่มีรายการ</div>`;
+        });
+        $('dashPendingTasks').innerText = state.tasks.filter(t => t.status !== 'done').length + ' รายการ';
+    }
 
-        function openEventModal(presetDate) { 
-            document.getElementById('eventForm').reset(); setDefaultDates(); selectMoodEmoji('😊');
-            if(presetDate) document.getElementById('eventDate').value = presetDate;
-            else if (selectedCalendarDate) document.getElementById('eventDate').value = selectedCalendarDate;
-            removeSelectedPhoto(); openModal('eventModal'); 
-        }
+    // ================= CALENDAR & DIARY =================
+    let currentCalendarDate = new Date();
+    let selectedCalendarDate = null;
+    let selectedMood = '😊';
+    let currentUploadedPhotoBase64 = '';
 
-        function handleSaveEvent(e) {
-            e.preventDefault();
-            const targetDate = document.getElementById('eventDate').value;
-            state.events.unshift({ id: 'ev_' + Date.now(), date: targetDate, mood: selectedMood, title: document.getElementById('eventTitle').value, photo: currentUploadedPhotoBase64 });
-            saveData(); closeModal('eventModal'); selectCalendarDate(targetDate); showToast('บันทึกไดอารี่แล้ว!');
-        }
+    function selectMoodEmoji(emoji) {
+        selectedMood = emoji;
+        document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('mood-btn-selected'));
+        const btn = $('mood-' + emoji);
+        if (btn) btn.classList.add('mood-btn-selected');
+    }
 
-        function selectCalendarDate(dateKey) { selectedCalendarDate = dateKey; renderCalendar(); renderEventsList(); }
+    function openEventModal(presetDate) {
+        $('eventForm').reset();
+        setDefaultDates();
+        selectMoodEmoji('😊');
+        removeSelectedPhoto();
+        $('eventDate').value = presetDate || selectedCalendarDate || localDateKey();
+        openModal('eventModal');
+    }
 
-        function viewEventDetails(eventId) {
-            const ev = state.events.find(e => e.id === eventId);
-            if (!ev) return;
-            document.getElementById('viewEventMood').innerText = ev.mood || '😊';
-            document.getElementById('viewEventDate').innerText = ev.date;
-            document.getElementById('viewEventTitle').innerText = ev.title;
-            const imgContainer = document.getElementById('viewEventPhotoContainer');
-            const imgEl = document.getElementById('viewEventPhoto');
-            if (ev.photo) { imgEl.src = ev.photo; imgContainer.classList.remove('hidden'); }
-            else { imgContainer.classList.add('hidden'); }
-            document.getElementById('deleteEventBtn').onclick = function() { deleteEvent(ev.id); closeModal('viewEventModal'); };
-            openModal('viewEventModal');
-        }
+    function handlePhotoSelection(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = new Image();
+            img.onload = () => {
+                const maxW = 640;
+                const scale = Math.min(1, maxW / img.width);
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.round(img.width * scale);
+                canvas.height = Math.round(img.height * scale);
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                currentUploadedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.65);
+                $('eventPhotoPreview').src = currentUploadedPhotoBase64;
+                $('photoPreviewArea').classList.remove('hidden');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
 
-        function deleteEvent(id) { state.events = state.events.filter(x => x.id !== id); saveData(); renderCalendar(); renderEventsList(); showToast('ลบโน้ตแล้ว'); }
-        function changeMonth(dir) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir); renderCalendar(); }
+    function removeSelectedPhoto() {
+        currentUploadedPhotoBase64 = '';
+        $('eventPhotoInput').value = '';
+        $('photoPreviewArea').classList.add('hidden');
+    }
 
-        function renderCalendar() {
-            const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
-            const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-            document.getElementById('calMonthYearLabel').innerText = `${thaiMonths[month]} ${year + 543}`;
-            document.getElementById('calendarMonthMoodTitle').innerText = `อารมณ์เดือน ${thaiMonths[month]} ${year + 543}`;
-
-            const firstDay = new Date(year, month, 1).getDay(), totalDays = new Date(year, month + 1, 0).getDate();
-            let html = '';
-            for(let i=0; i<firstDay; i++) html += `<div class="aspect-square"></div>`;
-            const todayStr = new Date().toISOString().split('T')[0];
-
-            for(let day=1; day<=totalDays; day++) {
-                const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                const evs = state.events.filter(e => e.date === dateKey);
-                const isSelected = selectedCalendarDate === dateKey;
-                const isToday = dateKey === todayStr;
-
-                let borderStyle = "border-darkText", bgStyle = "bg-offWhite";
-                if (isSelected) { borderStyle = "border-limeGreen ring-2 ring-limeGreen"; bgStyle = "bg-sunnyYellow/20"; }
-                else if (isToday) { borderStyle = "border-popBlue"; bgStyle = "bg-popBlue/10"; }
-
-                const topMood = evs.length > 0 ? (evs[0].mood || '😊') : '';
-
-                html += `
-                    <div onclick="selectCalendarDate('${dateKey}')" class="${bgStyle} text-darkText p-1 rounded-xl border ${borderStyle} aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 transition-all select-none relative overflow-hidden">
-                        <div class="flex justify-between items-center shrink-0">
-                            <span class="text-[10px] font-bold ${isToday ? 'bg-popBlue text-white px-1 rounded-full' : ''}">${day}</span>
-                            ${topMood ? `<span class="text-[10px]">${topMood}</span>` : ''}
-                        </div>
-                        <div class="space-y-0.5 overflow-y-auto flex-1 mt-0.5">
-                            ${evs.map(ev => `
-                                <div onclick="event.stopPropagation(); viewEventDetails('${ev.id}')" class="text-[8px] bg-white px-1 py-0.5 rounded border border-darkText truncate font-bold">
-                                    ${ev.mood || ''} ${ev.title}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            document.getElementById('calendarGrid').innerHTML = html;
-            renderMonthlyMoodSummary(year, month);
-        }
-
-        function renderMonthlyMoodSummary(year, month) {
-            const prefix = `${year}-${String(month+1).padStart(2,'0')}`;
-            const monthEvents = state.events.filter(e => e.date && e.date.startsWith(prefix));
-            const summaryEl = document.getElementById('calendarMonthMoodSummary');
-            if (monthEvents.length === 0) { summaryEl.innerText = "ยังไม่มีบันทึกอารมณ์ในเดือนนี้ 📝"; return; }
-            const counts = { '😊': 0, '🥰': 0, '😴': 0, '😭': 0, '😡': 0 };
-            monthEvents.forEach(ev => { const m = ev.mood || '😊'; counts[m] = (counts[m] || 0) + 1; });
-            let topMood = '😊', maxCount = -1;
-            for (let m in counts) { if (counts[m] > maxCount) { maxCount = counts[m]; topMood = m; } }
-            let msg = topMood === '😡' ? `เดือนนี้หัวร้อนบ่อย (${counts['😡']} วัน) พักผ่อนบ้างน้า 🥺` : topMood === '🥰' ? `เดือนนี้แฮปปี้สุดๆ ไปเลย! (${counts['🥰']} วัน) 🌸` : `เดือนนี้สดใสมีความสุขดี 🌟`;
-            summaryEl.innerText = msg;
-        }
-
-        function renderEventsList() {
-            const sb = document.getElementById('eventsListSidebar');
-            const titleEl = document.getElementById('diarySidebarTitle');
-            const resetBtn = document.getElementById('resetDateFilterBtn');
-            let filteredEvents = state.events;
-
-            if (selectedCalendarDate) {
-                filteredEvents = state.events.filter(e => e.date === selectedCalendarDate);
-                titleEl.innerHTML = `<i class="fa-solid fa-calendar-day text-hotPink"></i> วันที่ ${selectedCalendarDate}`;
-                resetBtn.classList.remove('hidden');
-            } else {
-                titleEl.innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด`;
-                resetBtn.classList.add('hidden');
-            }
-
-            if(!filteredEvents.length) {
-                sb.innerHTML = `<div class="text-center py-6 text-gray-400 text-xs space-y-2"><p>ไม่มีโน้ต</p>${selectedCalendarDate ? `<button onclick="openEventModal('${selectedCalendarDate}')" class="bg-limeGreen text-darkText font-bold px-2 py-1 rounded border border-darkText text-[10px]">+ เพิ่มโน้ต</button>` : ''}</div>`;
-                return;
-            }
-
-            sb.innerHTML = `
-                ${selectedCalendarDate ? `<button onclick="openEventModal('${selectedCalendarDate}')" class="w-full bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px] mb-2">+ เพิ่มโน้ตวันนี้</button>` : ''}
-                ${filteredEvents.map(ev => `
-                    <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1 cursor-pointer hover:bg-white text-xs">
-                        <div class="flex justify-between items-center text-[10px]">
-                            <span>${ev.mood || '😊'} <b>${ev.date}</b></span>
-                            <i class="fa-solid fa-chevron-right text-gray-400"></i>
-                        </div>
-                        <h4 class="font-bold text-popBlue truncate">${ev.title}</h4>
-                    </div>
-                `).join('')}
-            `;
-        }
-
-        function calcClear() { currentCalcExpression = "0"; document.getElementById('calcScreen').innerText = "0"; }
-        function calcAppend(val) { currentCalcExpression = currentCalcExpression === "0" && !['+','-','*','/','%','.'].includes(val) ? val : currentCalcExpression + val; document.getElementById('calcScreen').innerText = currentCalcExpression; }
-        function calcCalculate() {
+    function handleSaveEvent(e) {
+        e.preventDefault();
+        const id = 'ev_' + Date.now();
+        let hasPhoto = false;
+        if (currentUploadedPhotoBase64) {
             try {
-                let res = eval(currentCalcExpression.replace(/×/g, '*').replace(/÷/g, '/'));
-                lastCalcResult = Number(res.toFixed(2));
-                document.getElementById('calcScreen').innerText = lastCalcResult;
-                document.getElementById('latestCalcVal').innerText = lastCalcResult;
-                state.calcHistory.unshift({ expr: currentCalcExpression, result: lastCalcResult });
-                if(state.calcHistory.length > 10) state.calcHistory.pop();
-                saveData(); renderCalcHistory(); currentCalcExpression = String(lastCalcResult);
-            } catch(e) { document.getElementById('calcScreen').innerText = "Error"; currentCalcExpression = "0"; }
+                localStorage.setItem(photoKey(id), currentUploadedPhotoBase64);
+                hasPhoto = true;
+            } catch {
+                showToast('พื้นที่เต็ม บันทึกโน้ตโดยไม่มีรูป');
+            }
         }
-        function clearCalcHistory() { state.calcHistory = []; saveData(); renderCalcHistory(); }
-        function renderCalcHistory() {
-            const list = document.getElementById('calcHistoryList');
-            if(!state.calcHistory.length) { list.innerHTML = `<div class="text-center py-4 text-gray-400 text-[10px]">ไม่มีประวัติ</div>`; return; }
-            list.innerHTML = state.calcHistory.map(h => `<div class="bg-offWhite p-1.5 rounded border flex justify-between text-[11px]"><span>${h.expr} =</span><strong class="text-popBlue">${h.result}</strong></div>`).join('');
+        const date = $('eventDate').value;
+        state.events.unshift({ id, date, mood: selectedMood, title: $('eventTitle').value.trim(), hasPhoto });
+        saveData();
+        closeModal('eventModal');
+        selectCalendarDate(date);
+        showToast('บันทึกไดอารี่แล้ว!');
+    }
+
+    function selectCalendarDate(dateKey) {
+        selectedCalendarDate = dateKey;
+        renderCalendar();
+        renderEventsList();
+    }
+
+    function viewEventDetails(eventId) {
+        const ev = state.events.find(e => e.id === eventId);
+        if (!ev) return;
+        $('viewEventMood').innerText = ev.mood || '😊';
+        $('viewEventDate').innerText = ev.date;
+        $('viewEventTitle').innerText = ev.title;
+        const photo = ev.hasPhoto ? localStorage.getItem(photoKey(ev.id)) : null;
+        if (photo) { $('viewEventPhoto').src = photo; $('viewEventPhotoContainer').classList.remove('hidden'); }
+        else { $('viewEventPhotoContainer').classList.add('hidden'); }
+        $('deleteEventBtn').onclick = () => { deleteEvent(ev.id); closeModal('viewEventModal'); };
+        openModal('viewEventModal');
+    }
+
+    function deleteEvent(id) {
+        state.events = state.events.filter(x => x.id !== id);
+        try { localStorage.removeItem(photoKey(id)); } catch {}
+        saveData(); renderCalendar(); renderEventsList(); showToast('ลบโน้ตแล้ว');
+    }
+
+    function changeMonth(dir) {
+        currentCalendarDate.setDate(1);
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir);
+        renderCalendar();
+    }
+
+    function renderCalendar() {
+        const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
+        const label = `${THAI_MONTHS[month]} ${year + 543}`;
+        $('calMonthYearLabel').innerText = label;
+        $('calendarMonthMoodTitle').innerText = `อารมณ์เดือน${label}`;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const totalDays = new Date(year, month + 1, 0).getDate();
+        const todayStr = localDateKey();
+        let html = '';
+        for (let i = 0; i < firstDay; i++) html += `<div class="aspect-square"></div>`;
+
+        for (let day = 1; day <= totalDays; day++) {
+            const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const evs = state.events.filter(e => e.date === dateKey);
+            const isSelected = selectedCalendarDate === dateKey;
+            const isToday = dateKey === todayStr;
+
+            let borderStyle = 'border-darkText', bgStyle = 'bg-offWhite';
+            if (isSelected) { borderStyle = 'border-limeGreen ring-2 ring-limeGreen'; bgStyle = 'bg-sunnyYellow/20'; }
+            else if (isToday) { borderStyle = 'border-popBlue'; bgStyle = 'bg-popBlue/10'; }
+
+            const topMood = evs.length ? (evs[0].mood || '😊') : '';
+            html += `
+                <div onclick="selectCalendarDate('${dateKey}')" class="${bgStyle} text-darkText p-1 rounded-xl border ${borderStyle} aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 transition-all select-none overflow-hidden">
+                    <div class="flex justify-between items-center shrink-0">
+                        <span class="text-[10px] font-bold ${isToday ? 'bg-popBlue text-white px-1 rounded-full' : ''}">${day}</span>
+                        ${topMood ? `<span class="text-[10px]">${topMood}</span>` : ''}
+                    </div>
+                    <div class="space-y-0.5 overflow-y-auto flex-1 mt-0.5">
+                        ${evs.map(ev => `
+                            <div onclick="event.stopPropagation(); viewEventDetails('${ev.id}')" class="text-[8px] bg-white text-darkText px-1 py-0.5 rounded border border-darkText truncate font-bold">
+                                ${ev.mood || ''} ${esc(ev.title)}
+                            </div>`).join('')}
+                    </div>
+                </div>`;
         }
-        function saveCalcAsNote() {
-            state.events.unshift({ id: 'ev_' + Date.now(), date: new Date().toISOString().split('T')[0], mood: '😊', title: `คำนวณ: ฿${lastCalcResult}` });
-            saveData(); renderCalendar(); renderEventsList(); showToast('บันทึกโน้ตแล้ว');
-        }
-        function saveCalcAsExpense(type) {
-            state.transactions.unshift({ id: 'tx_' + Date.now(), date: new Date().toISOString().split('T')[0], title: 'จากเครื่องคิดเลข', category: type === 'expense' ? 'อื่นๆ' : 'เงินเดือน/รายรับ', amount: lastCalcResult, type: type });
-            saveData(); renderDashboard(); renderTransactions(); updatePetStatus(); showToast('บันทึกรายการแล้ว');
+        $('calendarGrid').innerHTML = html;
+        renderMonthlyMoodSummary(year, month);
+    }
+
+    function renderMonthlyMoodSummary(year, month) {
+        const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+        const monthEvents = state.events.filter(e => e.date && e.date.startsWith(prefix));
+        if (!monthEvents.length) { $('calendarMonthMoodSummary').innerText = 'ยังไม่มีบันทึกอารมณ์ในเดือนนี้ 📝'; return; }
+        const counts = {};
+        monthEvents.forEach(ev => { const m = ev.mood || '😊'; counts[m] = (counts[m] || 0) + 1; });
+        const topMood = Object.keys(counts).reduce((a, b) => counts[a] >= counts[b] ? a : b);
+        const msg = topMood === '😡' ? `เดือนนี้หัวร้อนบ่อย (${counts['😡']} วัน) พักผ่อนบ้างน้า 🥺`
+                  : topMood === '🥰' ? `เดือนนี้แฮปปี้สุดๆ ไปเลย! (${counts['🥰']} วัน) 🌸`
+                  : `เดือนนี้สดใสมีความสุขดี 🌟`;
+        $('calendarMonthMoodSummary').innerText = msg;
+    }
+
+    function renderEventsList() {
+        const sb = $('eventsListSidebar');
+        const titleEl = $('diarySidebarTitle');
+        const resetBtn = $('resetDateFilterBtn');
+        let list = state.events;
+
+        if (selectedCalendarDate) {
+            list = state.events.filter(e => e.date === selectedCalendarDate);
+            titleEl.innerHTML = `<i class="fa-solid fa-calendar-day text-hotPink"></i> วันที่ ${esc(selectedCalendarDate)}`;
+            resetBtn.classList.remove('hidden');
+        } else {
+            titleEl.innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด`;
+            resetBtn.classList.add('hidden');
         }
 
-        function renderDashboard() {
-            let inc = 0, exp = 0;
-            state.transactions.forEach(t => t.type === 'income' ? inc += t.amount : exp += t.amount);
-            document.getElementById('dashNetBalance').innerText = '฿ ' + (inc - exp).toLocaleString();
-            document.getElementById('dashTotalIncome').innerText = '฿ ' + inc.toLocaleString();
-            document.getElementById('dashTotalExpense').innerText = '฿ ' + exp.toLocaleString();
-            renderExpenseChart();
-        }
+        const addBtn = selectedCalendarDate
+            ? `<button onclick="openEventModal('${selectedCalendarDate}')" class="w-full bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px] mb-2">+ เพิ่มโน้ตวันนี้</button>`
+            : '';
 
-        function renderExpenseChart() {
-            const ctx = document.getElementById('expenseCategoryChart').getContext('2d');
-            const map = {};
-            state.transactions.filter(t => t.type === 'expense').forEach(t => map[t.category] = (map[t.category] || 0) + t.amount);
-            if(expenseChartInstance) expenseChartInstance.destroy();
-            expenseChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(map).length ? Object.keys(map) : ['ไม่มีรายจ่าย'],
-                    datasets: [{ data: Object.values(map).length ? Object.values(map) : [1], backgroundColor: ['#FF007F', '#0055FF', '#CCFF00', '#FFDD00', '#9D00FF'], borderWidth: 1, borderColor: '#1A1A1A' }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+        if (!list.length) {
+            sb.innerHTML = `${addBtn}<div class="text-center py-6 text-gray-400 text-xs">ไม่มีโน้ต</div>`;
+            return;
         }
+        sb.innerHTML = addBtn + list.map(ev => `
+            <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1 cursor-pointer hover:bg-white text-xs">
+                <div class="flex justify-between items-center text-[10px]">
+                    <span>${ev.mood || '😊'} <b>${esc(ev.date)}</b></span>
+                    <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                </div>
+                <h4 class="font-bold text-popBlue truncate">${esc(ev.title)}</h4>
+            </div>`).join('');
+    }
+
+    // ================= CALCULATOR =================
+    let calcExpr = '0';
+    let lastCalcResult = 0;
+
+    function calcRender() { $('calcScreen').innerText = calcExpr; }
+    function calcClear() { calcExpr = '0'; lastCalcResult = 0; $('latestCalcVal').innerText = '0'; calcRender(); }
+
+    function calcAppend(val) {
+        const ops = ['+', '-', '*', '/', '%', '.'];
+        if (calcExpr === '0' && !ops.includes(val)) calcExpr = val;
+        else calcExpr += val;
+        calcRender();
+    }
+
+    function calcCalculate() {
+        const expr = calcExpr.replace(/×/g, '*').replace(/÷/g, '/');
+        // อนุญาตเฉพาะตัวเลขและเครื่องหมายคำนวณ
+        if (!/^[0-9+\-*/%.() ]+$/.test(expr)) return calcError();
+        try {
+            const res = Function('"use strict"; return (' + expr + ')')();
+            if (!isFinite(res)) throw new Error('not finite');
+            lastCalcResult = Math.round(res * 100) / 100;
+            $('calcScreen').innerText = lastCalcResult;
+            $('latestCalcVal').innerText = money(lastCalcResult);
+            state.calcHistory.unshift({ expr: calcExpr, result: lastCalcResult });
+            if (state.calcHistory.length > 10) state.calcHistory.pop();
+            calcExpr = String(lastCalcResult);
+            saveData();
+            renderCalcHistory();
+        } catch { calcError(); }
+    }
+
+    function calcError() {
+        $('calcScreen').innerText = 'Error';
+        calcExpr = '0';
+    }
+
+    function clearCalcHistory() { state.calcHistory = []; saveData(); renderCalcHistory(); }
+
+    function renderCalcHistory() {
+        const list = $('calcHistoryList');
+        if (!state.calcHistory.length) { list.innerHTML = `<div class="text-center py-4 text-gray-400 text-[10px]">ไม่มีประวัติ</div>`; return; }
+        list.innerHTML = state.calcHistory.map(h => `
+            <div class="bg-offWhite text-darkText p-1.5 rounded border border-darkText flex justify-between text-[11px]">
+                <span>${esc(h.expr)} =</span><strong class="text-popBlue">${esc(h.result)}</strong>
+            </div>`).join('');
+    }
+
+    function calcDesc(fallback) {
+        return $('calcNoteDesc').value.trim() || fallback;
+    }
+
+    function saveCalcAsNote() {
+        if (!lastCalcResult) return showToast('ยังไม่มีผลลัพธ์ให้บันทึก');
+        state.events.unshift({ id: 'ev_' + Date.now(), date: localDateKey(), mood: '😊', title: `คำนวณ: ${calcDesc('ผลลัพธ์')} = ฿${money(lastCalcResult)}`, hasPhoto: false });
+        saveData(); renderCalendar(); renderEventsList(); showToast('บันทึกโน้ตแล้ว');
+    }
+
+    function saveCalcAsExpense(type) {
+        if (!lastCalcResult) return showToast('ยังไม่มีผลลัพธ์ให้บันทึก');
+        state.transactions.unshift({
+            id: 'tx_' + Date.now(), date: localDateKey(),
+            title: calcDesc('จากเครื่องคิดเลข'),
+            category: type === 'expense' ? 'อื่นๆ' : 'เงินเดือน/รายรับ',
+            amount: Math.abs(lastCalcResult), type
+        });
+        triggerPetSpeech(type === 'income' ? `เย้! เงินเข้า +฿${money(lastCalcResult)} 🎉` : `รายจ่าย -฿${money(lastCalcResult)} 🥺`);
+        saveData(); refreshUI(); showToast('บันทึกรายการแล้ว');
+    }
+
+    // ================= DASHBOARD =================
+    function renderDashboard() {
+        const { inc, exp, net } = calcNetBalance();
+        const month = thisMonthKey();
+        let mInc = 0, mExp = 0;
+        state.transactions.forEach(t => {
+            if (!t.date || !t.date.startsWith(month)) return;
+            t.type === 'income' ? mInc += t.amount : mExp += t.amount;
+        });
+        $('dashNetBalance').innerText = '฿ ' + money(net);
+        $('dashTotalIncome').innerText = '฿ ' + money(mInc);
+        $('dashTotalExpense').innerText = '฿ ' + money(mExp);
+
+        const pending = state.tasks.filter(t => t.status !== 'done');
+        $('dashTodoList').innerHTML = pending.length
+            ? pending.slice(0, 8).map(t => `
+                <div class="bg-offWhite text-darkText p-2 rounded-lg border border-darkText flex justify-between items-center gap-2">
+                    <span class="font-bold truncate">${esc(t.title)}</span>
+                    <span class="text-[9px] shrink-0 ${t.status === 'progress' ? 'text-popBlue' : 'text-gray-500'}">${t.status === 'progress' ? 'กำลังทำ' : 'ต้องทำ'}</span>
+                </div>`).join('')
+            : `<div class="text-center py-8 text-gray-400">ไม่มีงานค้างอยู่ 🎉</div>`;
+
+        renderExpenseChart();
+    }
+
+    let expenseChartInstance = null;
+    function renderExpenseChart() {
+        const canvas = $('expenseCategoryChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+        const map = {};
+        state.transactions.filter(t => t.type === 'expense').forEach(t => map[t.category] = (map[t.category] || 0) + t.amount);
+        const labels = Object.keys(map).length ? Object.keys(map) : ['ไม่มีรายจ่าย'];
+        const values = Object.keys(map).length ? Object.values(map) : [1];
+        if (expenseChartInstance) expenseChartInstance.destroy();
+        expenseChartInstance = new Chart(canvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels,
+                datasets: [{ data: values, backgroundColor: ['#FF007F', '#0055FF', '#CCFF00', '#FFDD00', '#9D00FF', '#FF8A00', '#00C2A8'], borderWidth: 2, borderColor: '#1A1A1A' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+
+    // ================= INIT =================
+    function setAppleIcon() {
+        const c = document.createElement('canvas');
+        c.width = 180; c.height = 180;
+        const x = c.getContext('2d');
+        x.fillStyle = '#0055FF'; x.fillRect(0, 0, 180, 180);
+        x.fillStyle = '#CCFF00'; x.fillRect(30, 30, 120, 120);
+        x.strokeStyle = '#1A1A1A'; x.lineWidth = 6; x.strokeRect(30, 30, 120, 120);
+        x.fillStyle = '#1A1A1A'; x.font = 'bold 40px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+        x.fillText('Y2K', 90, 92);
+        $('appleIcon').href = c.toDataURL('image/png');
+    }
+
+    window.addEventListener('load', () => {
+        setAppleIcon();
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW error:', err));
+        }
+        setDefaultDates();
+        refreshUI();
+        initFirebase();
+        if (!IS_CONFIGURED) setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
+    });
     </script>
 </body>
 </html>

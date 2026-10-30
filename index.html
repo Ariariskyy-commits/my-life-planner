@@ -2064,7 +2064,7 @@
         }
 
         function deleteCalcHistoryItem(id) {
-            state.calcHistory = state.calcHistory.filter(h => h.id !== id);
+            state.calcHistory = state.calcHistory.filter(h => String(h.id) !== String(id));
             saveData();
             renderCalcHistory();
             showToast('ลบรายการคำนวณแล้ว');

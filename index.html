@@ -258,12 +258,28 @@
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
-    <!-- FLOATING PET -->
-    <div id="floatingPet" class="fixed bottom-3 left-3 z-[9999] bg-sunnyYellow border-2 border-darkText rounded-xl px-2 py-1 shadow-sm flex items-center gap-1.5 cursor-pointer select-none hover:scale-105 transition-all max-w-[160px]" onclick="switchTab('pet')">
-        <div id="petAvatar" class="text-base bg-white w-6 h-6 rounded-lg border border-darkText flex items-center justify-center shrink-0">🐱</div>
-        <div class="overflow-hidden pr-0.5">
-            <span id="floatingPetName" class="text-[9px] font-extrabold text-darkText block truncate">สัตว์เลี้ยง</span>
-            <p id="petSpeechBubble" class="text-[9px] font-bold text-hotPink truncate">ยินดีต้อนรับ! 💰</p>
+    <!-- FLOATING PET & QUICK NOTE WIDGET -->
+    <div id="floatingPetWidget" class="fixed bottom-3 left-3 z-[9999] flex flex-col items-start gap-1.5 select-none max-w-[220px]">
+        <!-- กล่องโน้ตด่วนลอย (ซ่อน/เปิดได้) -->
+        <div id="floatingQuickNoteBox" class="bg-sunnyYellow border-2 border-darkText rounded-xl p-2.5 shadow-md w-full relative">
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-[10px] font-extrabold text-darkText flex items-center gap-1"><i class="fa-solid fa-note-sticky text-hotPink"></i> โน้ตด่วนสัตว์เลี้ยง</span>
+                <button onclick="toggleQuickNoteInput()" class="text-[9px] bg-white border border-darkText px-1.5 py-0.5 rounded font-bold hover:bg-hotPink hover:text-white transition-all">แก้ไข</button>
+            </div>
+            <p id="floatingQuickNoteText" class="text-[11px] font-bold text-darkText bg-white/70 p-1.5 rounded border border-darkText/20 break-words max-h-24 overflow-y-auto">ยังไม่มีโน้ตด่วน กดแก้ไขเพื่อเพิ่มเลย!</p>
+        </div>
+
+        <!-- ตัวสัตว์เลี้ยง (กดเพื่อสลับไปหน้าสัตว์เลี้ยง) -->
+        <div class="bg-sunnyYellow border-2 border-darkText rounded-xl px-2.5 py-1.5 shadow-sm flex items-center justify-between gap-2 cursor-pointer hover:scale-105 transition-all w-full" onclick="switchTab('pet')">
+            <div class="flex items-center gap-1.5 overflow-hidden">
+                <div id="petAvatar" class="text-base bg-white w-6 h-6 rounded-lg border border-darkText flex items-center justify-center shrink-0">🐱</div>
+                <div class="overflow-hidden pr-0.5">
+                    <span id="floatingPetName" class="text-[9px] font-extrabold text-darkText block truncate">สัตว์เลี้ยง</span>
+                    <p id="petSpeechBubble" class="text-[9px] font-bold text-hotPink truncate">ยินดีต้อนรับ! 💰</p>
+                </div>
+            </div>
+            <!-- ปุ่มซ่อน/เปิด โน้ตด่วน -->
+            <button onclick="event.stopPropagation(); toggleQuickNoteVisibility()" id="toggleQuickNoteBtn" class="w-5 h-5 bg-white border border-darkText rounded-md flex items-center justify-center text-[10px] font-bold text-darkText hover:bg-limeGreen transition-all" title="ซ่อน/เปิดโน้ตด่วน">▼</button>
         </div>
     </div>
 
@@ -629,6 +645,21 @@
         </div>
     </div>
 
+    <!-- QUICK NOTE MODAL -->
+    <div id="quickNoteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
+            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">📝 ตั้งค่าโน้ตด่วนสัตว์เลี้ยง</h3><button onclick="closeModal('quickNoteModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
+            <div class="space-y-2">
+                <label class="block font-bold">ข้อความที่สัตว์เลี้ยงจะพูดเตือนใจ:</label>
+                <textarea id="quickNoteInputText" rows="3" placeholder="เช่น อย่าลืมส่งงานบ่ายนี้! 📌" class="w-full bg-offWhite border border-darkText rounded-xl p-2.5 outline-none font-medium text-darkText"></textarea>
+            </div>
+            <div class="pt-1 flex gap-2">
+                <button type="button" onclick="closeModal('quickNoteModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
+                <button type="button" onclick="saveQuickNote()" class="flex-1 bg-popBlue text-white font-bold py-2 rounded-lg border border-darkText">บันทึกโน้ต</button>
+            </div>
+        </div>
+    </div>
+
     <!-- TRANSACTION MODAL -->
     <div id="transactionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
@@ -988,7 +1019,7 @@
         }
 
         // ================= STATE & STORAGE =================
-        const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories' };
+        const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNote:'y2k_quicknote', quickNoteShow:'y2k_quicknote_show' };
         const DEFAULT_CATEGORIES = [
             "🍔 อาหาร/เครื่องดื่ม", "🛍️ ช้อปปิ้ง", "🚗 เดินทาง",
             "🎮 บันเทิง/เกม", "💡 บิล/ค่าใช้จ่าย", "💰 เงินเดือน/รายรับ", "✨ อื่นๆ"
@@ -1010,7 +1041,9 @@
             events: readLS(KEYS.events, []),
             calcHistory: readLS(KEYS.calcHistory, []),
             categories: readLS(KEYS.categories, DEFAULT_CATEGORIES),
-            pet: Object.assign(makeDefaultPet(), readLS(KEYS.pet, {}))
+            pet: Object.assign(makeDefaultPet(), readLS(KEYS.pet, {})),
+            quickNote: localStorage.getItem(KEYS.quickNote) || '',
+            quickNoteShow: localStorage.getItem(KEYS.quickNoteShow) !== 'false'
         };
         if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
 
@@ -1024,6 +1057,8 @@
                 localStorage.setItem(KEYS.categories, JSON.stringify(state.categories));
                 localStorage.setItem(KEYS.pet, JSON.stringify(state.pet));
                 localStorage.setItem(KEYS.theme, state.theme);
+                localStorage.setItem(KEYS.quickNote, state.quickNote);
+                localStorage.setItem(KEYS.quickNoteShow, String(state.quickNoteShow));
             } catch (e) {
                 console.error(e);
                 showToast('บันทึกข้อมูลในเครื่องไม่สำเร็จ ⚠️');
@@ -1186,6 +1221,8 @@
                 categories: state.categories,
                 pet: state.pet,
                 theme: state.theme,
+                quickNote: state.quickNote,
+                quickNoteShow: state.quickNoteShow,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
         }
@@ -1228,6 +1265,8 @@
             state.categories = d.categories || DEFAULT_CATEGORIES;
             state.pet = Object.assign(makeDefaultPet(), d.pet || {});
             if (d.theme) state.theme = d.theme;
+            if (d.quickNote !== undefined) state.quickNote = d.quickNote;
+            if (d.quickNoteShow !== undefined) state.quickNoteShow = d.quickNoteShow;
             saveLocal();
         }
 
@@ -1237,7 +1276,7 @@
                 app: 'y2k-planner', version: 3, exportedAt: new Date().toISOString(),
                 transactions: state.transactions, bills: state.bills, tasks: state.tasks,
                 events: state.events, calcHistory: state.calcHistory, categories: state.categories, pet: state.pet,
-                theme: state.theme
+                theme: state.theme, quickNote: state.quickNote, quickNoteShow: state.quickNoteShow
             };
         }
 
@@ -1296,6 +1335,53 @@
             saveData();
             syncPendingPhotos();
             showToast('คืนค่าข้อมูลสำเร็จ! ✨');
+        }
+
+        // ================= QUICK NOTE WIDGET =================
+        function toggleQuickNoteInput() {
+            $('quickNoteInputText').value = state.quickNote;
+            openModal('quickNoteModal');
+        }
+
+        function saveQuickNote() {
+            state.quickNote = $('quickNoteInputText').value.trim();
+            state.quickNoteShow = true;
+            saveData();
+            closeModal('quickNoteModal');
+            renderQuickNoteWidget();
+            showToast('บันทึกโน้ตด่วนแล้ว! 📌');
+        }
+
+        function toggleQuickNoteVisibility() {
+            state.quickNoteShow = !state.quickNoteShow;
+            saveData();
+            renderQuickNoteWidget();
+        }
+
+        function renderQuickNoteWidget() {
+            const box = $('floatingQuickNoteBox');
+            const btn = $('toggleQuickNoteBtn');
+            const txt = $('floatingQuickNoteText');
+
+            if (!state.quickNote) {
+                box.classList.add('hidden');
+                btn.innerText = '▲';
+                btn.title = 'เพิ่มโน้ตด่วน';
+                btn.onclick = (e) => { e.stopPropagation(); toggleQuickNoteInput(); };
+                return;
+            }
+
+            box.classList.remove('hidden');
+            if (state.quickNoteShow) {
+                box.style.display = 'block';
+                btn.innerText = '▼';
+                btn.title = 'ซ่อนโน้ตด่วน';
+                txt.innerText = state.quickNote;
+            } else {
+                box.style.display = 'none';
+                btn.innerText = '▲';
+                btn.title = 'แสดงโน้ตด่วน';
+            }
         }
 
         // ================= THEME & PET =================
@@ -1364,6 +1450,7 @@
             $('petSpeechBubble').innerText = state.pet.speech;
             $('calPetSpeechText').innerText = state.pet.speech;
             renderPetSpeechHistory();
+            renderQuickNoteWidget();
         }
 
         function triggerPetSpeech(text) {
@@ -1416,6 +1503,7 @@
             $('petAvatarSelect').value = state.pet.avatar;
             renderDashboard(); renderTransactions(); renderBills(); renderTasks();
             renderCalendar(); renderEventsList(); updatePetStatus(); renderCalcHistory();
+            renderQuickNoteWidget();
         }
 
         // ================= FINANCE =================

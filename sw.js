@@ -1,40 +1,38 @@
-const CACHE_NAME = 'y2k-planner-v1';
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json'
-];
+const CACHE = 'y2k-planner-v5';
+const ASSETS = ['./', './index.html', './manifest.json', './icon.svg', './icon.png'];
 
-// ขั้นตอน Install และทำการ Caching ไฟล์
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
-  self.skipWaiting();
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE)
+            .then(cache => Promise.allSettled(ASSETS.map(url => cache.add(url))))
+            .then(() => self.skipWaiting())
+    );
 });
 
-// ขั้นตอน Activate และลบ Cache เก่าที่ไม่ใช้แล้ว
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
-    })
-  );
-  self.clients.claim();
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys()
+            .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+            .then(() => self.clients.claim())
+    );
 });
 
-// ขั้นตอน Fetch ข้อมูลมาแสดงผล (รองรับ Offline)
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request);
-    })
-  );
+// network-first: ออนไลน์ได้ของใหม่เสมอ ออฟไลน์ใช้ cache
+self.addEventListener('fetch', event => {
+    const req = event.request;
+    if (req.method !== 'GET') return;
+    const url = new URL(req.url);
+    if (url.origin !== self.location.origin) return;
+
+    event.respondWith(
+        fetch(req)
+            .then(res => {
+                if (res.ok) {
+                    const copy = res.clone();
+                    caches.open(CACHE).then(cache => cache.put(req, copy));
+                }
+                return res;
+            })
+            .catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
+    );
 });

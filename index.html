@@ -1,51 +1,61 @@
 <!DOCTYPE html>
-<html lang="th" data-view="desktop">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Y2K Playful Life Planner</title>
-
-    <!-- PWA -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Y2K Playful Life Planner - รายรับรายจ่าย แพลนเนอร์ & สัตว์เลี้ยงส่วนตัว</title>
+    
+    <!-- PWA Settings & App Icon -->
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icon-192.png" type="image/png">
-<link id="appleIcon" rel="apple-touch-icon" href="icon-512.png">
     <meta name="theme-color" content="#0055FF">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Y2K Planner">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="./icon.jpg">
 
-    <!-- Tailwind, Fonts, Icons, Chart.js (pinned) -->
+    <!-- Tailwind CSS & Fonts & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-
-    <!-- Firebase SDK (pinned) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // ===== ตั้งค่า Firebase โปรเจกต์ y2k-planner (ใส่ให้แล้ว ไม่ต้องแก้) =====
+        // กำหนดค่า Firebase ของคุณตรงนี้ (ถ้ามี) หรือปล่อยไว้ใช้โหมดจำลอง
         const firebaseConfig = {
-            apiKey: "AIzaSyAXBrkRElXiLTfeEB5iWDiiZlV-07wfXlc",
-            authDomain: "y2k-planner.firebaseapp.com",
-            projectId: "y2k-planner",
-            storageBucket: "y2k-planner.firebasestorage.app",
-            messagingSenderId: "214890533249",
-            appId: "1:214890533249:web:42f0bf9751f99398f61880",
-            measurementId: "G-6NVER687G3"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
-        const IS_CONFIGURED =
-            !!firebaseConfig.apiKey &&
-            !firebaseConfig.apiKey.startsWith("YOUR_");
+
+        let auth = null;
+        let db = null;
+        let isFirebaseActive = false;
+
+        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+                isFirebaseActive = true;
+            } catch(e) {
+                console.warn("Firebase Init bypassed:", e);
+            }
+        }
 
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        popBlue: '#0055FF', limeGreen: '#CCFF00', hotPink: '#FF007F',
-                        sunnyYellow: '#FFDD00', retroPurple: '#9D00FF', darkText: '#1A1A1A', offWhite: '#F9F9FB'
+                        popBlue: '#0055FF', // สีหลักคงเดิม แต่เอาไปใช้แบบเบาลง
+                        limeGreen: '#CCFF00',
+                        hotPink: '#FF007F',
+                        sunnyYellow: '#FFF35C', // เหลืองอ่อนลงนิดนึง
+                        retroPurple: '#9D00FF',
+                        softBg: '#F5F5F7', // พื้นหลังใหม่ ขาวอมเทาอ่อนๆ
+                        cardBg: '#FFFFFF',
+                        darkText: '#1A1A1A'
                     },
                     fontFamily: {
                         sans: ['Prompt', 'sans-serif'],
@@ -53,46 +63,25 @@
                     }
                 }
             }
-        };
+        }
     </script>
-
     <style>
-        /* utilities ที่ Tailwind CDN ไม่มีให้ */
-        .border-3 { border-width: 3px; }
-        .border-b-3 { border-bottom-width: 3px; }
-
         html, body {
-            width: 100%;
-            margin: 0;
-            overflow-x: hidden;
+            width: 100% !important;
+            min-height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow-x: hidden !important;
             font-family: 'Prompt', sans-serif;
-            box-sizing: border-box;
-        }
-        html {
-            scroll-behavior: smooth;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body {
-            min-height: 100vh;
-            background-color: var(--bg-color, #F9F9FB);
+            background-color: var(--bg-color, #F5F5F7); /* ใช้สี softBg เป็นค่าเริ่มต้น */
             color: var(--text-color, #1A1A1A);
-            -webkit-font-smoothing: antialiased;
+            box-sizing: border-box !important;
         }
 
-        body.theme-y2k    { --bg-color: #F9F9FB; --card-bg: #FFFFFF; --text-color: #1A1A1A; }
+        body.theme-y2k { --bg-color: #F5F5F7; --card-bg: #FFFFFF; --text-color: #1A1A1A; }
         body.theme-pastel { --bg-color: #FFF0F5; --card-bg: #FFFFFF; --text-color: #4A4045; }
-        body.theme-dark   { --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0; }
-        body.theme-minimal{ --bg-color: #F4F4F0; --card-bg: #FFFFFF; --text-color: #2C2C2C; }
-
-        /* ธีมมืด: ทำให้การ์ดและช่องกรอกเป็นสีมืดจริง */
-        body.theme-dark .bg-white { background-color: var(--card-bg) !important; }
-        body.theme-dark .bg-white.text-darkText,
-        body.theme-dark .bg-offWhite.text-darkText { color: var(--text-color) !important; }
-        body.theme-dark .bg-offWhite { background-color: #2A2A2A !important; }
-        body.theme-dark input, body.theme-dark select, body.theme-dark textarea,
-        body.theme-dark td, body.theme-dark th { color: var(--text-color); }
-        body.theme-dark .border-darkText { border-color: #5a5a5a !important; }
-        body.theme-dark .text-gray-500, body.theme-dark .text-gray-400, body.theme-dark .text-gray-600 { color: #aaa !important; }
+        body.theme-dark { --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0; }
+        body.theme-minimal { --bg-color: #F4F4F0; --card-bg: #FFFFFF; --text-color: #2C2C2C; }
 
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #eee; }
@@ -104,1792 +93,275 @@
             transform: scale(1.15);
         }
 
-        /* ===== ความนุ่มของทั้งเว็บ ===== */
-        button:not(.tb-btn):not(.mood-btn):not(.vs-btn):hover {
-            transform: translateY(-1px);
-        }
-        button:not(.tb-btn):not(.mood-btn):not(.vs-btn):active {
-            transform: scale(.97);
-        }
-        button, label, select, input, textarea, a {
-            transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, filter .2s ease;
-        }
-        .bg-white.rounded-2xl,
-        .bg-white.rounded-xl {
-            box-shadow: 0 8px 22px -14px rgba(26,26,26,.28);
-        }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0,85,255,.18);
-        }
-        .tab-content {
-            animation: softFadeUp .35s ease both;
-        }
-        @keyframes softFadeUp {
-            from { opacity: 0; transform: translateY(6px); }
-            to   { opacity: 1; transform: none; }
+        /* การ์ดดีไซน์ใหม่ ใช้เงาแทนเส้นขอบหนา */
+        .soft-card {
+            background-color: var(--card-bg);
+            border-radius: 24px; /* ขอบมนขึ้นเยอะ */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04); /* เงาบางๆ แทนเส้นขอบ */
+            border: 1px solid rgba(0,0,0,0.05); /* เส้นขอบบางมากๆ แทบมองไม่เห็น */
+            padding: 16px;
         }
 
-        /* ===== แถบบนสุดแบบแคปซูลลอย ===== */
-        .topbar {
-            margin: 10px 12px 0;
-            padding: 8px 12px !important;
-            border-radius: 22px;
-            background: linear-gradient(135deg, #1A1A1A 0%, #2B2B3A 100%);
-            box-shadow: 0 12px 28px -14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
-            row-gap: 6px;
+        /* ปุ่มสไตล์ใหม่ มนขึ้น */
+        .soft-btn {
+            font-weight: 600;
+            font-size: 12px;
+            padding: 8px 16px;
+            border-radius: 16px; /* ปุ่มมน */
+            transition: all 0.2s ease;
         }
-        .tb-icon {
-            font-size: .72rem;
-            width: .95rem;
-            text-align: center;
-            opacity: .85;
-        }
-        .tb-icon-sm {
-            font-size: .66rem;
-            margin-right: .2rem;
-        }
-        .tb-g {
-            width: .8rem;
-            height: .8rem;
-            flex: 0 0 .8rem;
-        }
-        .tb-sep {
-            display: inline-block;
-            width: 1px;
-            height: 14px;
-            background: rgba(255,255,255,.22);
-            margin: 0 .25rem;
-        }
-        .tb-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: .15rem;
-            line-height: 1.4;
-            white-space: nowrap;
-            border-radius: 999px;
-            transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
-        }
-        .tb-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 8px -3px rgba(0,0,0,.4);
-            filter: brightness(1.06);
-        }
-        .tb-btn:active {
-            transform: scale(.96);
-        }
+        .soft-btn:active { transform: scale(0.97); }
 
-        /* ===== ปุ่มสลับมุมมอง ===== */
-        .vs-wrap {
-            display: inline-flex;
-            align-items: center;
-            gap: 2px;
-            padding: 2px;
-            border-radius: 999px;
-            background: rgba(255,255,255,.08);
-            border: 1px solid rgba(255,255,255,.12);
-        }
-        .vs-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: .3rem;
-            padding: .2rem .55rem;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: 700;
-            color: rgba(255,255,255,.75);
-            transition: background-color .2s ease, color .2s ease, transform .15s ease;
-        }
-        .vs-btn:hover { color: #fff; background: rgba(255,255,255,.12); }
-        .vs-btn.vs-active {
-            background: #CCFF00;
-            color: #1A1A1A;
-            box-shadow: 0 2px 6px -2px rgba(0,0,0,.4);
-        }
-        .vs-btn i { font-size: .75rem; }
-
-        /* ===== กรอบแอป ===== */
-        #appFrame {
-            margin: 0 auto;
-            min-height: 100vh;
-            width: 100%;
-            background: var(--bg-color, #F9F9FB);
-            transition: max-width .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease;
-        }
-        html[data-view="desktop"] #appFrame { max-width: 1600px; }
-
-        html[data-view="tablet"] #appFrame,
-        html[data-view="mobile"] #appFrame {
-            border-left: 2px solid #1A1A1A;
-            border-right: 2px solid #1A1A1A;
-            box-shadow: 0 24px 60px -24px rgba(0,0,0,.4);
-            overflow: hidden;
-        }
-        html[data-view="tablet"] #appFrame { max-width: 1024px; border-radius: 24px; }
-        html[data-view="mobile"] #appFrame { max-width: 430px; border-radius: 32px; }
-        html[data-view="tablet"] body,
-        html[data-view="mobile"] body { background-color: #DDE3EE !important; }
-        html[data-view="tablet"].theme-dark body, html[data-view="mobile"] body.theme-dark { background-color: #0a0a0a !important; }
-
-        html[data-view="tablet"] .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
-        html[data-view="tablet"] .md\:grid-cols-2.lg\:grid-cols-3 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
-        html[data-view="tablet"] .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)) !important; }
-        html[data-view="tablet"] .lg\:flex-row { flex-direction: row !important; }
-        html[data-view="tablet"] .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
-
-        html[data-view="mobile"] .lg\:grid-cols-3,
-        html[data-view="mobile"] .md\:grid-cols-2,
-        html[data-view="mobile"] .md\:grid-cols-3 { grid-template-columns: minmax(0,1fr) !important; }
-        html[data-view="mobile"] .lg\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
-        html[data-view="mobile"] .lg\:grid-cols-2 { grid-template-columns: minmax(0,1fr) !important; }
-        html[data-view="mobile"] .lg\:flex-row,
-        html[data-view="mobile"] .md\:flex-row { flex-direction: column !important; }
-
-        @media (max-width: 768px) {
-            html[data-view] #appFrame { max-width: 100% !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; }
-            html[data-view] body { background-color: var(--bg-color, #F9F9FB) !important; }
-        }
-        @media (max-width: 640px) {
-            .topbar { margin: 6px 6px 0; border-radius: 18px; }
-        }
     </style>
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative pb-20">
 
     <!-- FLOATING PET -->
-    <div id="floatingPet" class="fixed bottom-3 left-3 z-[9999] bg-sunnyYellow border-2 border-darkText rounded-xl px-2 py-1 shadow-sm flex items-center gap-1.5 cursor-pointer select-none hover:scale-105 transition-all max-w-[160px]" onclick="switchTab('pet')">
-        <div id="petAvatar" class="text-base bg-white w-6 h-6 rounded-lg border border-darkText flex items-center justify-center shrink-0">🐱</div>
+    <div id="floatingPet" class="fixed bottom-4 left-4 z-[9999] bg-sunnyYellow rounded-3xl px-3 py-2 shadow-lg flex items-center gap-2.5 animate-bounce cursor-pointer select-none hover:scale-105 transition-all max-w-[180px]" onclick="switchTab('pet')">
+        <div id="petAvatar" class="text-xl bg-white w-10 h-10 rounded-full border-2 border-white flex items-center justify-center shrink-0 shadow-inner">🐱</div>
         <div class="overflow-hidden pr-0.5">
-            <span id="floatingPetName" class="text-[9px] font-extrabold text-darkText block truncate">สัตว์เลี้ยง</span>
-            <p id="petSpeechBubble" class="text-[9px] font-bold text-hotPink truncate">ยินดีต้อนรับ! 💰</p>
+            <span id="floatingPetName" class="text-[10px] font-extrabold text-darkText block truncate">สัตว์เลี้ยง</span>
+            <p id="petSpeechBubble" class="text-[10px] font-bold text-hotPink truncate">ยินดีต้อนรับ! 💰</p>
         </div>
     </div>
 
-    <div id="appFrame">
-
-    <!-- TOP BAR -->
-    <div class="topbar text-white flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold w-full">
-        <div class="flex items-center gap-1.5 flex-wrap">
-            <i class="fa-solid fa-palette tb-icon" aria-hidden="true"></i>
-            <button onclick="setTheme('y2k')" class="tb-btn px-2.5 py-0.5 bg-popBlue text-white">Y2K</button>
-            <button onclick="setTheme('pastel')" class="tb-btn px-2.5 py-0.5 bg-pink-400 text-white">พาสเทล</button>
-            <button onclick="setTheme('dark')" class="tb-btn px-2.5 py-0.5 bg-gray-800 text-white">ดาร์ก</button>
-            <button onclick="setTheme('minimal')" class="tb-btn px-2.5 py-0.5 bg-gray-300 text-darkText">มินิมอล</button>
-            <span class="tb-sep" aria-hidden="true"></span>
-            <button onclick="exportBackup()" class="tb-btn px-2.5 py-0.5 bg-limeGreen text-darkText"><i class="fa-solid fa-download tb-icon-sm" aria-hidden="true"></i>สำรองข้อมูล</button>
-            <label class="tb-btn px-2.5 py-0.5 bg-sunnyYellow text-darkText cursor-pointer"><i class="fa-solid fa-upload tb-icon-sm" aria-hidden="true"></i>คืนค่า
-                <input type="file" accept="application/json,.json" onchange="importBackup(event)" class="hidden">
-            </label>
+    <!-- THEME & AUTH BAR -->
+    <div class="bg-darkText text-white px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold w-full">
+        <div class="flex items-center gap-1 flex-wrap">
+            <span>🎨 ธีม:</span>
+            <button onclick="setTheme('y2k')" class="px-2 py-0.5 rounded-md bg-popBlue text-white">Y2K</button>
+            <button onclick="setTheme('pastel')" class="px-2 py-0.5 rounded-md bg-pink-400 text-white">พาสเทล</button>
+            <button onclick="setTheme('dark')" class="px-2 py-0.5 rounded-md bg-gray-800 text-white">ดาร์ก</button>
+            <button onclick="setTheme('minimal')" class="px-2 py-0.5 rounded-md bg-gray-300 text-darkText">มินิมอล</button>
         </div>
-
-        <div class="vs-wrap" role="group" aria-label="เลือกมุมมอง">
-            <button class="vs-btn" data-v="desktop" onclick="setView('desktop')"><i class="fa-solid fa-desktop"></i><span>คอม</span></button>
-            <button class="vs-btn" data-v="tablet" onclick="setView('tablet')"><i class="fa-solid fa-tablet-screen-button"></i><span>แท็บเล็ต</span></button>
-            <button class="vs-btn" data-v="mobile" onclick="setView('mobile')"><i class="fa-solid fa-mobile-screen-button"></i><span>มือถือ</span></button>
-        </div>
-
-        <div class="flex items-center gap-2 flex-wrap">
-            <span id="syncStatus" class="text-[10px] opacity-80">กำลังเตรียม...</span>
-            <button id="googleLoginBtn" onclick="loginWithGoogle()" class="tb-btn px-2.5 py-0.5 bg-white text-darkText border border-darkText font-bold text-[11px] gap-1.5">
-                <svg class="tb-g" viewBox="0 0 48 48" aria-hidden="true">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                </svg>
-                ล็อกอิน Gmail
-            </button>
-            <div id="userProfileArea" class="hidden flex items-center gap-1.5 bg-white/20 px-2 py-0.5 rounded-full">
-                <img id="userAvatarImg" class="w-5 h-5 rounded-full" src="" alt="">
-                <span id="userNameText" class="text-[11px] font-bold text-limeGreen max-w-[100px] truncate"></span>
-                <button onclick="logoutGoogle()" class="text-[9px] bg-hotPink text-white px-1.5 py-0.5 rounded-full">ออก</button>
+        
+        <div class="flex items-center gap-2">
+            <div id="authContainer">
+                <button id="googleLoginBtn" onclick="loginWithGoogle()" class="px-3 py-0.5 rounded-md bg-white text-darkText border border-darkText flex items-center gap-1 font-bold text-[11px]">
+                    <i class="fa-brands fa-google text-red-500"></i> ล็อกอิน Gmail
+                </button>
+                <div id="userProfileArea" class="hidden flex items-center gap-1.5 bg-white/10 px-2 py-0.5 rounded-md">
+                    <img id="userAvatarImg" class="w-5 h-5 rounded-full" src="" alt="User">
+                    <span id="userNameText" class="text-[11px] font-bold text-limeGreen"></span>
+                    <button onclick="logoutGoogle()" class="text-[9px] bg-hotPink text-white px-1.5 py-0.2 rounded-sm ml-1">ออก</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- HEADER NAV -->
-    <header class="bg-popBlue border-2 border-darkText text-white px-3 py-2.5 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl" style="margin:10px 12px 0; width:calc(100% - 24px);">
-        <div class="w-full flex flex-col lg:flex-row items-center justify-between gap-3">
-            <div class="bg-limeGreen text-darkText font-cute font-bold text-xl px-2.5 py-0.5 rounded-xl border-2 border-darkText shadow-sm -rotate-2">
-                ✨ Y2K PLANNER
+    <!-- TOP HEADER NAVBAR - แก้สีให้ไม่ตะโกนเกินไป -->
+    <header class="bg-white border-b border-gray-200 text-darkText px-3 py-3 w-full shadow-sm">
+        <div class="w-full flex flex-col lg:flex-row items-center justify-between gap-3 max-w-7xl mx-auto">
+            <div class="flex items-center space-x-2">
+                <div class="bg-popBlue text-white font-cute font-bold text-xl px-3 py-1 rounded-2xl shadow-[0_4px_0px_#0033CC] transform rotate-0">
+                    ✨ Y2K PLANNER
+                </div>
             </div>
-            <nav class="flex flex-wrap items-center justify-center gap-1 bg-white/10 p-1 rounded-xl border border-darkText">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs bg-limeGreen text-darkText border border-darkText shadow-sm flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-house"></i></span> แดชบอร์ด</button>
-                <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-arrow-right-arrow-left"></i></span> รายรับ-รายจ่าย</button>
-                <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-receipt"></i></span> เตรียมจ่าย</button>
-                <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-list-check"></i></span> แพลนเนอร์</button>
-                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-regular fa-calendar"></i></span> ปฏิทิน</button>
-                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-calculator"></i></span> คำนวณ</button>
-                <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn px-2.5 py-1 rounded-lg font-bold text-xs text-white hover:bg-white/20 flex items-center gap-1"><span class="header-nav-icon"><i class="fa-solid fa-paw"></i></span> สัตว์เลี้ยง</button>
+
+            <!-- NAVBAR ปรับปุ่มให้มนและมีสไตล์ -->
+            <nav class="flex flex-wrap items-center justify-center gap-1.5 p-1">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="soft-btn bg-popBlue text-white flex items-center gap-1.5"><i class="fa-solid fa-chart-pie"></i> แดชบอร์ด</button>
+                <button onclick="switchTab('finance')" id="nav-finance" class="soft-btn hover:bg-popBlue/5 flex items-center gap-1.5"><i class="fa-solid fa-wallet"></i> รายรับ-รายจ่าย</button>
+                <button onclick="switchTab('bills')" id="nav-bills" class="soft-btn hover:bg-popBlue/5 flex items-center gap-1.5"><i class="fa-solid fa-file-invoice-dollar"></i> เตรียมจ่าย</button>
+                <button onclick="switchTab('planner')" id="nav-planner" class="soft-btn hover:bg-popBlue/5 flex items-center gap-1.5"><i class="fa-solid fa-list-check"></i> แพลนเนอร์</button>
+                <button onclick="switchTab('calendar')" id="nav-calendar" class="soft-btn hover:bg-popBlue/5 flex items-center gap-1.5"><i class="fa-solid fa-calendar-days"></i> ปฏิทิน</button>
+                <button onclick="switchTab('calculator')" id="nav-calculator" class="soft-btn hover:bg-popBlue/5 flex items-center gap-1.5"><i class="fa-solid fa-calculator"></i> คำนวณ</button>
+                <button onclick="switchTab('pet')" id="nav-pet" class="soft-btn hover:bg-popBlue/5 flex items-center gap-1.5"><i class="fa-solid fa-paw"></i> สัตว์เลี้ยง</button>
             </nav>
-            <button onclick="openModal('quickAddModal')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center gap-1.5">
-                <span class="header-nav-icon"><i class="fa-solid fa-plus"></i></span> เพิ่มด่วน
-            </button>
+
+            <div class="flex items-center">
+                <button onclick="openModal('quickAddModal')" class="bg-hotPink text-white font-bold px-5 py-2 rounded-full shadow-[0_4px_0px_#CC0066] text-xs flex items-center gap-1.5 transform transition active:translate-y-1 active:shadow-none">
+                    <i class="fa-solid fa-plus"></i> เพิ่มด่วน
+                </button>
+            </div>
         </div>
     </header>
 
-    <main class="flex-1 w-full max-w-5xl mx-auto p-3 md:p-5 relative">
+    <!-- MAIN CONTAINER - เปลี่ยน padding -->
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 py-6 relative space-y-6">
 
-        <!-- DASHBOARD -->
-        <section id="tab-dashboard" class="tab-content space-y-4">
-            <div class="bg-gradient-to-r from-limeGreen to-sunnyYellow p-4 md:p-5 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 text-darkText">
-                <div class="space-y-1">
-                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">👋 ยินดีต้อนรับกลับมานะคนเก่ง!</div>
-                    <h1 class="text-xl md:text-2xl font-extrabold font-cute">จัดการชีวิต เงินทอง & แพลนวันนี้ให้ปังปุริเย่ 🌟</h1>
+        <!-- TAB 1: DASHBOARD - ใช้ soft-card -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <div class="soft-card bg-gradient-to-br from-limeGreen via-sunnyYellow to-sunnyYellow p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-4 text-darkText shadow-lg">
+                <div class="space-y-2">
+                    <div class="inline-block bg-white/70 text-darkText font-bold text-[11px] px-3 py-1 rounded-full">👋 ยินดีต้อนรับกลับมานะคนเก่ง!</div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold font-cute tracking-tight">จัดการชีวิต เงินทอง & แพลนวันนี้ให้ปังปุริเย่ 🌟</h1>
                 </div>
-                <div class="bg-white p-3 rounded-xl border-2 border-darkText text-center shadow-sm">
-                    <span class="text-[10px] font-bold text-gray-500 block">ยอดเงินสุทธิคงเหลือ (ทั้งหมด)</span>
-                    <span id="dashNetBalance" class="text-xl font-extrabold text-popBlue">฿ 0.00</span>
+                <div class="bg-white/90 backdrop-blur-sm p-4 rounded-3xl text-center shadow-inner border border-white/50">
+                    <span class="text-xs font-bold text-gray-500 block mb-1">ยอดเงินสุทธิคงเหลือ</span>
+                    <span id="dashNetBalance" class="text-4xl font-extrabold text-popBlue">฿ 0.00</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                    <div><p class="text-xs font-bold text-gray-500">รายรับเดือนนี้</p><h3 id="dashTotalIncome" class="text-lg font-extrabold text-green-600">฿ 0.00</h3></div>
-                    <div class="w-9 h-9 bg-limeGreen rounded-xl border-2 border-darkText flex items-center justify-center text-sm"><i class="fa-solid fa-arrow-trend-up"></i></div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- CARD แต่ละอันใช้ soft-card -->
+                <div class="soft-card flex items-center justify-between p-5 hover:shadow-md transition-shadow">
+                    <div><p class="text-sm font-medium text-gray-600 mb-1">รายรับเดือนนี้</p><h3 id="dashTotalIncome" class="text-2xl font-extrabold text-green-600">฿ 0.00</h3></div>
+                    <div class="w-12 h-12 bg-limeGreen/50 rounded-2xl flex items-center justify-center text-lg text-green-900"><i class="fa-solid fa-arrow-trend-up"></i></div>
                 </div>
-                <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                    <div><p class="text-xs font-bold text-gray-500">รายจ่ายเดือนนี้</p><h3 id="dashTotalExpense" class="text-lg font-extrabold text-hotPink">฿ 0.00</h3></div>
-                    <div class="w-9 h-9 bg-hotPink/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-hotPink"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                <div class="soft-card flex items-center justify-between p-5 hover:shadow-md transition-shadow">
+                    <div><p class="text-sm font-medium text-gray-600 mb-1">รายจ่ายเดือนนี้</p><h3 id="dashTotalExpense" class="text-2xl font-extrabold text-hotPink">฿ 0.00</h3></div>
+                    <div class="w-12 h-12 bg-hotPink/20 rounded-2xl flex items-center justify-center text-lg text-hotPink"><i class="fa-solid fa-arrow-trend-down"></i></div>
                 </div>
-                <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                    <div><p class="text-xs font-bold text-gray-500">บิลค้างจ่าย</p><h3 id="dashPendingBills" class="text-lg font-extrabold text-retroPurple">0 รายการ</h3></div>
-                    <div class="w-9 h-9 bg-retroPurple/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-retroPurple"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                <div class="soft-card flex items-center justify-between p-5 hover:shadow-md transition-shadow">
+                    <div><p class="text-sm font-medium text-gray-600 mb-1">บิลค้างจ่าย</p><h3 id="dashPendingBills" class="text-2xl font-extrabold text-retroPurple">0 รายการ</h3></div>
+                    <div class="w-12 h-12 bg-retroPurple/20 rounded-2xl flex items-center justify-center text-lg text-retroPurple"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                 </div>
-                <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
-                    <div><p class="text-xs font-bold text-gray-500">งานค้างอยู่</p><h3 id="dashPendingTasks" class="text-lg font-extrabold text-popBlue">0 รายการ</h3></div>
-                    <div class="w-9 h-9 bg-popBlue/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-popBlue"><i class="fa-solid fa-list-check"></i></div>
+                <div class="soft-card flex items-center justify-between p-5 hover:shadow-md transition-shadow">
+                    <div><p class="text-sm font-medium text-gray-600 mb-1">งานวันนี้</p><h3 id="dashPendingTasks" class="text-2xl font-extrabold text-popBlue">0 รายการ</h3></div>
+                    <div class="w-12 h-12 bg-popBlue/10 rounded-2xl flex items-center justify-center text-lg text-popBlue"><i class="fa-solid fa-list-check"></i></div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 flex flex-col">
-                    <h3 class="font-cute font-bold text-base mb-3 flex items-center gap-2"><i class="fa-solid fa-chart-pie text-popBlue"></i> สัดส่วนรายจ่ายตามหมวดหมู่ (ทั้งหมด)</h3>
-                    <div class="relative flex-1 flex items-center justify-center min-h-[220px]"><canvas id="expenseCategoryChart"></canvas></div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="soft-card lg:col-span-2 flex flex-col p-6">
+                    <h3 class="font-cute font-bold text-lg mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-bar text-popBlue"></i> สรุปสัดส่วนรายจ่ายตามหมวดหมู่</h3>
+                    <div class="relative flex-1 flex items-center justify-center min-h-[250px]"><canvas id="expenseCategoryChart" class="max-h-[250px]"></canvas></div>
                 </div>
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="font-cute font-bold text-base flex items-center gap-2"><i class="fa-solid fa-bolt text-sunnyYellow"></i> งานค้างอยู่</h3>
-                        <button onclick="switchTab('planner')" class="text-xs font-bold text-popBlue underline">ดูทั้งหมด</button>
+                <div class="soft-card flex flex-col p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-cute font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-bolt text-sunnyYellow"></i> แพลนด่วนวันนี้</h3>
+                        <button onclick="switchTab('planner')" class="text-sm font-bold text-popBlue hover:underline">ดูทั้งหมด</button>
                     </div>
-                    <div id="dashTodoList" class="space-y-2 overflow-y-auto max-h-[240px] pr-1 text-xs"></div>
+                    <div id="dashTodoList" class="space-y-3 overflow-y-auto max-h-[250px] pr-1 text-xs">
+                        <div class="text-center py-8 text-gray-400 bg-softBg/50 rounded-2xl">ไม่มีรายการแพลนเนอร์ค้างอยู่ 🎉</div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- FINANCE -->
-        <section id="tab-finance" class="tab-content hidden space-y-4">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-wallet text-popBlue"></i> บันทึกรายรับ - รายจ่าย</h2>
-                <div class="flex gap-2">
-                    <button onclick="openTransactionModal('income')" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus-circle"></i> เพิ่มรายรับ</button>
-                    <button onclick="openTransactionModal('expense')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-minus-circle"></i> เพิ่มรายจ่าย</button>
+        <!-- TAB 2: FINANCE -->
+        <section id="tab-finance" class="tab-content hidden space-y-6">
+            <div class="soft-card flex flex-col md:flex-row justify-between items-start md:items-center gap-3 p-6">
+                <h2 class="text-2xl font-extrabold font-cute flex items-center gap-2.5"><i class="fa-solid fa-wallet text-popBlue"></i> บันทึกรายรับ - รายจ่าย</h2>
+                <div class="flex gap-3 w-full md:w-auto">
+                    <button onclick="openTransactionModal('income')" class="soft-btn flex-1 bg-limeGreen text-darkText shadow-[0_4px_0px_#A3CC00] transform transition active:translate-y-1 active:shadow-none flex items-center justify-center gap-1.5"><i class="fa-solid fa-plus-circle"></i> เพิ่มรายรับ</button>
+                    <button onclick="openTransactionModal('expense')" class="soft-btn flex-1 bg-hotPink text-white shadow-[0_4px_0px_#CC0066] transform transition active:translate-y-1 active:shadow-none flex items-center justify-center gap-1.5"><i class="fa-solid fa-minus-circle"></i> เพิ่มรายจ่าย</button>
                 </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div class="bg-limeGreen/20 text-darkText p-3.5 rounded-xl border-2 border-darkText"><span class="text-xs font-bold text-gray-600 block">รายรับทั้งหมด</span><h3 id="finTotalIncome" class="text-2xl font-extrabold text-green-700 mt-0.5">฿ 0.00</h3></div>
-                <div class="bg-hotPink/10 text-darkText p-3.5 rounded-xl border-2 border-darkText"><span class="text-xs font-bold text-gray-600 block">รายจ่ายทั้งหมด</span><h3 id="finTotalExpense" class="text-2xl font-extrabold text-hotPink mt-0.5">฿ 0.00</h3></div>
-                <div class="bg-popBlue/10 text-darkText p-3.5 rounded-xl border-2 border-darkText"><span class="text-xs font-bold text-gray-600 block">เงินคงเหลือสุทธิ</span><h3 id="finNetBalance" class="text-2xl font-extrabold text-popBlue mt-0.5">฿ 0.00</h3></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="soft-card bg-green-50 border-green-100 p-5"><span class="text-xs font-bold text-green-800 block mb-1">รายรับทั้งหมด</span><h3 id="finTotalIncome" class="text-3xl font-extrabold text-green-800">฿ 0.00</h3></div>
+                <div class="soft-card bg-pink-50 border-pink-100 p-5"><span class="text-xs font-bold text-pink-800 block mb-1">รายจ่ายทั้งหมด</span><h3 id="finTotalExpense" class="text-3xl font-extrabold text-pink-800">฿ 0.00</h3></div>
+                <div class="soft-card bg-blue-50 border-blue-100 p-5"><span class="text-xs font-bold text-blue-800 block mb-1">เงินคงเหลือสุทธิ</span><h3 id="finNetBalance" class="text-3xl font-extrabold text-blue-900">฿ 0.00</h3></div>
             </div>
-            <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
-                    <h3 class="font-cute font-bold text-base">ประวัติรายการเงิน</h3>
+
+            <div class="soft-card p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-gray-100 pb-4">
+                    <h3 class="font-cute font-bold text-lg">ประวัติรายการเงิน</h3>
                     <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <select id="finFilterType" onchange="renderTransactions()" class="bg-offWhite border-2 border-darkText font-medium text-xs rounded-xl px-2 py-1.5 outline-none">
+                        <select id="finFilterType" onchange="renderTransactions()" class="bg-softBg border border-gray-200 font-medium text-xs rounded-xl px-3 py-2.5 outline-none w-full sm:w-auto">
                             <option value="all">ทุกประเภท</option>
                             <option value="income">รายรับ</option>
                             <option value="expense">รายจ่าย</option>
                         </select>
-                        <input type="text" id="finSearch" oninput="renderTransactions()" placeholder="ค้นหารายการ..." class="bg-offWhite border-2 border-darkText font-medium text-xs rounded-xl px-2 py-1.5 outline-none w-full sm:w-48">
+                        <input type="text" id="finSearch" oninput="renderTransactions()" placeholder="ค้นหารายการ..." class="bg-softBg border border-gray-200 font-medium text-xs rounded-xl px-3 py-2.5 outline-none w-full sm:w-64 focus:border-popBlue/50">
                     </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-xs">
                         <thead>
-                            <tr class="bg-offWhite border-b-2 border-darkText font-bold">
-                                <th class="p-2.5 border-r border-darkText">วันที่</th>
-                                <th class="p-2.5 border-r border-darkText">ประเภท</th>
-                                <th class="p-2.5 border-r border-darkText">หมวดหมู่</th>
-                                <th class="p-2.5 border-r border-darkText">รายการ</th>
-                                <th class="p-2.5 border-r border-darkText text-right">จำนวน (฿)</th>
-                                <th class="p-2.5 text-center">ลบ</th>
+                            <tr class="text-gray-500 font-bold uppercase text-[10px] tracking-wider border-b border-gray-100">
+                                <th class="p-3">วันที่</th>
+                                <th class="p-3">ประเภท</th>
+                                <th class="p-3">หมวดหมู่</th>
+                                <th class="p-3">รายการ</th>
+                                <th class="p-3 text-right">จำนวน (฿)</th>
+                                <th class="p-3 text-center">ลบ</th>
                             </tr>
                         </thead>
-                        <tbody id="transactionTableBody" class="divide-y divide-darkText font-medium"></tbody>
+                        <tbody id="transactionTableBody" class="divide-y divide-gray-100 font-medium"></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- BILLS -->
-        <section id="tab-bills" class="tab-content hidden space-y-4">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย</h2>
-                <button onclick="openBillModal()" class="bg-retroPurple text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มบิล</button>
+        <!-- TAB 3: UPCOMING BILLS -->
+        <section id="tab-bills" class="tab-content hidden space-y-6">
+            <div class="soft-card flex flex-col md:flex-row justify-between items-start md:items-center gap-3 p-6">
+                <h2 class="text-2xl font-extrabold font-cute flex items-center gap-2.5"><i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย</h2>
+                <button onclick="openBillModal()" class="soft-btn w-full md:w-auto bg-retroPurple text-white shadow-[0_4px_0px_#7A00CC] transform transition active:translate-y-1 active:shadow-none flex items-center justify-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มบิล</button>
             </div>
-            <p class="text-[11px] font-bold text-gray-500">กด "จ่าย" เพื่อบันทึกเป็นรายจ่ายอัตโนมัติ (กด "ยกเลิก" จะลบรายการนั้นออกด้วย)</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="billsGrid"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="billsGrid"></div>
         </section>
 
-        <!-- PLANNER -->
-        <section id="tab-planner" class="tab-content hidden space-y-4">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-list-check text-popBlue"></i> แพลนเนอร์</h2>
-                <button onclick="openTaskModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มงาน</button>
+        <!-- TAB 4: PLANNER -->
+        <section id="tab-planner" class="tab-content hidden space-y-6">
+            <div class="soft-card flex flex-col md:flex-row justify-between items-start md:items-center gap-3 p-6">
+                <h2 class="text-2xl font-extrabold font-cute flex items-center gap-2.5"><i class="fa-solid fa-list-check text-popBlue"></i> แพลนเนอร์</h2>
+                <button onclick="openTaskModal()" class="soft-btn w-full md:w-auto bg-sunnyYellow text-darkText shadow-[0_4px_0px_#CCBF00] transform transition active:translate-y-1 active:shadow-none flex items-center justify-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มงาน</button>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                    <div class="flex items-center justify-between pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-sm">ต้องทำ (To Do)</h3><span id="countTodo" class="bg-sunnyYellow text-darkText font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span></div>
-                    <div id="listTodo" class="space-y-2 min-h-[200px] overflow-y-auto pr-1 text-xs"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- คอลัมน์ต่างๆ ใช้ soft-card -->
+                <div class="soft-card p-5 space-y-4 bg-softBg/30 border-dashed border-gray-200">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-200"><h3 class="font-cute font-bold text-sm">ต้องทำ (To Do)</h3><span id="countTodo" class="bg-sunnyYellow text-darkText font-bold text-[11px] px-3 py-1 rounded-full">0</span></div>
+                    <div id="listTodo" class="space-y-3 min-h-[250px] overflow-y-auto pr-1 text-xs"></div>
                 </div>
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                    <div class="flex items-center justify-between pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-sm">กำลังทำ (In Progress)</h3><span id="countProgress" class="bg-popBlue text-white font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span></div>
-                    <div id="listProgress" class="space-y-2 min-h-[200px] overflow-y-auto pr-1 text-xs"></div>
+                <div class="soft-card p-5 space-y-4 bg-softBg/30 border-dashed border-gray-200">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-200"><h3 class="font-cute font-bold text-sm">กำลังทำ (In Progress)</h3><span id="countProgress" class="bg-popBlue text-white font-bold text-[11px] px-3 py-1 rounded-full">0</span></div>
+                    <div id="listProgress" class="space-y-3 min-h-[250px] overflow-y-auto pr-1 text-xs"></div>
                 </div>
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                    <div class="flex items-center justify-between pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-sm">เสร็จสิ้น (Done)</h3><span id="countDone" class="bg-limeGreen text-darkText font-bold text-[10px] px-2 py-0.5 rounded-full border border-darkText">0</span></div>
-                    <div id="listDone" class="space-y-2 min-h-[200px] overflow-y-auto pr-1 text-xs"></div>
+                <div class="soft-card p-5 space-y-4 bg-softBg/30 border-dashed border-gray-200">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-200"><h3 class="font-cute font-bold text-sm">เสร็จสิ้น (Done)</h3><span id="countDone" class="bg-limeGreen text-darkText font-bold text-[11px] px-3 py-1 rounded-full">0</span></div>
+                    <div id="listDone" class="space-y-3 min-h-[250px] overflow-y-auto pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
 
-        <!-- CALENDAR -->
-        <section id="tab-calendar" class="tab-content hidden space-y-4">
-            <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-darkText">
-                <div class="space-y-1 flex-1">
-                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">📊 อารมณ์เดือนนี้</div>
-                    <h2 id="calendarMonthMoodTitle" class="text-xl font-extrabold font-cute">อารมณ์ประจำเดือนนี้</h2>
-                    <p id="calendarMonthMoodSummary" class="font-bold text-xs bg-white/80 p-2.5 rounded-xl border border-darkText inline-block">กำลังประมวลผล...</p>
+        <!-- TAB 5: CALENDAR & DIARY -->
+        <section id="tab-calendar" class="tab-content hidden space-y-6">
+            <div class="soft-card bg-gradient-to-r from-sunnyYellow via-pink-100 to-limeGreen p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 text-darkText shadow-lg">
+                <div class="space-y-2 flex-1 text-center md:text-left">
+                    <div class="inline-block bg-hotPink text-white font-bold text-[11px] px-3 py-1 rounded-full">📊 อารมณ์เดือนนี้</div>
+                    <h2 id="calendarMonthMoodTitle" class="text-2xl md:text-3xl font-extrabold font-cute">อารมณ์ประจำเดือนนี้</h2>
+                    <p id="calendarMonthMoodSummary" class="font-medium text-sm bg-white/80 p-4 rounded-2xl inline-block shadow-sm">กำลังประมวลผล...</p>
                 </div>
-                <div class="bg-white p-3 rounded-2xl border-2 border-darkText flex items-center gap-2.5 min-w-[240px]">
-                    <div id="calPetAvatar" class="text-3xl bg-sunnyYellow/30 w-11 h-11 rounded-xl border border-darkText flex items-center justify-center">🐱</div>
+                <div class="bg-white/90 p-5 rounded-3xl flex items-center gap-4 shadow-inner border border-white/50">
+                    <div id="calPetAvatar" class="text-5xl bg-sunnyYellow/30 w-20 h-20 rounded-3xl flex items-center justify-center shadow-sm">🐱</div>
                     <div>
-                        <span class="text-[10px] font-extrabold text-popBlue block">คำทักทายวันนี้ 🐾</span>
-                        <p id="calPetSpeechText" class="text-[11px] font-bold text-hotPink mt-0.5">จิ้มเลือกวันที่ได้เลย!</p>
+                        <span class="text-xs font-extrabold text-popBlue block mb-1">คำทักทายวันนี้ 🐾</span>
+                        <p id="calPetSpeechText" class="text-sm font-bold text-hotPink mt-0.5">"จิ้มเลือกวันที่ได้เลย!"</p>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 space-y-3">
-                    <div class="flex items-center justify-between gap-2">
-                        <h3 id="calMonthYearLabel" class="font-cute font-extrabold text-xl">เดือน</h3>
-                        <div class="flex gap-1.5 items-center">
-                            <button onclick="openEventModal()" class="bg-retroPurple text-white font-bold px-2.5 py-1.5 rounded-lg border border-darkText text-[11px] flex items-center gap-1"><i class="fa-solid fa-plus"></i> ไดอารี่</button>
-                            <button onclick="changeMonth(-1)" class="w-8 h-8 bg-offWhite border border-darkText rounded-lg font-bold flex items-center justify-center text-xs"><i class="fa-solid fa-chevron-left"></i></button>
-                            <button onclick="changeMonth(1)" class="w-8 h-8 bg-offWhite border border-darkText rounded-lg font-bold flex items-center justify-center text-xs"><i class="fa-solid fa-chevron-right"></i></button>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="soft-card lg:col-span-2 p-6 space-y-5">
+                    <div class="flex items-center justify-between">
+                        <h3 id="calMonthYearLabel" class="font-cute font-extrabold text-2xl">ตุลาคม 2569</h3>
+                        <div class="flex gap-2">
+                            <button onclick="changeMonth(-1)" class="w-10 h-10 bg-softBg border border-gray-200 rounded-2xl font-bold flex items-center justify-center text-xs hover:bg-gray-100"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button onclick="changeMonth(1)" class="w-10 h-10 bg-softBg border border-gray-200 rounded-2xl font-bold flex items-center justify-center text-xs hover:bg-gray-100"><i class="fa-solid fa-chevron-right"></i></button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-7 text-center font-bold text-xs text-gray-500 border-b border-darkText pb-1.5">
+                    <div class="grid grid-cols-7 text-center font-bold text-xs text-gray-500 border-b border-gray-100 pb-3">
                         <span class="text-hotPink">อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span class="text-popBlue">ส</span>
                     </div>
-                    <div id="calendarGrid" class="grid grid-cols-7 gap-1.5"></div>
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-2.5"></div>
                 </div>
 
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
-                    <div class="flex justify-between items-center border-b border-darkText pb-2">
-                        <h3 id="diarySidebarTitle" class="font-cute font-bold text-base flex items-center gap-1.5"></h3>
-                        <button id="resetDateFilterBtn" onclick="selectCalendarDate(null)" class="hidden text-[10px] font-bold bg-gray-200 text-darkText px-2 py-0.5 rounded border border-darkText">แสดงทั้งหมด</button>
+                <div class="soft-card p-6 space-y-4 flex flex-col">
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+                        <h3 id="diarySidebarTitle" class="font-cute font-bold text-lg flex items-center gap-2.5"><i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด</h3>
+                        <button id="resetDateFilterBtn" onclick="selectCalendarDate(null)" class="hidden text-[11px] font-bold bg-gray-100 px-3 py-1 rounded-full hover:bg-gray-200">แสดงทั้งหมด</button>
                     </div>
-                    <div id="eventsListSidebar" class="space-y-2 overflow-y-auto max-h-[300px] flex-1 pr-1 text-xs"></div>
+                    <div id="eventsListSidebar" class="space-y-3 overflow-y-auto max-h-[350px] flex-1 pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
 
-        <!-- CALCULATOR -->
-        <section id="tab-calculator" class="tab-content hidden space-y-4">
-            <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-calculator text-popBlue"></i> เครื่องคิดเลขการเงิน</h2>
+        <!-- TAB 6: CALCULATOR -->
+        <section id="tab-calculator" class="tab-content hidden space-y-6">
+            <div class="soft-card p-6">
+                <h2 class="text-2xl font-extrabold font-cute flex items-center gap-2.5 mb-1"><i class="fa-solid fa-calculator text-popBlue"></i> เครื่องคิดเลขการเงิน</h2>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col items-center">
-                    <div class="w-full max-w-xs bg-offWhite border-2 border-darkText rounded-2xl p-4 shadow-sm">
-                        <div class="bg-darkText text-limeGreen font-mono text-2xl font-extrabold p-3 rounded-xl mb-3 text-right overflow-x-auto border border-darkText" id="calcScreen">0</div>
-                        <div class="grid grid-cols-4 gap-2 text-xs">
-                            <button onclick="calcClear()" class="bg-hotPink text-white font-bold p-3 rounded-xl border border-darkText">AC</button>
-                            <button onclick="calcAppend('%')" class="bg-gray-200 text-darkText font-bold p-3 rounded-xl border border-darkText">%</button>
-                            <button onclick="calcAppend('/')" class="bg-sunnyYellow text-darkText font-bold p-3 rounded-xl border border-darkText">÷</button>
-                            <button onclick="calcAppend('*')" class="bg-sunnyYellow text-darkText font-bold p-3 rounded-xl border border-darkText">×</button>
-                            <button onclick="calcAppend('7')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">7</button>
-                            <button onclick="calcAppend('8')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">8</button>
-                            <button onclick="calcAppend('9')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">9</button>
-                            <button onclick="calcAppend('-')" class="bg-sunnyYellow text-darkText font-bold p-3 rounded-xl border border-darkText">-</button>
-                            <button onclick="calcAppend('4')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">4</button>
-                            <button onclick="calcAppend('5')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">5</button>
-                            <button onclick="calcAppend('6')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">6</button>
-                            <button onclick="calcAppend('+')" class="bg-sunnyYellow text-darkText font-bold p-3 rounded-xl border border-darkText">+</button>
-                            <button onclick="calcAppend('1')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">1</button>
-                            <button onclick="calcAppend('2')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">2</button>
-                            <button onclick="calcAppend('3')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">3</button>
-                            <button onclick="calcCalculate()" class="bg-popBlue text-white font-bold p-3 rounded-xl border border-darkText row-span-2 flex items-center justify-center text-lg">=</button>
-                            <button onclick="calcAppend('0')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText col-span-2">0</button>
-                            <button onclick="calcAppend('.')" class="bg-white text-darkText font-bold p-3 rounded-xl border border-darkText">.</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col space-y-3">
-                    <div class="flex justify-between items-center border-b border-darkText pb-2">
-                        <h3 class="font-cute font-bold text-base">📜 ประวัติคำนวณ</h3>
-                        <button onclick="clearCalcHistory()" class="text-[10px] font-bold text-hotPink underline">ล้าง</button>
-                    </div>
-                    <div class="bg-offWhite p-3 rounded-xl border border-darkText space-y-2 text-xs">
-                        <label class="block font-bold">ผลลัพธ์ล่าสุด (<span id="latestCalcVal" class="text-popBlue font-extrabold">0</span>)</label>
-                        <input type="text" id="calcNoteDesc" placeholder="รายละเอียด เช่น ค่าข้าว" class="w-full bg-white border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium text-darkText">
-                        <div class="grid grid-cols-3 gap-1.5">
-                            <button onclick="saveCalcAsNote()" class="bg-retroPurple text-white font-bold py-1.5 rounded-lg border border-darkText text-[10px]">บันทึกโน้ต</button>
-                            <button onclick="saveCalcAsExpense('expense')" class="bg-hotPink text-white font-bold py-1.5 rounded-lg border border-darkText text-[10px]">บันทึกจ่าย</button>
-                            <button onclick="saveCalcAsExpense('income')" class="bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px]">บันทึกรับ</button>
-                        </div>
-                    </div>
-                    <div id="calcHistoryList" class="space-y-1.5 overflow-y-auto max-h-[180px] flex-1 pr-1 text-xs"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PET -->
-        <section id="tab-pet" class="tab-content hidden space-y-4">
-            <div class="bg-gradient-to-r from-sunnyYellow to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-darkText">
-                <div class="space-y-1 text-center md:text-left">
-                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">🐾 สัตว์เลี้ยงการเงิน</div>
-                    <h2 id="petHeaderTitle" class="text-2xl font-extrabold font-cute">สัตว์เลี้ยงการเงิน</h2>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border-2 border-darkText text-center min-w-[185px] text-darkText">
-                    <div id="petBigAvatar" class="text-5xl mb-1 animate-bounce">🐱</div>
-                    <h3 id="petBigName" class="font-cute font-bold text-sm">สัตว์เลี้ยงของคุณ</h3>
-                    <p id="petBigStatusText" class="text-[10px] font-bold text-popBlue mt-0.5">สถานะ...</p>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                    <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ตั้งค่าสัตว์เลี้ยง</h3>
-                    <div class="space-y-2 text-xs">
-                        <div><label class="block font-bold mb-0.5">ชื่อ</label><input type="text" id="petNameInput" onchange="updatePetSettings()" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 font-bold outline-none"></div>
-                        <div>
-                            <label class="block font-bold mb-0.5">ประเภท</label>
-                            <select id="petAvatarSelect" onchange="updatePetSettings()" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 font-bold outline-none">
-                                <option value="🐱">🐱 แมว</option>
-                                <option value="🐶">🐶 หมา</option>
-                                <option value="🐰">🐰 กระต่าย</option>
-                                <option value="🐹">🐹 แฮมสเตอร์</option>
-                                <option value="🐻">🐻 หมี</option>
-                                <option value="🦆">🦆 เป็ด</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                    <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">สถานะตามเงินจริง</h3>
-                    <div class="space-y-3 text-xs">
-                        <div>
-                            <div class="flex justify-between font-bold mb-0.5"><span>ความอิ่ม</span><span id="petHungerVal">0%</span></div>
-                            <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden"><div id="petHungerBar" class="bg-limeGreen h-full w-[0%] transition-all"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between font-bold mb-0.5"><span>ความสุข</span><span id="petHappyVal">0%</span></div>
-                            <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden"><div id="petHappyBar" class="bg-sunnyYellow h-full w-[0%] transition-all"></div></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
-                    <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ประวัติคำพูด</h3>
-                    <div id="petSpeechHistory" class="space-y-2 overflow-y-auto max-h-[160px] flex-1 pr-1 text-xs"></div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="bg-darkText text-white py-4 px-3 mt-8 border-t-2 border-darkText text-center text-xs w-full">
-        <p>✨ Y2K Playful Life Planner 🚀</p>
-    </footer>
-
-    </div><!-- /appFrame -->
-
-    <!-- MODALS -->
-    <div id="quickAddModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">⚡ เพิ่มรายการด่วน</h3><button onclick="closeModal('quickAddModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold text-xs">✕</button></div>
-            <div class="grid grid-cols-2 gap-2 text-xs font-bold">
-                <button onclick="closeModal('quickAddModal'); openTransactionModal('income')" class="p-3 bg-limeGreen/20 border border-darkText rounded-xl">รายรับ</button>
-                <button onclick="closeModal('quickAddModal'); openTransactionModal('expense')" class="p-3 bg-hotPink/20 border border-darkText rounded-xl">รายจ่าย</button>
-                <button onclick="closeModal('quickAddModal'); openBillModal()" class="p-3 bg-retroPurple/20 border border-darkText rounded-xl">เตรียมจ่าย</button>
-                <button onclick="closeModal('quickAddModal'); openTaskModal()" class="p-3 bg-sunnyYellow/30 border border-darkText rounded-xl">แพลนงาน</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="transactionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 id="txModalTitle" class="font-cute font-bold text-lg">เพิ่มรายการเงิน</h3><button onclick="closeModal('transactionModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold text-xs">✕</button></div>
-            <form id="transactionForm" onsubmit="handleSaveTransaction(event)" class="space-y-3">
-                <input type="hidden" id="txType" value="expense">
-                <div><label class="block font-bold mb-0.5">วันที่</label><input type="date" id="txDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                <div><label class="block font-bold mb-0.5">ชื่อรายการ</label><input type="text" id="txTitle" placeholder="เช่น ค่ากาแฟ" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block font-bold mb-0.5">หมวดหมู่</label>
-                        <select id="txCategory" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none">
-                            <option value="อาหาร/เครื่องดื่ม">🍔 อาหาร/เครื่องดื่ม</option>
-                            <option value="ช้อปปิ้ง">🛍️ ช้อปปิ้ง</option>
-                            <option value="เดินทาง">🚗 เดินทาง</option>
-                            <option value="บันเทิง/เกม">🎮 บันเทิง/เกม</option>
-                            <option value="บิล/ค่าใช้จ่าย">💡 บิล/ค่าใช้จ่าย</option>
-                            <option value="เงินเดือน/รายรับ">💰 เงินเดือน/รายรับ</option>
-                            <option value="อื่นๆ">✨ อื่นๆ</option>
-                        </select>
-                    </div>
-                    <div><label class="block font-bold mb-0.5">จำนวน (฿)</label><input type="number" step="0.01" min="0" id="txAmount" placeholder="0.00" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                </div>
-                <div class="pt-1 flex gap-2">
-                    <button type="button" onclick="closeModal('transactionModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
-                    <button type="submit" class="flex-1 bg-popBlue text-white font-bold py-2 rounded-lg border border-darkText">บันทึก</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="billModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">💡 เพิ่มบิลเตรียมจ่าย</h3><button onclick="closeModal('billModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
-            <form id="billForm" onsubmit="handleSaveBill(event)" class="space-y-3">
-                <div><label class="block font-bold mb-0.5">ชื่อบิล</label><input type="text" id="billTitle" placeholder="เช่น ค่าหอ" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div><label class="block font-bold mb-0.5">กำหนดจ่าย</label><input type="date" id="billDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                    <div><label class="block font-bold mb-0.5">จำนวน (฿)</label><input type="number" step="0.01" min="0" id="billAmount" placeholder="0.00" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                </div>
-                <div class="pt-1 flex gap-2">
-                    <button type="button" onclick="closeModal('billModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
-                    <button type="submit" class="flex-1 bg-retroPurple text-white font-bold py-2 rounded-lg border border-darkText">บันทึก</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="taskModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">เพิ่มแพลนงานใหม่</h3><button onclick="closeModal('taskModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
-            <form id="taskForm" onsubmit="handleSaveTask(event)" class="space-y-3">
-                <div><label class="block font-bold mb-0.5">หัวข้องาน</label><input type="text" id="taskTitle" placeholder="เช่น ส่งงาน" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div><label class="block font-bold mb-0.5">กำหนด</label><input type="date" id="taskDate" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                    <div>
-                        <label class="block font-bold mb-0.5">สถานะ</label>
-                        <select id="taskStatus" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none">
-                            <option value="todo">ต้องทำ</option>
-                            <option value="progress">กำลังทำ</option>
-                            <option value="done">เสร็จ</option>
-                        </select>
-                    </div>
-                </div>
-                <div><label class="block font-bold mb-0.5">รายละเอียด</label><textarea id="taskDesc" rows="2" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></textarea></div>
-                <div class="pt-1 flex gap-2">
-                    <button type="button" onclick="closeModal('taskModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
-                    <button type="submit" class="flex-1 bg-sunnyYellow text-darkText font-bold py-2 rounded-lg border border-darkText">บันทึก</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="eventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">📸 บันทึกไดอารี่</h3><button onclick="closeModal('eventModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
-            <form id="eventForm" onsubmit="handleSaveEvent(event)" class="space-y-3">
-                <div><label class="block font-bold mb-0.5">วันที่</label><input type="date" id="eventDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                <div>
-                    <label class="block font-bold mb-0.5">อารมณ์วันนี้</label>
-                    <div class="flex justify-between gap-1 bg-offWhite p-1.5 rounded-xl border border-darkText text-base">
-                        <button type="button" onclick="selectMoodEmoji('😊')" class="mood-btn p-1.5 rounded-lg border border-transparent" id="mood-😊">😊</button>
-                        <button type="button" onclick="selectMoodEmoji('🥰')" class="mood-btn p-1.5 rounded-lg border border-transparent" id="mood-🥰">🥰</button>
-                        <button type="button" onclick="selectMoodEmoji('😴')" class="mood-btn p-1.5 rounded-lg border border-transparent" id="mood-😴">😴</button>
-                        <button type="button" onclick="selectMoodEmoji('😭')" class="mood-btn p-1.5 rounded-lg border border-transparent" id="mood-😭">😭</button>
-                        <button type="button" onclick="selectMoodEmoji('😡')" class="mood-btn p-1.5 rounded-lg border border-transparent" id="mood-😡">😡</button>
-                    </div>
-                </div>
-                <div><label class="block font-bold mb-0.5">หัวข้อโน้ต</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้มีความสุข 🌸" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                <div>
-                    <label class="block font-bold mb-0.5">แนบรูป</label>
-                    <label class="flex flex-col items-center justify-center w-full p-3 bg-offWhite border border-dashed border-darkText rounded-xl cursor-pointer text-center">
-                        <i class="fa-solid fa-camera text-xl text-popBlue mb-1"></i>
-                        <span class="text-[10px] font-bold text-gray-600">กดเพื่อเลือกรูปภาพ</span>
-                        <input type="file" id="eventPhotoInput" accept="image/*" onchange="handlePhotoSelection(event)" class="hidden">
-                    </label>
-                    <p id="photoHint" class="text-[10px] text-gray-500 mt-1"></p>
-                    <div id="photoPreviewArea" class="hidden relative mt-2">
-                        <img id="eventPhotoPreview" class="w-full h-32 object-cover rounded-lg border border-darkText">
-                        <button type="button" onclick="removeSelectedPhoto()" class="absolute top-1 right-1 bg-hotPink text-white w-6 h-6 rounded-full border border-darkText text-[10px]">✕</button>
-                    </div>
-                </div>
-                <div class="pt-1 flex gap-2">
-                    <button type="button" onclick="closeModal('eventModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
-                    <button type="submit" id="eventSubmitBtn" class="flex-1 bg-retroPurple text-white font-bold py-2 rounded-lg border border-darkText">บันทึก</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="viewEventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
-        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText">
-                <div class="flex items-center gap-1.5"><span id="viewEventMood" class="text-xl">😊</span><span id="viewEventDate" class="text-[10px] font-bold bg-sunnyYellow text-darkText px-2 py-0.5 rounded border border-darkText"></span></div>
-                <button onclick="closeModal('viewEventModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button>
-            </div>
-            <h3 id="viewEventTitle" class="font-cute font-extrabold text-lg text-popBlue"></h3>
-            <div id="viewEventPhotoContainer" class="hidden"><img id="viewEventPhoto" class="w-full max-h-56 object-cover rounded-xl border border-darkText"></div>
-            <p id="viewEventPhotoNote" class="hidden text-[10px] text-gray-500"></p>
-            <div class="pt-2 border-t border-darkText">
-                <button id="deleteEventBtn" class="w-full bg-hotPink text-white font-bold py-2 rounded-lg border border-darkText text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ลบโน้ตนี้</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="toastNotification" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[10001] transition-all duration-300 opacity-0 pointer-events-none text-xs">
-        <div class="bg-limeGreen text-darkText font-bold px-4 py-2.5 rounded-xl border-2 border-darkText shadow-sm flex items-center gap-2 whitespace-nowrap">
-            <i class="fa-solid fa-circle-check text-base"></i>
-            <span id="toastMessage">สำเร็จ!</span>
-        </div>
-    </div>
-
-    <script>
-    // ================= UTILITIES =================
-    const $ = id => document.getElementById(id);
-    const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const money = n => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    function localDateKey(d = new Date()) {
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    }
-    const thisMonthKey = () => localDateKey().slice(0, 7);
-
-    // ค่าคงที่ของรูป: ย่อด้านยาวสุดเป็น 1024px, Firestore เก็บเอกสารได้ไม่เกิน 1 MiB จึงจำกัดความยาว base64
-    const MAX_PHOTO_PX = 1024;
-    const MAX_PHOTO_CHARS = 900000;
-    const CLOUD_TIMEOUT_MS = 20000;
-
-    function showToast(message) {
-        $('toastMessage').innerText = message;
-        const t = $('toastNotification');
-        t.classList.remove('opacity-0');
-        t.classList.add('opacity-100');
-        clearTimeout(showToast._timer);
-        showToast._timer = setTimeout(() => { t.classList.add('opacity-0'); t.classList.remove('opacity-100'); }, 2300);
-    }
-    function openModal(id) { $(id).classList.remove('hidden'); $(id).classList.add('flex'); }
-    function closeModal(id) { $(id).classList.add('hidden'); $(id).classList.remove('flex'); }
-
-    function withTimeout(promise, ms, msg) {
-        let timer;
-        return Promise.race([
-            promise,
-            new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(msg)), ms); })
-        ]).finally(() => clearTimeout(timer));
-    }
-
-    // ================= VIEW SWITCHER =================
-    function setView(view, save = true) {
-        if (!['desktop', 'tablet', 'mobile'].includes(view)) view = 'desktop';
-        document.documentElement.setAttribute('data-view', view);
-        document.querySelectorAll('.vs-btn').forEach(b => b.classList.toggle('vs-active', b.dataset.v === view));
-        if (save) localStorage.setItem('y2k_view', view);
-        setTimeout(() => { if (expenseChartInstance) expenseChartInstance.resize(); }, 420);
-    }
-
-    function initView() {
-        let saved = null;
-        try { saved = localStorage.getItem('y2k_view'); } catch {}
-        const auto = window.innerWidth <= 768 ? 'mobile' : 'desktop';
-        setView(saved || auto, false);
-    }
-
-    // ================= PHOTO STORAGE (IndexedDB = แคชในเครื่อง, Firestore = ซิงก์ข้ามเครื่อง) =================
-    let photoDbPromise = null;
-    function photoDB() {
-        if (!photoDbPromise) {
-            photoDbPromise = new Promise((resolve, reject) => {
-                if (!('indexedDB' in window)) return reject(new Error('เบราว์เซอร์นี้ไม่รองรับการเก็บรูป'));
-                const req = indexedDB.open('y2k_photos', 1);
-                req.onupgradeneeded = () => req.result.createObjectStore('photos', { keyPath: 'id' });
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => { photoDbPromise = null; reject(req.error); };
-            });
-        }
-        return photoDbPromise;
-    }
-
-    async function idbTx(mode, fn) {
-        const db = await photoDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction('photos', mode);
-            const req = fn(tx.objectStore('photos'));
-            let result;
-            if (req) req.onsuccess = () => { result = req.result; };
-            tx.oncomplete = () => resolve(result);
-            tx.onerror = () => reject(tx.error || new Error('บันทึกรูปในเครื่องไม่สำเร็จ'));
-            tx.onabort = () => reject(tx.error || new Error('บันทึกรูปในเครื่องไม่สำเร็จ (พื้นที่อาจเต็ม)'));
-        });
-    }
-
-    async function savePhotoLocal(id, data, synced) {
-        await idbTx('readwrite', s => s.put({ id, data, synced, createdAt: Date.now() }));
-    }
-
-    async function markPhotoSynced(id) {
-        const rec = await idbTx('readonly', s => s.get(id));
-        if (rec) await idbTx('readwrite', s => s.put({ ...rec, synced: true }));
-    }
-
-    function photosCol(uid) {
-        return db.collection('users').doc(uid).collection('photos');
-    }
-
-    async function uploadPhoto(id, data) {
-        await withTimeout(
-            photosCol(currentUser.uid).doc(id).set({
-                data,
-                eventId: id,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }),
-            CLOUD_TIMEOUT_MS,
-            'อัปโหลดรูปขึ้นคลาวด์ไม่สำเร็จ (ตรวจสอบอินเทอร์เน็ต)'
-        );
-    }
-
-    // ดึงรูป: ถ้าไม่มีในเครื่องและล็อกอินอยู่ จะดึงจากคลาวด์แล้วแคชไว้ในเครื่อง
-    async function getPhotoData(eventId) {
-        const rec = await idbTx('readonly', s => s.get(eventId));
-        if (rec && rec.data) return rec.data;
-        if (!currentUser || !isFirebaseActive) return null;
-        const snap = await withTimeout(
-            photosCol(currentUser.uid).doc(eventId).get(),
-            CLOUD_TIMEOUT_MS,
-            'โหลดรูปจากคลาวด์ไม่สำเร็จ'
-        );
-        if (!snap.exists) return null;
-        const data = snap.data().data;
-        await savePhotoLocal(eventId, data, true);
-        return data;
-    }
-
-    async function deletePhotoEverywhere(id) {
-        try { await idbTx('readwrite', s => s.delete(id)); } catch (e) { console.warn(e); }
-        if (currentUser && isFirebaseActive) {
-            try {
-                await withTimeout(photosCol(currentUser.uid).doc(id).delete(), CLOUD_TIMEOUT_MS, 'ลบรูปบนคลาวด์ไม่สำเร็จ');
-            } catch (e) { console.warn(e); }
-        }
-    }
-
-    // อัปโหลดรูปที่ยังไม่ได้ซิงก์ (เช่น บันทึกตอนยังไม่ได้ล็อกอิน)
-    async function syncPendingPhotos() {
-        if (!currentUser || !isFirebaseActive) return;
-        try {
-            const all = (await idbTx('readonly', s => s.getAll())) || [];
-            for (const rec of all) {
-                if (rec.synced) continue;
-                const ev = state.events.find(e => e.id === rec.id);
-                if (!ev || !ev.hasPhoto) continue;
-                try {
-                    await uploadPhoto(rec.id, rec.data);
-                    await markPhotoSynced(rec.id);
-                } catch (e) { console.warn('sync photo failed:', e); }
-            }
-        } catch (e) { console.warn(e); }
-    }
-
-    // ย้ายรูปเก่า (ที่เคยเก็บใน localStorage หรือฝังใน event) มาไว้ IndexedDB
-    async function migrateLegacyPhotos() {
-        let changed = false;
-        for (const ev of state.events) {
-            if (ev.photo) {
-                await savePhotoLocal(ev.id, ev.photo, false);
-                ev.hasPhoto = true;
-                delete ev.photo;
-                changed = true;
-            }
-        }
-        const legacyKeys = Object.keys(localStorage).filter(k => k.startsWith('y2k_photo_'));
-        for (const k of legacyKeys) {
-            const id = k.slice('y2k_photo_'.length);
-            const v = localStorage.getItem(k);
-            if (v) await savePhotoLocal(id, v, false);
-            localStorage.removeItem(k);
-        }
-        if (changed) saveLocal();
-    }
-
-    // บีบอัดรูป: 1024px คุณภาพ 0.8 ถ้าใหญ่เกินที่ Firestore รับได้จะลดคุณภาพอัตโนมัติ
-    function compressImage(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onerror = () => reject(new Error('อ่านไฟล์รูปไม่ได้'));
-            reader.onload = () => {
-                const img = new Image();
-                img.onerror = () => reject(new Error('ไฟล์นี้ไม่ใช่รูปภาพที่ใช้ได้'));
-                img.onload = () => {
-                    const scale = Math.min(1, MAX_PHOTO_PX / Math.max(img.width, img.height));
-                    const w = Math.round(img.width * scale);
-                    const h = Math.round(img.height * scale);
-                    const canvas = document.createElement('canvas');
-                    canvas.width = w;
-                    canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    for (const q of [0.8, 0.65, 0.5]) {
-                        const url = canvas.toDataURL('image/jpeg', q);
-                        if (url.length <= MAX_PHOTO_CHARS) return resolve(url);
-                    }
-                    reject(new Error('รูปนี้มีรายละเอียดมากเกินไป ลองเลือกรูปอื่นที่เล็กกว่า'));
-                };
-                img.src = reader.result;
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    // ================= STATE & STORAGE =================
-    const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme' };
-    const makeDefaultPet = () => ({
-        name: 'น้องสัตว์เลี้ยง', avatar: '🐱',
-        speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭',
-        speechHistory: [{ time: 'เริ่มต้น', text: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭' }]
-    });
-    function readLS(key, fallback) {
-        try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
-    }
-
-    let state = {
-        theme: localStorage.getItem(KEYS.theme) || 'y2k',
-        transactions: readLS(KEYS.transactions, []),
-        bills: readLS(KEYS.bills, []),
-        tasks: readLS(KEYS.tasks, []),
-        events: readLS(KEYS.events, []),
-        calcHistory: readLS(KEYS.calcHistory, []),
-        pet: Object.assign(makeDefaultPet(), readLS(KEYS.pet, {}))
-    };
-    if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
-
-    function saveLocal() {
-        try {
-            localStorage.setItem(KEYS.transactions, JSON.stringify(state.transactions));
-            localStorage.setItem(KEYS.bills, JSON.stringify(state.bills));
-            localStorage.setItem(KEYS.tasks, JSON.stringify(state.tasks));
-            localStorage.setItem(KEYS.events, JSON.stringify(state.events));
-            localStorage.setItem(KEYS.calcHistory, JSON.stringify(state.calcHistory));
-            localStorage.setItem(KEYS.pet, JSON.stringify(state.pet));
-            localStorage.setItem(KEYS.theme, state.theme);
-        } catch (e) {
-            console.error(e);
-            showToast('บันทึกข้อมูลในเครื่องไม่สำเร็จ ⚠️ กรุณาลองใหม่');
-        }
-    }
-
-    function saveData() {
-        saveLocal();
-        scheduleCloudSave();
-    }
-
-    // ================= FIREBASE: AUTH + CLOUD SYNC =================
-    let auth = null, db = null, currentUser = null, isFirebaseActive = false, syncTimer = null;
-    let googleLoginInProgress = false;
-
-    function setSyncStatus(text) { $('syncStatus').innerText = text; }
-
-    async function initFirebase() {
-        if (!IS_CONFIGURED) {
-            setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
-            return;
-        }
-        try {
-            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            db = firebase.firestore();
-
-            try {
-                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-            } catch (persistenceError) {
-                console.warn('Firebase persistence warning:', persistenceError);
-            }
-
-            isFirebaseActive = true;
-
-            auth.onAuthStateChanged(async user => {
-                if (user) {
-                    const isNewUser = !currentUser || currentUser.uid !== user.uid;
-                    currentUser = user;
-                    renderAuthUI();
-                    if (isNewUser) await pullFromCloud(user.uid);
-                } else {
-                    currentUser = null;
-                    renderAuthUI();
-                    setSyncStatus('ออกจากระบบแล้ว · ข้อมูลอยู่ในเครื่อง');
-                }
-            });
-
-            try {
-                const result = await auth.getRedirectResult();
-                if (result && result.user) {
-                    currentUser = result.user;
-                    renderAuthUI();
-                    showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
-                }
-            } catch (redirectError) {
-                console.error('Firebase redirect result:', redirectError);
-            }
-
-            setSyncStatus('พร้อมเชื่อมต่อ Gmail');
-        } catch (error) {
-            console.error('Firebase initialization error:', error);
-            isFirebaseActive = false;
-            setSyncStatus('เชื่อมต่อ Firebase ไม่สำเร็จ ⚠️');
-        }
-    }
-
-    function renderAuthUI() {
-        const logged = !!currentUser;
-        $('googleLoginBtn').classList.toggle('hidden', logged);
-        $('userProfileArea').classList.toggle('hidden', !logged);
-        if (logged) {
-            $('userAvatarImg').src = currentUser.photoURL || '';
-            $('userNameText').innerText = currentUser.displayName || currentUser.email || 'ผู้ใช้';
-        }
-    }
-
-    async function loginWithGoogle() {
-        if (googleLoginInProgress) return;
-        if (!isFirebaseActive || !auth) {
-            alert('Firebase ยังไม่พร้อม กรุณารีเฟรชหน้าเว็บแล้วลองใหม่');
-            return;
-        }
-        if (auth.currentUser) {
-            currentUser = auth.currentUser;
-            renderAuthUI();
-            setSyncStatus('เชื่อมต่อ Gmail อยู่แล้ว');
-            return;
-        }
-
-        googleLoginInProgress = true;
-        const loginButton = $('googleLoginBtn');
-        const originalButtonHTML = loginButton.innerHTML;
-        loginButton.disabled = true;
-        loginButton.classList.add('opacity-60', 'cursor-not-allowed');
-        loginButton.innerHTML = '<i class="fa-brands fa-google text-red-500"></i> กำลังเชื่อมต่อ...';
-
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-
-        try {
-            setSyncStatus('กำลังเชื่อมต่อ Gmail...');
-            const result = await auth.signInWithPopup(provider);
-            if (result && result.user) {
-                currentUser = result.user;
-                renderAuthUI();
-                await pullFromCloud(result.user.uid);
-                showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
-            }
-        } catch (error) {
-            console.error('Google Login Error:', error);
-
-            if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
-                setSyncStatus('การล็อกอินถูกยกเลิก กรุณากดใหม่อีกครั้ง');
-                return;
-            }
-
-            if (error.code === 'auth/popup-blocked' || error.code === 'auth/operation-not-supported-in-this-environment') {
-                try {
-                    await auth.signInWithRedirect(provider);
-                    return;
-                } catch (redirectError) {
-                    console.error('Google Redirect Error:', redirectError);
-                    setSyncStatus('ล็อกอินไม่สำเร็จ ⚠️');
-                    alert('เชื่อมต่อ Google ไม่สำเร็จ: ' + redirectError.message);
-                    return;
-                }
-            }
-
-            let message = error.message || 'เกิดข้อผิดพลาด';
-            if (error.code === 'auth/unauthorized-domain') {
-                message = 'โดเมนเว็บไซต์ยังไม่ได้รับอนุญาตใน Firebase';
-            } else if (error.code === 'auth/network-request-failed') {
-                message = 'อินเทอร์เน็ตมีปัญหา กรุณาลองใหม่';
-            }
-            setSyncStatus('ล็อกอินไม่สำเร็จ ⚠️');
-            alert('ล็อกอินไม่สำเร็จ: ' + message);
-        } finally {
-            googleLoginInProgress = false;
-            loginButton.disabled = false;
-            loginButton.classList.remove('opacity-60', 'cursor-not-allowed');
-            loginButton.innerHTML = originalButtonHTML;
-        }
-    }
-
-    async function logoutGoogle() {
-        if (!auth) return;
-        try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch (e) { console.error(e); }
-    }
-
-    function scheduleCloudSave() {
-        if (!currentUser || !db) return;
-        clearTimeout(syncTimer);
-        setSyncStatus('กำลังซิงก์...');
-        syncTimer = setTimeout(pushToCloud, 800);
-    }
-
-    // ข้อมูลหลักไม่รวมรูป (รูปแยกเป็นเอกสารของตัวเอง)
-    function cloudPayload() {
-        return {
-            transactions: state.transactions,
-            bills: state.bills,
-            tasks: state.tasks,
-            events: state.events,
-            calcHistory: state.calcHistory,
-            pet: state.pet,
-            theme: state.theme,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-    }
-
-    async function pushToCloud() {
-        if (!currentUser || !db) return;
-        try {
-            await db.collection('users').doc(currentUser.uid).set(cloudPayload());
-            setSyncStatus('ซิงก์แล้ว ☁️ ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }));
-        } catch (err) {
-            console.error(err);
-            setSyncStatus('ซิงก์ไม่สำเร็จ ⚠️');
-        }
-    }
-
-    async function pullFromCloud(uid) {
-        setSyncStatus('กำลังโหลดข้อมูล...');
-        try {
-            const snap = await db.collection('users').doc(uid).get();
-            if (snap.exists) {
-                try { localStorage.setItem('y2k_backup_before_cloud', JSON.stringify(collectMeta())); } catch {}
-                applyRemote(snap.data());
-                setSyncStatus('โหลดจากคลาวด์แล้ว ☁️');
-            } else {
-                await pushToCloud();
-            }
-            refreshUI();
-            syncPendingPhotos();
-        } catch (err) {
-            console.error(err);
-            setSyncStatus('โหลดข้อมูลไม่สำเร็จ ⚠️');
-        }
-    }
-
-    function applyRemote(d) {
-        state.transactions = d.transactions || [];
-        state.bills = d.bills || [];
-        state.tasks = d.tasks || [];
-        state.events = d.events || [];
-        state.calcHistory = d.calcHistory || [];
-        state.pet = Object.assign(makeDefaultPet(), d.pet || {});
-        if (d.theme) state.theme = d.theme;
-        saveLocal();
-    }
-
-    // ================= BACKUP / RESTORE =================
-    function collectMeta() {
-        return {
-            app: 'y2k-planner', version: 3, exportedAt: new Date().toISOString(),
-            transactions: state.transactions, bills: state.bills, tasks: state.tasks,
-            events: state.events, calcHistory: state.calcHistory, pet: state.pet,
-            theme: state.theme
-        };
-    }
-
-    // ไฟล์สำรองรวมรูปทั้งหมดด้วย
-    async function collectAll() {
-        const photos = {};
-        for (const ev of state.events) {
-            if (!ev.hasPhoto) continue;
-            try {
-                const d = await getPhotoData(ev.id);
-                if (d) photos[ev.id] = d;
-            } catch (e) { console.warn('backup photo skipped:', ev.id, e); }
-        }
-        return { ...collectMeta(), photos };
-    }
-
-    async function exportBackup() {
-        showToast('กำลังเตรียมไฟล์สำรอง...');
-        try {
-            const data = await collectAll();
-            const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `y2k-backup-${localDateKey()}.json`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(url), 1500);
-            showToast('ดาวน์โหลดไฟล์สำรองแล้ว 💾');
-        } catch (err) {
-            console.error(err);
-            alert('สร้างไฟล์สำรองไม่สำเร็จ: ' + err.message);
-        }
-    }
-
-    async function importBackup(e) {
-        const file = e.target.files[0];
-        e.target.value = '';
-        if (!file) return;
-
-        let d;
-        try { d = JSON.parse(await file.text()); } catch { return showToast('ไฟล์ไม่ถูกต้อง'); }
-        if (d.app !== 'y2k-planner') return showToast('ไม่ใช่ไฟล์สำรองของแอปนี้');
-        if (!confirm('แทนที่ข้อมูลปัจจุบันด้วยไฟล์สำรองนี้?')) return;
-
-        try {
-            for (const [id, data] of Object.entries(d.photos || {})) {
-                await savePhotoLocal(id, data, false);
-            }
-        } catch (err) {
-            return alert('คืนค่ารูปไม่สำเร็จ: ' + err.message + '\n(ข้อมูลเดิมยังอยู่ครบ)');
-        }
-
-        applyRemote(d);
-        refreshUI();
-        saveData();
-        syncPendingPhotos();
-        showToast('คืนค่าข้อมูลสำเร็จ! ✨');
-    }
-
-    // ================= THEME & PET =================
-    const PET_MOOD_FACES = {
-        '🐱': { sad: '😿', low: '😾', good: '😺', rich: '😻' },
-        '🐶': { sad: '🥺', low: '🐕', good: '🐶', rich: '🐶✨' },
-        '🐰': { sad: '😭', low: '🐰', good: '🐰✨', rich: '🐇💖' },
-        '🐹': { sad: '🥺', low: '🐹', good: '🐹✨', rich: '🐹👑' },
-        '🐻': { sad: '🐻‍❄️', low: '🐻', good: '🧸', rich: '🐻✨' },
-        '🦆': { sad: '😭', low: '🦆', good: '🦆✨', rich: '🐣🌟' }
-    };
-
-    function setTheme(themeName, save = true) {
-        state.theme = themeName;
-        document.body.className = `theme-${themeName} min-h-screen flex flex-col relative pb-20`;
-        if (save) saveData();
-    }
-
-    function updatePetSettings() {
-        state.pet.name = $('petNameInput').value.trim() || 'สัตว์เลี้ยง';
-        state.pet.avatar = $('petAvatarSelect').value;
-        saveData();
-        updatePetStatus();
-        showToast('อัปเดตสัตว์เลี้ยงแล้ว! ✨');
-    }
-
-    function calcNetBalance() {
-        let inc = 0, exp = 0;
-        state.transactions.forEach(t => t.type === 'income' ? inc += t.amount : exp += t.amount);
-        return { inc, exp, net: inc - exp };
-    }
-
-    function updatePetStatus() {
-        const { net } = calcNetBalance();
-        const faces = PET_MOOD_FACES[state.pet.avatar] || PET_MOOD_FACES['🐱'];
-        let hunger, happiness, avatar, moodText, defaultSpeech;
-
-        if (net <= 0)       { hunger = 0;   happiness = 0;   avatar = faces.sad;  moodText = 'หิวม๊าก 🥺';   defaultSpeech = 'เงินเป็น 0 แล้ว ช่วยเติมรายรับที! 😭'; }
-        else if (net < 1000){ hunger = 40;  happiness = 40;  avatar = faces.low;  moodText = 'ประหยัด...';    defaultSpeech = 'ประหยัดไว้ก่อนน้า 💸'; }
-        else if (net < 5000){ hunger = 75;  happiness = 75;  avatar = faces.good; moodText = 'อิ่มสบาย 😊';   defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟'; }
-        else                { hunger = 100; happiness = 100; avatar = faces.rich; moodText = 'เศรษฐี! 🤑';     defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖'; }
-
-        state.pet.hunger = hunger;
-        state.pet.happiness = happiness;
-        if (!state.pet.speech || state.pet.speech.includes('ยินดีต้อนรับ')) state.pet.speech = defaultSpeech;
-
-        const pName = state.pet.name || 'สัตว์เลี้ยง';
-        $('floatingPetName').innerText = pName;
-        $('petHeaderTitle').innerText = `${pName} (Tamagotchi)`;
-        $('petAvatar').innerText = avatar;
-        $('petBigAvatar').innerText = avatar;
-        $('calPetAvatar').innerText = avatar;
-        $('petBigName').innerText = `${pName} (${moodText})`;
-        $('petBigStatusText').innerText = `สุทธิ ฿${money(net)}`;
-        $('petHungerVal').innerText = hunger + '%';
-        $('petHungerBar').style.width = hunger + '%';
-        $('petHappyVal').innerText = happiness + '%';
-        $('petHappyBar').style.width = happiness + '%';
-        $('petSpeechBubble').innerText = state.pet.speech;
-        $('calPetSpeechText').innerText = state.pet.speech;
-        renderPetSpeechHistory();
-    }
-
-    function triggerPetSpeech(text) {
-        state.pet.speech = text;
-        state.pet.speechHistory.unshift({ time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), text });
-        if (state.pet.speechHistory.length > 8) state.pet.speechHistory.pop();
-    }
-
-    function renderPetSpeechHistory() {
-        $('petSpeechHistory').innerHTML = state.pet.speechHistory.map(h => `
-            <div class="bg-offWhite text-darkText p-2 rounded-lg border border-darkText text-[11px] flex items-center gap-2">
-                <span>${esc(state.pet.avatar) || '🐾'}</span>
-                <div><span class="text-[9px] text-gray-400">${esc(h.time)}</span><p class="font-bold text-hotPink">"${esc(h.text)}"</p></div>
-            </div>`).join('');
-    }
-
-    // ================= NAVIGATION =================
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border', 'border-darkText');
-            btn.classList.add('text-white', 'hover:bg-white/20');
-        });
-        $('tab-' + tabId).classList.remove('hidden');
-        const active = $('nav-' + tabId);
-        if (active) {
-            active.classList.remove('text-white', 'hover:bg-white/20');
-            active.classList.add('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border', 'border-darkText');
-        }
-        if (tabId === 'dashboard') renderDashboard();
-        if (tabId === 'finance') renderTransactions();
-        if (tabId === 'bills') renderBills();
-        if (tabId === 'planner') renderTasks();
-        if (tabId === 'calendar') renderCalendar();
-        if (tabId === 'pet') updatePetStatus();
-    }
-
-    function setDefaultDates() {
-        const today = localDateKey();
-        ['txDate', 'billDate', 'taskDate', 'eventDate'].forEach(id => { if ($(id)) $(id).value = today; });
-    }
-
-    function refreshUI() {
-        setTheme(state.theme, false);
-        $('petNameInput').value = state.pet.name;
-        $('petAvatarSelect').value = state.pet.avatar;
-        renderDashboard(); renderTransactions(); renderBills(); renderTasks();
-        renderCalendar(); renderEventsList(); updatePetStatus(); renderCalcHistory();
-    }
-
-    // ================= FINANCE =================
-    function openTransactionModal(type) {
-        $('transactionForm').reset();
-        $('txType').value = type;
-        $('txModalTitle').innerText = type === 'income' ? '💰 เพิ่มรายรับ' : '💸 เพิ่มรายจ่าย';
-        setDefaultDates();
-        openModal('transactionModal');
-    }
-
-    function handleSaveTransaction(e) {
-        e.preventDefault();
-        const type = $('txType').value;
-        const amount = parseFloat($('txAmount').value);
-        if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
-        state.transactions.unshift({
-            id: 'tx_' + Date.now(),
-            date: $('txDate').value,
-            title: $('txTitle').value.trim(),
-            category: $('txCategory').value,
-            amount, type
-        });
-        triggerPetSpeech(type === 'income' ? `เย้! เงินเข้า +฿${money(amount)} 🎉` : `รายจ่าย -฿${money(amount)} 🥺`);
-        saveData();
-        closeModal('transactionModal');
-        refreshUI();
-        showToast('บันทึกสำเร็จ!');
-    }
-
-    function deleteTransaction(id) {
-        state.transactions = state.transactions.filter(t => t.id !== id);
-        saveData(); refreshUI(); showToast('ลบรายการแล้ว');
-    }
-
-    function renderTransactions() {
-        const filterType = $('finFilterType').value;
-        const search = $('finSearch').value.toLowerCase();
-        const { inc, exp, net } = calcNetBalance();
-        $('finTotalIncome').innerText = '฿ ' + money(inc);
-        $('finTotalExpense').innerText = '฿ ' + money(exp);
-        $('finNetBalance').innerText = '฿ ' + money(net);
-
-        const filtered = state.transactions.filter(t =>
-            (filterType === 'all' || t.type === filterType) &&
-            (t.title.toLowerCase().includes(search) || t.category.toLowerCase().includes(search)));
-
-        if (!filtered.length) {
-            $('transactionTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">ไม่พบรายการ 🔎</td></tr>`;
-            return;
-        }
-        $('transactionTableBody').innerHTML = filtered.map(t => `
-            <tr class="hover:bg-offWhite transition-all">
-                <td class="p-2.5 border-r border-darkText">${esc(t.date)}</td>
-                <td class="p-2.5 border-r border-darkText"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.type === 'income' ? 'bg-limeGreen/30 text-green-800' : 'bg-hotPink/20 text-hotPink'}">${t.type === 'income' ? 'รับ' : 'จ่าย'}</span></td>
-                <td class="p-2.5 border-r border-darkText">${esc(t.category)}</td>
-                <td class="p-2.5 border-r border-darkText font-bold">${esc(t.title)}</td>
-                <td class="p-2.5 border-r border-darkText text-right font-extrabold ${t.type === 'income' ? 'text-green-600' : 'text-hotPink'}">${t.type === 'income' ? '+' : '-'}฿ ${money(t.amount)}</td>
-                <td class="p-2.5 text-center"><button onclick="deleteTransaction('${t.id}')" class="text-hotPink hover:scale-110"><i class="fa-solid fa-trash-can"></i></button></td>
-            </tr>`).join('');
-    }
-
-    // ================= BILLS =================
-    function openBillModal() { $('billForm').reset(); setDefaultDates(); openModal('billModal'); }
-
-    function handleSaveBill(e) {
-        e.preventDefault();
-        const amount = parseFloat($('billAmount').value);
-        if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
-        state.bills.unshift({
-            id: 'bill_' + Date.now(),
-            title: $('billTitle').value.trim(),
-            date: $('billDate').value,
-            amount, paid: false
-        });
-        saveData(); closeModal('billModal'); refreshUI(); showToast('เพิ่มบิลแล้ว!');
-    }
-
-    function toggleBillPaid(id) {
-        const b = state.bills.find(x => x.id === id);
-        if (!b) return;
-        b.paid = !b.paid;
-        if (b.paid) {
-            b.txId = 'tx_bill_' + b.id;
-            state.transactions.unshift({ id: b.txId, date: localDateKey(), title: 'จ่าย: ' + b.title, category: 'บิล/ค่าใช้จ่าย', amount: b.amount, type: 'expense' });
-        } else if (b.txId) {
-            state.transactions = state.transactions.filter(t => t.id !== b.txId);
-            delete b.txId;
-        }
-        saveData(); refreshUI(); showToast(b.paid ? 'จ่ายบิลแล้ว และบันทึกรายจ่ายให้แล้ว 💸' : 'ยกเลิกการจ่ายแล้ว');
-    }
-
-    function deleteBill(id) {
-        state.bills = state.bills.filter(x => x.id !== id);
-        saveData(); refreshUI(); showToast('ลบบิลแล้ว');
-    }
-
-    function renderBills() {
-        const grid = $('billsGrid');
-        $('dashPendingBills').innerText = state.bills.filter(b => !b.paid).length + ' รายการ';
-        if (!state.bills.length) {
-            grid.innerHTML = `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">ไม่มีบิลเตรียมจ่าย 💡</div>`;
-            return;
-        }
-        const sorted = [...state.bills].sort((a, b) => (a.paid - b.paid) || a.date.localeCompare(b.date));
-        grid.innerHTML = sorted.map(b => `
-            <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2 ${b.paid ? 'opacity-60' : ''}">
-                <div class="flex justify-between items-start">
-                    <span class="text-[10px] font-bold bg-retroPurple text-white px-2 py-0.5 rounded">${esc(b.date)}</span>
-                    <button onclick="deleteBill('${b.id}')" class="text-gray-400 hover:text-hotPink">✕</button>
-                </div>
-                <h4 class="font-bold text-sm">${esc(b.title)}</h4>
-                <span class="text-base font-extrabold text-hotPink">฿ ${money(b.amount)}</span>
-                <div class="pt-2 border-t border-darkText flex justify-between items-center text-xs">
-                    <span class="font-bold ${b.paid ? 'text-green-600' : 'text-orange-500'}">${b.paid ? '✔️ จ่ายแล้ว' : '⏳ รอจ่าย'}</span>
-                    <button onclick="toggleBillPaid('${b.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold border border-darkText ${b.paid ? 'bg-offWhite text-darkText' : 'bg-limeGreen text-darkText'}">${b.paid ? 'ยกเลิก' : 'จ่าย'}</button>
-                </div>
-            </div>`).join('');
-    }
-
-    // ================= PLANNER =================
-    function openTaskModal() { $('taskForm').reset(); setDefaultDates(); openModal('taskModal'); }
-
-    function handleSaveTask(e) {
-        e.preventDefault();
-        state.tasks.unshift({
-            id: 't_' + Date.now(),
-            title: $('taskTitle').value.trim(),
-            date: $('taskDate').value,
-            status: $('taskStatus').value,
-            desc: $('taskDesc').value.trim()
-        });
-        saveData(); closeModal('taskModal'); refreshUI(); showToast('เพิ่มงานแล้ว!');
-    }
-
-    function updateTaskStatus(id, st) {
-        const t = state.tasks.find(x => x.id === id);
-        if (t) { t.status = st; saveData(); refreshUI(); }
-    }
-
-    function deleteTask(id) {
-        state.tasks = state.tasks.filter(x => x.id !== id);
-        saveData(); refreshUI(); showToast('ลบงานแล้ว');
-    }
-
-    function renderTasks() {
-        const columns = { todo: ['listTodo', 'countTodo'], progress: ['listProgress', 'countProgress'], done: ['listDone', 'countDone'] };
-        Object.entries(columns).forEach(([st, [listId, countId]]) => {
-            const list = state.tasks.filter(t => t.status === st);
-            $(countId).innerText = list.length;
-            $(listId).innerHTML = list.length ? list.map(t => `
-                <div class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1">
-                    <div class="flex justify-between text-[10px] font-bold"><span>${esc(t.date) || 'ไม่มีกำหนด'}</span><button onclick="deleteTask('${t.id}')" class="text-gray-400 hover:text-hotPink">✕</button></div>
-                    <h4 class="font-bold text-xs">${esc(t.title)}</h4>
-                    ${t.desc ? `<p class="text-[10px] text-gray-500">${esc(t.desc)}</p>` : ''}
-                    <div class="flex gap-1 pt-1">
-                        ${st !== 'todo' ? `<button onclick="updateTaskStatus('${t.id}', 'todo')" class="text-[9px] bg-sunnyYellow text-darkText px-1 rounded border border-darkText">To Do</button>` : ''}
-                        ${st !== 'progress' ? `<button onclick="updateTaskStatus('${t.id}', 'progress')" class="text-[9px] bg-popBlue text-white px-1 rounded border border-darkText">Doing</button>` : ''}
-                        ${st !== 'done' ? `<button onclick="updateTaskStatus('${t.id}', 'done')" class="text-[9px] bg-limeGreen text-darkText px-1 rounded border border-darkText">Done</button>` : ''}
-                    </div>
-                </div>`).join('') : `<div class="text-center py-6 text-gray-400 text-[11px]">ไม่มีรายการ</div>`;
-        });
-        $('dashPendingTasks').innerText = state.tasks.filter(t => t.status !== 'done').length + ' รายการ';
-    }
-
-    // ================= CALENDAR & DIARY =================
-    let currentCalendarDate = new Date();
-    let selectedCalendarDate = null;
-    let selectedMood = '😊';
-    let pendingPhotoData = '';
-
-    function selectMoodEmoji(emoji) {
-        selectedMood = emoji;
-        document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('mood-btn-selected'));
-        const btn = $('mood-' + emoji);
-        if (btn) btn.classList.add('mood-btn-selected');
-    }
-
-    function setEventBusy(busy, text) {
-        const btn = $('eventSubmitBtn');
-        btn.disabled = busy;
-        btn.classList.toggle('opacity-60', busy);
-        btn.innerText = busy ? (text || 'กำลังบันทึก...') : 'บันทึก';
-    }
-
-    function openEventModal(presetDate) {
-        $('eventForm').reset();
-        setDefaultDates();
-        selectMoodEmoji('😊');
-        removeSelectedPhoto();
-        $('photoHint').innerText = currentUser
-            ? 'รูปจะซิงก์ไปยัง Gmail ของคุณ ปรับขนาดอัตโนมัติ'
-            : 'ยังไม่ได้ล็อกอิน Gmail รูปจะเก็บในเครื่องนี้เท่านั้น';
-        $('eventDate').value = presetDate || selectedCalendarDate || localDateKey();
-        openModal('eventModal');
-    }
-
-    async function handlePhotoSelection(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        setEventBusy(true, 'กำลังย่อรูป...');
-        try {
-            pendingPhotoData = await compressImage(file);
-            $('eventPhotoPreview').src = pendingPhotoData;
-            $('photoPreviewArea').classList.remove('hidden');
-        } catch (err) {
-            pendingPhotoData = '';
-            $('photoPreviewArea').classList.add('hidden');
-            alert('ใช้รูปนี้ไม่ได้: ' + err.message);
-        } finally {
-            setEventBusy(false);
-        }
-    }
-
-    function removeSelectedPhoto() {
-        pendingPhotoData = '';
-        $('eventPhotoInput').value = '';
-        $('photoPreviewArea').classList.add('hidden');
-    }
-
-    // บันทึกโน้ต: ถ้ามีรูปแล้วบันทึกรูปไม่สำเร็จ โน้ตจะไม่ถูกบันทึกเลย
-    async function handleSaveEvent(e) {
-        e.preventDefault();
-        const id = 'ev_' + Date.now();
-        const date = $('eventDate').value;
-        const title = $('eventTitle').value.trim();
-        let hasPhoto = false;
-
-        if (pendingPhotoData) {
-            setEventBusy(true);
-            try {
-                await savePhotoLocal(id, pendingPhotoData, false);
-                if (currentUser && isFirebaseActive) {
-                    await uploadPhoto(id, pendingPhotoData);
-                    await markPhotoSynced(id);
-                }
-                hasPhoto = true;
-            } catch (err) {
-                console.error(err);
-                try { await idbTx('readwrite', s => s.delete(id)); } catch {}
-                setEventBusy(false);
-                alert('บันทึกรูปไม่สำเร็จ โน้ตนี้ยังไม่ถูกบันทึก\nสาเหตุ: ' + err.message + '\n\nลองใหม่อีกครั้ง หรือเลือกรูปที่มีขนาดเล็กกว่า');
-                return;
-            }
-            setEventBusy(false);
-        }
-
-        state.events.unshift({ id, date, mood: selectedMood, title, hasPhoto });
-        saveData();
-        closeModal('eventModal');
-        selectCalendarDate(date);
-        showToast('บันทึกไดอารี่แล้ว!');
-    }
-
-    function selectCalendarDate(dateKey) {
-        selectedCalendarDate = dateKey;
-        renderCalendar();
-        renderEventsList();
-    }
-
-    async function viewEventDetails(eventId) {
-        const ev = state.events.find(e => e.id === eventId);
-        if (!ev) return;
-        $('viewEventMood').innerText = ev.mood || '😊';
-        $('viewEventDate').innerText = ev.date;
-        $('viewEventTitle').innerText = ev.title;
-        $('viewEventPhotoContainer').classList.add('hidden');
-        $('viewEventPhotoNote').classList.add('hidden');
-        $('deleteEventBtn').onclick = async () => {
-            await deleteEvent(ev.id);
-            closeModal('viewEventModal');
-        };
-        openModal('viewEventModal');
-
-        if (!ev.hasPhoto) return;
-
-        const note = $('viewEventPhotoNote');
-        note.innerText = 'กำลังโหลดรูป...';
-        note.classList.remove('hidden');
-        try {
-            const data = await getPhotoData(ev.id);
-            if (data) {
-                $('viewEventPhoto').src = data;
-                $('viewEventPhotoContainer').classList.remove('hidden');
-                note.classList.add('hidden');
-            } else {
-                note.innerText = 'ไม่พบรูปของโน้ตนี้ในเครื่อง ลองล็อกอิน Gmail เพื่อดึงรูปจากคลาวด์';
-            }
-        } catch (err) {
-            note.innerText = 'โหลดรูปไม่สำเร็จ: ' + err.message;
-        }
-    }
-
-    async function deleteEvent(id) {
-        const ev = state.events.find(x => x.id === id);
-        if (ev && ev.hasPhoto) await deletePhotoEverywhere(id);
-        state.events = state.events.filter(x => x.id !== id);
-        saveData(); renderCalendar(); renderEventsList(); showToast('ลบโน้ตแล้ว');
-    }
-
-    function changeMonth(dir) {
-        currentCalendarDate.setDate(1);
-        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir);
-        renderCalendar();
-    }
-
-    function renderCalendar() {
-        const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
-        const label = `${THAI_MONTHS[month]} ${year + 543}`;
-        $('calMonthYearLabel').innerText = label;
-        $('calendarMonthMoodTitle').innerText = `อารมณ์เดือน${label}`;
-
-        const firstDay = new Date(year, month, 1).getDay();
-        const totalDays = new Date(year, month + 1, 0).getDate();
-        const todayStr = localDateKey();
-        let html = '';
-        for (let i = 0; i < firstDay; i++) html += `<div class="aspect-square"></div>`;
-
-        for (let day = 1; day <= totalDays; day++) {
-            const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const evs = state.events.filter(e => e.date === dateKey);
-            const isSelected = selectedCalendarDate === dateKey;
-            const isToday = dateKey === todayStr;
-
-            let borderStyle = 'border-darkText', bgStyle = 'bg-offWhite';
-            if (isSelected) { borderStyle = 'border-limeGreen ring-2 ring-limeGreen'; bgStyle = 'bg-sunnyYellow/20'; }
-            else if (isToday) { borderStyle = 'border-popBlue'; bgStyle = 'bg-popBlue/10'; }
-
-            const topMood = evs.length ? (evs[0].mood || '😊') : '';
-            html += `
-                <div onclick="selectCalendarDate('${dateKey}')" class="${bgStyle} text-darkText p-1 rounded-xl border ${borderStyle} aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 transition-all select-none overflow-hidden">
-                    <div class="flex justify-between items-center shrink-0">
-                        <span class="text-[10px] font-bold ${isToday ? 'bg-popBlue text-white px-1 rounded-full' : ''}">${day}</span>
-                        ${topMood ? `<span class="text-[10px]">${topMood}</span>` : ''}
-                    </div>
-                    <div class="space-y-0.5 overflow-y-auto flex-1 mt-0.5">
-                        ${evs.map(ev => `
-                            <div onclick="event.stopPropagation(); viewEventDetails('${ev.id}')" class="text-[8px] bg-white text-darkText px-1 py-0.5 rounded border border-darkText truncate font-bold">
-                                ${ev.mood || ''} ${esc(ev.title)}
-                            </div>`).join('')}
-                    </div>
-                </div>`;
-        }
-        $('calendarGrid').innerHTML = html;
-        renderMonthlyMoodSummary(year, month);
-    }
-
-    function renderMonthlyMoodSummary(year, month) {
-        const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
-        const monthEvents = state.events.filter(e => e.date && e.date.startsWith(prefix));
-        if (!monthEvents.length) { $('calendarMonthMoodSummary').innerText = 'ยังไม่มีบันทึกอารมณ์ในเดือนนี้ 📝'; return; }
-        const counts = {};
-        monthEvents.forEach(ev => { const m = ev.mood || '😊'; counts[m] = (counts[m] || 0) + 1; });
-        const topMood = Object.keys(counts).reduce((a, b) => counts[a] >= counts[b] ? a : b);
-        const msg = topMood === '😡' ? `เดือนนี้หัวร้อนบ่อย (${counts['😡']} วัน) พักผ่อนบ้างน้า 🥺`
-                  : topMood === '🥰' ? `เดือนนี้แฮปปี้สุดๆ ไปเลย! (${counts['🥰']} วัน) 🌸`
-                  : `เดือนนี้สดใสมีความสุขดี 🌟`;
-        $('calendarMonthMoodSummary').innerText = msg;
-    }
-
-    function renderEventsList() {
-        const sb = $('eventsListSidebar');
-        const titleEl = $('diarySidebarTitle');
-        const resetBtn = $('resetDateFilterBtn');
-        let list = state.events;
-
-        if (selectedCalendarDate) {
-            list = state.events.filter(e => e.date === selectedCalendarDate);
-            titleEl.innerHTML = `<i class="fa-solid fa-calendar-day text-hotPink"></i> วันที่ ${esc(selectedCalendarDate)}`;
-            resetBtn.classList.remove('hidden');
-        } else {
-            titleEl.innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> โน้ตทั้งหมด`;
-            resetBtn.classList.add('hidden');
-        }
-
-        const addBtn = selectedCalendarDate
-            ? `<button onclick="openEventModal('${selectedCalendarDate}')" class="w-full bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px] mb-2">+ เพิ่มโน้ตวันนี้</button>`
-            : '';
-
-        if (!list.length) {
-            sb.innerHTML = `${addBtn}<div class="text-center py-6 text-gray-400 text-xs">ไม่มีโน้ต</div>`;
-            return;
-        }
-        sb.innerHTML = addBtn + list.map(ev => `
-            <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1 cursor-pointer hover:bg-white text-xs">
-                <div class="flex justify-between items-center text-[10px]">
-                    <span>${ev.mood || '😊'} <b>${esc(ev.date)}</b>${ev.hasPhoto ? ' 📷' : ''}</span>
-                    <i class="fa-solid fa-chevron-right text-gray-400"></i>
-                </div>
-                <h4 class="font-bold text-popBlue truncate">${esc(ev.title)}</h4>
-            </div>`).join('');
-    }
-
-    // ================= CALCULATOR =================
-    let calcExpr = '0';
-    let lastCalcResult = 0;
-
-    function calcRender() { $('calcScreen').innerText = calcExpr; }
-    function calcClear() { calcExpr = '0'; lastCalcResult = 0; $('latestCalcVal').innerText = '0'; calcRender(); }
-
-    function calcAppend(val) {
-        const ops = ['+', '-', '*', '/', '%', '.'];
-        if (calcExpr === '0' && !ops.includes(val)) calcExpr = val;
-        else calcExpr += val;
-        calcRender();
-    }
-
-    function calcCalculate() {
-        const expr = calcExpr.replace(/×/g, '*').replace(/÷/g, '/');
-        if (!/^[0-9+\-*/%.() ]+$/.test(expr)) return calcError();
-        try {
-            const res = Function('"use strict"; return (' + expr + ')')();
-            if (!isFinite(res)) throw new Error('not finite');
-            lastCalcResult = Math.round(res * 100) / 100;
-            $('calcScreen').innerText = lastCalcResult;
-            $('latestCalcVal').innerText = money(lastCalcResult);
-            state.calcHistory.unshift({ expr: calcExpr, result: lastCalcResult });
-            if (state.calcHistory.length > 10) state.calcHistory.pop();
-            calcExpr = String(lastCalcResult);
-            saveData();
-            renderCalcHistory();
-        } catch { calcError(); }
-    }
-
-    function calcError() {
-        $('calcScreen').innerText = 'Error';
-        calcExpr = '0';
-    }
-
-    function clearCalcHistory() { state.calcHistory = []; saveData(); renderCalcHistory(); }
-
-    function renderCalcHistory() {
-        const list = $('calcHistoryList');
-        if (!state.calcHistory.length) { list.innerHTML = `<div class="text-center py-4 text-gray-400 text-[10px]">ไม่มีประวัติ</div>`; return; }
-        list.innerHTML = state.calcHistory.map(h => `
-            <div class="bg-offWhite text-darkText p-1.5 rounded border border-darkText flex justify-between text-[11px]">
-                <span>${esc(h.expr)} =</span><strong class="text-popBlue">${esc(h.result)}</strong>
-            </div>`).join('');
-    }
-
-    function calcDesc(fallback) {
-        return $('calcNoteDesc').value.trim() || fallback;
-    }
-
-    function saveCalcAsNote() {
-        if (!lastCalcResult) return showToast('ยังไม่มีผลลัพธ์ให้บันทึก');
-        state.events.unshift({ id: 'ev_' + Date.now(), date: localDateKey(), mood: '😊', title: `คำนวณ: ${calcDesc('ผลลัพธ์')} = ฿${money(lastCalcResult)}`, hasPhoto: false });
-        saveData(); renderCalendar(); renderEventsList(); showToast('บันทึกโน้ตแล้ว');
-    }
-
-    function saveCalcAsExpense(type) {
-        if (!lastCalcResult) return showToast('ยังไม่มีผลลัพธ์ให้บันทึก');
-        state.transactions.unshift({
-            id: 'tx_' + Date.now(), date: localDateKey(),
-            title: calcDesc('จากเครื่องคิดเลข'),
-            category: type === 'expense' ? 'อื่นๆ' : 'เงินเดือน/รายรับ',
-            amount: Math.abs(lastCalcResult), type
-        });
-        triggerPetSpeech(type === 'income' ? `เย้! เงินเข้า +฿${money(lastCalcResult)} 🎉` : `รายจ่าย -฿${money(lastCalcResult)} 🥺`);
-        saveData(); refreshUI(); showToast('บันทึกรายการแล้ว');
-    }
-
-    // ================= DASHBOARD =================
-    function renderDashboard() {
-        const { inc, exp, net } = calcNetBalance();
-        const month = thisMonthKey();
-        let mInc = 0, mExp = 0;
-        state.transactions.forEach(t => {
-            if (!t.date || !t.date.startsWith(month)) return;
-            t.type === 'income' ? mInc += t.amount : mExp += t.amount;
-        });
-        $('dashNetBalance').innerText = '฿ ' + money(net);
-        $('dashTotalIncome').innerText = '฿ ' + money(mInc);
-        $('dashTotalExpense').innerText = '฿ ' + money(mExp);
-
-        const pending = state.tasks.filter(t => t.status !== 'done');
-        $('dashTodoList').innerHTML = pending.length
-            ? pending.slice(0, 8).map(t => `
-                <div class="bg-offWhite text-darkText p-2 rounded-lg border border-darkText flex justify-between items-center gap-2">
-                    <span class="font-bold truncate">${esc(t.title)}</span>
-                    <span class="text-[9px] shrink-0 ${t.status === 'progress' ? 'text-popBlue' : 'text-gray-500'}">${t.status === 'progress' ? 'กำลังทำ' : 'ต้องทำ'}</span>
-                </div>`).join('')
-            : `<div class="text-center py-8 text-gray-400">ไม่มีงานค้างอยู่ 🎉</div>`;
-
-        renderExpenseChart();
-    }
-
-    let expenseChartInstance = null;
-    function renderExpenseChart() {
-        const canvas = $('expenseCategoryChart');
-        if (!canvas || typeof Chart === 'undefined') return;
-        const map = {};
-        state.transactions.filter(t => t.type === 'expense').forEach(t => map[t.category] = (map[t.category] || 0) + t.amount);
-        const labels = Object.keys(map).length ? Object.keys(map) : ['ไม่มีรายจ่าย'];
-        const values = Object.keys(map).length ? Object.values(map) : [1];
-        if (expenseChartInstance) expenseChartInstance.destroy();
-        expenseChartInstance = new Chart(canvas.getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels,
-                datasets: [{ data: values, backgroundColor: ['#FF007F', '#0055FF', '#CCFF00', '#FFDD00', '#9D00FF', '#FF8A00', '#00C2A8'], borderWidth: 2, borderColor: '#1A1A1A' }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-        });
-    }
-
-    // ================= INIT =================
-    window.addEventListener('load', async () => {
-        initView();
-        // ขอให้เบราว์เซอร์เก็บข้อมูลไว้อย่างถาวร ลดโอกาสที่เบราว์เซอร์จะลบรูปเอง
-        if (navigator.storage && navigator.storage.persist) {
-            navigator.storage.persist().catch(() => {});
-        }
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW error:', err));
-        }
-        try { await migrateLegacyPhotos(); } catch (e) { console.warn('migrate photos:', e); }
-        setDefaultDates();
-        refreshUI();
-        initFirebase();
-        if (!IS_CONFIGURED) setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
-    });
-    </script>
-    if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(() => console.log('Service Worker Registered!'))
-            .catch(err => console.log('SW registration failed:', err));
-    });
-}
-</body>
-</html>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="soft-card p-6 flex flex-col items-center">
+                    <div class="w-full max-w-sm bg-softBg p-5 rounded-3xl shadow-inner border border-gray-200">
+                        <div class="bg-darkText text-limeGreen font-mono text-3xl font-extrabold p-5 rounded-2xl mb-4 text-right overflow-x-auto shadow-inner border border-gray-700" id="calcScreen">0</div>
+                        <div class="grid grid-cols-4 gap-3 text-sm font-semibold">
+                            <button onclick="calcClear()" class="p-4 bg-pink-100 text-pink-900 rounded-2xl hover:bg-pink-200 transition">AC</button>
+                            <button onclick="calcAppend('%')" class="p-4 bg-gray-100 text-darkText rounded-2xl hover:bg-gray-200 transition">%</button>
+                            <button onclick="calcAppend('/')" class="p-4 bg-sunnyYellow text-darkText rounded-2xl hover:bg-yellow-200 transition">÷</button>
+                            <button onclick="calcAppend('*')" class="p-4 bg-sunnyYellow text-darkText rounded-2xl hover:bg-yellow-200 transition">×</button>
+                            <button onclick="calcAppend('7')" class="p-4 bg-white

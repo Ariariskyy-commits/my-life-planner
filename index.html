@@ -544,19 +544,13 @@
                 </div>
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col space-y-3">
                     <div class="flex justify-between items-center border-b border-darkText pb-2">
-                        <h3 class="font-cute font-bold text-base">📜 ประวัติคำนวณ</h3>
+                        <h3 class="font-cute font-bold text-base">📜 ประวัติคำนวณ (เลือกรายการเพื่อโน้ต)</h3>
                         <button onclick="clearCalcHistory()" class="text-[10px] font-bold text-hotPink underline">ล้าง</button>
                     </div>
                     <div class="bg-offWhite p-3 rounded-xl border border-darkText space-y-2 text-xs">
-                        <label class="block font-bold">ผลลัพธ์ล่าสุด (<span id="latestCalcVal" class="text-popBlue font-extrabold">0</span>)</label>
                         <input type="text" id="calcNoteDesc" placeholder="รายละเอียด เช่น ค่าข้าว" class="w-full bg-white border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium text-darkText">
-                        <div class="grid grid-cols-3 gap-1.5">
-                            <button onclick="saveCalcAsNote()" class="bg-retroPurple text-white font-bold py-1.5 rounded-lg border border-darkText text-[10px]">บันทึกโน้ต</button>
-                            <button onclick="saveCalcAsExpense('expense')" class="bg-hotPink text-white font-bold py-1.5 rounded-lg border border-darkText text-[10px]">บันทึกจ่าย</button>
-                            <button onclick="saveCalcAsExpense('income')" class="bg-limeGreen text-darkText font-bold py-1.5 rounded-lg border border-darkText text-[10px]">บันทึกรับ</button>
-                        </div>
                     </div>
-                    <div id="calcHistoryList" class="space-y-1.5 overflow-y-auto max-h-[180px] flex-1 pr-1 text-xs"></div>
+                    <div id="calcHistoryList" class="space-y-1.5 overflow-y-auto max-h-[260px] flex-1 pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
@@ -1441,7 +1435,7 @@
             showToast('เพิ่มหมวดหมู่สำเร็จ! ✨');
         }
 
-        function openTransactionModal(type, editId = null) {
+        function openTransactionModal(type, editId = null, presetAmount = null) {
             $('transactionForm').reset();
             $('txId').value = '';
             $('txType').value = type;
@@ -1460,6 +1454,9 @@
                 }
             } else {
                 updateCategorySelects(type === 'income' ? '💰 เงินเดือน/รายรับ' : '🍔 อาหาร/เครื่องดื่ม');
+                if (presetAmount !== null) {
+                    $('txAmount').value = presetAmount;
+                }
                 $('txModalTitle').innerText = type === 'income' ? '💰 เพิ่มรายรับ' : '💸 เพิ่มรายจ่าย';
             }
             openModal('transactionModal');
@@ -2014,7 +2011,7 @@
         let lastCalcResult = 0;
 
         function calcRender() { $('calcScreen').innerText = calcExpr; }
-        function calcClear() { calcExpr = '0'; lastCalcResult = 0; $('latestCalcVal').innerText = '0'; calcRender(); }
+        function calcClear() { calcExpr = '0'; lastCalcResult = 0; calcRender(); }
 
         function calcAppend(val) {
             const ops = ['+', '-', '*', '/', '%', '.'];
@@ -2031,9 +2028,8 @@
                 if (!isFinite(res)) throw new Error('not finite');
                 lastCalcResult = Math.round(res * 100) / 100;
                 $('calcScreen').innerText = lastCalcResult;
-                $('latestCalcVal').innerText = money(lastCalcResult);
                 state.calcHistory.unshift({ expr: calcExpr, result: lastCalcResult });
-                if (state.calcHistory.length > 10) state.calcHistory.pop();
+                if (state.calcHistory.length > 15) state.calcHistory.pop();
                 calcExpr = String(lastCalcResult);
                 saveData();
                 renderCalcHistory();
@@ -2049,33 +2045,44 @@
 
         function renderCalcHistory() {
             const list = $('calcHistoryList');
-            if (!state.calcHistory.length) { list.innerHTML = `<div class="text-center py-4 text-gray-400 text-[10px]">ไม่มีประวัติ</div>`; return; }
+            if (!state.calcHistory.length) {
+                list.innerHTML = `<div class="text-center py-6 text-gray-400 text-xs">ไม่มีประวัติคำนวณ ✨</div>`;
+                return;
+            }
             list.innerHTML = state.calcHistory.map(h => `
-                <div class="bg-offWhite text-darkText p-1.5 rounded border border-darkText flex justify-between text-[11px]">
-                    <span>${esc(h.expr)} =</span><strong class="text-popBlue">${esc(h.result)}</strong>
+                <div class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1.5">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-mono text-gray-600">${esc(h.expr)} =</span>
+                        <strong class="text-popBlue text-sm font-extrabold">฿ ${money(h.result)}</strong>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1 pt-1 border-t border-darkText/10">
+                        <button onclick="saveSpecificCalcAsNote(${h.result}, '${esc(h.expr)}')" class="bg-retroPurple text-white font-bold py-1 rounded border border-darkText text-[10px]">บันทึกโน้ต</button>
+                        <button onclick="saveSpecificCalcAsExpense(${h.result}, 'expense')" class="bg-hotPink text-white font-bold py-1 rounded border border-darkText text-[10px]">บันทึกจ่าย</button>
+                        <button onclick="saveSpecificCalcAsExpense(${h.result}, 'income')" class="bg-limeGreen text-darkText font-bold py-1 rounded border border-darkText text-[10px]">บันทึกรับ</button>
+                    </div>
                 </div>`).join('');
         }
 
-        function calcDesc(fallback) {
-            return $('calcNoteDesc').value.trim() || fallback;
+        function getCalcNoteDesc() {
+            return $('calcNoteDesc').value.trim() || 'จากเครื่องคิดเลข';
         }
 
-        function saveCalcAsNote() {
-            if (!lastCalcResult) return showToast('ยังไม่มีผลลัพธ์ให้บันทึก');
-            state.events.unshift({ id: 'ev_' + Date.now(), date: localDateKey(), mood: '😊', title: `คำนวณ: ${calcDesc('ผลลัพธ์')} = ฿${money(lastCalcResult)}`, hasPhoto: false });
-            saveData(); renderCalendar(); renderEventsList(); showToast('บันทึกโน้ตแล้ว');
-        }
-
-        function saveCalcAsExpense(type) {
-            if (!lastCalcResult) return showToast('ยังไม่มีผลลัพธ์ให้บันทึก');
-            state.transactions.unshift({
-                id: 'tx_' + Date.now(), date: localDateKey(),
-                title: calcDesc('จากเครื่องคิดเลข'),
-                category: type === 'expense' ? 'อื่นๆ' : 'เงินเดือน/รายรับ',
-                amount: Math.abs(lastCalcResult), type
+        function saveSpecificCalcAsNote(val, expr) {
+            const noteDesc = getCalcNoteDesc();
+            state.events.unshift({
+                id: 'ev_' + Date.now(),
+                date: localDateKey(),
+                mood: '😊',
+                title: `${noteDesc} (${expr} = ฿${money(val)})`,
+                hasPhoto: false
             });
-            triggerPetSpeech(type === 'income' ? `เย้! เงินเข้า +฿${money(lastCalcResult)} 🎉` : `รายจ่าย -฿${money(lastCalcResult)} 🥺`);
-            saveData(); refreshUI(); showToast('บันทึกรายการแล้ว');
+            saveData(); renderCalendar(); renderEventsList(); showToast('บันทึกโน้ตจากรายการนี้แล้ว! 📝');
+        }
+
+        function saveSpecificCalcAsExpense(val, type) {
+            const noteDesc = getCalcNoteDesc();
+            openTransactionModal(type, null, val);
+            $('txTitle').value = noteDesc;
         }
 
         // ================= DASHBOARD =================

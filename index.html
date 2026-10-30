@@ -208,13 +208,18 @@
         }
         .vs-btn i { font-size: .75rem; }
 
-        /* ===== กรอบแอปเมื่อดูแบบแท็บเล็ต/มือถือ ===== */
+        /* ===== กรอบแอป ===== */
         #appFrame {
             margin: 0 auto;
             min-height: 100vh;
+            width: 100%;
             background: var(--bg-color, #F9F9FB);
             transition: max-width .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease;
         }
+        /* คอม: กว้างเกือบเต็มจอ ไม่มีพื้นที่ว่างเยอะ */
+        html[data-view="desktop"] #appFrame { max-width: 1600px; }
+
+        /* แท็บเล็ต: ขนาดใกล้ iPad */
         html[data-view="tablet"] #appFrame,
         html[data-view="mobile"] #appFrame {
             border-left: 2px solid #1A1A1A;
@@ -222,25 +227,27 @@
             box-shadow: 0 24px 60px -24px rgba(0,0,0,.4);
             overflow: hidden;
         }
-        html[data-view="tablet"] #appFrame { max-width: 768px; border-radius: 24px; }
-        html[data-view="mobile"] #appFrame { max-width: 390px; border-radius: 32px; }
+        html[data-view="tablet"] #appFrame { max-width: 1024px; border-radius: 24px; }
+        html[data-view="mobile"] #appFrame { max-width: 430px; border-radius: 32px; }
         html[data-view="tablet"] body,
         html[data-view="mobile"] body { background-color: #DDE3EE !important; }
         html[data-view="tablet"].theme-dark body, html[data-view="mobile"] body.theme-dark { background-color: #0a0a0a !important; }
 
-        /* จัดเลย์เอาต์ให้เหมาะกับกรอบแท็บเล็ต/มือถือ */
-        html[data-view="tablet"] .lg\:grid-cols-3,
+        /* จัดเลย์เอาต์ให้เหมาะกับกรอบแท็บเล็ต (กว้างขึ้นแล้ว จึงคงหลายคอลัมน์ไว้) */
+        html[data-view="tablet"] .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
         html[data-view="tablet"] .md\:grid-cols-2.lg\:grid-cols-3 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
         html[data-view="tablet"] .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)) !important; }
+        html[data-view="tablet"] .lg\:flex-row { flex-direction: row !important; }
+        html[data-view="tablet"] .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
 
+        /* จัดเลย์เอาต์ให้เหมาะกับกรอบมือถือ */
         html[data-view="mobile"] .lg\:grid-cols-3,
         html[data-view="mobile"] .md\:grid-cols-2,
         html[data-view="mobile"] .md\:grid-cols-3 { grid-template-columns: minmax(0,1fr) !important; }
         html[data-view="mobile"] .lg\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+        html[data-view="mobile"] .lg\:grid-cols-2 { grid-template-columns: minmax(0,1fr) !important; }
         html[data-view="mobile"] .lg\:flex-row,
         html[data-view="mobile"] .md\:flex-row { flex-direction: column !important; }
-
-        html[data-view="tablet"] .lg\:flex-row { flex-direction: column !important; }
 
         /* บนมือถือจริง ให้กว้างเต็มจอเสมอ */
         @media (max-width: 768px) {

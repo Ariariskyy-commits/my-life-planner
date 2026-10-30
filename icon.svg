@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="110" fill="#0055FF"/>
+  <rect x="96" y="96" width="320" height="320" rx="60" fill="#CCFF00" stroke="#1A1A1A" stroke-width="16"/>
+  <text x="256" y="300" font-family="Arial Black, Arial, sans-serif" font-size="150" font-weight="900" text-anchor="middle" fill="#1A1A1A">Y2K</text>
+</svg>

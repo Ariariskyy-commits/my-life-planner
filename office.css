@@ -276,3 +276,10 @@
  .office-sprite .office-avatar{font-size:38px}
  .office-sprite .office-name{font-size:9px}
 }
+
+/* v8 readability override */
+#officeSprites .office-speech{display:none!important;visibility:hidden!important;}
+#officeDialogue{display:flex!important;position:relative!important;z-index:20!important;overflow:visible!important;}
+#officeDialogueText{font-size:13px!important;line-height:1.45!important;margin:5px 0 0!important;white-space:normal!important;word-break:break-word!important;}
+#officeDialogueName{font-size:12px!important;}
+#officeSprites .office-expression{display:grid!important;}

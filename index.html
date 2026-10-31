@@ -189,6 +189,81 @@
             transform: rotate(-.4deg);
         }
 
+        /* ===== โลโก้ Y2K PLANNER แบบการ์ดกระจกไล่สี ===== */
+        .y2k-logo {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 16px 6px 6px;
+            border-radius: 18px;
+            background: linear-gradient(120deg, #FF007F 0%, #9D00FF 55%, #0055FF 100%);
+            border: 2px solid #1A1A1A;
+            box-shadow: 0 4px 0 #1A1A1A, inset 0 1px 0 rgba(255,255,255,.35);
+            overflow: hidden;
+            flex: 1 1 auto;
+            max-width: 280px;
+            min-width: 0;
+        }
+        .y2k-logo::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -60%;
+            width: 40%;
+            height: 100%;
+            background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
+            transform: skewX(-20deg);
+            animation: logoShine 3.6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes logoShine {
+            0%, 60% { left: -60%; }
+            100% { left: 130%; }
+        }
+        .y2k-logo-icon {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: #CCFF00;
+            border: 2px solid #1A1A1A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            box-shadow: 0 2px 0 #1A1A1A;
+            animation: logoWiggle 2.8s ease-in-out infinite;
+        }
+        @keyframes logoWiggle {
+            0%, 100% { transform: rotate(-6deg); }
+            50% { transform: rotate(6deg); }
+        }
+        .y2k-logo-text {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            line-height: 1;
+        }
+        .y2k-logo-title {
+            font-family: 'Fredoka', 'Prompt', sans-serif;
+            font-weight: 600;
+            font-size: 20px;
+            letter-spacing: .04em;
+            color: #FFFFFF;
+            text-shadow: 2px 2px 0 #1A1A1A;
+            white-space: nowrap;
+        }
+        .y2k-logo-sub {
+            margin-top: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .32em;
+            color: #CCFF00;
+            text-shadow: 1px 1px 0 #1A1A1A;
+            white-space: nowrap;
+        }
+
         .topbar {
             margin: 10px 12px 0;
             padding: 8px 12px !important;
@@ -562,6 +637,66 @@
         @media (max-width: 640px) {
             .topbar { margin: 6px 6px 0; border-radius: 18px; }
         }
+
+        /* ===== Liquid Glass: แถบเมนูล่างเป็นกระจกฝ้า ===== */
+        .bottom-nav {
+            background: linear-gradient(180deg, rgba(60,140,255,.62) 0%, rgba(0,85,255,.5) 100%) !important;
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            border: 1.5px solid rgba(255,255,255,.55) !important;
+            box-shadow:
+                0 14px 34px -12px rgba(0,20,80,.55),
+                inset 0 1px 0 rgba(255,255,255,.6),
+                inset 0 -1px 0 rgba(255,255,255,.18) !important;
+            overflow: hidden;
+        }
+        .bottom-nav::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(120deg, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 38%, rgba(255,255,255,0) 70%, rgba(255,255,255,.18) 100%);
+            pointer-events: none;
+        }
+        .bottom-nav .bn-item.bn-active {
+            background: rgba(204,255,0,.85) !important;
+            backdrop-filter: blur(6px);
+            border: 1.5px solid rgba(255,255,255,.7) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 4px 12px -4px rgba(0,0,0,.35) !important;
+        }
+        .bn-add {
+            background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.55), rgba(255,0,127,.85) 45%, rgba(200,0,100,.9) 100%) !important;
+            border: 1.5px solid rgba(255,255,255,.7) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 8px 18px -6px rgba(255,0,127,.6) !important;
+        }
+
+        /* ===== Liquid Glass ตอนสัมผัส: แสงสะท้อนตามนิ้ว + ขยับแบบสปริง ===== */
+        .glass-press {
+            transform: scale(.93) !important;
+            transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, filter .2s ease !important;
+            background-image:
+                radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255,255,255,.7) 0, rgba(255,255,255,.25) 28%, rgba(255,255,255,0) 60%),
+                linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.05)) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.85), inset 0 -2px 6px rgba(255,255,255,.25), 0 6px 16px -6px rgba(0,0,0,.35) !important;
+            backdrop-filter: blur(10px) saturate(200%);
+            -webkit-backdrop-filter: blur(10px) saturate(200%);
+            filter: brightness(1.08);
+        }
+        .bn-add.glass-press {
+            transform: scale(.9) !important;
+        }
+        .bottom-nav .glass-press.bn-item:not(.bn-active) {
+            border-radius: 18px;
+        }
+        .tab-btn.glass-press,
+        .vs-btn.glass-press,
+        .tb-btn.glass-press,
+        #floatingMinimizedBtn.glass-press {
+            filter: brightness(1.05) saturate(1.15);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .glass-press { transition: none !important; }
+        }
     </style>
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
@@ -660,8 +795,12 @@
         </div>
 
         <div class="flex items-center justify-between gap-2">
-            <div class="bg-limeGreen text-darkText font-cute font-extrabold text-sm sm:text-base px-3.5 py-1 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1.5 flex-1 max-w-[260px]">
-                <span>✨</span> Y2K PLANNER
+            <div class="y2k-logo">
+                <span class="y2k-logo-icon" aria-hidden="true">✨</span>
+                <span class="y2k-logo-text">
+                    <span class="y2k-logo-title">Y2K</span>
+                    <span class="y2k-logo-sub">PLANNER</span>
+                </span>
             </div>
             
             <div class="flex items-center gap-2">
@@ -1507,7 +1646,7 @@
         function openModal(id) { $(id).classList.remove('hidden'); $(id).classList.add('flex'); }
         function closeModal(id) { $(id).classList.add('hidden'); $(id).classList.remove('flex'); }
 
-        // ===== หน้าต่างตั้งค่า (เปิดจากแถบเมนูล่าง) =====
+        // ===== หน้าต่างตั้งค่า (เปิดจากแถบเมนูล่างง) =====
         function openSettingsModal() {
             document.querySelectorAll('.settings-theme-btn').forEach(b => {
                 b.classList.toggle('ring-4', b.dataset.themeBtn === state.theme);
@@ -2337,7 +2476,10 @@
                             <button onclick="deleteBill('${b.id}')" class="text-gray-400 hover:text-hotPink"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
-                    <h4 class="font-bold text-sm">${esc(b.title)}</h4>
+                    <div class="flex justify-between items-start gap-2">
+                        <h4 class="font-bold text-sm min-w-0 break-words">${esc(b.title)}</h4>
+                        <span class="shrink-0 text-[10px] font-extrabold bg-limeGreen text-darkText px-2 py-0.5 rounded-full border-2 border-darkText whitespace-nowrap max-w-[45%] truncate" title="${esc(b.category || 'ไม่ระบุหมวด')}">${esc(b.category || 'ไม่ระบุหมวด')}</span>
+                    </div>
                     <span class="text-base font-extrabold text-hotPink block">฿ ${money(b.amount)}</span>
                     <button onclick="toggleBillPaid('${b.id}')" class="w-full py-1 bg-limeGreen text-darkText font-bold text-xs rounded border border-darkText">จ่าย</button>
                 </div>`).join('') : `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">เย้! ไม่มีบิลค้างจ่ายแล้ว 🎉</div>`;
@@ -2497,6 +2639,25 @@
             initView(); setDefaultDates(); refreshUI(); initFirebase();
             setBottomNavActive('dashboard');
         });
+
+        /* ===== Liquid Glass: แสงสะท้อนตามนิ้วตอนสัมผัส ===== */
+        (function () {
+            const SEL = '.bottom-nav button, .tab-btn, .vs-btn, .tb-btn, #floatingMinimizedBtn';
+            document.addEventListener('pointerdown', function (e) {
+                const el = e.target.closest(SEL);
+                if (!el) return;
+                const r = el.getBoundingClientRect();
+                el.style.setProperty('--gx', (e.clientX - r.left) + 'px');
+                el.style.setProperty('--gy', (e.clientY - r.top) + 'px');
+                el.classList.add('glass-press');
+            }, { passive: true });
+            function release() {
+                document.querySelectorAll('.glass-press').forEach(function (el) { el.classList.remove('glass-press'); });
+            }
+            document.addEventListener('pointerup', release);
+            document.addEventListener('pointercancel', release);
+            window.addEventListener('blur', release);
+        })();
     </script>
 </body>
 </html>

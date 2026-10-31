@@ -546,3 +546,21 @@
 .office-morale i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#f3bd66,#8bc99a);transition:width .3s ease;}
 .office-agent-status{white-space:nowrap;}
 @media(max-width:560px){.office-command-bar button{font-size:9px;min-height:48px;padding:6px 2px;}}
+
+/* Mini garden around the isometric office */
+.office-garden-tree{position:absolute;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;width:54px;height:76px;pointer-events:none;filter:drop-shadow(0 5px 2px #344b3b33);animation:gardenSway 4s ease-in-out infinite;transform-origin:50% 100%;}
+.office-garden-tree .crown{font-size:43px;line-height:1;filter:drop-shadow(0 2px 0 #397a4b55);}
+.office-garden-tree .trunk{width:9px;height:18px;margin-top:-3px;border-radius:3px;background:linear-gradient(90deg,#805238,#bd8658,#70452e);box-shadow:0 2px 0 #61422e;}
+.office-garden-tree .shadow{width:38px;height:7px;margin-top:-1px;border-radius:50%;background:#587a7044;}
+.office-garden-tree.tree-a{left:3%;top:46%;animation-delay:-1s}
+.office-garden-tree.tree-b{right:3%;top:52%;animation-delay:-2s}
+.office-garden-tree.tree-c{left:17%;top:78%;transform:scale(.78);animation-delay:-.5s}
+.office-garden-tree.tree-d{right:17%;top:79%;transform:scale(.82);animation-delay:-2.5s}
+@keyframes gardenSway{0%,100%{translate:0 0;rotate:-1.5deg}50%{translate:0 -2px;rotate:1.5deg}}
+.office-pet-meter{display:grid;grid-template-columns:1fr auto;gap:3px 5px;text-align:left;margin:6px 3px 0;font-size:8px;color:#828ba0;font-weight:800;}
+.office-pet-meter b{font-size:8px;color:#56617a;}
+.office-pet-meter i{grid-column:1/-1;height:6px;border-radius:99px;background:#e9edf4;overflow:hidden;}
+.office-pet-meter em{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#f2b65c,#f5d47a);transition:width .35s;}
+.office-pet-meter.joy em{background:linear-gradient(90deg,#8ec9e9,#a6d9b4);}
+.office-pet-hint{line-height:1.5;}
+@media(max-width:560px){.office-garden-tree{scale:.78}.office-garden-tree.tree-c,.office-garden-tree.tree-d{scale:.65}}

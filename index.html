@@ -397,7 +397,7 @@
             </div>
         </div>
 
-        <!-- โหมดตอนซ่อน (จะแปลงร่างเป็นไอคอนอิโมจิกลมๆ ลัดไปแต่ละหน้าทันที!) -->
+        <!-- โหมดตอนซ่อน (แปลงร่างเป็นไอคอนอิโมจิกลมๆ ลัดไปแต่ละหน้าทันที) -->
         <div id="plannerMinimizedBar" class="hidden flex items-center justify-center gap-2 py-1 overflow-x-auto">
             <button onclick="switchTab('dashboard')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="แดชบอร์ด">📊</button>
             <button onclick="switchTab('finance')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="รายรับ-รายจ่าย">💸</button>
@@ -1168,7 +1168,7 @@
 
             if (state.headerCollapsed) {
                 body.classList.add('hidden');
-                minimizedBar.classList.remove('hidden'); // แสดงไอคอนอิโมจิลัดตอนซ่อน
+                minimizedBar.classList.remove('hidden');
                 if (toggleText) toggleText.innerText = 'แสดง';
                 if (toggleIcon) {
                     toggleIcon.classList.remove('fa-chevron-up');
@@ -1176,7 +1176,7 @@
                 }
             } else {
                 body.classList.remove('hidden');
-                minimizedBar.classList.add('hidden'); // ซ่อนแถบไอคอนเมื่อกางออกเต็ม
+                minimizedBar.classList.add('hidden');
                 if (toggleText) toggleText.innerText = 'ซ่อน';
                 if (toggleIcon) {
                     toggleIcon.classList.remove('fa-chevron-down');
@@ -1266,45 +1266,6 @@
                     } catch (e) { console.warn('sync photo failed:', e); }
                 }
             } catch (e) { console.warn(e); }
-        }
-
-        async function migrateLegacyPhotos() {
-            let changed = false;
-            for (const ev of state.events) {
-                if (ev.photo) {
-                    await savePhotoLocal(ev.id, ev.photo, false);
-                    ev.hasPhoto = true;
-                    delete ev.photo;
-                    changed = true;
-                }
-            }
-            if (changed) saveLocal();
-        }
-
-        function compressImage(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onerror = () => reject(new Error('อ่านไฟล์รูปไม่ได้'));
-                reader.onload = () => {
-                    const img = new Image();
-                    img.onerror = () => reject(new Error('ไฟล์นี้ไม่ใช่รูปภาพที่ใช้ได้'));
-                    img.onload = () => {
-                        const scale = Math.min(1, MAX_PHOTO_PX / Math.max(img.width, img.height));
-                        const w = Math.round(img.width * scale);
-                        const h = Math.round(img.height * scale);
-                        const canvas = document.createElement('canvas');
-                        canvas.width = w; canvas.height = h;
-                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                        for (const q of [0.8, 0.65, 0.5]) {
-                            const url = canvas.toDataURL('image/jpeg', q);
-                            if (url.length <= MAX_PHOTO_CHARS) return resolve(url);
-                        }
-                        reject(new Error('รูปนี้มีรายละเอียดมากเกินไป'));
-                    };
-                    img.src = reader.result;
-                };
-                reader.readAsDataURL(file);
-            });
         }
 
         const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show', headerCollapsed:'y2k_header_collapsed' };
@@ -1826,12 +1787,19 @@
             for (let i = 0; i < firstDay; i++) html += `<div class="aspect-square"></div>`;
             for (let day = 1; day <= totalDays; day++) {
                 const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const holidayName = getHolidayName(dateKey);
                 const evs = state.events.filter(e => e.date === dateKey);
                 const isSelected = selectedCalendarDate === dateKey;
                 html += `
-                    <div onclick="selectCalendarDate('${dateKey}')" class="${isSelected ? 'bg-sunnyYellow/20 border-limeGreen ring-2 ring-limeGreen' : 'bg-offWhite border-darkText'} p-1 rounded-xl border aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20">
-                        <span class="text-[10px] font-bold">${day}</span>
-                        <div class="space-y-0.5 overflow-y-auto flex-1">${evs.map(ev => `<div class="text-[8px] bg-white px-1 rounded border border-darkText truncate font-bold">${ev.mood} ${esc(ev.title)}</div>`).join('')}</div>
+                    <div onclick="selectCalendarDate('${dateKey}')" class="${isSelected ? 'bg-sunnyYellow/20 border-limeGreen ring-2 ring-limeGreen' : 'bg-offWhite border-darkText'} p-1 rounded-xl border aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 relative">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold">${day}</span>
+                            ${holidayName ? `<span class="w-2 h-2 rounded-full bg-hotPink shrink-0" title="${esc(holidayName)}"></span>` : ''}
+                        </div>
+                        <div class="space-y-0.5 overflow-y-auto flex-1">
+                            ${holidayName ? `<div class="text-[7px] bg-pink-100 text-hotPink px-1 rounded border border-hotPink/30 truncate font-bold">${esc(holidayName)}</div>` : ''}
+                            ${evs.map(ev => `<div class="text-[8px] bg-white px-1 rounded border border-darkText truncate font-bold">${ev.mood} ${esc(ev.title)}</div>`).join('')}
+                        </div>
                     </div>`;
             }
             $('calendarGrid').innerHTML = html;
@@ -1839,13 +1807,20 @@
 
         function renderEventsList() {
             const list = selectedCalendarDate ? state.events.filter(e => e.date === selectedCalendarDate) : state.events;
+            let holidayNotice = '';
+            if (selectedCalendarDate) {
+                const hName = getHolidayName(selectedCalendarDate);
+                if (hName) {
+                    holidayNotice = `<div class="bg-hotPink/10 text-hotPink p-2.5 rounded-xl border border-hotPink text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-star"></i> วันหยุด: ${esc(hName)}</div>`;
+                }
+            }
             $('diarySidebarTitle').innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> ${selectedCalendarDate || 'โน้ตทั้งหมด'}`;
             $('resetDateFilterBtn').classList.toggle('hidden', !selectedCalendarDate);
-            $('eventsListSidebar').innerHTML = list.length ? list.map(ev => `
+            $('eventsListSidebar').innerHTML = holidayNotice + (list.length ? list.map(ev => `
                 <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite p-2.5 rounded-xl border border-darkText cursor-pointer hover:bg-white text-xs">
                     <span class="text-[10px]">${ev.mood} <b>${esc(ev.date)}</b></span>
                     <h4 class="font-bold text-popBlue truncate">${esc(ev.title)}</h4>
-                </div>`).join('') : `<div class="text-center py-6 text-gray-400 text-xs">ไม่มีโน้ต</div>`;
+                </div>`).join('') : (!holidayNotice ? `<div class="text-center py-6 text-gray-400 text-xs">ไม่มีโน้ต</div>` : ''));
         }
 
         let calcExpr = '0';

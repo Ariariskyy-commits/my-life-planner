@@ -80,8 +80,7 @@
     if(text)text.textContent='“'+line.text+'”';
     const scene=document.querySelectorAll('#officeSprites .office-sprite');
     scene.forEach(el=>el.classList.toggle('is-speaking',el.getAttribute('data-agent-id')===agent.id));
-    const bubble=document.querySelector('#officeSprites [data-agent-id="'+agent.id+'"] .office-speech');
-    if(bubble)bubble.textContent=line.text;
+
   }
   function refreshDialogue(){
     const agent=agents[dialogueIndex%agents.length];
@@ -93,7 +92,7 @@
       const working=statusOf(a.id)==='working';
       const line=lineFor(a);
       const pos=working?[{x:54,y:44},{x:67,y:50},{x:29,y:54},{x:38,y:62},{x:48,y:76},{x:60,y:78}][i]:{x:a.x,y:a.y};
-      return '<div class="office-sprite '+(working?'is-working':'is-idle')+'" data-agent-id="'+a.id+'" style="left:calc('+pos.x+'% - 34px);top:calc('+pos.y+'% - 34px)" title="'+safeText(a.name+' · '+a.role)+'"><span class="office-speech">'+safeText(line.text)+'</span><span class="office-expression">'+line.face+'</span><span class="office-avatar">'+a.emoji+'</span><span class="office-name">'+a.name+(working?' · ทำงาน':'')+'</span></div>';
+      return '<div class="office-sprite '+(working?'is-working':'is-idle')+'" data-agent-id="'+a.id+'" style="left:calc('+pos.x+'% - 34px);top:calc('+pos.y+'% - 34px)" title="'+safeText(a.name+' · '+a.role)+'"><span class="office-expression">'+line.face+'</span><span class="office-avatar">'+a.emoji+'</span><span class="office-name">'+a.name+(working?' · ทำงาน':'')+'</span></div>';
     }).join('');
     const petSprites='<div class="office-pet-sprite cat" title="มะลิ แมวประจำออฟฟิศ">🐈</div><div class="office-pet-sprite dog" title="โมจิ น้องหมาประจำออฟฟิศ">🐕</div><div class="office-pet-sprite bird" title="จิ๊บจิ๊บ นกประจำออฟฟิศ">🦜</div>';
     $('officeSprites').innerHTML=people+petSprites;

@@ -9,7 +9,8 @@
     {id:'writer',name:'ไนท์',role:'นักเขียน',emoji:'👩🏻‍🎨',x:29,y:55,shirt:'#e58b9f',hair:'#33251f'},
     {id:'designer',name:'ตุงตวง',role:'นักออกแบบ',emoji:'🧑🏼‍🎨',x:45,y:66,shirt:'#e5b34c',hair:'#b27a3c'},
     {id:'analyst',name:'ข้าวผัด',role:'นักวิเคราะห์',emoji:'👨🏻‍💻',x:55,y:70,shirt:'#5e789a',hair:'#262b32'},
-    {id:'secretary',name:'ต้นกล้า',role:'เลขานุการ',emoji:'👩🏻‍💻',x:68,y:58,shirt:'#62a77b',hair:'#30231f'}
+    {id:'secretary',name:'ต้นกล้า',role:'เลขานุการ',emoji:'👩🏻‍💻',x:68,y:58,shirt:'#62a77b',hair:'#30231f'},
+    {id:'coordinator',name:'ภีม',role:'ประสานงาน',emoji:'🧑🏻‍💼',x:78,y:67,shirt:'#c47d62',hair:'#30231f'}
   ];
   const pets = [
     {id:'cat',name:'ข้าวตัง',kind:'แมว',emoji:'🐈',mood:'กำลังงีบ',hunger:68,joy:82},
@@ -32,7 +33,7 @@
     writer:['ว่างจัง... หรือจะให้ฉันเขียนแคปชันอีกดี?','ไอเดียมาแล้ว! ขอพิมพ์ก่อนลืม','CEO พิมพ์บรีฟมาได้เลย ฉันรออยู่'],
     designer:['ขอสีอีกนิด ทุกอย่างจะลงตัว!','ใครเอาฟอนต์ Comic Sans มาใส่ไฟล์ฉัน?!','โต๊ะฉันรกเพราะกำลังสร้างสรรค์ค่ะ'],
     analyst:['ตัวเลขไม่เคยโกหก... แต่คนชอบปัดเศษ','งานยังไม่มา ฉันเลยนั่งดูกราฟเล่น','CEO มีข้อมูลให้ฉันวิเคราะห์มั้ย?'],
-    secretary:['วันนี้มีอะไรต้องจดบ้างคะ?','CEO คะ งานค้างเริ่มมองแรงแล้วนะ','ฉันเตรียมตารางไว้แล้ว อย่าลืมเปิดดูนะ']
+    secretary:['วันนี้มีอะไรต้องจดบ้างคะ?','CEO คะ งานค้างเริ่มมองแรงแล้วนะ','ฉันเตรียมตารางไว้แล้ว อย่าลืมเปิดดูนะ'],coordinator:['ภีมพร้อมประสานงานครับ','ใครเห็นเอกสารประชุมบ้างครับ?','ขอรายชื่อคนเข้าร่วมอีกนิดครับ']
   };
   const safeText = value => String(value == null ? '' : value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function load(){
@@ -181,7 +182,7 @@
       const slacking=slackingAgentId===a.id&&!working;
       const line=(bubbleAgentId===a.id&&bubbleLine)?bubbleLine:lineFor(a);
       const positions=[
-        {x:37,y:41},{x:63,y:37},{x:25,y:58},{x:46,y:67},{x:56,y:73},{x:72,y:59},{x:78,y:68}
+        {x:37,y:41},{x:63,y:37},{x:25,y:58},{x:46,y:67},{x:56,y:73},{x:72,y:59},{x:78,y:68},{x:78,y:68}
       ];
       const pos=positions[i];
       const activityClass=working?'is-working':slacking?'is-slacking':'is-idle';
@@ -190,7 +191,7 @@
       }[a.id]:'';
       const bubble=bubbleAgentId===a.id&&bubbleLine?'<span class="office-mini-bubble">'+safeText(bubbleLine.text)+'</span>':'';
       const action=working?'<span class="office-work-prop">'+workProp+'</span>':slacking?'<span class="office-loaf-prop">💤</span>':'';
-      return '<button type="button" class="office-sprite '+activityClass+' role-'+a.id+'" data-agent-id="'+a.id+'" style="left:'+pos.x+'%;top:'+pos.y+'%" title="คุยกับ '+safeText(a.name)+'"><span class="office-expression">'+line.face+'</span>'+bubble+'<span class="office-avatar">'+pixelCharacter(a,line.face)+'</span>'+action+'<span class="office-name">'+a.name+'</span><span class="office-role-tag">'+({manager:'หัวหน้าทีม',researcher:'วิจัย',writer:'เขียน',designer:'ออกแบบ',analyst:'วิเคราะห์',secretary:'ธุรการ'}[a.id])+'</span></button>';
+      return '<button type="button" class="office-sprite '+activityClass+' role-'+a.id+'" data-agent-id="'+a.id+'" style="left:'+pos.x+'%;top:'+pos.y+'%" title="คุยกับ '+safeText(a.name)+'"><span class="office-expression">'+line.face+'</span>'+bubble+'<span class="office-avatar">'+pixelCharacter(a,line.face)+'</span>'+action+'<span class="office-name">'+a.name+'</span><span class="office-role-tag">'+({manager:'หัวหน้าทีม',researcher:'วิจัย',writer:'เขียน',designer:'ออกแบบ',analyst:'วิเคราะห์',secretary:'ธุรการ',coordinator:'ประสานงาน'}[a.id])+'</span></button>';
     }).join('');
     const petSprites='<div class="office-pet-sprite cat" title="มะลิ แมวประจำออฟฟิศ">🐈</div><div class="office-pet-sprite dog" title="โมจิ น้องหมาประจำออฟฟิศ">🐕</div><div class="office-pet-sprite bird" title="จิ๊บจิ๊บ นกประจำออฟฟิศ">🦜</div>';
     $('officeSprites').innerHTML=zoneLabels+people+petSprites;

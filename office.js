@@ -57,7 +57,8 @@
     $('officeTeamCount').textContent=String(agents.length).padStart(2,'0');
     $('officeAgents').innerHTML=agents.map(a=>{
       const working=statusOf(a.id)==='working';
-      return '<button type="button" class="office-agent" data-office-agent="'+a.id+'"><span class="office-agent-avatar">'+a.emoji+'</span><span class="office-agent-info"><strong>'+a.name+'</strong><small>'+a.role+'</small></span><span class="office-agent-status '+(working?'working':'')+'">'+(working?'กำลังทำงาน':'ว่าง')+'</span></button>';
+      const slacking=slackingAgentId===a.id&&!working;
+      return '<button type="button" class="office-agent" data-office-agent="'+a.id+'"><span class="office-agent-avatar">'+a.emoji+'</span><span class="office-agent-info"><strong>'+a.name+'</strong><small>'+a.role+'</small></span><span class="office-agent-status '+(working?'working':slacking?'slacking':'')+'">'+(working?'กำลังทำงาน':slacking?'แอบอู้':'ว่าง')+'</span></button>';
     }).join('');
     $('officeTaskAgent').innerHTML=agents.map(a=>'<option value="'+a.id+'">'+a.name+' — '+a.role+'</option>').join('');
   }
@@ -121,14 +122,14 @@
   function cycleLoafing(){
     const free=agents.filter(a=>statusOf(a.id)!=='working');
     if(!free.length){slackingAgentId=null;return;}
-    if(slackingAgentId){slackingAgentId=null;renderSprites();return;}
+    if(slackingAgentId){slackingAgentId=null;renderSprites();renderAgents();return;}
     if(Math.random()<0.72){
       const agent=free[Math.floor(Math.random()*free.length)];
       slackingAgentId=agent.id;
       bubbleAgentId=agent.id;
       bubbleLine=lineFor(agent);
       showDialogue(agent,bubbleLine);
-      renderSprites();
+      renderSprites();renderAgents();
     }
   }
   function pixelCharacter(a,face){

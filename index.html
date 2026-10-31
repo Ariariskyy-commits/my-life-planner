@@ -72,17 +72,19 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ===== พื้นหลังมีมิติ: ลาย grid + จุด halftone + แสงไล่สีนุ่ม ===== */
+        /* ===== พื้นหลัง: ตารางหมากรุกพาสเทล + จุดฮาล์ฟโทน + แสงสี (ตามโทนภาพอ้างอิง) ===== */
         body {
             min-height: 100vh;
-            background-color: var(--bg-color, #F9F9FB);
+            background-color: var(--bg-color, #FFF0F7);
             background-image:
-                radial-gradient(circle at 85% -5%, var(--glow-1, rgba(204,255,0,.22)) 0, transparent 38%),
-                radial-gradient(circle at -5% 105%, var(--glow-2, rgba(255,0,127,.14)) 0, transparent 42%),
-                radial-gradient(var(--dot-color, rgba(26,26,26,.09)) 1.2px, transparent 1.4px),
-                linear-gradient(var(--grid-color, rgba(26,26,26,.035)) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-color, rgba(26,26,26,.035)) 1px, transparent 1px);
-            background-size: auto, auto, 22px 22px, 44px 44px, 44px 44px;
+                radial-gradient(circle at 92% 6%, var(--glow-1, rgba(204,255,0,.35)) 0, transparent 26%),
+                radial-gradient(circle at 4% 96%, var(--glow-2, rgba(157,0,255,.18)) 0, transparent 30%),
+                radial-gradient(var(--dot-color, rgba(255,0,127,.18)) 1.6px, transparent 1.8px),
+                linear-gradient(45deg, var(--check-a, rgba(255,255,255,.55)) 25%, transparent 25%, transparent 75%, var(--check-a, rgba(255,255,255,.55)) 75%),
+                linear-gradient(45deg, var(--check-a, rgba(255,255,255,.55)) 25%, transparent 25%, transparent 75%, var(--check-a, rgba(255,255,255,.55)) 75%),
+                var(--check-b, #FFD6EC);
+            background-size: auto, auto, 18px 18px, 64px 64px, 64px 64px, auto;
+            background-position: 0 0, 0 0, 0 0, 0 0, 32px 32px, 0 0;
             background-attachment: fixed;
             color: var(--text-color, #1A1A1A);
             -webkit-font-smoothing: antialiased;
@@ -90,24 +92,24 @@
         }
 
         body.theme-y2k {
-            --bg-color: #F9F9FB; --card-bg: #FFFFFF; --text-color: #1A1A1A;
-            --glow-1: rgba(204,255,0,.26); --glow-2: rgba(0,85,255,.12);
-            --dot-color: rgba(0,85,255,.12); --grid-color: rgba(0,85,255,.05);
+            --bg-color: #FFF0F7; --card-bg: #FFFFFF; --text-color: #1A1A1A;
+            --check-a: rgba(255,255,255,.6); --check-b: #FFD0EA;
+            --dot-color: rgba(255,0,127,.22); --glow-1: rgba(204,255,0,.45); --glow-2: rgba(157,0,255,.2);
         }
         body.theme-pastel {
             --bg-color: #FFF0F5; --card-bg: #FFFFFF; --text-color: #4A4045;
-            --glow-1: rgba(255,221,0,.22); --glow-2: rgba(157,0,255,.10);
-            --dot-color: rgba(255,0,127,.12); --grid-color: rgba(255,0,127,.05);
+            --check-a: rgba(255,255,255,.7); --check-b: #FFE0F0;
+            --dot-color: rgba(255,0,127,.14); --glow-1: rgba(255,221,0,.35); --glow-2: rgba(0,85,255,.12);
         }
         body.theme-dark {
             --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0;
-            --glow-1: rgba(204,255,0,.10); --glow-2: rgba(0,85,255,.14);
-            --dot-color: rgba(255,255,255,.06); --grid-color: rgba(255,255,255,.035);
+            --check-a: rgba(255,255,255,.04); --check-b: #181818;
+            --dot-color: rgba(255,0,127,.12); --glow-1: rgba(204,255,0,.1); --glow-2: rgba(0,85,255,.12);
         }
         body.theme-minimal {
             --bg-color: #F4F4F0; --card-bg: #FFFFFF; --text-color: #2C2C2C;
-            --glow-1: rgba(0,0,0,.04); --glow-2: rgba(0,0,0,.03);
-            --dot-color: rgba(0,0,0,.06); --grid-color: rgba(0,0,0,.03);
+            --check-a: rgba(255,255,255,.6); --check-b: #ECECE6;
+            --dot-color: rgba(0,0,0,.05); --glow-1: rgba(0,0,0,.03); --glow-2: rgba(0,0,0,.02);
         }
 
         body.theme-dark .bg-white { background-color: var(--card-bg) !important; }
@@ -121,7 +123,7 @@
 
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #eee; }
-        ::-webkit-scrollbar-thumb { background: #0055FF; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #FF007F; border-radius: 4px; }
 
         .mood-btn-selected {
             border-color: #FF007F !important;
@@ -139,33 +141,33 @@
             transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, filter .2s ease;
         }
 
-        /* ===== การ์ดมีมิติ: เงาทึบแบบ neo-brutalist + เงาฟุ้งรอบนอก ===== */
+        /* ===== การ์ด: ขอบบน gradient แบบสติกเกอร์ + เงาแข็งสไตล์ Y2K ===== */
         .bg-white.rounded-2xl,
         .bg-white.rounded-xl {
+            position: relative;
             box-shadow:
-                0 3px 0 rgba(26,26,26,.12),
-                0 14px 28px -18px rgba(26,26,26,.32);
+                0 4px 0 rgba(26,26,26,.9),
+                0 16px 26px -18px rgba(157,0,255,.35);
         }
-        .bg-white.rounded-2xl {
-            border-width: 2px;
+        .bg-white.rounded-2xl::before {
+            content: "";
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            top: -5px;
+            height: 8px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #FF007F, #FFDD00, #CCFF00, #0055FF, #9D00FF);
+            border: 2px solid #1A1A1A;
+            pointer-events: none;
         }
-        .pet-title-card,
-        .pet-stats,
-        .pet-scene {
-            box-shadow:
-                0 4px 0 #1A1A1A,
-                0 18px 30px -20px rgba(26,26,26,.35) !important;
+        body.theme-dark .bg-white.rounded-2xl::before,
+        body.theme-minimal .bg-white.rounded-2xl::before {
+            opacity: .6;
         }
-
-        /* หัวข้อการ์ดมีเส้นคั่นบางให้ดูเป็นระเบียบ */
-        .pet-wrap > .bg-white > h3,
-        section > .bg-white > h3 {
-            letter-spacing: .01em;
-        }
-
         input:focus, select:focus, textarea:focus {
             outline: none;
-            box-shadow: 0 0 0 3px rgba(0,85,255,.18);
+            box-shadow: 0 0 0 3px rgba(255,0,127,.22);
         }
         .tab-content {
             animation: softFadeUp .35s ease both;
@@ -175,9 +177,17 @@
             to   { opacity: 1; transform: none; }
         }
 
-        /* ระยะห่างของแต่ละหน้าให้สม่ำเสมอ */
-        main section.tab-content { gap: 14px; }
-        main section.tab-content > * + * { margin-top: 0; }
+        /* หัวการ์ดสีสันแบบสติกเกอร์ */
+        .pet-title-card {
+            position: relative;
+            background: #FFFFFF;
+            border: 3px solid #1A1A1A;
+            border-radius: 18px;
+            padding: 12px 14px;
+            text-align: center;
+            box-shadow: 0 5px 0 #1A1A1A;
+            transform: rotate(-.4deg);
+        }
 
         .topbar {
             margin: 10px 12px 0;
@@ -404,14 +414,6 @@
             margin: 0 auto;
             width: 100%;
         }
-        .pet-title-card {
-            background: #FFFFFF;
-            border: 3px solid #1A1A1A;
-            border-radius: 18px;
-            padding: 12px 14px;
-            text-align: center;
-            box-shadow: 0 6px 14px -10px rgba(0,0,0,.35);
-        }
         .pet-scene {
             position: relative;
             width: 100%;
@@ -420,7 +422,7 @@
             border-radius: 20px;
             overflow: hidden;
             background: #FFF4B8;
-            box-shadow: 0 8px 22px -14px rgba(26,26,26,.28);
+            box-shadow: 0 6px 0 #1A1A1A;
         }
         .pet-scene > svg {
             position: absolute;
@@ -497,7 +499,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            box-shadow: 0 6px 14px -10px rgba(0,0,0,.35);
+            box-shadow: 0 5px 0 #1A1A1A;
         }
         .pet-stat-row {
             display: grid;
@@ -547,7 +549,7 @@
         }
         .pet-type-btn.pet-type-active {
             background: #FFDD00;
-            box-shadow: 0 0 0 3px rgba(0,85,255,.25);
+            box-shadow: 0 0 0 3px rgba(255,0,127,.3);
         }
         .pet-type-btn:hover { transform: translateY(-1px); }
 
@@ -555,7 +557,7 @@
 
         @media (max-width: 768px) {
             html[data-view] #appFrame { max-width: 100% !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; }
-            html[data-view] body { background-color: var(--bg-color, #F9F9FB) !important; }
+            html[data-view] body { background-color: var(--bg-color, #FFF0F7) !important; }
         }
         @media (max-width: 640px) {
             .topbar { margin: 6px 6px 0; border-radius: 18px; }

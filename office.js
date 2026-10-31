@@ -22,6 +22,10 @@
   let speechTimer = null;
   let dialogueIndex = 0;
   let currentDialogueAgent = 'manager';
+  let bubbleAgentId = null;
+  let bubbleLine = null;
+  let slackingAgentId = null;
+  let loafTimer = null;
   const speech = {
     manager:['CEO วันนี้มีงานอะไรให้ทีมลุยบ้างคะ?','ทุกคนพร้อมแล้วค่ะ... รอคำสั่งอยู่นะ','อย่าลืมพักบ้างนะ CEO งานไม่หนีไปไหนหรอกค่ะ'],
     researcher:['มีเรื่องให้ค้นอีกมั้ย? สมองกำลังแล่นเลย','ฉันเปิดแท็บไว้ 27 แท็บแล้วนะ...','ข้อมูลแน่นมาก ขอเวลาย่อยแป๊บ!'],
@@ -59,7 +63,30 @@
   }
   function lineFor(agent){
     const working=statusOf(agent.id)==='working';
-    if(working)return {text:['กำลังลุยงานอยู่! ขอสมาธิแป๊บนะ','รับทราบค่า CEO! กำลังจัดการให้','งานนี้ฉันเอาอยู่ ✨'][Math.floor(Math.random()*3)],mood:'ตั้งใจทำงาน',face:'🤓'};
+    if(working){
+      const workLines={
+        manager:['กำลังจัดคิวงานให้ทุกคนค่ะ','เช็กความคืบหน้าทีมอยู่ค่ะ'],
+        researcher:['กำลังค้นข้อมูลอยู่!','เจอข้อมูลน่าสนใจแล้ว'],
+        writer:['กำลังร่างข้อความให้อยู่นะ','ขอเกลาประโยคอีกนิด'],
+        designer:['กำลังจัดเลย์เอาต์อยู่','เลือกสีให้เข้ากันก่อนนะ'],
+        analyst:['กำลังเช็กตัวเลขอยู่','กำลังสรุปข้อมูลให้ CEO'],
+        secretary:['กำลังจัดตารางนัดหมาย','กำลังอัปเดตเช็กลิสต์ค่ะ']
+      };
+      const lines=workLines[agent.id]||['กำลังทำงานอยู่'];
+      return {text:lines[Math.floor(Math.random()*lines.length)],mood:'กำลังทำงาน',face:'🤓',activity:'working'};
+    }
+    if(slackingAgentId===agent.id){
+      const loaf={
+        manager:['ทีมเงียบจัง... ขอจิบกาแฟก่อนนะ','พักสายตาแป๊บ เดี๋ยวค่อยตามงาน'],
+        researcher:['เปิดอ่านเรื่องแมวเพลินไปหน่อย','ขอพักสมอง 5 นาทีได้มั้ย'],
+        writer:['นั่งมองหน้ากระดาษเปล่าอยู่...','ขอหาแรงบันดาลใจก่อนนะ'],
+        designer:['เลื่อนดู Pinterest แป๊บเดียวเอง','กำลังเลือกวอลเปเปอร์โต๊ะอยู่'],
+        analyst:['แอบเล่นเกมตัวเลขอยู่ครับ','ไม่มีข้อมูลให้วิเคราะห์ เลยว่างเลย'],
+        secretary:['แอบไถมือถือแป๊บนึงค่ะ','ขอเติมกาแฟก่อนนะ CEO']
+      };
+      const lines=loaf[agent.id]||['ขอพักแป๊บนึง'];
+      return {text:lines[Math.floor(Math.random()*lines.length)],mood:'แอบอู้',face:'😏',activity:'slacking'};
+    }
     const lines=speech[agent.id]||['มีงานอะไรให้ช่วยมั้ย?'];
     const text=lines[Math.floor(Math.random()*lines.length)];
     let mood='อารมณ์ดี',face='😊';
@@ -69,10 +96,10 @@
     if(/พักบ้าง|งีบ/.test(text)){mood='ง่วงนอน',face='😴';}
     return {text,mood,face};
   }
-  function showDialogue(agent){
+  function showDialogue(agent,providedLine){
     if(!agent)return;
     currentDialogueAgent=agent.id;
-    const line=lineFor(agent);
+    const line=providedLine||lineFor(agent);
     const avatar=$('officeDialogueAvatar'),name=$('officeDialogueName'),mood=$('officeDialogueMood'),text=$('officeDialogueText');
     if(avatar)avatar.textContent=agent.emoji;
     if(name)name.textContent=agent.name+' · '+agent.role;
@@ -83,9 +110,26 @@
 
   }
   function refreshDialogue(){
-    const agent=agents[dialogueIndex%agents.length];
+    const candidates=agents.filter(a=>statusOf(a.id)==='working'||slackingAgentId===a.id||true);
+    const agent=candidates[dialogueIndex%candidates.length];
     dialogueIndex++;
-    showDialogue(agent);
+    bubbleAgentId=agent.id;
+    bubbleLine=lineFor(agent);
+    showDialogue(agent,bubbleLine);
+    renderSprites();
+  }
+  function cycleLoafing(){
+    const free=agents.filter(a=>statusOf(a.id)!=='working');
+    if(!free.length){slackingAgentId=null;return;}
+    if(slackingAgentId){slackingAgentId=null;renderSprites();return;}
+    if(Math.random()<0.72){
+      const agent=free[Math.floor(Math.random()*free.length)];
+      slackingAgentId=agent.id;
+      bubbleAgentId=agent.id;
+      bubbleLine=lineFor(agent);
+      showDialogue(agent,bubbleLine);
+      renderSprites();
+    }
   }
   function pixelCharacter(a,face){
     const hair=a.hair||'#49332e',shirt=a.shirt||'#638bd8';
@@ -112,11 +156,19 @@
   function renderSprites(){
     const people=agents.map((a,i)=>{
       const working=statusOf(a.id)==='working';
-      const line=lineFor(a);
-      const pos=working?[
-        {x:39,y:40},{x:62,y:34},{x:29,y:55},{x:45,y:66},{x:55,y:70},{x:68,y:58}
-      ][i]:{x:a.x,y:a.y};
-      return '<button type="button" class="office-sprite '+(working?'is-working':'is-idle')+'" data-agent-id="'+a.id+'" style="left:'+pos.x+'%;top:'+pos.y+'%" title="คุยกับ '+safeText(a.name)+'"><span class="office-expression">'+line.face+'</span><span class="office-avatar">'+pixelCharacter(a,line.face)+'</span><span class="office-name">'+a.name+'</span></button>';
+      const slacking=slackingAgentId===a.id&&!working;
+      const line=(bubbleAgentId===a.id&&bubbleLine)?bubbleLine:lineFor(a);
+      const positions=[
+        {x:37,y:41},{x:63,y:37},{x:25,y:58},{x:46,y:67},{x:56,y:73},{x:72,y:59}
+      ];
+      const pos=positions[i];
+      const activityClass=working?'is-working':slacking?'is-slacking':'is-idle';
+      const workProp=working?{
+        manager:'📋',researcher:'🔎',writer:'⌨️',designer:'🎨',analyst:'📊',secretary:'🗂️'
+      }[a.id]:'';
+      const bubble=bubbleAgentId===a.id&&bubbleLine?'<span class="office-mini-bubble">'+safeText(bubbleLine.text)+'</span>':'';
+      const action=working?'<span class="office-work-prop">'+workProp+'</span>':slacking?'<span class="office-loaf-prop">💤</span>':'';
+      return '<button type="button" class="office-sprite '+activityClass+' role-'+a.id+'" data-agent-id="'+a.id+'" style="left:'+pos.x+'%;top:'+pos.y+'%" title="คุยกับ '+safeText(a.name)+'"><span class="office-expression">'+line.face+'</span>'+bubble+'<span class="office-avatar">'+pixelCharacter(a,line.face)+'</span>'+action+'<span class="office-name">'+a.name+'</span><span class="office-role-tag">'+({manager:'หัวหน้าทีม',researcher:'วิจัย',writer:'เขียน',designer:'ออกแบบ',analyst:'วิเคราะห์',secretary:'ธุรการ'}[a.id])+'</span></button>';
     }).join('');
     const petSprites='<div class="office-pet-sprite cat" title="มะลิ แมวประจำออฟฟิศ">🐈</div><div class="office-pet-sprite dog" title="โมจิ น้องหมาประจำออฟฟิศ">🐕</div><div class="office-pet-sprite bird" title="จิ๊บจิ๊บ นกประจำออฟฟิศ">🦜</div>';
     $('officeSprites').innerHTML=people+petSprites;
@@ -142,16 +194,18 @@
     const title=$('officeTaskTitle').value.trim();if(!title)return;
     const agentId=$('officeTaskAgent').value;
     data.tasks.push({id:'office_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),title,detail:$('officeTaskDetail').value.trim(),agent:agentId,status:'doing',created:Date.now()});
-    data.statuses[agentId]='working';save();render();$('officeTaskForm').reset();$('officeTaskTitle').focus();
+    data.statuses[agentId]='working';if(slackingAgentId===agentId)slackingAgentId=null;save();render();$('officeTaskForm').reset();$('officeTaskTitle').focus();
   }
   function completeTask(id){
     const task=data.tasks.find(t=>t.id===id);if(!task)return;
     task.status='done';
+    if(slackingAgentId===task.agent)slackingAgentId=null;
     if(!data.tasks.some(t=>t.agent===task.agent&&t.status==='doing'))data.statuses[task.agent]='idle';
     save();render();
   }
   function deleteTask(id){
     const task=data.tasks.find(t=>t.id===id);data.tasks=data.tasks.filter(t=>t.id!==id);
+    if(task&&slackingAgentId===task.agent)slackingAgentId=null;
     if(task&&!data.tasks.some(t=>t.agent===task.agent&&t.status==='doing'))data.statuses[task.agent]='idle';
     save();render();
   }
@@ -167,7 +221,9 @@
     initialized=true;load();render();
     if(speechTimer)clearInterval(speechTimer);
     showDialogue(agents[0]);
-    speechTimer=setInterval(refreshDialogue,5200);
+    speechTimer=setInterval(refreshDialogue,6200);
+    if(loafTimer)clearInterval(loafTimer);
+    loafTimer=setInterval(cycleLoafing,9000);
     $('officeTaskForm').addEventListener('submit',addTask);
     $('officeTaskList').addEventListener('click',e=>{
       const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]');

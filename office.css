@@ -515,3 +515,20 @@
  .tycoon-sprites .office-role-tag{font-size:5.5px;padding:1px 3px;}
  .office-zone{font-size:6px;padding:2px 3px;}
 }
+
+
+/* Role-specific work poses */
+.tycoon-sprites .role-manager.is-working .pixel-person-svg{animation:managerPlan .9s ease-in-out infinite!important;}
+.tycoon-sprites .role-researcher.is-working .pixel-person-svg{animation:researchRead 1.2s ease-in-out infinite!important;}
+.tycoon-sprites .role-writer.is-working .pixel-person-svg{animation:writerType .28s steps(2,end) infinite alternate!important;}
+.tycoon-sprites .role-designer.is-working .pixel-person-svg{animation:designerDraw .55s ease-in-out infinite alternate!important;}
+.tycoon-sprites .role-analyst.is-working .pixel-person-svg{animation:analystCalc .7s steps(2,end) infinite alternate!important;}
+.tycoon-sprites .role-secretary.is-working .pixel-person-svg{animation:secretaryFile .65s ease-in-out infinite alternate!important;}
+@keyframes managerPlan{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-3px) rotate(2deg)}}
+@keyframes researchRead{0%,100%{transform:rotate(0)}50%{transform:rotate(-5deg) translateY(-2px)}}
+@keyframes writerType{from{transform:translateY(0) rotate(-1deg)}to{transform:translateY(-2px) rotate(1deg)}}
+@keyframes designerDraw{from{transform:rotate(-3deg) translateY(0)}to{transform:rotate(3deg) translateY(-2px)}}
+@keyframes analystCalc{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+@keyframes secretaryFile{from{transform:translateX(-1px)}to{transform:translateX(1px) translateY(-2px)}}
+.office-agent-status.slacking{color:#b66b45;background:#fff0e4;border-radius:99px;padding:4px 7px;}
+.office-agent-status.working{color:#3f9368;}

@@ -1,0 +1,82 @@
+/* MY LIFE PLANNER — isolated virtual office styles */
+#tab-office { --office-ink:#293044; --office-blue:#8bc8ff; --office-pink:#ffd4e7; --office-lime:#d9f7a4; color:var(--office-ink); }
+.office-app { display:grid; gap:16px; }
+.office-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:20px 22px; background:linear-gradient(120deg,#fff 0%,#f4f8ff 55%,#fff0f7 100%); border:2px solid #293044; border-radius:22px; box-shadow:0 4px 0 #293044; }
+.office-kicker,.office-panel-title span,.office-scene-top span { display:block; color:#7b83a0; font-size:9px; font-weight:800; letter-spacing:.16em; }
+.office-heading h2 { margin:3px 0 0; font-size:clamp(22px,4vw,32px); font-weight:900; letter-spacing:-.04em; }
+.office-heading p { margin:4px 0 0; font-size:12px; color:#6c7286; }
+.office-live { flex:none; display:flex; align-items:center; gap:7px; padding:8px 11px; border:1px solid #c7e9cb; border-radius:99px; background:#f0fff1; color:#34764a; font-size:9px; font-weight:900; letter-spacing:.08em; }
+.office-live span { width:7px;height:7px;border-radius:50%;background:#42bf68;box-shadow:0 0 0 4px #42bf6822; }
+.office-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.office-stat { padding:12px 14px; border:1.5px solid #dce2ed; border-radius:16px; background:#fff; }
+.office-stat small { display:block; color:#8790a4; font-size:10px; font-weight:700; }
+.office-stat strong { display:block; margin-top:2px; font-size:22px; font-weight:900; }
+.office-layout { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(270px,.9fr); gap:14px; align-items:start; }
+.office-scene-card,.office-panel { min-width:0; overflow:hidden; border:1.5px solid #dce2ed; border-radius:19px; background:#fff; box-shadow:0 5px 18px #26324a0b; }
+.office-scene-top { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:13px 15px; }
+.office-scene-top strong { font-size:11px; letter-spacing:.12em; }
+.office-scene { position:relative; isolation:isolate; min-height:390px; overflow:hidden; background:linear-gradient(145deg,#b9e5ff,#eaf7ff 55%,#d8efff); }
+.office-sky { position:absolute; inset:0; opacity:.5; background:radial-gradient(ellipse at 20% 15%,#fff 0 5%,transparent 18%),radial-gradient(ellipse at 75% 8%,#fff 0 4%,transparent 16%); }
+.office-floor { position:absolute; width:76%; height:66%; left:12%; top:19%; transform:rotate(30deg) skewX(-30deg) scaleY(.86); background-color:#eacb9f; background-image:linear-gradient(#d7b88f66 1px,transparent 1px),linear-gradient(90deg,#d7b88f66 1px,transparent 1px);background-size:28px 28px; border:5px solid #fff4dd; box-shadow:0 15px 0 #8ab6d5; }
+.office-rug { position:absolute; width:27%;height:18%;left:37%;top:57%;transform:rotate(30deg) skewX(-30deg);background:#b9d7ee;border:3px solid #fff;border-radius:8px; }
+.office-window { position:absolute;left:14%;top:11%;width:23%;height:19%;background:#b7e7ff;border:5px solid #fff;box-shadow:0 4px 0 #7d9eb9;display:flex;gap:4px;padding:5px; }
+.office-window i { flex:1;background:linear-gradient(150deg,#fff8 0 30%,#8dcfff 31%);border-right:2px solid #fff; }
+.office-shelf { position:absolute;right:12%;top:24%;padding:8px 10px;background:#b9825d;border:3px solid #80573e;border-radius:5px;box-shadow:0 5px 0 #714d3a;font-size:19px;line-height:1.1;z-index:2; }
+.office-plant { position:absolute;z-index:3;font-size:25px;filter:drop-shadow(0 3px 1px #4252); }
+.plant-a {left:16%;top:59%;}.plant-b {right:12%;top:62%;}
+.office-desk { position:absolute;z-index:3;width:22%;height:12%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;background:#c88d68;border:3px solid #8b6048;box-shadow:0 7px 0 #986a4e;border-radius:5px;transform:skewY(-24deg); }
+.office-desk span {font-size:24px;line-height:1.1;transform:skewY(24deg);}
+.office-desk small {font-size:7px;font-weight:900;letter-spacing:.1em;color:#fff;transform:skewY(24deg);}
+.desk-a {left:24%;top:44%;}.desk-b {left:51%;top:37%;}.desk-c {left:43%;top:67%;}
+.office-sofa {position:absolute;z-index:3;left:12%;top:35%;font-size:34px;filter:drop-shadow(0 4px 0 #8d7180);}
+.office-coffee {position:absolute;z-index:4;right:20%;top:69%;font-size:23px;}
+.office-sprites {position:absolute;inset:0;z-index:5;pointer-events:none;}
+.office-sprite {position:absolute;width:50px;display:flex;align-items:center;flex-direction:column;gap:1px;transition:left 1.8s cubic-bezier(.2,.75,.2,1),top 1.8s cubic-bezier(.2,.75,.2,1);filter:drop-shadow(0 3px 1px #24354a33);}
+.office-sprite .office-avatar {font-size:29px;line-height:1.15;image-rendering:pixelated;}
+.office-sprite .office-name {max-width:70px;padding:2px 5px;border-radius:5px;background:#fff;border:1px solid #d8deea;color:#424b61;font-size:8px;font-weight:900;white-space:nowrap;}
+.office-sprite.is-working .office-avatar {animation:officeType .45s steps(2,end) infinite alternate;}
+.office-sprite.is-walking .office-avatar {animation:officeWalk .22s steps(2,end) infinite alternate;}
+@keyframes officeType {from{transform:translateY(0)}to{transform:translateY(-3px)}}
+@keyframes officeWalk {from{transform:translateX(-2px) rotate(-5deg)}to{transform:translateX(2px) rotate(5deg)}}
+.office-scene-caption {position:absolute;left:10px;bottom:8px;z-index:6;color:#53728b;font-size:8px;font-weight:900;letter-spacing:.12em;}
+.office-legend {display:flex;gap:14px;flex-wrap:wrap;padding:11px 14px;color:#70788c;font-size:10px;font-weight:700;}
+.office-legend span {display:flex;align-items:center;gap:6px;}
+.office-legend i {width:7px;height:7px;border-radius:50%;background:#aab2c1;}
+.office-legend i.working {background:#58bb7a;}.office-legend i.done {background:#8c83df;}
+.office-side {display:grid;gap:14px;}
+.office-panel {padding:14px;}
+.office-panel-title {display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;}
+.office-panel-title h3 {margin:2px 0 0;font-size:15px;font-weight:900;}
+.office-panel-title>b {display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:#edf5ff;color:#4c76a9;font-size:12px;}
+.office-agents {display:grid;gap:7px;}
+.office-agent {display:flex;align-items:center;gap:9px;width:100%;padding:8px;border:1px solid #edf0f5;border-radius:12px;background:#fbfcff;text-align:left;color:#343b50;}
+.office-agent:focus-visible,.office-agent:hover {outline:2px solid #b7d9ff;background:#f4f9ff;}
+.office-agent-avatar {display:grid;place-items:center;flex:none;width:35px;height:35px;border-radius:10px;background:#f0edff;font-size:21px;}
+.office-agent-info {min-width:0;flex:1;}
+.office-agent-info strong {display:block;font-size:11px;}
+.office-agent-info small {display:block;color:#9299aa;font-size:9px;}
+.office-agent-status {font-size:8px;font-weight:900;color:#8a91a1;white-space:nowrap;}
+.office-agent-status.working {color:#32965b;}
+.office-task-form {display:grid;gap:7px;}
+.office-task-form label {margin-top:3px;color:#737d92;font-size:10px;font-weight:800;}
+.office-task-form input,.office-task-form textarea,.office-task-form select {width:100%;min-width:0;padding:9px 10px;border:1px solid #dce2ed;border-radius:10px;background:#fbfcff;color:#30384d;font:inherit;font-size:11px;outline:none;}
+.office-task-form input:focus,.office-task-form textarea:focus,.office-task-form select:focus {border-color:#86bfff;box-shadow:0 0 0 3px #86bfff2b;}
+.office-primary-btn {display:flex;align-items:center;justify-content:center;gap:8px;margin-top:5px;padding:10px;border:0;border-radius:11px;background:#4c79d8;color:#fff;font-size:11px;font-weight:900;box-shadow:0 3px 0 #31569f;}
+.office-demo-note {margin:11px 0 0;color:#8b7893;font-size:9px;line-height:1.55;}
+.office-demo-note i {margin-right:4px;}
+.office-queue {padding:15px;}
+.office-local-tag {padding:5px 8px;border-radius:99px;background:#f2f4f8;color:#7f8799;font-size:8px;font-weight:800;}
+.office-task-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+.office-task {padding:11px;border:1px solid #e6eaf1;border-radius:13px;background:#fcfdff;min-width:0;}
+.office-task-head {display:flex;justify-content:space-between;gap:8px;align-items:flex-start;}
+.office-task h4 {margin:0;font-size:11px;font-weight:900;overflow-wrap:anywhere;}
+.office-task p {margin:6px 0;color:#858da0;font-size:9px;white-space:pre-wrap;overflow-wrap:anywhere;}
+.office-task-meta {display:flex;justify-content:space-between;align-items:center;gap:8px;color:#8790a2;font-size:9px;}
+.office-task-state {padding:3px 6px;border-radius:99px;background:#fff2d8;color:#9b7022;font-size:8px;font-weight:900;white-space:nowrap;}
+.office-task-state.done {background:#e8f8ec;color:#39824f;}
+.office-task-actions {display:flex;gap:6px;margin-top:9px;}
+.office-task-actions button {padding:5px 8px;border:1px solid #dce2ed;border-radius:8px;background:#fff;color:#59647b;font-size:9px;font-weight:800;}
+.office-empty {grid-column:1/-1;padding:22px;text-align:center;color:#a0a7b6;font-size:10px;}
+@media(max-width:850px){.office-layout{grid-template-columns:1fr}.office-side{grid-template-columns:repeat(2,minmax(0,1fr))}.office-scene{min-height:360px}}
+@media(max-width:560px){.office-heading{align-items:flex-start;padding:15px}.office-live{font-size:8px;padding:6px 8px}.office-stats{gap:6px}.office-stat{padding:9px}.office-stat strong{font-size:18px}.office-side{grid-template-columns:1fr}.office-scene{min-height:300px}.office-floor{width:86%;left:7%;}.office-task-list{grid-template-columns:1fr}.office-scene-top span{font-size:7px}}
+@media(prefers-reduced-motion:reduce){.office-sprite,.office-sprite .office-avatar{transition:none!important;animation:none!important}}

@@ -20,6 +20,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 
+    <link rel="stylesheet" href="office.css">
+
     <!-- Firebase SDK (pinned) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -906,6 +908,10 @@
                     <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-hotPink text-xs"></i> ปฏิทิน</span>
                     <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
                 </button>
+                <button onclick="switchTab('office')" id="nav-office" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-building text-retroPurple text-xs"></i> AI Office</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
+                </button>
                 <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
                     <span class="flex items-center gap-1.5"><i class="fa-solid fa-calculator text-popBlue text-xs"></i> คำนวณ</span>
                     <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
@@ -1384,7 +1390,29 @@
                 </div>
             </div>
         </section>
-    </main>
+    
+        <!-- AI VIRTUAL OFFICE: isolated module -->
+        <section id="tab-office" class="tab-content hidden space-y-4">
+          <div id="officeApp" class="office-app">
+            <header class="office-heading"><div><span class="office-kicker">MY LIFE PLANNER · WORKSPACE</span><h2>My Little Office</h2><p>ออฟฟิศจิ๋วของ CEO — จัดทีมและมอบหมายงานได้ในที่เดียว</p></div><div class="office-live"><span></span> OFFICE OPEN</div></header>
+            <div class="office-stats" id="officeStats"></div>
+            <div class="office-layout">
+              <div class="office-scene-card"><div class="office-scene-top"><strong>THE OFFICE</strong><span>ISOMETRIC ROOM · LIVE SIMULATION</span></div>
+                <div class="office-scene" id="officeScene" aria-label="ออฟฟิศจำลอง"><div class="office-sky"></div><div class="office-floor"></div><div class="office-rug"></div><div class="office-window"><i></i><i></i><i></i></div><div class="office-shelf">📚<br>📚<br>📚</div><div class="office-plant plant-a">🪴</div><div class="office-plant plant-b">🌴</div><div class="office-desk desk-a"><span>💻</span><small>DESIGN</small></div><div class="office-desk desk-b"><span>🖥️</span><small>RESEARCH</small></div><div class="office-desk desk-c"><span>💻</span><small>STUDIO</small></div><div class="office-sofa">🛋️</div><div class="office-coffee">☕</div><div id="officeSprites" class="office-sprites"></div><div class="office-scene-caption">A LITTLE SPACE TO MAKE BIG THINGS ✦</div></div>
+                <div class="office-legend"><span><i class="working"></i> กำลังทำงาน</span><span><i class="idle"></i> ว่าง</span><span><i class="done"></i> เสร็จแล้ว</span></div>
+              </div>
+              <aside class="office-side">
+                <div class="office-panel"><div class="office-panel-title"><div><span>YOUR TEAM</span><h3>พนักงานของฉัน</h3></div><b id="officeTeamCount">06</b></div><div id="officeAgents" class="office-agents"></div></div>
+                <div class="office-panel office-task-panel"><div class="office-panel-title"><div><span>CEO DESK</span><h3>มอบหมายงานใหม่</h3></div>✎</div>
+                  <form id="officeTaskForm" class="office-task-form"><label for="officeTaskTitle">ชื่องาน</label><input id="officeTaskTitle" maxlength="120" required placeholder="เช่น วางแผนคอนเทนต์ประจำสัปดาห์"><label for="officeTaskDetail">รายละเอียดงาน</label><textarea id="officeTaskDetail" rows="3" maxlength="1000" placeholder="อธิบายสิ่งที่ต้องการให้ทีมทำ..."></textarea><label for="officeTaskAgent">มอบหมายให้</label><select id="officeTaskAgent"></select><button type="submit" class="office-primary-btn"><i class="fa-solid fa-paper-plane"></i> มอบหมายงาน</button></form>
+                  <p class="office-demo-note"><i class="fa-solid fa-circle-info"></i> ขณะนี้เป็นระบบจำลองการมอบหมายงาน ยังไม่เรียก AI API จริง</p>
+                </div>
+              </aside>
+            </div>
+            <div class="office-panel office-queue"><div class="office-panel-title"><div><span>WORKFLOW</span><h3>กระดานงานของออฟฟิศ</h3></div><span class="office-local-tag">บันทึกในอุปกรณ์นี้</span></div><div id="officeTaskList" class="office-task-list"></div></div>
+          </div>
+        </section>
+</main>
 
     <footer class="bg-darkText text-white py-4 px-3 mt-auto border-t-2 border-darkText text-center text-xs w-full shrink-0">
         <p>✨ Y2K Playful Life Planner 🚀</p>
@@ -2727,5 +2755,6 @@
             window.addEventListener('blur', release);
         })();
     </script>
+    <script src="office.js"></script>
 </body>
 </html>

@@ -669,3 +669,10 @@
   border:1px solid #d9d5fb;
 }
 .office-deliverable-preview b{color:#49418f}
+
+
+/* v23 — persistent save confirmation */
+.office-work-saved{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:2px;padding:7px 9px;border-radius:8px;background:#e8f7ef;border:1px solid #b9e5cc}
+.office-work-saved span{font-size:10px;font-weight:900;color:#24784a}
+.office-work-saved small{font-size:9px;color:#52866a}
+.office-deliverable-entry button:active{transform:translateY(1px)}

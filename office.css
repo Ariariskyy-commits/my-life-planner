@@ -357,3 +357,21 @@
  .tycoon-sprites .office-name{font-size:8px;padding:2px 4px;}
  .office-pet-sprite{font-size:22px;}
 }
+
+/* final game-sprite alignment */
+.tycoon-sprites .office-sprite{
+  transform:translate(-50%,-78%);
+  margin:0;padding:0;border:0;background:transparent;appearance:none;
+  min-height:0;line-height:1;outline-offset:3px;
+}
+.tycoon-sprites .office-sprite:focus-visible{outline:3px solid #ffe47a;}
+.tycoon-sprites .office-avatar{width:100%;display:block;}
+.tycoon-sprites .pixel-person{transform-origin:50% 100%;}
+.tycoon-sprites .office-sprite.is-working .pixel-person{animation:pixelWork .42s steps(2,end) infinite alternate;}
+.tycoon-sprites .office-sprite.is-idle .pixel-person{animation:pixelIdle 2.4s ease-in-out infinite;}
+.tycoon-sprites .office-name{position:relative;margin-top:-1px;}
+.tycoon-map{preserveAspectRatio:none;}
+@media(max-width:560px){
+ .tycoon-sprites .office-sprite{transform:translate(-50%,-78%);}
+ .tycoon-sprites .pixel-person{transform:scale(.86);transform-origin:50% 100%;}
+}

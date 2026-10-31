@@ -217,9 +217,39 @@
   function addTask(event){
     event.preventDefault();
     const title=$('officeTaskTitle').value.trim();if(!title)return;
+    const detail=$('officeTaskDetail').value.trim();
     const agentId=$('officeTaskAgent').value;
-    data.tasks.push({id:'office_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),title,detail:$('officeTaskDetail').value.trim(),agent:agentId,status:'doing',created:Date.now()});
-    data.statuses[agentId]='working';if(slackingAgentId===agentId)slackingAgentId=null;data.morale[agentId]=Math.min(100,moraleOf(agentId)+2);save();render();$('officeTaskForm').reset();$('officeTaskTitle').focus();
+    const now=Date.now();
+    const makeId=()=> 'office_'+now+'_'+Math.random().toString(36).slice(2,7);
+    const parentId=makeId();
+    data.tasks.push({id:parentId,title,detail,agent:agentId,status:'doing',created:now});
+    data.statuses[agentId]='working';
+    if(slackingAgentId===agentId)slackingAgentId=null;
+    data.morale[agentId]=Math.min(100,moraleOf(agentId)+2);
+
+    // Rule-based team delegation: create individual task cards only for employees
+    // explicitly named in the CEO's instruction. This is a local simulation, not AI.
+    const delegationRequested=agentId==='manager'&&/แบ่งงาน|มอบหมายงาน|กระจายงาน/.test(title+' '+detail);
+    const namedAgents=delegationRequested?agents.filter(a=>a.id!=='manager'&&(title+' '+detail).includes(a.name)):[];
+    const duties={
+      researcher:'ค้นคว้าข้อมูลตลาด กลุ่มเป้าหมาย และตัวอย่างที่เกี่ยวข้อง พร้อมสรุปข้อค้นพบ',
+      writer:'จัดทำข้อความเปิดตัว คำโปรย และเนื้อหาประชาสัมพันธ์ให้เหมาะกับกลุ่มเป้าหมาย',
+      designer:'กำหนดแนวทางภาพ Mood & Tone สี ฟอนต์ และออกแบบสื่อประชาสัมพันธ์',
+      analyst:'วิเคราะห์งบประมาณ ตัวชี้วัด และผลลัพธ์ที่ต้องติดตาม',
+      secretary:'รวบรวมข้อมูล จัดทำเอกสาร และบันทึกกำหนดส่งของโครงการ',
+      coordinator:'ประสานงานผู้เกี่ยวข้อง ติดตามความคืบหน้า และรวบรวมสถานะจากทุกฝ่าย'
+    };
+    namedAgents.forEach((a,index)=>{
+      const subTitle='งานย่อย: '+a.name+' — '+(title||'ดำเนินงานตามโครงการ');
+      const subDetail=(duties[a.id]||('ดำเนินงานในส่วน '+a.role+' ตามโครงการ'))+'\n\nงานหลัก: '+title;
+      data.tasks.push({id:makeId(),title:subTitle,detail:subDetail,agent:a.id,status:'doing',created:now+index+1,parentId});
+      data.statuses[a.id]='working';
+      if(slackingAgentId===a.id)slackingAgentId=null;
+      data.morale[a.id]=Math.min(100,moraleOf(a.id)+2);
+    });
+    save();render();
+    if(namedAgents.length)showToast('ขุนพลแบ่งงานย่อยให้ '+namedAgents.map(a=>a.name).join(' · ')+' เรียบร้อยค่ะ');
+    $('officeTaskForm').reset();$('officeTaskTitle').focus();
   }
   function completeTask(id){
     const task=data.tasks.find(t=>t.id===id);if(!task)return;

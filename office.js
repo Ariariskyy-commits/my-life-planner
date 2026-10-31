@@ -4,12 +4,12 @@
   'use strict';
   const KEY = 'myLifePlanner_virtualOffice_v1';
   const agents = [
-    {id:'manager',name:'Mika',role:'ผู้จัดการ',emoji:'👩🏻‍💼',x:54,y:44},
-    {id:'researcher',name:'Nori',role:'นักค้นคว้า',emoji:'🧑🏻‍🔬',x:67,y:50},
-    {id:'writer',name:'Momo',role:'นักเขียน',emoji:'👩🏻‍🎨',x:29,y:52},
-    {id:'designer',name:'Kiki',role:'นักออกแบบ',emoji:'🧑🏼‍🎨',x:38,y:61},
-    {id:'analyst',name:'Theo',role:'นักวิเคราะห์',emoji:'👨🏻‍💻',x:48,y:76},
-    {id:'secretary',name:'Pim',role:'เลขานุการ',emoji:'👩🏻‍💻',x:60,y:78}
+    {id:'manager',name:'Mika',role:'ผู้จัดการ',emoji:'👩🏻‍💼',x:38,y:39,shirt:'#7558a8',hair:'#49332e'},
+    {id:'researcher',name:'Nori',role:'นักค้นคว้า',emoji:'🧑🏻‍🔬',x:62,y:34,shirt:'#4f91c7',hair:'#382b27'},
+    {id:'writer',name:'Momo',role:'นักเขียน',emoji:'👩🏻‍🎨',x:29,y:55,shirt:'#e58b9f',hair:'#33251f'},
+    {id:'designer',name:'Kiki',role:'นักออกแบบ',emoji:'🧑🏼‍🎨',x:45,y:66,shirt:'#e5b34c',hair:'#b27a3c'},
+    {id:'analyst',name:'Theo',role:'นักวิเคราะห์',emoji:'👨🏻‍💻',x:55,y:70,shirt:'#5e789a',hair:'#262b32'},
+    {id:'secretary',name:'Pim',role:'เลขานุการ',emoji:'👩🏻‍💻',x:68,y:58,shirt:'#62a77b',hair:'#30231f'}
   ];
   const pets = [
     {id:'cat',name:'มะลิ',kind:'แมว',emoji:'🐈',mood:'กำลังงีบ',hunger:68,joy:82},
@@ -91,8 +91,11 @@
     const people=agents.map((a,i)=>{
       const working=statusOf(a.id)==='working';
       const line=lineFor(a);
-      const pos=working?[{x:54,y:44},{x:67,y:50},{x:29,y:54},{x:38,y:62},{x:48,y:76},{x:60,y:78}][i]:{x:a.x,y:a.y};
-      return '<div class="office-sprite '+(working?'is-working':'is-idle')+'" data-agent-id="'+a.id+'" style="left:calc('+pos.x+'% - 34px);top:calc('+pos.y+'% - 34px)" title="'+safeText(a.name+' · '+a.role)+'"><span class="office-expression">'+line.face+'</span><span class="office-avatar">'+a.emoji+'</span><span class="office-name">'+a.name+(working?' · ทำงาน':'')+'</span></div>';
+      const pos=working?[
+        {x:39,y:40},{x:62,y:34},{x:29,y:55},{x:45,y:66},{x:55,y:70},{x:68,y:58}
+      ][i]:{x:a.x,y:a.y};
+      const pixel='<span class="pixel-person" style="--shirt:'+a.shirt+';--hair:'+a.hair+'"><i class="hair"></i><i class="face"></i><i class="body"></i><i class="arm left"></i><i class="arm right"></i><i class="legs"></i></span>';
+      return '<button type="button" class="office-sprite '+(working?'is-working':'is-idle')+'" data-agent-id="'+a.id+'" style="left:'+pos.x+'%;top:'+pos.y+'%" title="คุยกับ '+safeText(a.name)+'"><span class="office-expression">'+line.face+'</span><span class="office-avatar">'+pixel+'</span><span class="office-name">'+a.name+'</span></button>';
     }).join('');
     const petSprites='<div class="office-pet-sprite cat" title="มะลิ แมวประจำออฟฟิศ">🐈</div><div class="office-pet-sprite dog" title="โมจิ น้องหมาประจำออฟฟิศ">🐕</div><div class="office-pet-sprite bird" title="จิ๊บจิ๊บ นกประจำออฟฟิศ">🦜</div>';
     $('officeSprites').innerHTML=people+petSprites;
@@ -152,6 +155,10 @@
     });
     $('officeAgents').addEventListener('click',e=>{
       const btn=e.target.closest('[data-office-agent]');if(btn){const id=btn.getAttribute('data-office-agent');$('officeTaskAgent').value=id;showDialogue(agents.find(a=>a.id===id));}
+    });
+    $('officeSprites').addEventListener('click',e=>{
+      const btn=e.target.closest('[data-agent-id]');
+      if(btn){const id=btn.getAttribute('data-agent-id');showDialogue(agents.find(a=>a.id===id));}
     });
     $('officePets').addEventListener('click',e=>{
       const btn=e.target.closest('[data-pet-action]');if(btn)petAction(btn.getAttribute('data-pet'),btn.getAttribute('data-pet-action'));

@@ -154,6 +154,7 @@
       '</svg>';
   }
   function renderSprites(){
+    const zoneLabels='<span class="office-zone manager">บริหารทีม</span><span class="office-zone researcher">วิจัย</span><span class="office-zone writer">เขียนคอนเทนต์</span><span class="office-zone designer">ออกแบบ</span><span class="office-zone analyst">วิเคราะห์</span><span class="office-zone secretary">ธุรการ</span>';
     const people=agents.map((a,i)=>{
       const working=statusOf(a.id)==='working';
       const slacking=slackingAgentId===a.id&&!working;
@@ -171,7 +172,7 @@
       return '<button type="button" class="office-sprite '+activityClass+' role-'+a.id+'" data-agent-id="'+a.id+'" style="left:'+pos.x+'%;top:'+pos.y+'%" title="คุยกับ '+safeText(a.name)+'"><span class="office-expression">'+line.face+'</span>'+bubble+'<span class="office-avatar">'+pixelCharacter(a,line.face)+'</span>'+action+'<span class="office-name">'+a.name+'</span><span class="office-role-tag">'+({manager:'หัวหน้าทีม',researcher:'วิจัย',writer:'เขียน',designer:'ออกแบบ',analyst:'วิเคราะห์',secretary:'ธุรการ'}[a.id])+'</span></button>';
     }).join('');
     const petSprites='<div class="office-pet-sprite cat" title="มะลิ แมวประจำออฟฟิศ">🐈</div><div class="office-pet-sprite dog" title="โมจิ น้องหมาประจำออฟฟิศ">🐕</div><div class="office-pet-sprite bird" title="จิ๊บจิ๊บ นกประจำออฟฟิศ">🦜</div>';
-    $('officeSprites').innerHTML=people+petSprites;
+    $('officeSprites').innerHTML=zoneLabels+people+petSprites;
   }
   function renderPets(){
     const host=$('officePets'); if(!host)return;

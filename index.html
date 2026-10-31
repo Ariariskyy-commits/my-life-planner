@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 
-    <link rel="stylesheet" href="office.css?v=8">
+    <link rel="stylesheet" href="office.css?v=9">
 
     <!-- Firebase SDK (pinned) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -1399,7 +1399,10 @@
             <div class="office-stats" id="officeStats"></div>
             <div class="office-layout">
               <div class="office-scene-card"><div class="office-scene-top"><strong>ออฟฟิศของเรา</strong><span>ออฟฟิศมีชีวิต · พนักงานและสัตว์เลี้ยง</span></div>
-                <div class="office-scene" id="officeScene" aria-label="ออฟฟิศจำลอง"><div class="office-sky"></div><div class="office-floor"></div><div class="office-rug"></div><div class="office-window"><i></i><i></i><i></i></div><div class="office-shelf">📚<br>📚<br>📚</div><div class="office-plant plant-a">🪴</div><div class="office-plant plant-b">🌴</div><div class="office-desk desk-a"><span>💻</span><small>DESIGN</small></div><div class="office-desk desk-b"><span>🖥️</span><small>RESEARCH</small></div><div class="office-desk desk-c"><span>💻</span><small>STUDIO</small></div><div class="office-sofa">🛋️</div><div class="office-coffee">☕</div><div id="officeSprites" class="office-sprites"></div><div class="office-scene-caption">พื้นที่เล็ก ๆ สำหรับไอเดียใหญ่ ๆ ✦</div></div>
+                <div class="office-scene tycoon-scene" id="officeScene" aria-label="ออฟฟิศจำลองสไตล์เกมบริหาร">
+                  <div id="officeSprites" class="office-sprites tycoon-sprites"></div>
+                  <div class="office-scene-caption">MY LITTLE OFFICE · บริษัทของ CEO</div>
+                </div>
                 <div class="office-dialogue" id="officeDialogue" aria-live="polite" style="display:flex!important;align-items:center;gap:12px;margin:12px 13px 4px;padding:12px 14px;border:1.5px solid #dce3f0;border-radius:17px;background:linear-gradient(110deg,#fff,#f7f8ff 58%,#fff4fa);box-shadow:0 5px 0 #e6e9f2,0 9px 16px #34455a0d;min-height:86px;position:relative;z-index:20;"><div class="office-dialogue-avatar" id="officeDialogueAvatar" style="display:grid;place-items:center;flex:none;width:48px;height:48px;border-radius:15px;background:#eeeaff;font-size:28px;">👩🏻‍💼</div><div class="office-dialogue-copy" style="min-width:0;flex:1;"><div class="office-dialogue-meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><strong id="officeDialogueName" style="font-size:12px;color:#333d55;">Mika · ผู้จัดการ</strong><span id="officeDialogueMood" style="font-size:10px;color:#8b6b4e;background:#fff0ce;border-radius:99px;padding:3px 7px;font-weight:800;">😊 อารมณ์ดี</span></div><p id="officeDialogueText" style="margin:5px 0 0;font-size:13px!important;line-height:1.45;font-weight:800;color:#46516a;">CEO วันนี้มีงานอะไรให้ทีมลุยบ้างคะ?</p></div><span class="office-dialogue-live" style="flex:none;padding:4px 7px;border-radius:99px;background:#eaf9ef;color:#43845a;font-size:8px;font-weight:900;">กำลังคุย</span></div><div class="office-legend"><span><i class="working"></i> กำลังทำงาน</span><span><i class="idle"></i> ว่าง</span><span><i class="done"></i> เสร็จแล้ว</span></div>
               </div>
               <aside class="office-side">
@@ -2757,6 +2760,6 @@
             window.addEventListener('blur', release);
         })();
     </script>
-    <script src="office.js?v=8"></script>
+    <script src="office.js?v=9"></script>
 </body>
 </html>

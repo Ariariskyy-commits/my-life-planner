@@ -532,3 +532,17 @@
 @keyframes secretaryFile{from{transform:translateX(-1px)}to{transform:translateX(1px) translateY(-2px)}}
 .office-agent-status.slacking{color:#b66b45;background:#fff0e4;border-radius:99px;padding:4px 7px;}
 .office-agent-status.working{color:#3f9368;}
+
+/* CEO command center and staff morale */
+.office-ceo-panel{background:linear-gradient(145deg,#fff,#f5f7ff 65%,#fff3f7);}
+.office-command-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px;}
+.office-command-bar button{min-height:54px;padding:8px 5px;border:1.5px solid #dce4f2;border-radius:12px;background:#fff;color:#48536d;font-size:11px;font-weight:900;box-shadow:0 3px 0 #e7eaf3;cursor:pointer;}
+.office-command-bar button:active{transform:translateY(2px);box-shadow:0 1px 0 #e7eaf3;}
+.office-command-hint{margin:9px 0 0;color:#9299aa;font-size:10px;line-height:1.4;}
+.office-toast{display:none;margin-top:9px;padding:8px 10px;border-radius:10px;background:#eaf8ef;color:#3e8059;font-size:11px;font-weight:800;}
+.office-toast.show{display:block;animation:miniBubbleIn .2s ease-out;}
+.office-agent-info{min-width:0;flex:1;}
+.office-morale{display:block;width:100%;height:5px;margin-top:5px;border-radius:99px;background:#e9edf5;overflow:hidden;}
+.office-morale i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#f3bd66,#8bc99a);transition:width .3s ease;}
+.office-agent-status{white-space:nowrap;}
+@media(max-width:560px){.office-command-bar button{font-size:9px;min-height:48px;padding:6px 2px;}}

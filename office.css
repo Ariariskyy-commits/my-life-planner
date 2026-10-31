@@ -80,3 +80,43 @@
 @media(max-width:850px){.office-layout{grid-template-columns:1fr}.office-side{grid-template-columns:repeat(2,minmax(0,1fr))}.office-scene{min-height:360px}}
 @media(max-width:560px){.office-heading{align-items:flex-start;padding:15px}.office-live{font-size:8px;padding:6px 8px}.office-stats{gap:6px}.office-stat{padding:9px}.office-stat strong{font-size:18px}.office-side{grid-template-columns:1fr}.office-scene{min-height:300px}.office-floor{width:86%;left:7%;}.office-task-list{grid-template-columns:1fr}.office-scene-top span{font-size:7px}}
 @media(prefers-reduced-motion:reduce){.office-sprite,.office-sprite .office-avatar{transition:none!important;animation:none!important}}
+
+
+/* ===== 3D CEO LIFE upgrade: readable characters, lively room and pets ===== */
+.office-scene {min-height:440px;background:radial-gradient(ellipse at 48% 8%,#fff 0 5%,transparent 24%),linear-gradient(145deg,#a9ddff 0%,#e8f7ff 56%,#c8e9ff 100%);}
+.office-floor {filter:drop-shadow(0 12px 7px #456b8b35);}
+.office-desk {box-shadow:0 9px 0 #8e6048, inset 0 3px 0 #ffffff55; border-radius:8px;}
+.office-sprite {width:76px;z-index:7;gap:3px;filter:drop-shadow(0 7px 4px #24354a45);}
+.office-sprite .office-avatar {font-size:44px;line-height:1.12;display:block;filter:drop-shadow(0 3px 2px #25344a33);transform-origin:50% 85%;}
+.office-sprite .office-name {max-width:90px;padding:3px 8px;border-radius:9px;border:1.5px solid #dce4f1;color:#26324a;font-size:10px;box-shadow:0 3px 0 #dce4f1;font-weight:900;}
+.office-sprite.is-working .office-avatar {animation:office3DWork .42s ease-in-out infinite alternate;}
+.office-sprite.is-idle .office-avatar {animation:office3DBreathe 2s ease-in-out infinite;}
+@keyframes office3DWork {from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-5px) rotate(3deg)}}
+@keyframes office3DBreathe {0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.office-scene-caption {letter-spacing:.02em;font-size:10px;background:#ffffffb8;padding:5px 9px;border-radius:99px;bottom:10px;left:12px;}
+.office-pets {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.office-pet {min-width:0;padding:10px 5px;border:1px solid #e5e9f2;border-radius:15px;background:linear-gradient(180deg,#fff,#f7f8ff);text-align:center;}
+.office-pet-face {display:block;font-size:34px;line-height:1.3;filter:drop-shadow(0 4px 2px #27344a22);animation:officePetBounce 2s ease-in-out infinite;}
+.office-pet:nth-child(2) .office-pet-face{animation-delay:.35s}.office-pet:nth-child(3) .office-pet-face{animation-delay:.7s}
+@keyframes officePetBounce {0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-5px) rotate(2deg)}}
+.office-pet strong{display:block;font-size:11px;color:#343c52}.office-pet small{display:block;font-size:9px;color:#8a91a4;margin:2px 0 7px}
+.office-pet-actions{display:flex;gap:4px;justify-content:center;flex-wrap:wrap}
+.office-pet-actions button{border:1px solid #dce3ef;background:#fff;border-radius:8px;padding:5px 7px;font-size:9px;font-weight:800;color:#52617a}
+.office-pet-actions button:active{transform:scale(.96)}
+.office-pet-hint{margin:8px 0 0;color:#8991a4;font-size:9px}
+.office-pet-sprite{position:absolute;z-index:8;font-size:30px;filter:drop-shadow(0 5px 3px #26364a35);animation:officePetRoam 3.2s ease-in-out infinite;pointer-events:none}
+.office-pet-sprite.cat{left:12%;top:72%}.office-pet-sprite.dog{left:76%;top:76%;animation-delay:.8s}.office-pet-sprite.bird{left:83%;top:30%;animation:officeBirdFly 4s ease-in-out infinite}
+@keyframes officePetRoam{0%,100%{transform:translate(0,0) rotate(-5deg)}50%{transform:translate(13px,-7px) rotate(5deg)}}
+@keyframes officeBirdFly{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,-15px)}}
+.office-stat small{font-size:10px;line-height:1.4;min-height:28px}
+.office-stat strong{font-size:22px}
+.office-demo-note{line-height:1.55}
+@media(max-width:560px){
+ .office-scene{min-height:390px}
+ .office-sprite{width:66px}
+ .office-sprite .office-avatar{font-size:38px}
+ .office-sprite .office-name{font-size:9px}
+ .office-pets{gap:5px}
+ .office-pet{padding:8px 3px}
+ .office-pet-face{font-size:30px}
+}

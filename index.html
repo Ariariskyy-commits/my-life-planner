@@ -711,58 +711,141 @@
             </div>
         </section>
 
-        <!-- PET -->
+        <!-- PET (EXACT MATCH DESIGN) -->
         <section id="tab-pet" class="tab-content hidden space-y-4">
-            <div class="bg-gradient-to-r from-sunnyYellow to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-darkText">
-                <div class="space-y-1 text-center md:text-left">
-                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">🐾 สัตว์เลี้ยงการเงิน</div>
-                    <h2 id="petHeaderTitle" class="text-2xl font-extrabold font-cute">สัตว์เลี้ยงการเงิน</h2>
+            
+            <!-- การ์ดห้องนอนสัตว์เลี้ยง (Tamagotchi Room Banner) -->
+            <div class="bg-gradient-to-r from-sunnyYellow via-pink-100 to-limeGreen p-5 rounded-3xl border-3 border-darkText shadow-sm relative overflow-hidden">
+                <!-- ตกแต่งประกายวิบวับ -->
+                <div class="absolute top-3 right-5 text-yellow-500 text-lg animate-pulse">✨</div>
+                <div class="absolute top-10 right-16 text-pink-400 text-sm">💖</div>
+                <div class="absolute bottom-4 left-6 text-yellow-400 text-sm">✨</div>
+
+                <div class="text-center space-y-1.5 mb-4 relative z-10">
+                    <span class="inline-block bg-hotPink text-white font-bold text-[11px] px-3 py-0.5 rounded-full border-2 border-darkText shadow-sm">
+                        <i class="fa-solid fa-paw mr-1"></i> สัตว์เลี้ยงการเงิน
+                    </span>
+                    <h2 id="petHeaderNameTitle" class="text-2xl sm:text-3xl font-extrabold font-cute text-darkText">น้องป๋อง (Tamagotchi)</h2>
+                    <p class="text-xs font-bold text-gray-700">เลี้ยงด้วยการจดรายรับรายจ่าย</p>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border-2 border-darkText text-center min-w-[185px] text-darkText">
-                    <div id="petBigAvatar" class="text-5xl mb-1 animate-bounce">🐱</div>
-                    <h3 id="petBigName" class="font-cute font-bold text-sm">สัตว์เลี้ยงของคุณ</h3>
-                    <p id="petBigStatusText" class="text-[10px] font-bold text-popBlue mt-0.5">สถานะ...</p>
+
+                <!-- ห้องนอนจำลอง + ตัวละครน้อง + การ์ดสเตตัสข้างๆ -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center relative z-10">
+                    
+                    <!-- โซนห้องนอนน้องสัตว์เลี้ยง -->
+                    <div class="relative bg-white/70 backdrop-blur-sm p-4 rounded-2xl border-2 border-darkText shadow-inner flex flex-col items-center justify-center min-h-[200px]">
+                        <div class="absolute top-2 left-2 text-xs opacity-60">🖼️ 🌿</div>
+                        <!-- ตัวน้องสัตว์เลี้ยงในเตียงนอน -->
+                        <div class="relative text-center">
+                            <div id="petRoomAvatar" class="text-7xl sm:text-8xl drop-shadow-md animate-bounce">🐱</div>
+                            <div class="absolute -bottom-1 -right-2 bg-sunnyYellow text-darkText text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-darkText">LV.1</div>
+                        </div>
+                        <div class="flex gap-4 mt-3 text-xs opacity-80">
+                            <span>🛏️ เตียงนุ่มๆ</span>
+                            <span>🐟 ปลาทูอิ่มๆ</span>
+                        </div>
+                    </div>
+
+                    <!-- การ์ดหลอดพลังงานสเตตัส -->
+                    <div class="bg-white/95 border-2 border-darkText p-4 rounded-2xl shadow-sm space-y-3">
+                        <div class="flex justify-between items-center border-b border-darkText/20 pb-1.5">
+                            <h3 id="petCardTitleStatus" class="font-cute font-extrabold text-sm text-darkText">น้องป๋อง (หิวมาก 🥺)</h3>
+                        </div>
+
+                        <div class="space-y-2 text-xs font-bold">
+                            <div>
+                                <div class="flex justify-between mb-0.5">
+                                    <span class="flex items-center gap-1">🍜 ความอิ่ม</span>
+                                    <span id="petHungerVal">30%</span>
+                                </div>
+                                <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden p-0.5">
+                                    <div id="petHungerBar" class="bg-hotPink h-full rounded-full w-[30%] transition-all"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-0.5">
+                                    <span class="flex items-center gap-1">💖 ความสุข</span>
+                                    <span id="petHappyVal">60%</span>
+                                </div>
+                                <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden p-0.5">
+                                    <div id="petHappyBar" class="bg-hotPink h-full rounded-full w-[60%] transition-all"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-0.5">
+                                    <span class="flex items-center gap-1">😊 อารมณ์ดี</span>
+                                    <span id="petEmotionVal">80%</span>
+                                </div>
+                                <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden p-0.5">
+                                    <div id="petEmotionBar" class="bg-hotPink h-full rounded-full w-[80%] transition-all"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="feedPet()" class="bg-gradient-to-r from-hotPink to-pink-500 text-white font-extrabold py-2 px-3 rounded-xl border-2 border-darkText text-xs shadow-sm flex items-center justify-center gap-1.5 hover:scale-105 transition-all">
+                                <span>🍜</span> <span id="feedBtnText">ให้อารมณ์น้อง</span>
+                            </button>
+                            <button onclick="openEditPetModal()" class="bg-white text-darkText font-extrabold py-2 px-3 rounded-xl border-2 border-darkText text-xs shadow-sm flex items-center justify-center gap-1.5 hover:bg-sunnyYellow transition-all">
+                                <i class="fa-solid fa-pen text-[10px]"></i> แก้ไขชื่อ
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                    <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ตั้งค่าสัตว์เลี้ยง</h3>
-                    <div class="space-y-2 text-xs">
-                        <div><label class="block font-bold mb-0.5">ชื่อ</label><input type="text" id="petNameInput" onchange="updatePetSettings()" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 font-bold outline-none"></div>
-                        <div>
-                            <label class="block font-bold mb-0.5">ประเภท</label>
-                            <select id="petAvatarSelect" onchange="updatePetSettings()" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 font-bold outline-none">
-                                <option value="🐱">🐱 แมว</option>
-                                <option value="🐶">🐶 หมา</option>
-                                <option value="🐰">🐰 กระต่าย</option>
-                                <option value="🐹">🐹 แฮมสเตอร์</option>
-                                <option value="🐻">🐻 หมี</option>
-                                <option value="🦆">🦆 เป็ด</option>
-                            </select>
-                        </div>
-                    </div>
+
+            <!-- โซนตั้งค่าสัตว์เลี้ยงด้านล่าง (ตามแบบเป๊ะๆ) -->
+            <div class="bg-white text-darkText p-5 rounded-3xl border-2 border-darkText shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b-2 border-darkText pb-3">
+                    <h3 class="font-cute font-extrabold text-lg flex items-center gap-2">
+                        <span>🐾</span> ตั้งค่าสัตว์เลี้ยง
+                    </h3>
+                    <i class="fa-solid fa-paw text-gray-400"></i>
                 </div>
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                    <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">สถานะตามเงินจริง</h3>
-                    <div class="space-y-3 text-xs">
-                        <div>
-                            <div class="flex justify-between font-bold mb-0.5"><span>ความอิ่ม</span><span id="petHungerVal">0%</span></div>
-                            <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden"><div id="petHungerBar" class="bg-limeGreen h-full w-[0%] transition-all"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between font-bold mb-0.5"><span>ความสุข</span><span id="petHappyVal">0%</span></div>
-                            <div class="w-full bg-offWhite h-3 rounded-full border border-darkText overflow-hidden"><div id="petHappyBar" class="bg-sunnyYellow h-full w-[0%] transition-all"></div></div>
+
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="block font-bold mb-1">ชื่อ</label>
+                        <div class="flex items-center gap-2 bg-offWhite border-2 border-darkText rounded-xl px-3 py-2">
+                            <span id="settingPetAvatarIcon" class="text-lg">🐱</span>
+                            <input type="text" id="petNameInput" onchange="updatePetSettings()" class="w-full bg-transparent font-extrabold text-darkText outline-none" value="น้องป๋อง">
+                            <i class="fa-solid fa-pen text-gray-400 text-xs"></i>
                         </div>
                     </div>
-                </div>
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
-                    <div class="flex justify-between items-center border-b border-darkText pb-2">
-                        <h3 class="font-cute font-bold text-base">ประวัติคำพูด (แชท)</h3>
-                        <button onclick="clearPetSpeechHistory()" class="text-[10px] font-bold text-hotPink underline">ล้างแชท</button>
+
+                    <div>
+                        <label class="block font-bold mb-1.5">ประเภท</label>
+                        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                            <button onclick="selectPetType('🐱', 'แมว')" class="pet-type-btn bg-offWhite border-2 border-darkText p-2 rounded-2xl flex flex-col items-center gap-1 hover:bg-sunnyYellow transition-all" data-type="แมว">
+                                <span class="text-2xl relative">🐱<span class="absolute -top-1 -right-1 w-2 h-2 bg-popBlue rounded-full"></span></span>
+                                <span class="font-bold text-[11px]">แมว</span>
+                            </button>
+                            <button onclick="selectPetType('🐶', 'หมา')" class="pet-type-btn bg-offWhite border-2 border-darkText p-2 rounded-2xl flex flex-col items-center gap-1 hover:bg-sunnyYellow transition-all" data-type="หมา">
+                                <span class="text-2xl">🐶</span>
+                                <span class="font-bold text-[11px]">หมา</span>
+                            </button>
+                            <button onclick="selectPetType('🐰', 'กระต่าย')" class="pet-type-btn bg-offWhite border-2 border-darkText p-2 rounded-2xl flex flex-col items-center gap-1 hover:bg-sunnyYellow transition-all" data-type="กระต่าย">
+                                <span class="text-2xl">🐰</span>
+                                <span class="font-bold text-[11px]">กระต่าย</span>
+                            </button>
+                            <button onclick="selectPetType('🐦', 'นก')" class="pet-type-btn bg-offWhite border-2 border-darkText p-2 rounded-2xl flex flex-col items-center gap-1 hover:bg-sunnyYellow transition-all" data-type="นก">
+                                <span class="text-2xl">🐦</span>
+                                <span class="font-bold text-[11px]">นก</span>
+                            </button>
+                            <button onclick="selectPetType('🐟', 'ปลา')" class="pet-type-btn bg-offWhite border-2 border-darkText p-2 rounded-2xl flex flex-col items-center gap-1 hover:bg-sunnyYellow transition-all" data-type="ปลา">
+                                <span class="text-2xl">🐟</span>
+                                <span class="font-bold text-[11px]">ปลา</span>
+                            </button>
+                            <button onclick="selectPetType('🐾', 'อื่นๆ')" class="pet-type-btn bg-offWhite border-2 border-darkText p-2 rounded-2xl flex flex-col items-center gap-1 hover:bg-sunnyYellow transition-all" data-type="อื่นๆ">
+                                <span class="text-2xl">🐾</span>
+                                <span class="font-bold text-[11px]">อื่นๆ</span>
+                            </button>
+                        </div>
                     </div>
-                    <div id="petSpeechHistory" class="space-y-2 overflow-y-auto max-h-[160px] flex-1 pr-1 text-xs"></div>
                 </div>
             </div>
+
         </section>
     </main>
 
@@ -1185,96 +1268,13 @@
             }
         }
 
-        let photoDbPromise = null;
-        function photoDB() {
-            if (!photoDbPromise) {
-                photoDbPromise = new Promise((resolve, reject) => {
-                    if (!('indexedDB' in window)) return reject(new Error('เบราว์เซอร์นี้ไม่รองรับการเก็บรูป'));
-                    const req = indexedDB.open('y2k_photos', 1);
-                    req.onupgradeneeded = () => req.result.createObjectStore('photos', { keyPath: 'id' });
-                    req.onsuccess = () => resolve(req.result);
-                    req.onerror = () => { photoDbPromise = null; reject(req.error); };
-                });
-            }
-            return photoDbPromise;
-        }
-
-        async function idbTx(mode, fn) {
-            const db = await photoDB();
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction('photos', mode);
-                const req = fn(tx.objectStore('photos'));
-                let result;
-                if (req) req.onsuccess = () => { result = req.result; };
-                tx.oncomplete = () => resolve(result);
-                tx.onerror = () => reject(tx.error || new Error('บันทึกรูปในเครื่องไม่สำเร็จ'));
-                tx.onabort = () => reject(tx.error || new Error('บันทึกรูปในเครื่องไม่สำเร็จ'));
-            });
-        }
-
-        async function savePhotoLocal(id, data, synced) {
-            await idbTx('readwrite', s => s.put({ id, data, synced, createdAt: Date.now() }));
-        }
-
-        async function markPhotoSynced(id) {
-            const rec = await idbTx('readonly', s => s.get(id));
-            if (rec) await idbTx('readwrite', s => s.put({ ...rec, synced: true }));
-        }
-
-        function photosCol(uid) {
-            return db.collection('users').doc(uid).collection('photos');
-        }
-
-        async function uploadPhoto(id, data) {
-            await withTimeout(
-                photosCol(currentUser.uid).doc(id).set({
-                    data, eventId: id, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }),
-                CLOUD_TIMEOUT_MS, 'อัปโหลดรูปขึ้นคลาวด์ไม่สำเร็จ'
-            );
-        }
-
-        async function getPhotoData(eventId) {
-            const rec = await idbTx('readonly', s => s.get(eventId));
-            if (rec && rec.data) return rec.data;
-            if (!currentUser || !isFirebaseActive) return null;
-            const snap = await withTimeout(photosCol(currentUser.uid).doc(eventId).get(), CLOUD_TIMEOUT_MS, 'โหลดรูปจากคลาวด์ไม่สำเร็จ');
-            if (!snap.exists) return null;
-            const data = snap.data().data;
-            await savePhotoLocal(eventId, data, true);
-            return data;
-        }
-
-        async function deletePhotoEverywhere(id) {
-            try { await idbTx('readwrite', s => s.delete(id)); } catch (e) { console.warn(e); }
-            if (currentUser && isFirebaseActive) {
-                try { await withTimeout(photosCol(currentUser.uid).doc(id).delete(), CLOUD_TIMEOUT_MS, 'ลบรูปบนคลาวด์ไม่สำเร็จ'); } catch (e) { console.warn(e); }
-            }
-        }
-
-        async function syncPendingPhotos() {
-            if (!currentUser || !isFirebaseActive) return;
-            try {
-                const all = (await idbTx('readonly', s => s.getAll())) || [];
-                for (const rec of all) {
-                    if (rec.synced) continue;
-                    const ev = state.events.find(e => e.id === rec.id);
-                    if (!ev || !ev.hasPhoto) continue;
-                    try {
-                        await uploadPhoto(rec.id, rec.data);
-                        await markPhotoSynced(rec.id);
-                    } catch (e) { console.warn('sync photo failed:', e); }
-                }
-            } catch (e) { console.warn(e); }
-        }
-
         const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show', headerCollapsed:'y2k_header_collapsed' };
         const DEFAULT_CATEGORIES = [
             "🍔 อาหาร/เครื่องดื่ม", "🛍️ ช้อปปิ้ง", "🚗 เดินทาง",
             "🎮 บันเทิง/เกม", "💡 บิล/ค่าใช้จ่าย", "💰 เงินเดือน/รายรับ", "✨ อื่นๆ"
         ];
         const makeDefaultPet = () => ({
-            name: 'น้องสัตว์เลี้ยง', avatar: '🐱',
+            name: 'น้องป๋อง', avatar: '🐱', type: 'แมว',
             speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭',
             speechHistory: [{ time: 'เริ่มต้น', text: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭' }]
         });
@@ -1418,7 +1418,7 @@
                 const snap = await db.collection('users').doc(uid).get();
                 if (snap.exists) { applyRemote(snap.data()); setSyncStatus('โหลดจากคลาวด์แล้ว ☁️'); }
                 else { await pushToCloud(); }
-                refreshUI(); syncPendingPhotos();
+                refreshUI();
             } catch { setSyncStatus('โหลดข้อมูลไม่สำเร็จ ⚠️'); }
         }
 
@@ -1497,9 +1497,9 @@
             '🐱': { sad: '😿', low: '😾', good: '😺', rich: '😻' },
             '🐶': { sad: '🥺', low: '🐕', good: '🐶', rich: '🐶✨' },
             '🐰': { sad: '😭', low: '🐰', good: '🐰✨', rich: '🐇💖' },
-            '🐹': { sad: '🥺', low: '🐹', good: '🐹✨', rich: '🐹👑' },
-            '🐻': { sad: '🐻‍❄️', low: '🐻', good: '🧸', rich: '🐻✨' },
-            '🦆': { sad: '😭', low: '🦆', good: '🦆✨', rich: '🐣🌟' }
+            '🐦': { sad: '🥺', low: '🐦', good: '🐦✨', rich: '🐦🌟' },
+            '🐟': { sad: '🥺', low: '🐟', good: '🐟✨', rich: '🐟💖' },
+            '🐾': { sad: '🥺', low: '🐾', good: '🐾', rich: '🐾✨' }
         };
 
         function setTheme(themeName, save = true) {
@@ -1510,11 +1510,25 @@
 
         function updatePetSettings() {
             state.pet.name = $('petNameInput').value.trim() || 'สัตว์เลี้ยง';
-            state.pet.avatar = $('petAvatarSelect').value;
-            saveData(); updatePetStatus(); showToast('อัปเดตสัตว์เลี้ยงแล้ว! ✨');
+            saveData(); updatePetStatus(); showToast('อัปเดตชื่อสัตว์เลี้ยงแล้ว! ✨');
         }
 
-        function clearPetSpeechHistory() { state.pet.speechHistory = []; saveData(); renderPetSpeechHistory(); }
+        function selectPetType(emoji, typeName) {
+            state.pet.avatar = emoji;
+            state.pet.type = typeName;
+            saveData(); updatePetStatus(); showToast(`เปลี่ยนประเภทเป็น ${typeName} แล้ว! 🐾`);
+        }
+
+        function feedPet() {
+            triggerPetSpeech(`ขอบคุณสำหรับความรักและอาหารนะงับ! 💖`);
+            updatePetStatus();
+            showToast('ให้อาหารน้องแล้ว น้องมีความสุขมากๆ! 🐾');
+        }
+
+        function openEditPetModal() {
+            $('petNameInput').focus();
+            showToast('แก้ไขชื่อในช่องตั้งค่าด้านล่างได้เลยครับ ✏️');
+        }
 
         function calcNetBalance() {
             let inc = 0, exp = 0;
@@ -1524,44 +1538,46 @@
 
         function updatePetStatus() {
             const { net } = calcNetBalance();
-            const faces = PET_MOOD_FACES[state.pet.avatar] || PET_MOOD_FACES['🐱'];
-            let hunger, happiness, avatar, moodText, defaultSpeech;
+            const pName = state.pet.name || 'น้องป๋อง';
+            const avatar = state.pet.avatar || '🐱';
+            const faces = PET_MOOD_FACES[avatar] || PET_MOOD_FACES['🐱'];
+            let hunger, happiness, emotion, moodText, defaultSpeech;
 
-            if (net <= 0)       { hunger = 0;   happiness = 0;   avatar = faces.sad;  moodText = 'หิวม๊าก 🥺';   defaultSpeech = 'เงินเป็น 0 แล้ว ช่วยเติมรายรับที! 😭'; }
-            else if (net < 1000){ hunger = 40;  happiness = 40;  avatar = faces.low;  moodText = 'ประหยัด...';    defaultSpeech = 'ประหยัดไว้ก่อนน้า 💸'; }
-            else if (net < 5000){ hunger = 75;  happiness = 75;  avatar = faces.good; moodText = 'อิ่มสบาย 😊';   defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟'; }
-            else                { hunger = 100; happiness = 100; avatar = faces.rich; moodText = 'เศรษฐี! 🤑';     defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖'; }
+            if (net <= 0)       { hunger = 30;  happiness = 60;  emotion = 80;  moodText = 'หิวมาก 🥺'; defaultSpeech = 'เงินเป็น 0 แล้ว ช่วยเติมรายรับที! 😭'; }
+            else if (net < 1000){ hunger = 50;  happiness = 70;  emotion = 85;  moodText = 'ประหยัด...'; defaultSpeech = 'ประหยัดไว้ก่อนน้า 💸'; }
+            else if (net < 5000){ hunger = 80;  happiness = 85;  emotion = 90;  moodText = 'อิ่มสบาย 😊'; defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟'; }
+            else                { hunger = 100; happiness = 100; emotion = 100; moodText = 'เศรษฐี! 🤑'; defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖'; }
 
-            state.pet.hunger = hunger; state.pet.happiness = happiness;
             if (!state.pet.speech || state.pet.speech.includes('ยินดีต้อนรับ')) state.pet.speech = defaultSpeech;
 
-            const pName = state.pet.name || 'สัตว์เลี้ยง';
+            // อัปเดต UI หน้าสัตว์เลี้ยงตามแบบเป๊ะๆ
             $('floatingPetName').innerText = pName;
-            $('petHeaderTitle').innerText = `${pName} (Tamagotchi)`;
+            $('petHeaderNameTitle').innerText = `${pName} (Tamagotchi)`;
+            $('petCardTitleStatus').innerText = `${pName} (${moodText})`;
+            $('settingPetAvatarIcon').innerText = avatar;
             $('petAvatar').innerText = avatar; $('minimizedPetAvatar').innerText = avatar;
-            $('petBigAvatar').innerText = avatar; $('calPetAvatar').innerText = avatar; $('dashCatAvatar').innerText = avatar;
-            $('petBigName').innerText = `${pName} (${moodText})`;
-            $('petBigStatusText').innerText = `สุทธิ ฿${money(net)}`;
+            $('petRoomAvatar').innerText = avatar; $('dashCatAvatar').innerText = avatar; $('calPetAvatar').innerText = avatar;
+            
             $('petHungerVal').innerText = hunger + '%'; $('petHungerBar').style.width = hunger + '%';
             $('petHappyVal').innerText = happiness + '%'; $('petHappyBar').style.width = happiness + '%';
+            $('petEmotionVal').innerText = emotion + '%'; $('petEmotionBar').style.width = emotion + '%';
+            
             $('petSpeechBubble').innerText = state.pet.speech;
             $('calPetSpeechText').innerText = state.pet.speech;
             $('dashCatSpeechText').innerText = state.pet.speech;
-            renderPetSpeechHistory(); renderQuickNotesWidget();
+            $('petNameInput').value = pName;
+
+            // ไฮไลต์ปุ่มประเภทที่เลือก
+            document.querySelectorAll('.pet-type-btn').forEach(btn => {
+                const active = btn.dataset.type === (state.pet.type || 'แมว');
+                btn.classList.toggle('bg-sunnyYellow', active);
+                btn.classList.toggle('border-hotPink', active);
+            });
+            renderQuickNotesWidget();
         }
 
         function triggerPetSpeech(text) {
             state.pet.speech = text;
-            state.pet.speechHistory.unshift({ time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), text });
-            if (state.pet.speechHistory.length > 8) state.pet.speechHistory.pop();
-        }
-
-        function renderPetSpeechHistory() {
-            $('petSpeechHistory').innerHTML = state.pet.speechHistory.length ? state.pet.speechHistory.map(h => `
-                <div class="bg-offWhite text-darkText p-2 rounded-lg border border-darkText text-[11px] flex items-center gap-2">
-                    <span>${esc(state.pet.avatar) || '🐾'}</span>
-                    <div><span class="text-[9px] text-gray-400">${esc(h.time)}</span><p class="font-bold text-hotPink">"${esc(h.text)}"</p></div>
-                </div>`).join('') : `<div class="text-center py-4 text-gray-400 text-[10px]">ไม่มีประวัติแชท</div>`;
         }
 
         function switchTab(tabId) {
@@ -1591,8 +1607,6 @@
 
         function refreshUI() {
             setTheme(state.theme, false);
-            $('petNameInput').value = state.pet.name;
-            $('petAvatarSelect').value = state.pet.avatar;
             applyHeaderCollapseState();
             renderDashboard(); renderTransactions(); renderBills(); renderTasks();
             renderCalendar(); renderEventsList(); updatePetStatus(); renderCalcHistory();

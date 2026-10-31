@@ -344,199 +344,83 @@
             .bn-add { width: 54px; height: 54px; flex-basis: 54px; margin-top: -30px; }
         }
 
-        /* ===== ห้องสัตว์เลี้ยง (หน้า Pet) ===== */
-        .pet-room {
+        /* ===== หน้าสัตว์เลี้ยง ===== */
+        .pet-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 640px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .pet-title-card {
+            background: #FFFFFF;
+            border: 3px solid #1A1A1A;
+            border-radius: 18px;
+            padding: 12px 14px;
+            text-align: center;
+            box-shadow: 0 6px 14px -10px rgba(0,0,0,.35);
+        }
+        .pet-scene {
             position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
             border: 3px solid #1A1A1A;
             border-radius: 20px;
             overflow: hidden;
-            background: linear-gradient(170deg, #FFF59D 0%, #EEFF8A 55%, #D4FFB0 100%);
+            background: #FFF4B8;
             box-shadow: 0 8px 22px -14px rgba(26,26,26,.28);
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            padding: 18px 16px 16px;
-            min-height: 440px;
         }
-        .pet-room-wall {
+        .pet-scene > svg {
             position: absolute;
-            left: 0; right: 0; top: 0;
-            height: 62%;
-            background: linear-gradient(180deg, #FFFBD6 0%, #FFF3A6 100%);
-            pointer-events: none;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
         }
-        .pet-room-floor {
-            position: absolute;
-            left: 0; right: 0; bottom: 0;
-            height: 38%;
-            background-color: #FFC9B5;
-            background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.25) 0 2px, transparent 2px 60px);
-            border-top: 3px solid #1A1A1A;
-            pointer-events: none;
-        }
-        .pet-deco {
-            position: absolute;
-            z-index: 1;
-            pointer-events: none;
-            user-select: none;
-        }
-        /* หน้าต่าง */
-        .pet-window {
-            right: 18px; top: 16px;
-            width: 96px; height: 76px;
-            background: linear-gradient(180deg, #BDEBFF 0%, #E9F9FF 100%);
-            border: 4px solid #1A1A1A;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .pet-window::before, .pet-window::after {
-            content: "";
-            position: absolute;
-            background: #1A1A1A;
-        }
-        .pet-window::before { left: 50%; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; }
-        .pet-window::after { top: 50%; left: 0; right: 0; height: 3px; margin-top: -1.5px; }
-        .pet-window-cloud {
-            position: absolute;
-            left: 10px; top: 14px;
-            font-size: 18px;
-        }
-        /* ชั้นหนังสือ */
-        .pet-shelf {
-            left: 12px; top: 26px;
-            width: 92px; height: 56px;
-            background: #C88B4A;
-            border: 3px solid #1A1A1A;
-            border-radius: 6px;
-            display: flex; align-items: flex-end; justify-content: space-around;
-            padding: 0 6px 4px;
-            font-size: 18px;
-        }
-        /* กรอบรูป */
-        .pet-frame {
-            left: 48%; top: 22px;
-            font-size: 26px;
-            background: #fff;
-            border: 3px solid #1A1A1A;
-            border-radius: 8px;
-            padding: 2px 8px;
-            transform: rotate(-4deg);
-        }
-        /* พรม */
-        .pet-rug {
-            left: 50%; bottom: 22px;
-            transform: translateX(-50%);
-            width: 300px; height: 40px;
-            background: #FF9EC4;
-            border: 3px solid #1A1A1A;
-            border-radius: 50%;
-            box-shadow: inset 0 -6px 0 rgba(0,0,0,.08);
-        }
-        /* ต้นไม้ */
-        .pet-plant { left: 10px; bottom: 96px; font-size: 48px; }
-        /* กล่องกระดาษ */
-        .pet-box {
-            right: 14px; bottom: 36px;
-            font-size: 52px;
-            line-height: 1;
-            filter: drop-shadow(0 4px 0 rgba(0,0,0,.15));
-        }
-        /* ชามอาหาร */
-        .pet-bowl {
-            right: 46%; bottom: 40px;
-            font-size: 26px;
-        }
-        /* โคมไฟ/ของตกแต่ง */
-        .pet-lamp { left: 6px; bottom: 36px; font-size: 40px; }
-        .pet-spark {
-            position: absolute;
-            z-index: 1;
-            font-size: 20px;
-            pointer-events: none;
-            animation: petTwinkle 2.6s ease-in-out infinite;
-        }
-        .pet-spark.s1 { top: 112px; right: 6px; }
-        .pet-spark.s2 { top: 52px; left: 50%; animation-delay: 1.2s; }
-        @keyframes petTwinkle {
-            0%, 100% { opacity: .35; transform: scale(.85); }
-            50% { opacity: 1; transform: scale(1.1); }
-        }
-
-        .pet-room-top {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-        }
-        .pet-room-top h2 {
-            color: #1A1A1A;
-            margin-top: 6px;
-        }
-
-        /* ที่นอน */
-        .pet-bed {
-            position: relative;
-            z-index: 1;
-            width: 250px;
-            height: 120px;
-            margin: 92px auto 0;
-            border: 3px solid #1A1A1A;
-            border-radius: 50% / 45%;
-            background-color: #BFE6FF;
-            background-image:
-                repeating-linear-gradient(90deg, rgba(255,255,255,.75) 0 12px, transparent 12px 24px),
-                repeating-linear-gradient(0deg, rgba(255,255,255,.75) 0 12px, transparent 12px 24px);
-            box-shadow: inset 0 -10px 0 rgba(0,0,0,.08), 0 8px 14px -8px rgba(0,0,0,.35);
-        }
-        /* หมอนบนที่นอน */
-        .pet-pillow {
-            position: absolute;
-            left: 12px; bottom: 14px;
-            width: 74px; height: 40px;
-            background: #FFDD00;
-            border: 3px solid #1A1A1A;
-            border-radius: 14px;
-            transform: rotate(-8deg);
-            box-shadow: inset -6px -6px 0 rgba(0,0,0,.08);
-        }
-        .pet-pillow::after {
-            content: "";
-            position: absolute;
-            left: 14px; right: 14px; top: 10px;
-            height: 6px;
-            border-radius: 4px;
-            background: rgba(255,255,255,.6);
-        }
-        .pet-avatar {
+        .pet-character {
             position: absolute;
             left: 50%;
-            top: -86px;
+            bottom: 30%;
             transform: translateX(-50%);
-            font-size: 96px;
+            font-size: clamp(64px, 26vw, 120px);
             line-height: 1;
-            animation: petBob 2.4s ease-in-out infinite;
-            filter: drop-shadow(0 6px 6px rgba(0,0,0,.18));
-            user-select: none;
             z-index: 2;
+            animation: petBob 2.4s ease-in-out infinite;
+            filter: drop-shadow(0 6px 6px rgba(0,0,0,.2));
+            user-select: none;
         }
         @keyframes petBob {
             0%, 100% { transform: translate(-50%, 0); }
             50% { transform: translate(-50%, -8px); }
         }
-
-        .pet-panel {
-            position: relative;
-            z-index: 2;
+        .pet-stats {
             background: #FFFFFF;
             border: 2px solid #1A1A1A;
             border-radius: 16px;
-            padding: 12px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
             gap: 10px;
             box-shadow: 0 6px 14px -10px rgba(0,0,0,.35);
         }
+        .pet-stat-row {
+            display: grid;
+            grid-template-columns: 20px 44px 1fr 44px;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .pet-stat-icon {
+            text-align: center;
+            font-size: 14px;
+        }
+        .pet-stat-val {
+            text-align: right;
+        }
         .pet-bar {
-            height: 12px;
+            height: 14px;
             border-radius: 999px;
             border: 2px solid #1A1A1A;
             background: #EFEFEF;
@@ -546,25 +430,6 @@
             height: 100%;
             width: 0%;
             transition: width .6s ease;
-        }
-        .pet-stat-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 11px;
-        }
-        .pet-stat-icon {
-            width: 22px;
-            text-align: center;
-            font-size: 15px;
-            flex-shrink: 0;
-        }
-        .pet-stat-row .pet-bar { flex: 1; }
-        .pet-stat-val {
-            width: 38px;
-            text-align: right;
-            font-weight: 700;
-            flex-shrink: 0;
         }
         .pet-type-btn {
             flex: 1 1 0;
@@ -590,36 +455,6 @@
             box-shadow: 0 0 0 3px rgba(0,85,255,.25);
         }
         .pet-type-btn:hover { transform: translateY(-1px); }
-
-        html[data-view="mobile"] .pet-room { min-height: 0; }
-        html[data-view="mobile"] .pet-room-wall { height: 100%; }
-        html[data-view="mobile"] .pet-room-floor { height: 0; border-top: none; }
-        html[data-view="mobile"] .pet-bed { margin: 80px auto 0; }
-        html[data-view="mobile"] .pet-plant,
-        html[data-view="mobile"] .pet-lamp { display: none; }
-        html[data-view="mobile"] .pet-window { width: 74px; height: 60px; right: 10px; top: 10px; }
-        html[data-view="mobile"] .pet-shelf { width: 70px; height: 44px; left: 8px; top: 16px; font-size: 14px; }
-        html[data-view="mobile"] .pet-frame { left: auto; right: 96px; top: 96px; font-size: 20px; }
-        html[data-view="mobile"] .pet-rug { width: 240px; }
-        html[data-view="mobile"] .pet-box { font-size: 40px; right: 8px; bottom: 20px; }
-        html[data-view="mobile"] .pet-bowl { right: 30%; bottom: 26px; font-size: 22px; }
-        html[data-view="mobile"] .pet-panel { position: static; width: 100%; }
-
-        html:not([data-view="mobile"]) .pet-room { min-height: 480px; }
-        html:not([data-view="mobile"]) .pet-bed {
-            position: absolute;
-            left: 36%;
-            bottom: 74px;
-            transform: translateX(-50%);
-            margin: 0;
-        }
-        html:not([data-view="mobile"]) .pet-panel {
-            position: absolute;
-            right: 16px;
-            bottom: 16px;
-            width: min(340px, 42%);
-        }
-        html:not([data-view="mobile"]) .pet-bowl { right: 44%; bottom: 46px; }
 
         .vs-btn, .tb-btn { font-family: 'Prompt', sans-serif; }
 
@@ -1065,36 +900,107 @@
 
         <!-- PET -->
         <section id="tab-pet" class="tab-content hidden space-y-4">
+            <div class="pet-wrap">
 
-            <!-- ห้องสัตว์เลี้ยง -->
-            <div class="pet-room">
-                <div class="pet-room-wall" aria-hidden="true"></div>
-                <div class="pet-room-floor" aria-hidden="true"></div>
-
-                <!-- ของตกแต่งในห้อง -->
-                <div class="pet-deco pet-window" aria-hidden="true"><span class="pet-window-cloud">☁️</span></div>
-                <div class="pet-deco pet-shelf" aria-hidden="true"><span>📚</span><span>🧸</span><span>📖</span></div>
-                <span class="pet-deco pet-frame" aria-hidden="true">🖼️</span>
-                <span class="pet-deco pet-plant" aria-hidden="true">🪴</span>
-                <span class="pet-deco pet-lamp" aria-hidden="true">🛋️</span>
-                <div class="pet-deco pet-rug" aria-hidden="true"></div>
-                <span class="pet-deco pet-box" aria-hidden="true">📦</span>
-                <span class="pet-deco pet-bowl" aria-hidden="true">🥣</span>
-                <span class="pet-spark s1" aria-hidden="true">✨</span>
-                <span class="pet-spark s2" aria-hidden="true">💖</span>
-
-                <div class="pet-room-top">
-                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">🐾 สัตว์เลี้ยงการเงิน</div>
-                    <h2 id="petHeaderTitle" class="text-2xl font-extrabold font-cute">สัตว์เลี้ยงการเงิน</h2>
+                <!-- การ์ดชื่อ -->
+                <div class="pet-title-card">
+                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border-2 border-darkText">🐾 สัตว์เลี้ยงการเงิน</div>
+                    <h2 id="petHeaderTitle" class="text-2xl font-extrabold font-cute mt-1.5">สัตว์เลี้ยงการเงิน</h2>
                     <p class="text-xs font-bold text-darkText/70">เลี้ยงด้วยการจดรายรับรายจ่าย</p>
                 </div>
 
-                <div class="pet-bed" aria-hidden="true">
-                    <div class="pet-pillow"></div>
-                    <div id="petRoomAvatar" class="pet-avatar">🐱</div>
+                <!-- ฉากห้อง (SVG ทั้งห้องในภาพเดียว) -->
+                <div class="pet-scene">
+                    <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                        <defs>
+                            <pattern id="petCheck" width="24" height="24" patternUnits="userSpaceOnUse">
+                                <rect width="24" height="24" fill="#FFFFFF"/>
+                                <rect width="12" height="24" fill="#BFE6FF" opacity=".75"/>
+                                <rect width="24" height="12" fill="#BFE6FF" opacity=".75"/>
+                            </pattern>
+                        </defs>
+
+                        <!-- ผนัง -->
+                        <rect x="0" y="0" width="400" height="200" fill="#FFF4B8"/>
+                        <rect x="0" y="150" width="400" height="50" fill="#FFE98A"/>
+                        <line x1="0" y1="150" x2="400" y2="150" stroke="#E8C94A" stroke-width="3"/>
+
+                        <!-- พื้น -->
+                        <rect x="0" y="200" width="400" height="100" fill="#F9C7A6"/>
+                        <line x1="0" y1="230" x2="400" y2="230" stroke="#E9A985" stroke-width="2"/>
+                        <line x1="0" y1="262" x2="400" y2="262" stroke="#E9A985" stroke-width="2"/>
+                        <line x1="100" y1="200" x2="100" y2="230" stroke="#E9A985" stroke-width="2"/>
+                        <line x1="260" y1="230" x2="260" y2="262" stroke="#E9A985" stroke-width="2"/>
+                        <line x1="180" y1="262" x2="180" y2="300" stroke="#E9A985" stroke-width="2"/>
+                        <rect x="0" y="197" width="400" height="6" fill="#1A1A1A"/>
+
+                        <!-- หน้าต่าง + ม่าน -->
+                        <rect x="262" y="26" width="108" height="96" rx="8" fill="#BDEBFF" stroke="#1A1A1A" stroke-width="5"/>
+                        <line x1="316" y1="26" x2="316" y2="122" stroke="#1A1A1A" stroke-width="4"/>
+                        <line x1="262" y1="74" x2="370" y2="74" stroke="#1A1A1A" stroke-width="4"/>
+                        <ellipse cx="282" cy="98" rx="14" ry="8" fill="#FFFFFF"/>
+                        <ellipse cx="294" cy="94" rx="10" ry="8" fill="#FFFFFF"/>
+                        <rect x="252" y="122" width="128" height="8" rx="3" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="3"/>
+                        <path d="M246 18 Q272 40 262 128 L246 128 Z" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="3"/>
+                        <path d="M386 18 Q360 40 370 128 L386 128 Z" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="3"/>
+
+                        <!-- ชั้นหนังสือ -->
+                        <rect x="24" y="70" width="120" height="8" rx="2" fill="#C88B4A" stroke="#1A1A1A" stroke-width="3"/>
+                        <rect x="30" y="40" width="12" height="30" fill="#FF007F" stroke="#1A1A1A" stroke-width="2"/>
+                        <rect x="44" y="46" width="10" height="24" fill="#0055FF" stroke="#1A1A1A" stroke-width="2"/>
+                        <rect x="56" y="36" width="12" height="34" fill="#CCFF00" stroke="#1A1A1A" stroke-width="2"/>
+                        <rect x="70" y="50" width="14" height="20" fill="#9D00FF" stroke="#1A1A1A" stroke-width="2"/>
+                        <rect x="86" y="42" width="10" height="28" fill="#FFDD00" stroke="#1A1A1A" stroke-width="2"/>
+                        <rect x="110" y="56" width="16" height="14" rx="2" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="2"/>
+                        <ellipse cx="118" cy="48" rx="10" ry="9" fill="#7BD389" stroke="#1A1A1A" stroke-width="2"/>
+
+                        <!-- กรอบรูป -->
+                        <rect x="164" y="42" width="60" height="46" rx="4" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="4"/>
+                        <rect x="170" y="48" width="48" height="34" fill="#BDEBFF"/>
+                        <path d="M170 82 L186 62 L198 74 L206 66 L218 82 Z" fill="#7BD389"/>
+                        <circle cx="200" cy="58" r="5" fill="#FFDD00"/>
+
+                        <!-- ต้นไม้ในกระถาง -->
+                        <path d="M26 226 L58 226 L54 258 L30 258 Z" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="3"/>
+                        <ellipse cx="42" cy="196" rx="14" ry="26" fill="#7BD389" stroke="#1A1A1A" stroke-width="3"/>
+                        <ellipse cx="24" cy="208" rx="11" ry="18" fill="#7BD389" stroke="#1A1A1A" stroke-width="3" transform="rotate(-25 24 208)"/>
+                        <ellipse cx="60" cy="208" rx="11" ry="18" fill="#7BD389" stroke="#1A1A1A" stroke-width="3" transform="rotate(25 60 208)"/>
+
+                        <!-- พรม -->
+                        <ellipse cx="200" cy="264" rx="150" ry="24" fill="#FFB3D1" stroke="#1A1A1A" stroke-width="3"/>
+                        <ellipse cx="200" cy="264" rx="122" ry="16" fill="none" stroke="#FFFFFF" stroke-width="3" opacity=".6"/>
+
+                        <!-- เงาที่นอน -->
+                        <ellipse cx="200" cy="274" rx="118" ry="8" fill="#000000" opacity=".12"/>
+
+                        <!-- ที่นอนลายตาราง -->
+                        <ellipse cx="200" cy="232" rx="118" ry="42" fill="url(#petCheck)" stroke="#1A1A1A" stroke-width="4"/>
+                        <ellipse cx="200" cy="232" rx="96" ry="30" fill="none" stroke="#FFFFFF" stroke-width="5" opacity=".55"/>
+
+                        <!-- หมอน -->
+                        <rect x="86" y="222" width="64" height="26" rx="12" fill="#FFDD00" stroke="#1A1A1A" stroke-width="3" transform="rotate(-6 118 235)"/>
+                        <rect x="98" y="229" width="34" height="5" rx="3" fill="#FFFFFF" opacity=".7" transform="rotate(-6 118 235)"/>
+
+                        <!-- กล่องกระดาษ -->
+                        <rect x="330" y="200" width="54" height="36" rx="3" fill="#E0A96D" stroke="#1A1A1A" stroke-width="3"/>
+                        <rect x="353" y="200" width="8" height="36" fill="#FFFFFF" opacity=".6"/>
+                        <path d="M330 200 L338 190 L376 190 L384 200 Z" fill="#C98B4E" stroke="#1A1A1A" stroke-width="3"/>
+
+                        <!-- ชามอาหาร -->
+                        <path d="M318 262 L372 262 Q368 288 345 288 Q322 288 318 262 Z" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="3"/>
+                        <ellipse cx="345" cy="262" rx="27" ry="5" fill="#FFDD00" stroke="#1A1A1A" stroke-width="2"/>
+
+                        <!-- ดาวระยิบ -->
+                        <path d="M364 150 L367 157 L374 160 L367 163 L364 170 L361 163 L354 160 L361 157 Z" fill="#FFDD00" stroke="#1A1A1A" stroke-width="1.5"/>
+                        <path d="M38 150 L40 155 L45 157 L40 159 L38 164 L36 159 L31 157 L36 155 Z" fill="#FF007F" stroke="#1A1A1A" stroke-width="1.5"/>
+                    </svg>
+
+                    <!-- ตัวสัตว์เลี้ยง -->
+                    <div id="petRoomAvatar" class="pet-character">🐱</div>
                 </div>
 
-                <div class="pet-panel">
+                <!-- สถานะ -->
+                <div class="pet-stats">
                     <div class="flex items-center justify-between gap-2">
                         <div class="min-w-0">
                             <span id="petRoomName" class="font-cute font-extrabold text-sm block truncate">สัตว์เลี้ยงของคุณ</span>
@@ -1106,29 +1012,30 @@
                     </div>
 
                     <div class="pet-stat-row">
-                        <span class="pet-stat-icon" aria-hidden="true">🍙</span>
-                        <div class="pet-bar"><div id="petHungerBar" class="pet-bar-fill bg-hotPink"></div></div>
+                        <i class="fa-solid fa-bowl-food pet-stat-icon text-popBlue"></i>
+                        <span>อิ่ม</span>
+                        <div class="pet-bar"><div id="petHungerBar" class="pet-bar-fill" style="background:#CCFF00"></div></div>
                         <span id="petHungerVal" class="pet-stat-val">0%</span>
                     </div>
                     <div class="pet-stat-row">
-                        <span class="pet-stat-icon" aria-hidden="true">❤️</span>
-                        <div class="pet-bar"><div id="petHappyBar" class="pet-bar-fill bg-hotPink"></div></div>
+                        <i class="fa-solid fa-heart pet-stat-icon text-hotPink"></i>
+                        <span>สุข</span>
+                        <div class="pet-bar"><div id="petHappyBar" class="pet-bar-fill" style="background:#FF007F"></div></div>
                         <span id="petHappyVal" class="pet-stat-val">0%</span>
                     </div>
                     <div class="pet-stat-row">
-                        <span class="pet-stat-icon" aria-hidden="true">🙂</span>
-                        <div class="pet-bar"><div id="petStableBar" class="pet-bar-fill bg-hotPink"></div></div>
+                        <i class="fa-solid fa-piggy-bank pet-stat-icon text-retroPurple"></i>
+                        <span>มั่นคง</span>
+                        <div class="pet-bar"><div id="petStableBar" class="pet-bar-fill" style="background:#0055FF"></div></div>
                         <span id="petStableVal" class="pet-stat-val">0%</span>
                     </div>
 
                     <button onclick="feedPet()" class="w-full bg-popBlue text-white font-extrabold text-xs py-2 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-center gap-1.5 hover:brightness-105">
-                        🍣 ให้อาหารน้อง
+                        <i class="fa-solid fa-bowl-food"></i> ให้อาหารน้อง
                     </button>
                 </div>
-            </div>
 
-            <!-- ตั้งค่า + ประวัติคำพูด -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- ตั้งค่า + ประวัติคำพูด -->
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
                     <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ตั้งค่าสัตว์เลี้ยง</h3>
                     <div class="space-y-3 text-xs">

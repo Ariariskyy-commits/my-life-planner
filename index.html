@@ -189,50 +189,43 @@
             transform: rotate(-.4deg);
         }
 
-        /* ===== โลโก้ Y2K PLANNER แบบการ์ดกระจกไล่สี ===== */
+        /* ===== โลโก้ Y2K PLANNER: การ์ดสีเหลืองนีออนตามภาพอ้างอิง ===== */
         .y2k-logo {
             position: relative;
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 6px 16px 6px 6px;
-            border-radius: 18px;
-            background: linear-gradient(120deg, #FF007F 0%, #9D00FF 55%, #0055FF 100%);
-            border: 2px solid #1A1A1A;
-            box-shadow: 0 4px 0 #1A1A1A, inset 0 1px 0 rgba(255,255,255,.35);
+            height: 52px;
+            padding: 0 16px 0 8px;
+            border-radius: 16px;
+            background: #D9FF2B;
+            border: 2.5px solid #1A1A1A;
+            box-shadow: 0 4px 0 #1A1A1A;
             overflow: hidden;
             flex: 1 1 auto;
-            max-width: 280px;
+            max-width: 240px;
             min-width: 0;
         }
-        .y2k-logo::after {
+        .y2k-logo::before {
             content: "";
             position: absolute;
-            top: 0;
-            left: -60%;
-            width: 40%;
-            height: 100%;
-            background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
-            transform: skewX(-20deg);
-            animation: logoShine 3.6s ease-in-out infinite;
+            inset: 0;
+            background-image:
+                linear-gradient(45deg, rgba(255,255,255,.35) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(255,255,255,.35) 25%, transparent 25%);
+            background-size: 12px 12px;
+            opacity: .45;
             pointer-events: none;
         }
-        @keyframes logoShine {
-            0%, 60% { left: -60%; }
-            100% { left: 130%; }
-        }
         .y2k-logo-icon {
-            width: 36px;
-            height: 36px;
+            position: relative;
+            width: 40px;
+            height: 40px;
             flex-shrink: 0;
-            border-radius: 50%;
-            background: #CCFF00;
-            border: 2px solid #1A1A1A;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 17px;
-            box-shadow: 0 2px 0 #1A1A1A;
+            font-size: 22px;
             animation: logoWiggle 2.8s ease-in-out infinite;
         }
         @keyframes logoWiggle {
@@ -240,28 +233,44 @@
             50% { transform: rotate(6deg); }
         }
         .y2k-logo-text {
+            position: relative;
             display: flex;
             flex-direction: column;
             min-width: 0;
             line-height: 1;
         }
         .y2k-logo-title {
-            font-family: 'Fredoka', 'Prompt', sans-serif;
-            font-weight: 600;
+            font-family: 'Prompt', sans-serif;
+            font-weight: 800;
             font-size: 20px;
-            letter-spacing: .04em;
-            color: #FFFFFF;
-            text-shadow: 2px 2px 0 #1A1A1A;
+            letter-spacing: .02em;
+            color: #1A1A1A;
             white-space: nowrap;
         }
         .y2k-logo-sub {
-            margin-top: 4px;
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: .32em;
-            color: #CCFF00;
-            text-shadow: 1px 1px 0 #1A1A1A;
+            margin-top: 3px;
+            font-family: 'Prompt', sans-serif;
+            font-weight: 500;
+            font-size: 11px;
+            letter-spacing: .18em;
+            color: #1A1A1A;
             white-space: nowrap;
+        }
+        .y2k-logo-arrow {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #FFFFFF;
+            border: 2px solid #1A1A1A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #1A1A1A;
         }
 
         .topbar {
@@ -648,7 +657,7 @@
                 0 14px 34px -12px rgba(0,20,80,.55),
                 inset 0 1px 0 rgba(255,255,255,.6),
                 inset 0 -1px 0 rgba(255,255,255,.18) !important;
-            overflow: hidden;
+            overflow: visible;
         }
         .bottom-nav::before {
             content: "";
@@ -668,6 +677,23 @@
             background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.55), rgba(255,0,127,.85) 45%, rgba(200,0,100,.9) 100%) !important;
             border: 1.5px solid rgba(255,255,255,.7) !important;
             box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 8px 18px -6px rgba(255,0,127,.6) !important;
+        }
+
+        /* ===== Liquid Glass สำหรับปุ่มอื่น: ปุ่มทางลัด โหมดมุมมอง ปุ่มในหัวการ์ด ===== */
+        .tab-btn,
+        .vs-btn,
+        #plannerToggleBtn,
+        #floatingMinimizedBtn,
+        .topbar .tb-btn {
+            background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.12)) !important;
+            backdrop-filter: blur(10px) saturate(170%);
+            -webkit-backdrop-filter: blur(10px) saturate(170%);
+            border: 1.5px solid rgba(255,255,255,.7) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 4px 10px -4px rgba(0,0,0,.3) !important;
+        }
+        .tab-btn.bg-white,
+        #plannerToggleBtn {
+            background-color: rgba(255,255,255,.72) !important;
         }
 
         /* ===== Liquid Glass ตอนสัมผัส: แสงสะท้อนตามนิ้ว + ขยับแบบสปริง ===== */
@@ -796,11 +822,12 @@
 
         <div class="flex items-center justify-between gap-2">
             <div class="y2k-logo">
-                <span class="y2k-logo-icon" aria-hidden="true">✨</span>
+                <span class="y2k-logo-icon" aria-hidden="true">📓</span>
                 <span class="y2k-logo-text">
                     <span class="y2k-logo-title">Y2K</span>
                     <span class="y2k-logo-sub">PLANNER</span>
                 </span>
+                <span class="y2k-logo-arrow" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
             </div>
             
             <div class="flex items-center gap-2">
@@ -1646,7 +1673,7 @@
         function openModal(id) { $(id).classList.remove('hidden'); $(id).classList.add('flex'); }
         function closeModal(id) { $(id).classList.add('hidden'); $(id).classList.remove('flex'); }
 
-        // ===== หน้าต่างตั้งค่า (เปิดจากแถบเมนูล่างง) =====
+        // ===== หน้าต่างตั้งค่า (เปิดจากแถบเมนูล่าง) =====
         function openSettingsModal() {
             document.querySelectorAll('.settings-theme-btn').forEach(b => {
                 b.classList.toggle('ring-4', b.dataset.themeBtn === state.theme);
@@ -2642,7 +2669,7 @@
 
         /* ===== Liquid Glass: แสงสะท้อนตามนิ้วตอนสัมผัส ===== */
         (function () {
-            const SEL = '.bottom-nav button, .tab-btn, .vs-btn, .tb-btn, #floatingMinimizedBtn';
+            const SEL = '.bottom-nav button, .tab-btn, .vs-btn, .tb-btn, #floatingMinimizedBtn, #plannerToggleBtn';
             document.addEventListener('pointerdown', function (e) {
                 const el = e.target.closest(SEL);
                 if (!el) return;

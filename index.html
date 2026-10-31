@@ -262,44 +262,37 @@
         </div>
     </div>
 
-    <!-- MAIN HEADER PLANNER CARD (แก้ไขปรับเป็นไอคอนหรูขึ้นตามบรีฟ) -->
-    <header class="bg-popBlue border-3 border-darkText text-darkText p-2.5 md:p-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-2.5" style="margin:8px 12px 0; width:calc(100% - 24px);">
-        
-        <!-- AI SMART COMMAND BAR -->
-        <div class="bg-white/95 border-2 border-darkText p-1.5 rounded-xl shadow-[0_2px_0_#1A1A1A] flex items-center gap-2">
-            <div class="w-8 h-8 bg-popBlue text-white rounded-lg flex items-center justify-center shrink-0 border-2 border-darkText shadow-sm">
-                <i class="fa-solid fa-robot text-[13px]"></i>
-            </div>
+    <!-- MAIN HEADER PLANNER CARD (แก้ไขไอคอนในแถบที่วงสีแดงตามภาพ) -->
+    <header class="bg-popBlue border-3 border-darkText text-darkText p-2.5 md:p-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-2" style="margin:8px 12px 0; width:calc(100% - 24px);">
+        <div class="bg-white/95 border-2 border-darkText p-2 rounded-xl shadow-sm flex items-center gap-2">
+            <span class="text-base shrink-0 animate-bounce">🤖</span>
             <div class="flex-1 relative">
-                <input type="text" id="aiCommandInput" onkeydown="if(event.key==='Enter') executeAiCommand()" placeholder="พิมพ์สั่ง AI เช่น 'พรุ่งนี้จ่ายค่าเน็ต 500'..." class="w-full bg-offWhite border-2 border-darkText rounded-lg px-2.5 py-1.5 text-xs font-bold text-darkText outline-none pr-1 focus:bg-white transition-colors">
+                <input type="text" id="aiCommandInput" onkeydown="if(event.key==='Enter') executeAiCommand()" placeholder="พิมพ์สั่ง AI เช่น 'พรุ่งนี้จ่ายค่าเน็ต 500'..." class="w-full bg-offWhite border-2 border-darkText rounded-lg px-2.5 py-1 text-xs font-bold text-darkText outline-none pr-16">
             </div>
-            <button onclick="executeAiCommand()" class="bg-hotPink text-white font-extrabold px-3 py-1.5 rounded-lg border-2 border-darkText text-[11px] shadow-sm hover:scale-105 active:scale-95 shrink-0 flex items-center gap-1.5 transition-all">
-                <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i> สั่ง AI
+            <button onclick="executeAiCommand()" class="bg-hotPink text-white font-extrabold px-3 py-1 rounded-lg border-2 border-darkText text-xs shadow-sm hover:brightness-105 shrink-0 flex items-center gap-1">
+                <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> สั่ง AI
             </button>
         </div>
-
         <div class="flex items-center justify-between gap-2">
-            <div class="bg-limeGreen text-darkText font-cute font-extrabold text-sm sm:text-base px-3.5 py-1.5 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1.5 flex-1 max-w-[260px]">
-                <i class="fa-solid fa-bolt text-popBlue text-sm drop-shadow-sm"></i> Y2K PLANNER
+            <div class="bg-limeGreen text-darkText font-cute font-extrabold text-sm sm:text-base px-3.5 py-1 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1.5 flex-1 max-w-[260px]">
+                <span>✨</span> Y2K PLANNER
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="togglePlannerHeader()" id="plannerToggleBtn" class="bg-white border-2 border-darkText px-2.5 py-1.5 rounded-xl shadow-[0_2px_0_#1A1A1A] text-[11px] font-extrabold flex items-center gap-1 hover:bg-sunnyYellow active:translate-y-0.5 active:shadow-none transition-all" title="ซ่อน/แสดงเมนู">
+                <button onclick="togglePlannerHeader()" id="plannerToggleBtn" class="bg-white border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-xs font-extrabold flex items-center gap-1 hover:bg-sunnyYellow transition-all" title="ซ่อน/แสดงเมนู">
                     <span id="plannerToggleText">ซ่อน</span>
-                    <i id="plannerToggleIcon" class="fa-solid fa-chevron-up text-[10px]"></i>
+                    <i id="plannerToggleIcon" class="fa-solid fa-chevron-up text-xs"></i>
                 </button>
-                <div class="bg-white/90 border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-right flex items-center gap-2 min-w-0">
+                <div class="bg-white/90 border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-right flex items-center gap-1.5 min-w-0">
                     <div class="text-right truncate">
-                        <span class="text-[10px] sm:text-[11px] font-extrabold text-darkText block truncate" id="greetingText">สวัสดีตอนค่ำ</span>
+                        <span class="text-[10px] sm:text-[11px] font-extrabold text-darkText block truncate" id="greetingText">สวัสดีตอนค่ำ 🌙</span>
                         <span class="text-[8px] sm:text-[9px] font-bold text-gray-500 block truncate">* วันนี้ที่ดูยอดแล้ว</span>
                     </div>
-                    <div class="w-6 h-6 bg-offWhite border border-darkText rounded-full flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-moon text-retroPurple text-[10px]"></i>
-                    </div>
+                    <i class="fa-solid fa-cloud text-gray-400 text-sm sm:text-base shrink-0"></i>
                 </div>
             </div>
         </div>
 
-        <!-- MINIMIZED SHORTCUTS (เปลี่ยนจากอิโมจิเป็นไอคอนที่ดูโปรและน่าเชื่อถือ) -->
+        <!-- MINIMIZED SHORTCUTS (เปลี่ยนจากอิโมจิเป็น FontAwesome Icons และจัดปุ่มให้ดูโปรขึ้น) -->
         <div id="plannerMinimizedBar" class="hidden flex items-center justify-center gap-1.5 py-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-0.5">
             <button onclick="switchTab('dashboard')" class="w-[38px] h-[38px] bg-white border-2 border-darkText rounded-full shadow-[0_2px_0_#1A1A1A] flex items-center justify-center text-[14px] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all shrink-0 text-popBlue" title="แดชบอร์ด"><i class="fa-solid fa-chart-pie"></i></button>
             <button onclick="switchTab('finance')" class="w-[38px] h-[38px] bg-white border-2 border-darkText rounded-full shadow-[0_2px_0_#1A1A1A] flex items-center justify-center text-[14px] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all shrink-0 text-green-600" title="รายรับ-รายจ่าย"><i class="fa-solid fa-wallet"></i></button>
@@ -957,7 +950,7 @@
 
         const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show', headerCollapsed:'y2k_header_collapsed' };
         const DEFAULT_CATEGORIES = [ "🍔 อาหาร/เครื่องดื่ม", "🛍️ ช้อปปิ้ง", "🚗 เดินทาง", "🎮 บันเทิง/เกม", "💡 บิล/ค่าใช้จ่าย", "💰 เงินเดือน/รายรับ", "✨ อื่นๆ" ];
-        const makeDefaultPet = () => ({ name: 'น้องสัตว์เลี้ยง', avatar: '🐱', speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭', speechHistory: [{ time: 'เริ่มต้น', text: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭' }] });
+        const makeDefaultPet = () => ({ name: 'น้องป๋อง', avatar: '🐱', speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭', speechHistory: [{ time: 'เริ่มต้น', text: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭' }] });
         function readLS(key, fallback) { try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; } }
 
         let state = {
@@ -1107,7 +1100,7 @@
             state.pet.hunger = hunger; state.pet.happiness = happiness;
             if (!state.pet.speech || state.pet.speech.includes('ยินดีต้อนรับ')) state.pet.speech = defaultSpeech;
 
-            const pName = state.pet.name || 'สัตว์เลี้ยง';
+            const pName = state.pet.name || 'น้องป๋อง';
             $('floatingPetName').innerText = pName; $('petHeaderTitle').innerText = `${pName} (Tamagotchi)`;
             $('petAvatar').innerText = avatar; $('minimizedPetAvatar').innerText = avatar;
             $('petRoomAvatar').innerText = avatar; $('dashCatAvatar').innerText = avatar;

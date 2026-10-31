@@ -448,3 +448,70 @@
  .tycoon-sprites .office-expression{width:15px!important;height:15px!important;font-size:9px!important;}
  .tycoon-sprites .office-pet-sprite{font-size:20px!important;}
 }
+
+
+/* ===== OFFICE SIM GAMEPLAY v12 ===== */
+.tycoon-sprites .office-sprite{
+  width:7.4%!important;min-width:34px!important;max-width:50px!important;
+  overflow:visible!important;z-index:9;
+}
+.tycoon-sprites .office-sprite.is-working{z-index:12;}
+.tycoon-sprites .office-sprite.is-slacking{z-index:13;filter:drop-shadow(0 0 4px #ffcf77)!important;}
+.tycoon-sprites .office-sprite.is-slacking .pixel-person-svg{
+  animation:loafLean 1.4s ease-in-out infinite!important;
+}
+@keyframes loafLean{0%,100%{transform:rotate(0) translateY(0)}50%{transform:rotate(8deg) translateY(2px)}}
+.tycoon-sprites .office-mini-bubble{
+  position:absolute;z-index:30;left:50%;bottom:calc(100% + 7px);
+  transform:translateX(-50%);width:max-content;max-width:112px;
+  padding:5px 7px;background:#fffdf4;color:#4b3b2b;
+  border:1.5px solid #9c7955;border-radius:8px;
+  box-shadow:0 2px 0 #785b40,0 4px 8px #33485b30;
+  font-size:8px;line-height:1.25;font-weight:900;text-align:center;
+  white-space:normal;pointer-events:none;
+  animation:miniBubbleIn .22s ease-out;
+}
+.tycoon-sprites .office-mini-bubble:after{
+  content:"";position:absolute;left:50%;bottom:-5px;width:8px;height:8px;
+  background:#fffdf4;border-right:1.5px solid #9c7955;border-bottom:1.5px solid #9c7955;
+  transform:translateX(-50%) rotate(45deg);
+}
+@keyframes miniBubbleIn{from{opacity:0;transform:translate(-50%,5px) scale(.92)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+.tycoon-sprites .office-work-prop,.tycoon-sprites .office-loaf-prop{
+  position:absolute;z-index:7;left:calc(100% - 7px);top:42%;
+  display:grid;place-items:center;width:19px;height:19px;
+  border:1.5px solid #fff;border-radius:50%;background:#fff8dc;
+  box-shadow:0 2px 4px #34485b33;font-size:11px;
+  animation:propBob 1s ease-in-out infinite;
+}
+.tycoon-sprites .office-loaf-prop{background:#eee9ff;}
+@keyframes propBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.tycoon-sprites .office-role-tag{
+  display:block;margin-top:3px;padding:1px 4px;
+  border-radius:3px;background:#66533f;color:#fff4dc;
+  font-size:6px;line-height:1.2;font-weight:800;white-space:nowrap;
+  opacity:.9;
+}
+.tycoon-sprites .office-sprite.is-working .office-role-tag{background:#477b67;}
+.tycoon-sprites .office-sprite.is-slacking .office-role-tag{background:#a66a4e;}
+/* Workstation areas: six clearly separated departments */
+.office-zone{
+  position:absolute;z-index:4;transform:translate(-50%,-50%);
+  padding:2px 5px;border:1px solid #a77e55;border-radius:3px;
+  background:#fff0d4;color:#6d5038;box-shadow:0 2px 0 #8c6748;
+  font-size:7px;line-height:1.2;font-weight:900;white-space:nowrap;
+  pointer-events:none;opacity:.94;
+}
+.office-zone.manager{left:37%;top:29%}
+.office-zone.researcher{left:65%;top:24%}
+.office-zone.writer{left:23%;top:53%}
+.office-zone.designer{left:45%;top:57%}
+.office-zone.analyst{left:58%;top:68%}
+.office-zone.secretary{left:76%;top:51%}
+@media(max-width:560px){
+ .tycoon-sprites .office-sprite{width:8.1%!important;min-width:29px!important;max-width:41px!important;}
+ .tycoon-sprites .office-mini-bubble{max-width:91px;font-size:7px;padding:4px 5px;}
+ .tycoon-sprites .office-work-prop,.tycoon-sprites .office-loaf-prop{width:16px;height:16px;font-size:9px;}
+ .tycoon-sprites .office-role-tag{font-size:5.5px;padding:1px 3px;}
+ .office-zone{font-size:6px;padding:2px 3px;}
+}

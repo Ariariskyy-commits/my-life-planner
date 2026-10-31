@@ -283,3 +283,77 @@
 #officeDialogueText{font-size:13px!important;line-height:1.45!important;margin:5px 0 0!important;white-space:normal!important;word-break:break-word!important;}
 #officeDialogueName{font-size:12px!important;}
 #officeSprites .office-expression{display:grid!important;}
+
+
+/* ===== TYCOON MAP v9 — pixel-game office, inspired by classic management sims ===== */
+.tycoon-scene{
+  position:relative;isolation:isolate;min-height:0!important;
+  aspect-ratio:1.42/1;overflow:hidden;
+  background:linear-gradient(180deg,#b8e5ff 0%,#e7f6ff 53%,#8fc9e8 100%);
+  image-rendering:pixelated;
+}
+.tycoon-scene:before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 12%,#fff9 0 8%,transparent 38%),linear-gradient(180deg,transparent 60%,#8bc6e8 100%);
+}
+.tycoon-scene:after{
+  content:"";position:absolute;z-index:1;left:3%;right:3%;top:10%;height:80%;
+  background:#617d8e;clip-path:polygon(50% 0,100% 48%,100% 55%,50% 100%,0 55%,0 48%);
+  filter:drop-shadow(0 8px 0 #49697f);pointer-events:none;
+}
+.tycoon-map{
+  position:absolute;z-index:2;inset:0;width:100%;height:100%;
+  filter:drop-shadow(0 7px 0 #547e96);shape-rendering:crispEdges;
+}
+.tycoon-map .wall{stroke:#a87f55;stroke-width:7;stroke-linejoin:round}
+.tycoon-map .wall-edge{stroke:#fff1d9;stroke-width:8;stroke-linejoin:round}
+.tycoon-map .floor-line{stroke:#b98b5b;stroke-width:2;opacity:.55}
+.tycoon-map .furniture{stroke:#79543c;stroke-width:5;stroke-linejoin:round}
+.tycoon-map .outline{stroke:#79543c;stroke-width:4;stroke-linejoin:round}
+.tycoon-map .window-frame{fill:#dff6ff;stroke:#fff;stroke-width:9}
+.tycoon-map .glass{fill:#8ed6ff;stroke:#6e9fb5;stroke-width:3}
+.tycoon-map .plant-leaf{fill:#49a85d;stroke:#277447;stroke-width:2}
+.tycoon-sprites{position:absolute;z-index:8;inset:0;pointer-events:none;}
+.tycoon-sprites .office-sprite{
+  position:absolute;width:8.5%;min-width:42px;max-width:66px;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  pointer-events:auto;cursor:pointer;filter:drop-shadow(0 4px 1px #34485b55);
+  transition:left .8s ease,top .8s ease;z-index:9;
+}
+.tycoon-sprites .office-avatar{display:block;width:100%;height:auto;font-size:0;line-height:0;}
+.pixel-person{position:relative;display:block;width:46px;height:62px;margin:auto;image-rendering:pixelated;filter:drop-shadow(2px 3px 0 #273a4b35);}
+.pixel-person .hair{position:absolute;z-index:3;left:10px;top:1px;width:27px;height:14px;background:var(--hair,#49362d);box-shadow:0 5px 0 var(--hair,#49362d),-3px 5px 0 var(--hair,#49362d),3px 5px 0 var(--hair,#49362d);}
+.pixel-person .face{position:absolute;z-index:2;left:12px;top:8px;width:23px;height:23px;background:#f3c79f;box-shadow:inset 0 -3px 0 #d99c79;}
+.pixel-person .face:before{content:"";position:absolute;left:5px;top:9px;width:3px;height:4px;background:#30303a;box-shadow:10px 0 #30303a;}
+.pixel-person .face:after{content:"";position:absolute;left:8px;top:17px;width:7px;height:2px;background:#a44d58;}
+.pixel-person .body{position:absolute;z-index:1;left:7px;top:31px;width:33px;height:22px;background:var(--shirt,#638bd8);clip-path:polygon(20% 0,80% 0,100% 100%,0 100%);border-bottom:4px solid #35465b;}
+.pixel-person .arm{position:absolute;z-index:2;top:33px;width:8px;height:17px;background:#f0bf99;}
+.pixel-person .arm.left{left:2px;transform:rotate(13deg)}.pixel-person .arm.right{right:2px;transform:rotate(-13deg)}
+.pixel-person .legs{position:absolute;z-index:1;left:13px;top:51px;width:22px;height:10px;background:#35445e;box-shadow:0 4px 0 #303949;}
+.pixel-person .hair-cap{position:absolute;z-index:4;left:8px;top:0;width:31px;height:8px;background:var(--hair,#49362d);border-bottom:3px solid #312a2b;}
+.office-sprite.is-working .pixel-person{animation:pixelWork .38s steps(2,end) infinite alternate;}
+.office-sprite.is-idle .pixel-person{animation:pixelIdle 2.4s ease-in-out infinite;}
+@keyframes pixelWork{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+@keyframes pixelIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.tycoon-sprites .office-expression{
+  right:-2px;top:-5px;width:19px;height:19px;font-size:11px;border:2px solid #fff;background:#fff1b8;
+}
+.tycoon-sprites .office-name{
+  display:block;white-space:nowrap;background:#fff8e7;color:#473d31;
+  border:2px solid #9a7655;border-radius:3px;padding:2px 5px;
+  box-shadow:0 2px 0 #6e543f;font-size:9px;font-weight:900;
+}
+.tycoon-sprites .office-speech{display:none!important;}
+.tycoon-sprites .office-sprite.is-speaking{z-index:14;filter:drop-shadow(0 0 5px #ffe37a);}
+.tycoon-sprites .office-sprite.is-speaking .office-name{background:#fff0a8;}
+.office-pet-sprite{z-index:10;font-size:25px;filter:drop-shadow(0 4px 1px #31485b66);}
+.office-pet-sprite.cat{left:17%;top:68%}.office-pet-sprite.dog{left:77%;top:70%}.office-pet-sprite.bird{left:82%;top:21%}
+.office-scene-caption{z-index:15;left:10px;bottom:9px;background:#fff1d9;border:2px solid #9a7655;border-radius:3px;color:#604b37;font-size:9px;font-weight:900;letter-spacing:.08em;box-shadow:0 3px 0 #74573f;}
+#officeDialogue{margin:10px 12px 4px!important;min-height:74px!important;}
+@media(max-width:560px){
+ .tycoon-scene{aspect-ratio:1.18/1;}
+ .tycoon-sprites .office-sprite{width:10%;min-width:36px;}
+ .pixel-person{transform:scale(.83);transform-origin:bottom center;}
+ .tycoon-sprites .office-name{font-size:8px;padding:2px 4px;}
+ .office-pet-sprite{font-size:22px;}
+}

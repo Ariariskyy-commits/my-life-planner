@@ -19,6 +19,15 @@
   const $ = id => document.getElementById(id);
   let data = {tasks:[],statuses:{},petState:{}};
   let initialized = false;
+  let speechTimer = null;
+  const speech = {
+    manager:['CEO วันนี้มีงานอะไรให้ทีมลุยบ้างคะ?','ทุกคนพร้อมแล้วค่ะ... รอคำสั่งอยู่นะ','อย่าลืมพักบ้างนะ CEO งานไม่หนีไปไหนหรอกค่ะ'],
+    researcher:['มีเรื่องให้ค้นอีกมั้ย? สมองกำลังแล่นเลย','ฉันเปิดแท็บไว้ 27 แท็บแล้วนะ...','ข้อมูลแน่นมาก ขอเวลาย่อยแป๊บ!'],
+    writer:['ว่างจัง... หรือจะให้ฉันเขียนแคปชันอีกดี?','ไอเดียมาแล้ว! ขอพิมพ์ก่อนลืม','CEO พิมพ์บรีฟมาได้เลย ฉันรออยู่'],
+    designer:['ขอสีอีกนิด ทุกอย่างจะลงตัว!','ใครเอาฟอนต์ Comic Sans มาใส่ไฟล์ฉัน?!','โต๊ะฉันรกเพราะกำลังสร้างสรรค์ค่ะ'],
+    analyst:['ตัวเลขไม่เคยโกหก... แต่คนชอบปัดเศษ','งานยังไม่มา ฉันเลยนั่งดูกราฟเล่น','CEO มีข้อมูลให้ฉันวิเคราะห์มั้ย?'],
+    secretary:['วันนี้มีอะไรต้องจดบ้างคะ?','CEO คะ งานค้างเริ่มมองแรงแล้วนะ','ฉันเตรียมตารางไว้แล้ว อย่าลืมเปิดดูนะ']
+  };
   const safeText = value => String(value == null ? '' : value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function load(){
     try{
@@ -46,11 +55,23 @@
     }).join('');
     $('officeTaskAgent').innerHTML=agents.map(a=>'<option value="'+a.id+'">'+a.name+' — '+a.role+'</option>').join('');
   }
+  function lineFor(agent){
+    const lines=speech[agent.id]||['มีงานอะไรให้ช่วยมั้ย?'];
+    if(statusOf(agent.id)==='working')return ['กำลังลุยงานอยู่!','ขอเวลาโฟกัสแป๊บนะ','รับทราบค่า CEO ✨'][Math.floor(Math.random()*3)];
+    return lines[Math.floor(Math.random()*lines.length)];
+  }
+  function refreshDialogue(){
+    document.querySelectorAll('#officeSprites .office-sprite').forEach(el=>{
+      const id=el.getAttribute('data-agent-id'),agent=agents.find(a=>a.id===id);
+      const bubble=el.querySelector('.office-speech');
+      if(agent&&bubble)bubble.textContent=lineFor(agent);
+    });
+  }
   function renderSprites(){
     const people=agents.map((a,i)=>{
       const working=statusOf(a.id)==='working';
       const pos=working?[{x:54,y:44},{x:67,y:50},{x:29,y:54},{x:38,y:62},{x:48,y:76},{x:60,y:78}][i]:{x:a.x,y:a.y};
-      return '<div class="office-sprite '+(working?'is-working':'is-idle')+'" style="left:calc('+pos.x+'% - 34px);top:calc('+pos.y+'% - 34px)" title="'+safeText(a.name+' · '+a.role)+'"><span class="office-avatar">'+a.emoji+'</span><span class="office-name">'+a.name+(working?' · ทำงาน':'')+'</span></div>';
+      return '<div class="office-sprite '+(working?'is-working':'is-idle')+'" data-agent-id="'+a.id+'" style="left:calc('+pos.x+'% - 34px);top:calc('+pos.y+'% - 34px)" title="'+safeText(a.name+' · '+a.role)+'"><span class="office-speech">'+safeText(lineFor(a))+'</span><span class="office-avatar">'+a.emoji+'</span><span class="office-name">'+a.name+(working?' · ทำงาน':'')+'</span></div>';
     }).join('');
     const petSprites='<div class="office-pet-sprite cat" title="มะลิ แมวประจำออฟฟิศ">🐈</div><div class="office-pet-sprite dog" title="โมจิ น้องหมาประจำออฟฟิศ">🐕</div><div class="office-pet-sprite bird" title="จิ๊บจิ๊บ นกประจำออฟฟิศ">🦜</div>';
     $('officeSprites').innerHTML=people+petSprites;
@@ -99,6 +120,8 @@
   function init(){
     if(initialized||!$('officeApp'))return;
     initialized=true;load();render();
+    if(speechTimer)clearInterval(speechTimer);
+    speechTimer=setInterval(refreshDialogue,6500);
     $('officeTaskForm').addEventListener('submit',addTask);
     $('officeTaskList').addEventListener('click',e=>{
       const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]');

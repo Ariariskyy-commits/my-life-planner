@@ -181,7 +181,7 @@
       const slacking=slackingAgentId===a.id&&!working;
       const line=(bubbleAgentId===a.id&&bubbleLine)?bubbleLine:lineFor(a);
       const positions=[
-        {x:37,y:41},{x:63,y:37},{x:25,y:58},{x:46,y:67},{x:56,y:73},{x:72,y:59}
+        {x:37,y:41},{x:63,y:37},{x:25,y:58},{x:46,y:67},{x:56,y:73},{x:72,y:59},{x:78,y:68}
       ];
       const pos=positions[i];
       const activityClass=working?'is-working':slacking?'is-slacking':'is-idle';
@@ -240,6 +240,20 @@
     if(action==='feed'){s.hunger=Math.min(100,(s.hunger||50)+28);s.mood='อิ่มท้องแล้ว ขอบคุณนะ';}
     if(action==='play'){s.joy=Math.min(100,(s.joy||50)+26);s.mood='มีความสุขสุด ๆ';}
     data.petState[id]={hunger:s.hunger,joy:s.joy,mood:s.mood};save();renderPets();
+    const petLines={cat:action==='feed'?'ข้าวตังอิ่มแล้ว ขอไปนอนบนเอกสารนะ!':'ข้าวตัง: จับหนูให้ดูมั้ย?',dog:action==='feed'?'ถั่วงอกงั่ม ๆ ขออีกได้มั้ย!':'ถั่วงอก: โยนลูกบอลมาเลย CEO!',bird:action==='feed'?'กะทิอิ่มแล้ว จิ๊บ ๆ':'กะทิ: ขอเกาะไหล่หน่อย!'};
+    const host=agents[Math.floor(Math.random()*agents.length)];bubbleAgentId=host.id;bubbleLine={text:petLines[id],mood:action==='feed'?'อิ่มแปล้':'กำลังเล่นกับสัตว์เลี้ยง',face:action==='feed'?'😋':'🥰'};showDialogue(host,bubbleLine);renderSprites();
+  }
+  function startPetRoaming(){
+    const routes={cat:[{x:15,y:72},{x:28,y:61},{x:42,y:76},{x:58,y:64},{x:70,y:75},{x:49,y:81}],dog:[{x:77,y:77},{x:64,y:69},{x:50,y:78},{x:33,y:73},{x:22,y:62},{x:60,y:57}],bird:[{x:82,y:29},{x:70,y:25},{x:58,y:33},{x:45,y:25},{x:66,y:42},{x:84,y:36}]};
+    const steps={cat:0,dog:2,bird:1};
+    setInterval(()=>{
+      Object.keys(routes).forEach(id=>{const el=document.querySelector('#officeSprites [data-pet-id="'+id+'"]');if(!el)return;const route=routes[id],p=route[steps[id]%route.length];steps[id]++;el.style.left=p.x+'%';el.style.top=p.y+'%';el.classList.add('is-roaming');});
+      if(Math.random()<.42){
+        const id=['cat','dog','bird'][Math.floor(Math.random()*3)],agent=agents[Math.floor(Math.random()*agents.length)];
+        const lines={cat:['ข้าวตัง! อย่าเดินบนคีย์บอร์ดสิ งานหายหมดแล้ว!','ข้าวตังแอบหลับบนแฟ้มอีกแล้ว'],dog:['ถั่วงอก! อย่าคาบเอกสารประชุมไป!','ถั่วงอกวิ่งชนโต๊ะอีกแล้ว!'],bird:['กะทิ! อย่าจิกสายเมาส์นะ!','กะทิร้องประชุมแทน CEO แล้วเหรอ']};
+        bubbleAgentId=agent.id;bubbleLine={text:lines[id][Math.floor(Math.random()*lines[id].length)],mood:'โดนสัตว์เลี้ยงป่วน',face:'😵'};showDialogue(agent,bubbleLine);renderSprites();
+      }
+    },3200);
   }
   function init(){
     if(initialized||!$('officeApp'))return;
@@ -250,6 +264,7 @@
     setInterval(()=>{pets.forEach(p=>{const s=petOf(p);s.hunger=Math.max(0,(Number(s.hunger)||50)-1);s.joy=Math.max(0,(Number(s.joy)||50)-1);if(s.hunger<25)s.mood='หิวแล้ว ขอขนมหน่อย';else if(s.joy<25)s.mood='เหงาจัง มาเล่นกัน';data.petState[p.id]={hunger:s.hunger,joy:s.joy,mood:s.mood};});save();renderPets();},60000);
     if(loafTimer)clearInterval(loafTimer);
     loafTimer=setInterval(cycleLoafing,9000);
+    startPetRoaming();
     $('officeTaskForm').addEventListener('submit',addTask);
     $('officeTaskList').addEventListener('click',e=>{
       const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]');

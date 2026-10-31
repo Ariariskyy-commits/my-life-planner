@@ -701,7 +701,7 @@
                         </div>
                     </div>
 
-                    <div class="relative cursor-pointer hover:scale-105 transition-all shrink-0 p-1 flex items-center justify-center" onclick="switchTab('pet')">
+                    <div class="relative cursor-pointer hover:scale-105 transition-all shrink-0 p-1 flex items-center justify-center" onclick="switchTab('calendar')">
                         <div id="dashCatAvatar" class="text-5xl sm:text-6xl drop-shadow-md">🐱</div>
                         <span class="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-hotPink text-white font-extrabold text-[10px] sm:text-xs rounded-full border-2 border-darkText flex items-center justify-center animate-pulse shadow-sm">!</span>
                     </div>
@@ -857,18 +857,37 @@
 
         <!-- CALENDAR -->
         <section id="tab-calendar" class="tab-content hidden space-y-4">
-            <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 text-darkText">
-                <div class="space-y-1 flex-1">
-                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">📊 อารมณ์เดือนนี้</div>
-                    <h2 id="calendarMonthMoodTitle" class="text-xl font-extrabold font-cute">อารมณ์ประจำเดือนนี้</h2>
-                    <p id="calendarMonthMoodSummary" class="font-bold text-xs bg-white/80 p-2.5 rounded-xl border border-darkText inline-block">กำลังประมวลผล...</p>
-                </div>
-                <div class="bg-white p-3 rounded-2xl border-2 border-darkText flex items-center gap-2.5 min-w-[240px]">
-                    <div id="calPetAvatar" class="text-3xl bg-sunnyYellow/30 w-11 h-11 rounded-xl border border-darkText flex items-center justify-center">🐱</div>
+            
+            <!-- การ์ดอารมณ์เดือนนี้ (ดีไซน์สไตล์หน้าสัตว์เลี้ยง พร้อมตัวน้องและกล่องคำพูด) -->
+            <div class="pet-wrap">
+                <div class="pet-title-card flex items-center justify-between">
                     <div>
-                        <span class="text-[10px] font-extrabold text-popBlue block">คำทักทายวันนี้ 🐾</span>
-                        <p id="calPetSpeechText" class="text-[11px] font-bold text-hotPink mt-0.5">จิ้มเลือกวันที่ได้เลย!</p>
+                        <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border-2 border-darkText">🗓️ อารมณ์ประจำเดือน</div>
+                        <h2 id="calendarMonthMoodTitle" class="text-xl font-extrabold font-cute mt-1">อารมณ์ประจำเดือนนี้</h2>
                     </div>
+                    <button onclick="selectCalendarDate(null)" id="resetDateFilterBtnCalendar" class="hidden text-xs bg-gray-200 border-2 border-darkText px-3 py-1 rounded-xl font-bold">แสดงทั้งหมด</button>
+                </div>
+
+                <div class="pet-scene" style="aspect-ratio: 16 / 7;">
+                    <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                        <defs>
+                            <pattern id="calCheck" width="24" height="24" patternUnits="userSpaceOnUse">
+                                <rect width="24" height="24" fill="#FFFFFF"/>
+                                <rect width="12" height="24" fill="#FFD1DC" opacity=".6"/>
+                                <rect width="24" height="12" fill="#FFD1DC" opacity=".6"/>
+                            </pattern>
+                        </defs>
+                        <rect x="0" y="0" width="400" height="180" fill="#E0F7FA"/>
+                        <rect x="0" y="120" width="400" height="60" fill="#FFE0B2"/>
+                        <line x1="0" y1="120" x2="400" y2="120" stroke="#FFCC80" stroke-width="3"/>
+                        <ellipse cx="200" cy="150" rx="130" ry="18" fill="#FFCDD2" stroke="#1A1A1A" stroke-width="3"/>
+                    </svg>
+
+                    <!-- กล่องคำพูดอารมณ์ประจำเดือน -->
+                    <div id="calendarMonthMoodSpeech" class="pet-speech">กำลังประมวลผลอารมณ์เดือนนี้... ✨</div>
+
+                    <!-- ตัวสัตว์เลี้ยงประจำหน้าปฏิทิน -->
+                    <div id="calendarMonthPetAvatar" class="pet-character" style="bottom: 22%;">🐱</div>
                 </div>
             </div>
 
@@ -891,7 +910,6 @@
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
                     <div class="flex justify-between items-center border-b border-darkText pb-2">
                         <h3 id="diarySidebarTitle" class="font-cute font-bold text-base flex items-center gap-1.5"></h3>
-                        <button id="resetDateFilterBtn" onclick="selectCalendarDate(null)" class="hidden text-[10px] font-bold bg-gray-200 text-darkText px-2 py-0.5 rounded border border-darkText">แสดงทั้งหมด</button>
                     </div>
                     <div id="eventsListSidebar" class="space-y-2 overflow-y-auto max-h-[300px] flex-1 pr-1 text-xs"></div>
                 </div>
@@ -1979,6 +1997,40 @@
             return { inc, exp, net: inc - exp };
         }
 
+        function updatepetCalendarMoodDisplay() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+            const monthEvents = state.events.filter(e => e.date && e.date.startsWith(monthPrefix));
+            
+            const titleLabel = `อารมณ์เดือน${THAI_MONTHS[month]} ${year + 543}`;
+            if ($('calendarMonthMoodTitle')) $('calendarMonthMoodTitle').innerText = titleLabel;
+            if ($('dashCalendarMonthMoodTitle')) $('dashCalendarMonthMoodTitle').innerText = titleLabel;
+
+            let speechText = 'เดือนนี้ยังไม่มีการบันทึกโน้ตหรืออารมณ์เลย ลองกดเพิ่มไดอารี่ดูสิคะ! 🌸';
+            let avatar = state.pet.avatar || '🐱';
+
+            if (monthEvents.length > 0) {
+                const moods = monthEvents.map(e => e.mood).filter(Boolean);
+                const count = monthEvents.length;
+                if (moods.includes('🥰') || moods.includes('😊')) {
+                    speechText = `เดือนนี้แฮปปี้สุดๆ มีเรื่องราวดีๆ บันทึกไว้ ${count} วันเลย! 💖✨`;
+                    avatar = '😺';
+                } else if (moods.includes('😭') || moods.includes('😡')) {
+                    speechText = `เดือนนี้ดูเหมือนจะเหนื่อยหรือมีเรื่องให้เครียด ${count} วัน สู้ๆ นะคะ! 💪`;
+                    avatar = '😿';
+                } else {
+                    speechText = `เดือนนี้บันทึกความทรงจำไว้ ${count} วันแล้ว เยี่ยมมาก! 📝`;
+                    avatar = '🐱';
+                }
+            }
+
+            if ($('calendarMonthMoodSummary')) $('calendarMonthMoodSummary').innerText = speechText;
+            if ($('dashCalendarMonthMoodSummary')) $('dashCalendarMonthMoodSummary').innerText = speechText;
+            if ($('calendarMonthMoodSpeech')) $('calendarMonthMoodSpeech').innerText = speechText;
+            if ($('calendarMonthPetAvatar')) $('calendarMonthPetAvatar').innerText = avatar;
+        }
+
         function updatePetStatus() {
             const { inc, exp, net } = calcNetBalance();
             const faces = PET_MOOD_FACES[state.pet.avatar] || PET_MOOD_FACES['🐱'];
@@ -1991,10 +2043,8 @@
             else if (net < 5000){ hunger = 75;  avatar = faces.good; moodText = 'อิ่มสบาย 😊';   defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟'; }
             else                { hunger = 100; avatar = faces.rich; moodText = 'เศรษฐี! 🤑';     defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖'; }
 
-            // ความสุข: สัดส่วนรายรับเทียบกับรายรับ+รายจ่ายทั้งหมด (ไม่มีรายการให้ถือว่า 0%)
+            // ความสุข: สัดส่วนรายรับเทียบกับรายรับ+รายจ่ายทั้งหมด
             const happiness = (inc + exp) > 0 ? clamp(inc / (inc + exp) * 100) : 0;
-
-            // ความมั่นคง: อัตราการเก็บเงิน = (รายรับ - รายจ่าย) / รายรับ
             const stable = inc > 0 ? clamp(net / inc * 100) : 0;
 
             state.pet.hunger = hunger; state.pet.happiness = happiness;
@@ -2004,7 +2054,7 @@
             $('floatingPetName').innerText = pName;
             $('petHeaderTitle').innerText = `${pName} (Tamagotchi)`;
             $('petAvatar').innerText = avatar; $('minimizedPetAvatar').innerText = avatar;
-            $('petRoomAvatar').innerText = avatar; $('calPetAvatar').innerText = avatar; $('dashCatAvatar').innerText = avatar;
+            $('petRoomAvatar').innerText = avatar; $('dashCatAvatar').innerText = avatar;
             $('petRoomName').innerText = `${pName} (${moodText})`;
             $('petRoomStatus').innerText = `สุทธิ ฿${money(net)}`;
             $('petHungerVal').innerText = hunger + '%'; $('petHungerBar').style.width = hunger + '%';
@@ -2012,7 +2062,6 @@
             $('petStableVal').innerText = stable + '%'; $('petStableBar').style.width = stable + '%';
             $('petSpeechBubble').innerText = state.pet.speech;
             $('petRoomSpeech').innerText = state.pet.speech;
-            $('calPetSpeechText').innerText = state.pet.speech;
             $('dashCatSpeechText').innerText = state.pet.speech;
 
             document.querySelectorAll('.pet-type-btn').forEach(b => {
@@ -2020,6 +2069,7 @@
             });
 
             renderPetSpeechHistory(); renderQuickNotesWidget();
+            updatepetCalendarMoodDisplay();
         }
 
         function triggerPetSpeech(text) {
@@ -2027,7 +2077,6 @@
             state.pet.speechHistory.unshift({ time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), text });
             if (state.pet.speechHistory.length > 8) state.pet.speechHistory.pop();
 
-            // อัปเดตกล่องคำพูดในห้องทันทีและเล่นอนิเมชันใหม่
             const bubble = $('petRoomSpeech');
             if (bubble) {
                 bubble.innerText = text;
@@ -2158,18 +2207,41 @@
             $('billUseInstallment').checked = false; $('installmentInputs').classList.add('hidden');
             updateCategorySelects('💡 บิล/ค่าใช้จ่าย');
             if (presetAmount !== null) $('billAmount').value = presetAmount;
+            if (editId) {
+                const b = state.bills.find(x => x.id === editId);
+                if (b) {
+                    $('billId').value = b.id; $('billTitle').value = b.title; $('billDate').value = b.date;
+                    updateCategorySelects(b.category); $('billAmount').value = b.amount;
+                }
+            }
             openModal('billModal');
         }
 
         function handleSaveBill(e) {
             e.preventDefault();
+            const id = $('billId').value;
+            const title = $('billTitle').value.trim();
+            const date = $('billDate').value;
+            const category = $('billCategory').value;
             const amount = parseFloat($('billAmount').value);
             if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
-            state.bills.unshift({
-                id: 'bill_' + Date.now(), title: $('billTitle').value.trim(), date: $('billDate').value,
-                category: $('billCategory').value, amount, paid: false
-            });
-            saveData(); closeModal('billModal'); refreshUI(); showToast('เพิ่มบิลแล้ว!');
+
+            if (id) {
+                const b = state.bills.find(x => x.id === id);
+                if (b) { b.title = title; b.date = date; b.category = category; b.amount = amount; }
+            } else {
+                let finalTitle = title;
+                if ($('billUseInstallment').checked) {
+                    const cur = $('billInstallmentCurrent').value || '1';
+                    const tot = $('billInstallmentTotal').value || '3';
+                    finalTitle += ` ${cur}/${tot}`;
+                }
+                state.bills.unshift({
+                    id: 'bill_' + Date.now(), title: finalTitle, date,
+                    category, amount, paid: false
+                });
+            }
+            saveData(); closeModal('billModal'); refreshUI(); showToast('บันทึกบิลสำเร็จ!');
         }
 
         function toggleBillPaid(id) {
@@ -2205,7 +2277,13 @@
             $('billsTotalSummaryText').innerText = `ยอดรวมที่ต้องเตรียมจ่าย: ฿ ${money(totalAmount)}`;
             $('billsGrid').innerHTML = activeBills.length ? activeBills.map(b => `
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2">
-                    <div class="flex justify-between"><span class="text-[10px] font-bold bg-retroPurple text-white px-2 py-0.5 rounded">${esc(b.date)}</span><button onclick="deleteBill('${b.id}')" class="text-gray-400 hover:text-hotPink"><i class="fa-solid fa-trash-can"></i></button></div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-bold bg-retroPurple text-white px-2 py-0.5 rounded">${esc(b.date)}</span>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="openBillModal('${b.id}')" class="text-popBlue"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteBill('${b.id}')" class="text-gray-400 hover:text-hotPink"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
                     <h4 class="font-bold text-sm">${esc(b.title)}</h4>
                     <span class="text-base font-extrabold text-hotPink block">฿ ${money(b.amount)}</span>
                     <button onclick="toggleBillPaid('${b.id}')" class="w-full py-1 bg-limeGreen text-darkText font-bold text-xs rounded border border-darkText">จ่าย</button>
@@ -2255,7 +2333,7 @@
             const ev = state.events.find(e => e.id === eventId);
             if (!ev) return;
             $('viewEventMood').innerText = ev.mood || '😊'; $('viewEventDate').innerText = ev.date; $('viewEventTitle').innerText = ev.title;
-            $('deleteEventBtn').onclick = async () => { state.events = state.events.filter(x => x.id !== ev.id); saveData(); renderCalendar(); renderEventsList(); closeModal('viewEventModal'); };
+            $('deleteEventBtn').onclick = async () => { state.events = state.events.filter(x => x.id !== ev.id); saveData(); renderCalendar(); renderEventsList(); closeModal('viewEventModal'); updatepetCalendarMoodDisplay(); };
             openModal('viewEventModal');
         }
         function changeMonth(dir) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir); renderCalendar(); }
@@ -2263,7 +2341,9 @@
         function renderCalendar() {
             const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
             const label = `${THAI_MONTHS[month]} ${year + 543}`;
-            $('calMonthYearLabel').innerText = label; $('calendarMonthMoodTitle').innerText = `อารมณ์เดือน${label}`;
+            $('calMonthYearLabel').innerText = label;
+            updatepetCalendarMoodDisplay();
+
             const firstDay = new Date(year, month, 1).getDay(), totalDays = new Date(year, month + 1, 0).getDate();
             let html = '';
             for (let i = 0; i < firstDay; i++) html += `<div class="aspect-square"></div>`;
@@ -2297,7 +2377,7 @@
                 }
             }
             $('diarySidebarTitle').innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> ${selectedCalendarDate || 'โน้ตทั้งหมด'}`;
-            $('resetDateFilterBtn').classList.toggle('hidden', !selectedCalendarDate);
+            $('resetDateFilterBtnCalendar').classList.toggle('hidden', !selectedCalendarDate);
             $('eventsListSidebar').innerHTML = holidayNotice + (list.length ? list.map(ev => `
                 <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite p-2.5 rounded-xl border border-darkText cursor-pointer hover:bg-white text-xs">
                     <span class="text-[10px]">${ev.mood} <b>${esc(ev.date)}</b></span>
@@ -2332,6 +2412,7 @@
             $('dashTotalIncome').innerText = '฿ ' + money(inc);
             $('dashTotalExpense').innerText = '฿ ' + money(exp);
             renderExpenseChart(); renderBillsChart();
+            updatepetCalendarMoodDisplay();
         }
 
         let expenseChartInstance = null, billsChartInstance = null;

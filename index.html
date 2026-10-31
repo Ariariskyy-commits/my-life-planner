@@ -76,6 +76,7 @@
             background-color: var(--bg-color, #F9F9FB);
             color: var(--text-color, #1A1A1A);
             -webkit-font-smoothing: antialiased;
+            padding-bottom: 96px;
         }
 
         body.theme-y2k    { --bg-color: #F9F9FB; --card-bg: #FFFFFF; --text-color: #1A1A1A; }
@@ -102,10 +103,10 @@
             transform: scale(1.15);
         }
 
-        button:not(.tb-btn):not(.mood-btn):not(.vs-btn):hover {
+        button:not(.tb-btn):not(.mood-btn):not(.vs-btn):not(.bn-item):not(.bn-add):hover {
             transform: translateY(-1px);
         }
-        button:not(.tb-btn):not(.mood-btn):not(.vs-btn):active {
+        button:not(.tb-btn):not(.mood-btn):not(.vs-btn):not(.bn-item):not(.bn-add):active {
             transform: scale(.97);
         }
         button, label, select, input, textarea, a {
@@ -271,6 +272,78 @@
             font-size: 0.55rem !important;
         }
 
+        /* ===== แถบเมนูล่าง (Bottom Navigation) ===== */
+        .bottom-nav {
+            position: fixed;
+            left: 50%;
+            bottom: 12px;
+            transform: translateX(-50%);
+            width: calc(100% - 24px);
+            max-width: 520px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            background: #0055FF;
+            border: 3px solid #1A1A1A;
+            border-radius: 26px;
+            box-shadow: 0 6px 0 #1A1A1A, 0 14px 26px -12px rgba(0,0,0,.45);
+            z-index: 9000;
+        }
+        .bn-item {
+            flex: 1 1 0;
+            min-width: 0;
+            height: 52px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            color: #FFFFFF;
+            border-radius: 18px;
+            font-size: 10px;
+            font-weight: 700;
+            background: transparent;
+            border: none;
+        }
+        .bn-item i {
+            font-size: 17px;
+        }
+        .bn-item span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        .bn-item.bn-active {
+            background: #CCFF00;
+            color: #1A1A1A;
+            box-shadow: 0 3px 0 #1A1A1A;
+            border: 2px solid #1A1A1A;
+        }
+        .bn-add {
+            width: 60px;
+            height: 60px;
+            flex: 0 0 60px;
+            margin-top: -34px;
+            border-radius: 50%;
+            background: #FF007F;
+            color: #FFFFFF;
+            border: 3px solid #1A1A1A;
+            box-shadow: 0 5px 0 #1A1A1A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+        .bn-add:active { transform: translateY(3px); box-shadow: 0 2px 0 #1A1A1A; }
+
+        @media (max-width: 380px) {
+            .bn-item span { font-size: 9px; }
+            .bn-add { width: 54px; height: 54px; flex-basis: 54px; margin-top: -30px; }
+        }
+
         /* ===== ห้องสัตว์เลี้ยง (หน้า Pet) ===== */
         .pet-room {
             position: relative;
@@ -288,14 +361,14 @@
         .pet-room-wall {
             position: absolute;
             left: 0; right: 0; top: 0;
-            height: 60%;
+            height: 62%;
             background: linear-gradient(180deg, #FFFBD6 0%, #FFF3A6 100%);
             pointer-events: none;
         }
         .pet-room-floor {
             position: absolute;
             left: 0; right: 0; bottom: 0;
-            height: 40%;
+            height: 38%;
             background-color: #FFC9B5;
             background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.25) 0 2px, transparent 2px 60px);
             border-top: 3px solid #1A1A1A;
@@ -307,26 +380,83 @@
             pointer-events: none;
             user-select: none;
         }
-        .pet-deco-plant { left: 14px; bottom: 96px; font-size: 52px; }
-        .pet-deco-frame {
-            right: 46%; top: 22px;
-            font-size: 34px;
+        /* หน้าต่าง */
+        .pet-window {
+            right: 18px; top: 16px;
+            width: 96px; height: 76px;
+            background: linear-gradient(180deg, #BDEBFF 0%, #E9F9FF 100%);
+            border: 4px solid #1A1A1A;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .pet-window::before, .pet-window::after {
+            content: "";
+            position: absolute;
+            background: #1A1A1A;
+        }
+        .pet-window::before { left: 50%; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; }
+        .pet-window::after { top: 50%; left: 0; right: 0; height: 3px; margin-top: -1.5px; }
+        .pet-window-cloud {
+            position: absolute;
+            left: 10px; top: 14px;
+            font-size: 18px;
+        }
+        /* ชั้นหนังสือ */
+        .pet-shelf {
+            left: 12px; top: 26px;
+            width: 92px; height: 56px;
+            background: #C88B4A;
+            border: 3px solid #1A1A1A;
+            border-radius: 6px;
+            display: flex; align-items: flex-end; justify-content: space-around;
+            padding: 0 6px 4px;
+            font-size: 18px;
+        }
+        /* กรอบรูป */
+        .pet-frame {
+            left: 48%; top: 22px;
+            font-size: 26px;
             background: #fff;
             border: 3px solid #1A1A1A;
             border-radius: 8px;
-            padding: 4px 8px;
+            padding: 2px 8px;
             transform: rotate(-4deg);
         }
-        .pet-deco-lamp { right: 14px; bottom: 90px; font-size: 44px; }
+        /* พรม */
+        .pet-rug {
+            left: 50%; bottom: 22px;
+            transform: translateX(-50%);
+            width: 300px; height: 40px;
+            background: #FF9EC4;
+            border: 3px solid #1A1A1A;
+            border-radius: 50%;
+            box-shadow: inset 0 -6px 0 rgba(0,0,0,.08);
+        }
+        /* ต้นไม้ */
+        .pet-plant { left: 10px; bottom: 96px; font-size: 48px; }
+        /* กล่องกระดาษ */
+        .pet-box {
+            right: 14px; bottom: 36px;
+            font-size: 52px;
+            line-height: 1;
+            filter: drop-shadow(0 4px 0 rgba(0,0,0,.15));
+        }
+        /* ชามอาหาร */
+        .pet-bowl {
+            right: 46%; bottom: 40px;
+            font-size: 26px;
+        }
+        /* โคมไฟ/ของตกแต่ง */
+        .pet-lamp { left: 6px; bottom: 36px; font-size: 40px; }
         .pet-spark {
             position: absolute;
             z-index: 1;
-            font-size: 22px;
+            font-size: 20px;
             pointer-events: none;
             animation: petTwinkle 2.6s ease-in-out infinite;
         }
-        .pet-spark.s1 { top: 14px; right: 18px; }
-        .pet-spark.s2 { top: 56px; left: 16px; animation-delay: 1.2s; }
+        .pet-spark.s1 { top: 112px; right: 6px; }
+        .pet-spark.s2 { top: 52px; left: 50%; animation-delay: 1.2s; }
         @keyframes petTwinkle {
             0%, 100% { opacity: .35; transform: scale(.85); }
             50% { opacity: 1; transform: scale(1.1); }
@@ -342,11 +472,12 @@
             margin-top: 6px;
         }
 
+        /* ที่นอน */
         .pet-bed {
             position: relative;
             z-index: 1;
-            width: 240px;
-            height: 118px;
+            width: 250px;
+            height: 120px;
             margin: 92px auto 0;
             border: 3px solid #1A1A1A;
             border-radius: 50% / 45%;
@@ -355,6 +486,25 @@
                 repeating-linear-gradient(90deg, rgba(255,255,255,.75) 0 12px, transparent 12px 24px),
                 repeating-linear-gradient(0deg, rgba(255,255,255,.75) 0 12px, transparent 12px 24px);
             box-shadow: inset 0 -10px 0 rgba(0,0,0,.08), 0 8px 14px -8px rgba(0,0,0,.35);
+        }
+        /* หมอนบนที่นอน */
+        .pet-pillow {
+            position: absolute;
+            left: 12px; bottom: 14px;
+            width: 74px; height: 40px;
+            background: #FFDD00;
+            border: 3px solid #1A1A1A;
+            border-radius: 14px;
+            transform: rotate(-8deg);
+            box-shadow: inset -6px -6px 0 rgba(0,0,0,.08);
+        }
+        .pet-pillow::after {
+            content: "";
+            position: absolute;
+            left: 14px; right: 14px; top: 10px;
+            height: 6px;
+            border-radius: 4px;
+            background: rgba(255,255,255,.6);
         }
         .pet-avatar {
             position: absolute;
@@ -366,6 +516,7 @@
             animation: petBob 2.4s ease-in-out infinite;
             filter: drop-shadow(0 6px 6px rgba(0,0,0,.18));
             user-select: none;
+            z-index: 2;
         }
         @keyframes petBob {
             0%, 100% { transform: translate(-50%, 0); }
@@ -438,25 +589,27 @@
             background: #FFDD00;
             box-shadow: 0 0 0 3px rgba(0,85,255,.25);
         }
+        .pet-type-btn:hover { transform: translateY(-1px); }
 
-        html[data-view="mobile"] .pet-room {
-            min-height: 0;
-        }
+        html[data-view="mobile"] .pet-room { min-height: 0; }
         html[data-view="mobile"] .pet-room-wall { height: 100%; }
         html[data-view="mobile"] .pet-room-floor { height: 0; border-top: none; }
         html[data-view="mobile"] .pet-bed { margin: 80px auto 0; }
-        html[data-view="mobile"] .pet-deco-plant,
-        html[data-view="mobile"] .pet-deco-lamp { display: none; }
-        html[data-view="mobile"] .pet-deco-frame { right: 10px; top: 10px; font-size: 26px; }
+        html[data-view="mobile"] .pet-plant,
+        html[data-view="mobile"] .pet-lamp { display: none; }
+        html[data-view="mobile"] .pet-window { width: 74px; height: 60px; right: 10px; top: 10px; }
+        html[data-view="mobile"] .pet-shelf { width: 70px; height: 44px; left: 8px; top: 16px; font-size: 14px; }
+        html[data-view="mobile"] .pet-frame { left: auto; right: 96px; top: 96px; font-size: 20px; }
+        html[data-view="mobile"] .pet-rug { width: 240px; }
+        html[data-view="mobile"] .pet-box { font-size: 40px; right: 8px; bottom: 20px; }
+        html[data-view="mobile"] .pet-bowl { right: 30%; bottom: 26px; font-size: 22px; }
         html[data-view="mobile"] .pet-panel { position: static; width: 100%; }
 
-        html:not([data-view="mobile"]) .pet-room {
-            min-height: 460px;
-        }
+        html:not([data-view="mobile"]) .pet-room { min-height: 480px; }
         html:not([data-view="mobile"]) .pet-bed {
             position: absolute;
-            left: 34%;
-            bottom: 70px;
+            left: 36%;
+            bottom: 74px;
             transform: translateX(-50%);
             margin: 0;
         }
@@ -466,10 +619,9 @@
             bottom: 16px;
             width: min(340px, 42%);
         }
+        html:not([data-view="mobile"]) .pet-bowl { right: 44%; bottom: 46px; }
 
         .vs-btn, .tb-btn { font-family: 'Prompt', sans-serif; }
-
-        .pet-type-btn:hover { transform: translateY(-1px); }
 
         @media (max-width: 768px) {
             html[data-view] #appFrame { max-width: 100% !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; }
@@ -483,7 +635,7 @@
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
     <!-- FLOATING PET & QUICK NOTES WIDGET -->
-    <div id="floatingPetWidget" class="fixed bottom-3 left-3 z-[9999] flex flex-col items-start gap-1.5 select-none max-w-[240px]">
+    <div id="floatingPetWidget" class="fixed bottom-24 left-3 z-[8000] flex flex-col items-start gap-1.5 select-none max-w-[240px]">
         
         <!-- รูปแบบตอนย่อ -->
         <div id="floatingMinimizedBtn" onclick="toggleQuickNoteListVisibility()" class="hidden relative bg-sunnyYellow border-2 border-darkText w-12 h-12 rounded-full shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-all" title="เปิดโน้ตด่วนและสัตว์เลี้ยง">
@@ -918,9 +1070,16 @@
             <div class="pet-room">
                 <div class="pet-room-wall" aria-hidden="true"></div>
                 <div class="pet-room-floor" aria-hidden="true"></div>
-                <span class="pet-deco pet-deco-frame" aria-hidden="true">🖼️</span>
-                <span class="pet-deco pet-deco-plant" aria-hidden="true">🪴</span>
-                <span class="pet-deco pet-deco-lamp" aria-hidden="true">🛋️</span>
+
+                <!-- ของตกแต่งในห้อง -->
+                <div class="pet-deco pet-window" aria-hidden="true"><span class="pet-window-cloud">☁️</span></div>
+                <div class="pet-deco pet-shelf" aria-hidden="true"><span>📚</span><span>🧸</span><span>📖</span></div>
+                <span class="pet-deco pet-frame" aria-hidden="true">🖼️</span>
+                <span class="pet-deco pet-plant" aria-hidden="true">🪴</span>
+                <span class="pet-deco pet-lamp" aria-hidden="true">🛋️</span>
+                <div class="pet-deco pet-rug" aria-hidden="true"></div>
+                <span class="pet-deco pet-box" aria-hidden="true">📦</span>
+                <span class="pet-deco pet-bowl" aria-hidden="true">🥣</span>
                 <span class="pet-spark s1" aria-hidden="true">✨</span>
                 <span class="pet-spark s2" aria-hidden="true">💖</span>
 
@@ -931,6 +1090,7 @@
                 </div>
 
                 <div class="pet-bed" aria-hidden="true">
+                    <div class="pet-pillow"></div>
                     <div id="petRoomAvatar" class="pet-avatar">🐱</div>
                 </div>
 
@@ -1018,6 +1178,15 @@
 
     </div><!-- /appFrame -->
 
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav" aria-label="เมนูหลัก">
+        <button class="bn-item" id="bn-dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-house"></i><span>หน้าแรก</span></button>
+        <button class="bn-item" id="bn-planner" onclick="switchTab('planner')"><i class="fa-solid fa-calendar-check"></i><span>แพลนเนอร์</span></button>
+        <button class="bn-add" onclick="openModal('quickAddModal')" aria-label="เพิ่มด่วน"><i class="fa-solid fa-plus"></i></button>
+        <button class="bn-item" id="bn-calendar" onclick="switchTab('calendar')"><i class="fa-regular fa-image"></i><span>แกลเลอรี</span></button>
+        <button class="bn-item" onclick="openSettingsModal()"><i class="fa-solid fa-gear"></i><span>ตั้งค่า</span></button>
+    </nav>
+
     <!-- MODALS -->
     <div id="quickAddModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3">
@@ -1027,6 +1196,50 @@
                 <button onclick="closeModal('quickAddModal'); openTransactionModal('expense')" class="p-3 bg-hotPink/20 border border-darkText rounded-xl">รายจ่าย</button>
                 <button onclick="closeModal('quickAddModal'); openBillModal()" class="p-3 bg-retroPurple/20 border border-darkText rounded-xl">เตรียมจ่าย</button>
                 <button onclick="closeModal('quickAddModal'); openTaskModal()" class="p-3 bg-sunnyYellow/30 border border-darkText rounded-xl">แพลนงาน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-4 text-xs">
+            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">⚙️ ตั้งค่า</h3><button onclick="closeModal('settingsModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold text-xs">✕</button></div>
+
+            <div class="space-y-1.5">
+                <span class="font-bold block">🎨 ธีม</span>
+                <div class="grid grid-cols-4 gap-1.5 font-bold">
+                    <button onclick="setTheme('y2k'); openSettingsModal()" data-theme-btn="y2k" class="settings-theme-btn p-2 rounded-lg border border-darkText bg-popBlue text-white">Y2K</button>
+                    <button onclick="setTheme('pastel'); openSettingsModal()" data-theme-btn="pastel" class="settings-theme-btn p-2 rounded-lg border border-darkText bg-pink-400 text-white">พาสเทล</button>
+                    <button onclick="setTheme('dark'); openSettingsModal()" data-theme-btn="dark" class="settings-theme-btn p-2 rounded-lg border border-darkText bg-gray-800 text-white">ดาร์ก</button>
+                    <button onclick="setTheme('minimal'); openSettingsModal()" data-theme-btn="minimal" class="settings-theme-btn p-2 rounded-lg border border-darkText bg-gray-300 text-darkText">มินิมอล</button>
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <span class="font-bold block">📱 มุมมองหน้าจอ</span>
+                <div class="grid grid-cols-3 gap-1.5 font-bold">
+                    <button onclick="setView('desktop')" class="p-2 rounded-lg border border-darkText bg-offWhite"><i class="fa-solid fa-desktop"></i> คอม</button>
+                    <button onclick="setView('tablet')" class="p-2 rounded-lg border border-darkText bg-offWhite"><i class="fa-solid fa-tablet-screen-button"></i> แท็บเล็ต</button>
+                    <button onclick="setView('mobile')" class="p-2 rounded-lg border border-darkText bg-offWhite"><i class="fa-solid fa-mobile-screen-button"></i> มือถือ</button>
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <span class="font-bold block">💾 ข้อมูล</span>
+                <div class="grid grid-cols-2 gap-2 font-bold">
+                    <button onclick="exportBackup()" class="p-2.5 rounded-lg border border-darkText bg-limeGreen"><i class="fa-solid fa-download"></i> สำรองข้อมูล</button>
+                    <label class="p-2.5 rounded-lg border border-darkText bg-sunnyYellow text-center cursor-pointer"><i class="fa-solid fa-upload"></i> คืนค่า
+                        <input type="file" accept="application/json,.json" onchange="importBackup(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <span class="font-bold block">☁️ บัญชี Gmail</span>
+                <div class="grid grid-cols-2 gap-2 font-bold">
+                    <button id="settingsLoginBtn" onclick="loginWithGoogle()" class="p-2.5 rounded-lg border border-darkText bg-white">ล็อกอิน Gmail</button>
+                    <button id="settingsLogoutBtn" onclick="logoutGoogle()" class="p-2.5 rounded-lg border border-darkText bg-hotPink text-white hidden">ออกจากระบบ</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1202,7 +1415,7 @@
         </div>
     </div>
 
-    <div id="toastNotification" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[10001] transition-all duration-300 opacity-0 pointer-events-none text-xs">
+    <div id="toastNotification" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[10001] transition-all duration-300 opacity-0 pointer-events-none text-xs">
         <div class="bg-limeGreen text-darkText font-bold px-4 py-2.5 rounded-xl border-2 border-darkText shadow-sm flex items-center gap-2 whitespace-nowrap">
             <i class="fa-solid fa-circle-check text-base"></i>
             <span id="toastMessage">สำเร็จ!</span>
@@ -1268,6 +1481,25 @@
         }
         function openModal(id) { $(id).classList.remove('hidden'); $(id).classList.add('flex'); }
         function closeModal(id) { $(id).classList.add('hidden'); $(id).classList.remove('flex'); }
+
+        // ===== หน้าต่างตั้งค่า (เปิดจากแถบเมนูล่าง) =====
+        function openSettingsModal() {
+            document.querySelectorAll('.settings-theme-btn').forEach(b => {
+                b.classList.toggle('ring-4', b.dataset.themeBtn === state.theme);
+                b.classList.toggle('ring-hotPink', b.dataset.themeBtn === state.theme);
+            });
+            const logged = !!currentUser;
+            $('settingsLoginBtn').classList.toggle('hidden', logged);
+            $('settingsLogoutBtn').classList.toggle('hidden', !logged);
+            openModal('settingsModal');
+        }
+
+        // ===== ไฮไลต์แถบเมนูล่างตามหน้าที่เปิดอยู่ =====
+        function setBottomNavActive(tabId) {
+            document.querySelectorAll('.bn-item').forEach(b => b.classList.remove('bn-active'));
+            const map = { dashboard: 'bn-dashboard', planner: 'bn-planner', calendar: 'bn-calendar' };
+            if (map[tabId]) $(map[tabId]).classList.add('bn-active');
+        }
 
         function withTimeout(promise, ms, msg) {
             let timer;
@@ -1608,6 +1840,8 @@
                 $('userAvatarImg').src = currentUser.photoURL || '';
                 $('userNameText').innerText = currentUser.displayName || currentUser.email || 'ผู้ใช้';
             }
+            $('settingsLoginBtn').classList.toggle('hidden', logged);
+            $('settingsLogoutBtn').classList.toggle('hidden', !logged);
         }
 
         async function loginWithGoogle() {
@@ -1763,7 +1997,7 @@
             saveData(); updatePetStatus(); showToast('อัปเดตสัตว์เลี้ยงแล้ว! ✨');
         }
 
-        // ===== ฟังก์ชันใหม่สำหรับห้องสัตว์เลี้ยง =====
+        // ===== ฟังก์ชันสำหรับห้องสัตว์เลี้ยง =====
         function selectPetType(emoji) {
             $('petAvatarSelect').value = emoji;
             updatePetSettings();
@@ -1792,19 +2026,22 @@
         }
 
         function updatePetStatus() {
-            const { net } = calcNetBalance();
+            const { inc, exp, net } = calcNetBalance();
             const faces = PET_MOOD_FACES[state.pet.avatar] || PET_MOOD_FACES['🐱'];
-            let hunger, happiness, avatar, moodText, defaultSpeech;
+            const clamp = v => Math.max(0, Math.min(100, Math.round(v)));
 
-            if (net <= 0)       { hunger = 0;   happiness = 0;   avatar = faces.sad;  moodText = 'หิวม๊าก 🥺';   defaultSpeech = 'เงินเป็น 0 แล้ว ช่วยเติมรายรับที! 😭'; }
-            else if (net < 1000){ hunger = 40;  happiness = 40;  avatar = faces.low;  moodText = 'ประหยัด...';    defaultSpeech = 'ประหยัดไว้ก่อนน้า 💸'; }
-            else if (net < 5000){ hunger = 75;  happiness = 75;  avatar = faces.good; moodText = 'อิ่มสบาย 😊';   defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟'; }
-            else                { hunger = 100; happiness = 100; avatar = faces.rich; moodText = 'เศรษฐี! 🤑';     defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖'; }
+            // ความอิ่ม: ตามยอดคงเหลือสุทธิ
+            let hunger, avatar, moodText, defaultSpeech;
+            if (net <= 0)       { hunger = 0;   avatar = faces.sad;  moodText = 'หิวม๊าก 🥺';   defaultSpeech = 'เงินเป็น 0 แล้ว ช่วยเติมรายรับที! 😭'; }
+            else if (net < 1000){ hunger = 40;  avatar = faces.low;  moodText = 'ประหยัด...';    defaultSpeech = 'ประหยัดไว้ก่อนน้า 💸'; }
+            else if (net < 5000){ hunger = 75;  avatar = faces.good; moodText = 'อิ่มสบาย 😊';   defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟'; }
+            else                { hunger = 100; avatar = faces.rich; moodText = 'เศรษฐี! 🤑';     defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖'; }
 
-            // ความมั่นคง = สัดส่วนบิลที่จ่ายแล้วต่อบิลทั้งหมด (ไม่มีบิลให้ถือว่า 100%)
-            const totalBills = state.bills.length;
-            const paidBills = state.bills.filter(b => b.paid).length;
-            const stable = totalBills ? Math.round((paidBills / totalBills) * 100) : 100;
+            // ความสุข: สัดส่วนรายรับเทียบกับรายรับ+รายจ่ายทั้งหมด (ไม่มีรายการให้ถือว่า 0%)
+            const happiness = (inc + exp) > 0 ? clamp(inc / (inc + exp) * 100) : 0;
+
+            // ความมั่นคง: อัตราการเก็บเงิน = (รายรับ - รายจ่าย) / รายรับ
+            const stable = inc > 0 ? clamp(net / inc * 100) : 0;
 
             state.pet.hunger = hunger; state.pet.happiness = happiness;
             if (!state.pet.speech || state.pet.speech.includes('ยินดีต้อนรับ')) state.pet.speech = defaultSpeech;
@@ -1856,6 +2093,7 @@
                 active.classList.remove('bg-white');
                 active.classList.add('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border-2', 'border-darkText');
             }
+            setBottomNavActive(tabId);
             if (tabId === 'dashboard') renderDashboard();
             if (tabId === 'finance') renderTransactions();
             if (tabId === 'bills') renderBills();
@@ -2159,6 +2397,7 @@
 
         window.addEventListener('load', async () => {
             initView(); setDefaultDates(); refreshUI(); initFirebase();
+            setBottomNavActive('dashboard');
         });
     </script>
 </body>

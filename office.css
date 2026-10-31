@@ -597,3 +597,14 @@
   .office-primary-btn{min-height:42px!important;padding:8px!important;font-size:11px!important;}
   .office-task{padding:9px!important;margin-bottom:6px!important;}
 }
+
+/* v17 — roaming pets and new Thai team member */
+.office-pet-sprite{z-index:9;display:flex;align-items:center;flex-direction:column;gap:0;transition:left 2.4s cubic-bezier(.2,.75,.2,1),top 2.4s cubic-bezier(.2,.75,.2,1);font-size:25px;filter:drop-shadow(0 4px 3px #24354a44)}
+.office-pet-sprite small{display:block;padding:1px 4px;border-radius:5px;background:#fffdf4;border:1px solid #d9c6a6;color:#69533e;font-size:7px;font-weight:900;white-space:nowrap}
+.office-pet-sprite.is-roaming{animation:petHop .48s ease-in-out infinite alternate}
+.office-pet-sprite.bird.is-roaming{animation:petFly .8s ease-in-out infinite alternate}
+@keyframes petHop{from{transform:translateY(0) rotate(-4deg)}to{transform:translateY(-5px) rotate(4deg)}}
+@keyframes petFly{from{transform:translateY(0) rotate(-5deg)}to{transform:translateY(-8px) rotate(6deg)}}
+.office-sprite.is-pet-bothered .pixel-person-svg{animation:petSurprise .35s ease-in-out 3!important}
+@keyframes petSurprise{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px) rotate(-4deg)}75%{transform:translateX(3px) rotate(4deg)}}
+@media(max-width:560px){.office-pet-sprite{font-size:21px}.office-pet-sprite small{font-size:6px;padding:1px 3px}}

@@ -32,16 +32,16 @@
     const active = agents.filter(a => statusOf(a.id) === 'working').length;
     const done = data.tasks.filter(t => t.status === 'done').length;
     $('officeStats').innerHTML = [
-      ['TEAM MEMBERS',agents.length,'fa-users'],
-      ['ON THE CLOCK',active,'fa-laptop'],
-      ['TASKS COMPLETED',done,'fa-check-circle']
+      ['สมาชิกทีม',agents.length,'fa-users'],
+      ['กำลังทำงาน',active,'fa-laptop'],
+      ['งานที่เสร็จแล้ว',done,'fa-check-circle']
     ].map(x => '<div class="office-stat"><small><i class="fa-solid '+x[2]+'"></i> '+x[0]+'</small><strong>'+x[1]+'</strong></div>').join('');
   }
   function renderAgents() {
     $('officeTeamCount').textContent = String(agents.length).padStart(2,'0');
     $('officeAgents').innerHTML = agents.map(a => {
       const working = statusOf(a.id) === 'working';
-      return '<button type="button" class="office-agent" data-office-agent="'+a.id+'"><span class="office-agent-avatar">'+a.emoji+'</span><span class="office-agent-info"><strong>'+a.name+'</strong><small>'+a.role+'</small></span><span class="office-agent-status '+(working?'working':'')+'">'+(working?'WORKING':'AVAILABLE')+'</span></button>';
+      return '<button type="button" class="office-agent" data-office-agent="'+a.id+'"><span class="office-agent-avatar">'+a.emoji+'</span><span class="office-agent-info"><strong>'+a.name+'</strong><small>'+a.role+'</small></span><span class="office-agent-status '+(working?'working':'')+'">'+(working?'กำลังทำงาน':'ว่าง')+'</span></button>';
     }).join('');
     $('officeTaskAgent').innerHTML = agents.map(a => '<option value="'+a.id+'">'+a.name+' — '+a.role.split(' · ')[0]+'</option>').join('');
   }
@@ -59,7 +59,7 @@
     list.innerHTML = data.tasks.slice().sort((a,b)=>b.created-a.created).map(t => {
       const agent = agents.find(a=>a.id===t.agent);
       const done = t.status === 'done';
-      return '<article class="office-task"><div class="office-task-head"><h4>'+safeText(t.title)+'</h4><span class="office-task-state '+(done?'done':'')+'">'+(done?'COMPLETED':'SIMULATION')+'</span></div><p>'+safeText(t.detail || 'ไม่มีรายละเอียดเพิ่มเติม')+'</p><div class="office-task-meta"><span>'+safeText(agent?agent.name:'ทีม')+'</span><span>'+new Date(t.created).toLocaleDateString('th-TH')+'</span></div><div class="office-task-actions">'+(done?'':'<button type="button" data-office-done="'+t.id+'">ทำเครื่องหมายว่าเสร็จ</button>')+'<button type="button" data-office-delete="'+t.id+'">ลบงาน</button></div></article>';
+      return '<article class="office-task"><div class="office-task-head"><h4>'+safeText(t.title)+'</h4><span class="office-task-state '+(done?'done':'')+'">'+(done?'เสร็จแล้ว':'กำลังดำเนินการ')+'</span></div><p>'+safeText(t.detail || 'ไม่มีรายละเอียดเพิ่มเติม')+'</p><div class="office-task-meta"><span>'+safeText(agent?agent.name:'ทีม')+'</span><span>'+new Date(t.created).toLocaleDateString('th-TH')+'</span></div><div class="office-task-actions">'+(done?'':'<button type="button" data-office-done="'+t.id+'">ทำเครื่องหมายว่าเสร็จ</button>')+'<button type="button" data-office-delete="'+t.id+'">ลบงาน</button></div></article>';
     }).join('');
   }
   function render() { renderStats(); renderAgents(); renderSprites(); renderTasks(); }

@@ -608,3 +608,20 @@
 .office-sprite.is-pet-bothered .pixel-person-svg{animation:petSurprise .35s ease-in-out 3!important}
 @keyframes petSurprise{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px) rotate(-4deg)}75%{transform:translateX(3px) rotate(4deg)}}
 @media(max-width:560px){.office-pet-sprite{font-size:21px}.office-pet-sprite small{font-size:6px;padding:1px 3px}}
+
+
+/* v19 — employee reports and manager inbox */
+.office-report-entry{display:grid;gap:6px;margin-top:9px;padding:9px;border:1px solid #e3e8f2;border-radius:10px;background:#f7f9ff}
+.office-report-entry label{font-size:9px;font-weight:900;color:#69758d}
+.office-report-entry textarea{width:100%;min-width:0;resize:vertical;padding:8px 9px;border:1px solid #dce2ed;border-radius:8px;background:#fff;color:#30384d;font:inherit;font-size:10px;line-height:1.5;outline:none}
+.office-report-entry textarea:focus{border-color:#86bfff;box-shadow:0 0 0 3px #86bfff2b}
+.office-report-entry button{justify-self:start;padding:6px 10px;border:0;border-radius:8px;background:#4f78d3;color:#fff;font-size:9px;font-weight:900}
+.office-task-state.review{background:#eaf1ff;color:#4d70b5}
+.office-manager-reports{display:grid;gap:8px}
+.office-report-card{padding:11px;border:1px solid #e3e8f2;border-radius:12px;background:#fcfdff}
+.office-report-card>div{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.office-report-card strong{font-size:10px;color:#4f78a8}
+.office-report-card span{font-size:10px;font-weight:900;color:#30384d;text-align:right}
+.office-report-card p{margin:8px 0;color:#68738a;font-size:10px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.office-report-card small{font-size:8px;color:#9aa2b1}
+@media(max-width:560px){.office-report-entry{padding:7px}.office-report-entry textarea{font-size:10px}.office-report-card{padding:9px}}

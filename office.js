@@ -229,8 +229,9 @@
 
     // Rule-based team delegation: create individual task cards only for employees
     // explicitly named in the CEO's instruction. This is a local simulation, not AI.
-    const delegationRequested=agentId==='manager'&&/แบ่งงาน|มอบหมายงาน|กระจายงาน/.test(title+' '+detail);
-    const namedAgents=delegationRequested?agents.filter(a=>a.id!=='manager'&&(title+' '+detail).includes(a.name)):[];
+    const commandText=(title+' '+detail).normalize('NFC');
+    const delegationRequested=agentId==='manager'&&/(แบ่งงาน|มอบหมายงาน|กระจายงาน)/.test(commandText);
+    const namedAgents=delegationRequested?agents.filter(a=>a.id!=='manager'&&commandText.normalize('NFC').includes(String(a.name).normalize('NFC'))):[];
     const duties={
       researcher:'ค้นคว้าข้อมูลตลาด กลุ่มเป้าหมาย และตัวอย่างที่เกี่ยวข้อง พร้อมสรุปข้อค้นพบ',
       writer:'จัดทำข้อความเปิดตัว คำโปรย และเนื้อหาประชาสัมพันธ์ให้เหมาะกับกลุ่มเป้าหมาย',

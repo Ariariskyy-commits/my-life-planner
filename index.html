@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 
-    <link rel="stylesheet" href="office.css?v=5">
+    <link rel="stylesheet" href="office.css?v=6">
 
     <!-- Firebase SDK (pinned) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -1400,7 +1400,7 @@
             <div class="office-layout">
               <div class="office-scene-card"><div class="office-scene-top"><strong>ออฟฟิศของเรา</strong><span>ออฟฟิศมีชีวิต · พนักงานและสัตว์เลี้ยง</span></div>
                 <div class="office-scene" id="officeScene" aria-label="ออฟฟิศจำลอง"><div class="office-sky"></div><div class="office-floor"></div><div class="office-rug"></div><div class="office-window"><i></i><i></i><i></i></div><div class="office-shelf">📚<br>📚<br>📚</div><div class="office-plant plant-a">🪴</div><div class="office-plant plant-b">🌴</div><div class="office-desk desk-a"><span>💻</span><small>DESIGN</small></div><div class="office-desk desk-b"><span>🖥️</span><small>RESEARCH</small></div><div class="office-desk desk-c"><span>💻</span><small>STUDIO</small></div><div class="office-sofa">🛋️</div><div class="office-coffee">☕</div><div id="officeSprites" class="office-sprites"></div><div class="office-scene-caption">พื้นที่เล็ก ๆ สำหรับไอเดียใหญ่ ๆ ✦</div></div>
-                <div class="office-legend"><span><i class="working"></i> กำลังทำงาน</span><span><i class="idle"></i> ว่าง</span><span><i class="done"></i> เสร็จแล้ว</span></div>
+                <div class="office-dialogue" id="officeDialogue" aria-live="polite"><div class="office-dialogue-avatar" id="officeDialogueAvatar">👩🏻‍💼</div><div class="office-dialogue-copy"><div class="office-dialogue-meta"><strong id="officeDialogueName">Mika · ผู้จัดการ</strong><span id="officeDialogueMood">😊 อารมณ์ดี</span></div><p id="officeDialogueText">CEO วันนี้มีงานอะไรให้ทีมลุยบ้างคะ?</p></div><span class="office-dialogue-live">คุยกันอยู่</span></div><div class="office-legend"><span><i class="working"></i> กำลังทำงาน</span><span><i class="idle"></i> ว่าง</span><span><i class="done"></i> เสร็จแล้ว</span></div>
               </div>
               <aside class="office-side">
                 <div class="office-panel"><div class="office-panel-title"><div><span>ทีมงานของฉัน</span><h3>พนักงานของฉัน</h3></div><b id="officeTeamCount">06</b></div><div id="officeAgents" class="office-agents"></div></div>
@@ -2757,6 +2757,6 @@
             window.addEventListener('blur', release);
         })();
     </script>
-    <script src="office.js?v=5"></script>
+    <script src="office.js?v=6"></script>
 </body>
 </html>

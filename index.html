@@ -1551,4 +1551,615 @@
                 localStorage.setItem(KEYS.events, JSON.stringify(state.events));
                 localStorage.setItem(KEYS.calcHistory, JSON.stringify(state.calcHistory));
                 localStorage.setItem(KEYS.categories, JSON.stringify(state.categories));
-                localSto
+                localStorage.setItem(KEYS.pet, JSON.stringify(state.pet));
+                localStorage.setItem(KEYS.theme, state.theme);
+                localStorage.setItem(KEYS.quickNotes, JSON.stringify(state.quickNotes));
+                localStorage.setItem(KEYS.quickNoteShow, String(state.quickNoteShow));
+                localStorage.setItem(KEYS.headerCollapsed, String(state.headerCollapsed));
+            } catch (e) { console.error(e); }
+        }
+
+        function saveData() {
+            saveLocal();
+            scheduleCloudSave();
+        }
+
+        let auth = null, db = null, currentUser = null, isFirebaseActive = false, syncTimer = null;
+        let googleLoginInProgress = false;
+
+        function setSyncStatus(text) { $('syncStatus').innerText = text; }
+
+        async function initFirebase() {
+            if (!IS_CONFIGURED) {
+                setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
+                return;
+            }
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+                try { await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch {}
+                isFirebaseActive = true;
+
+                auth.onAuthStateChanged(async user => {
+                    if (user) {
+                        const isNewUser = !currentUser || currentUser.uid !== user.uid;
+                        currentUser = user;
+                        renderAuthUI();
+                        if (isNewUser) await pullFromCloud(user.uid);
+                    } else {
+                        currentUser = null;
+                        renderAuthUI();
+                        setSyncStatus('ออกจากระบบแล้ว · ข้อมูลอยู่ในเครื่อง');
+                    }
+                });
+                setSyncStatus('พร้อมเชื่อมต่อ Gmail');
+            } catch (error) {
+                isFirebaseActive = false;
+                setSyncStatus('เชื่อมต่อ Firebase ไม่สำเร็จ ⚠️');
+            }
+        }
+
+        function renderAuthUI() {
+            const logged = !!currentUser;
+            $('googleLoginBtn').classList.toggle('hidden', logged);
+            $('userProfileArea').classList.toggle('hidden', !logged);
+            if (logged) {
+                $('userAvatarImg').src = currentUser.photoURL || '';
+                $('userNameText').innerText = currentUser.displayName || currentUser.email || 'ผู้ใช้';
+            }
+        }
+
+        async function loginWithGoogle() {
+            if (googleLoginInProgress) return;
+            if (!isFirebaseActive || !auth) { alert('Firebase ยังไม่พร้อม'); return; }
+            googleLoginInProgress = true;
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                const result = await auth.signInWithPopup(provider);
+                if (result && result.user) {
+                    currentUser = result.user;
+                    renderAuthUI();
+                    await pullFromCloud(result.user.uid);
+                    showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
+                }
+            } catch (error) {
+                alert('ล็อกอินไม่สำเร็จ: ' + error.message);
+            } finally { googleLoginInProgress = false; }
+        }
+
+        async function logoutGoogle() {
+            if (!auth) return;
+            try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch {}
+        }
+
+        function scheduleCloudSave() {
+            if (!currentUser || !db) return;
+            clearTimeout(syncTimer);
+            setSyncStatus('กำลังซิงก์...');
+            syncTimer = setTimeout(pushToCloud, 800);
+        }
+
+        function cloudPayload() {
+            return {
+                transactions: state.transactions, bills: state.bills, tasks: state.tasks,
+                events: state.events, calcHistory: state.calcHistory, categories: state.categories,
+                pet: state.pet, theme: state.theme, quickNotes: state.quickNotes,
+                quickNoteShow: state.quickNoteShow, headerCollapsed: state.headerCollapsed,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+        }
+
+        async function pushToCloud() {
+            if (!currentUser || !db) return;
+            try {
+                await db.collection('users').doc(currentUser.uid).set(cloudPayload());
+                setSyncStatus('ซิงก์แล้ว ☁️');
+            } catch { setSyncStatus('ซิงก์ไม่สำเร็จ ⚠️'); }
+        }
+
+        async function pullFromCloud(uid) {
+            setSyncStatus('กำลังโหลดข้อมูล...');
+            try {
+                const snap = await db.collection('users').doc(uid).get();
+                if (snap.exists) { applyRemote(snap.data()); setSyncStatus('โหลดจากคลาวด์แล้ว ☁️'); }
+                else { await pushToCloud(); }
+                refreshUI(); syncPendingPhotos();
+            } catch { setSyncStatus('โหลดข้อมูลไม่สำเร็จ ⚠️'); }
+        }
+
+        function applyRemote(d) {
+            state.transactions = d.transactions || [];
+            state.bills = d.bills || [];
+            state.tasks = d.tasks || [];
+            state.events = d.events || [];
+            state.calcHistory = d.calcHistory || [];
+            state.categories = d.categories || DEFAULT_CATEGORIES;
+            state.pet = Object.assign(makeDefaultPet(), d.pet || {});
+            if (d.theme) state.theme = d.theme;
+            if (d.quickNotes !== undefined) state.quickNotes = d.quickNotes;
+            if (d.quickNoteShow !== undefined) state.quickNoteShow = d.quickNoteShow;
+            if (d.headerCollapsed !== undefined) state.headerCollapsed = d.headerCollapsed;
+            saveLocal();
+        }
+
+        async function exportBackup() {
+            try {
+                const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = `y2k-backup-${localDateKey()}.json`;
+                document.body.appendChild(a); a.click(); a.remove();
+                showToast('ดาวน์โหลดไฟล์สำรองแล้ว 💾');
+            } catch (err) { alert('สร้างไฟล์สำรองไม่สำเร็จ'); }
+        }
+
+        async function importBackup(e) {
+            const file = e.target.files[0];
+            e.target.value = '';
+            if (!file) return;
+            try {
+                const d = JSON.parse(await file.text());
+                applyRemote(d); refreshUI(); saveData();
+                showToast('คืนค่าข้อมูลสำเร็จ! ✨');
+            } catch { showToast('ไฟล์ไม่ถูกต้อง'); }
+        }
+
+        function openQuickNoteModal() { $('quickNoteForm').reset(); openModal('quickNoteModal'); }
+        function handleSaveQuickNote(e) {
+            e.preventDefault();
+            const text = $('quickNoteInputText').value.trim();
+            if (!text) return;
+            state.quickNotes.unshift({ id: 'qn_' + Date.now(), text });
+            state.quickNoteShow = true;
+            saveData(); renderQuickNotesWidget(); showToast('เพิ่มโน้ตด่วนแล้ว! 📌');
+        }
+        function deleteQuickNote(id) { state.quickNotes = state.quickNotes.filter(n => n.id !== id); saveData(); renderQuickNotesWidget(); }
+        function toggleQuickNoteListVisibility() { state.quickNoteShow = !state.quickNoteShow; saveData(); renderQuickNotesWidget(); }
+
+        function renderQuickNotesWidget() {
+            const expandedContainer = $('floatingExpandedContainer');
+            const minimizedBtn = $('floatingMinimizedBtn');
+            const listContainer = $('floatingQuickNotesList');
+            const badge = $('quickNoteBadge');
+            const hasNotes = state.quickNotes.length > 0;
+
+            badge.classList.toggle('hidden', !hasNotes);
+            if (state.quickNoteShow) {
+                expandedContainer.classList.remove('hidden');
+                minimizedBtn.classList.add('hidden');
+                listContainer.innerHTML = hasNotes ? state.quickNotes.map(n => `
+                    <div class="bg-white/90 text-darkText p-1.5 rounded border border-darkText/20 flex items-start justify-between gap-1 text-[11px] font-bold">
+                        <span class="break-words flex-1 leading-snug">${esc(n.text)}</span>
+                        <button onclick="deleteQuickNote('${n.id}')" class="text-gray-400 hover:text-hotPink shrink-0 px-1">✕</button>
+                    </div>`).join('') : `<div class="text-center py-2 text-darkText/60 text-[10px]">ยังไม่มีโน้ตด่วน ✨</div>`;
+            } else {
+                expandedContainer.classList.add('hidden');
+                minimizedBtn.classList.remove('hidden');
+            }
+        }
+
+        const PET_MOOD_FACES = {
+            '🐱': { sad: '😿', low: '😾', good: '😺', rich: '😻' },
+            '🐶': { sad: '🥺', low: '🐕', good: '🐶', rich: '🐶✨' },
+            '🐰': { sad: '😭', low: '🐰', good: '🐰✨', rich: '🐇💖' },
+            '🐦': { sad: '🥺', low: '🐦', good: '🐦✨', rich: '🐦👑' },
+            '🐟': { sad: '😭', low: '🐟', good: '🐠', rich: '🐡🌟' },
+            '🐾': { sad: '🥺', low: '🐾', good: '🐾✨', rich: '🐾👑' },
+            '🐹': { sad: '🥺', low: '🐹', good: '🐹✨', rich: '🐹👑' },
+            '🐻': { sad: '🐻‍❄️', low: '🐻', good: '🧸', rich: '🐻✨' },
+            '🦆': { sad: '😭', low: '🦆', good: '🦆✨', rich: '🐣🌟' }
+        };
+
+        function setTheme(themeName, save = true) {
+            state.theme = themeName;
+            document.body.className = `theme-${themeName} min-h-screen flex flex-col relative`;
+            if (save) saveData();
+        }
+
+        function updatePetSettings() {
+            state.pet.name = $('petNameInput').value.trim() || 'สัตว์เลี้ยง';
+            state.pet.avatar = $('petAvatarSelect').value;
+            saveData(); updatePetStatus(); showToast('อัปเดตสัตว์เลี้ยงแล้ว! ✨');
+        }
+
+        // ===== ฟังก์ชันใหม่สำหรับห้องสัตว์เลี้ยง =====
+        function selectPetType(emoji) {
+            $('petAvatarSelect').value = emoji;
+            updatePetSettings();
+        }
+
+        function focusPetName() {
+            const input = $('petNameInput');
+            input.focus();
+            input.select();
+        }
+
+        function feedPet() {
+            const { net } = calcNetBalance();
+            triggerPetSpeech(net > 0 ? 'อร่อยจัง ขอบคุณน้า! 🍣' : 'หิวจัง ช่วยเติมรายรับให้หน่อยนะ 🥺');
+            saveData();
+            updatePetStatus();
+            showToast('ความอิ่มขึ้นกับยอดเงินจริงนะ 💰');
+        }
+
+        function clearPetSpeechHistory() { state.pet.speechHistory = []; saveData(); renderPetSpeechHistory(); }
+
+        function calcNetBalance() {
+            let inc = 0, exp = 0;
+            state.transactions.forEach(t => t.type === 'income' ? inc += t.amount : exp += t.amount);
+            return { inc, exp, net: inc - exp };
+        }
+
+        function updatePetStatus() {
+            const { net } = calcNetBalance();
+            const faces = PET_MOOD_FACES[state.pet.avatar] || PET_MOOD_FACES['🐱'];
+            let hunger, happiness, avatar, moodText, defaultSpeech;
+
+            if (net <= 0)       { hunger = 0;   happiness = 0;   avatar = faces.sad;  moodText = 'หิวม๊าก 🥺';   defaultSpeech = 'เงินเป็น 0 แล้ว ช่วยเติมรายรับที! 😭'; }
+            else if (net < 1000){ hunger = 40;  happiness = 40;  avatar = faces.low;  moodText = 'ประหยัด...';    defaultSpeech = 'ประหยัดไว้ก่อนน้า 💸'; }
+            else if (net < 5000){ hunger = 75;  happiness = 75;  avatar = faces.good; moodText = 'อิ่มสบาย 😊';   defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟'; }
+            else                { hunger = 100; happiness = 100; avatar = faces.rich; moodText = 'เศรษฐี! 🤑';     defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖'; }
+
+            // ความมั่นคง = สัดส่วนบิลที่จ่ายแล้วต่อบิลทั้งหมด (ไม่มีบิลให้ถือว่า 100%)
+            const totalBills = state.bills.length;
+            const paidBills = state.bills.filter(b => b.paid).length;
+            const stable = totalBills ? Math.round((paidBills / totalBills) * 100) : 100;
+
+            state.pet.hunger = hunger; state.pet.happiness = happiness;
+            if (!state.pet.speech || state.pet.speech.includes('ยินดีต้อนรับ')) state.pet.speech = defaultSpeech;
+
+            const pName = state.pet.name || 'สัตว์เลี้ยง';
+            $('floatingPetName').innerText = pName;
+            $('petHeaderTitle').innerText = `${pName} (Tamagotchi)`;
+            $('petAvatar').innerText = avatar; $('minimizedPetAvatar').innerText = avatar;
+            $('petRoomAvatar').innerText = avatar; $('calPetAvatar').innerText = avatar; $('dashCatAvatar').innerText = avatar;
+            $('petRoomName').innerText = `${pName} (${moodText})`;
+            $('petRoomStatus').innerText = `สุทธิ ฿${money(net)}`;
+            $('petHungerVal').innerText = hunger + '%'; $('petHungerBar').style.width = hunger + '%';
+            $('petHappyVal').innerText = happiness + '%'; $('petHappyBar').style.width = happiness + '%';
+            $('petStableVal').innerText = stable + '%'; $('petStableBar').style.width = stable + '%';
+            $('petSpeechBubble').innerText = state.pet.speech;
+            $('calPetSpeechText').innerText = state.pet.speech;
+            $('dashCatSpeechText').innerText = state.pet.speech;
+
+            document.querySelectorAll('.pet-type-btn').forEach(b => {
+                b.classList.toggle('pet-type-active', b.dataset.avatar === state.pet.avatar);
+            });
+
+            renderPetSpeechHistory(); renderQuickNotesWidget();
+        }
+
+        function triggerPetSpeech(text) {
+            state.pet.speech = text;
+            state.pet.speechHistory.unshift({ time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), text });
+            if (state.pet.speechHistory.length > 8) state.pet.speechHistory.pop();
+        }
+
+        function renderPetSpeechHistory() {
+            $('petSpeechHistory').innerHTML = state.pet.speechHistory.length ? state.pet.speechHistory.map(h => `
+                <div class="bg-offWhite text-darkText p-2 rounded-lg border border-darkText text-[11px] flex items-center gap-2">
+                    <span>${esc(state.pet.avatar) || '🐾'}</span>
+                    <div><span class="text-[9px] text-gray-400">${esc(h.time)}</span><p class="font-bold text-hotPink">"${esc(h.text)}"</p></div>
+                </div>`).join('') : `<div class="text-center py-4 text-gray-400 text-[10px]">ไม่มีประวัติแชท</div>`;
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border-2', 'border-darkText');
+                if (btn.id !== 'nav-dashboard') btn.classList.add('bg-white', 'text-darkText');
+            });
+            $('tab-' + tabId).classList.remove('hidden');
+            const active = $('nav-' + tabId);
+            if (active) {
+                active.classList.remove('bg-white');
+                active.classList.add('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border-2', 'border-darkText');
+            }
+            if (tabId === 'dashboard') renderDashboard();
+            if (tabId === 'finance') renderTransactions();
+            if (tabId === 'bills') renderBills();
+            if (tabId === 'planner') renderTasks();
+            if (tabId === 'calendar') renderCalendar();
+            if (tabId === 'pet') updatePetStatus();
+        }
+
+        function setDefaultDates() {
+            const today = localDateKey();
+            ['txDate', 'billDate', 'taskDate', 'eventDate'].forEach(id => { if ($(id)) $(id).value = today; });
+        }
+
+        function refreshUI() {
+            setTheme(state.theme, false);
+            $('petNameInput').value = state.pet.name;
+            $('petAvatarSelect').value = state.pet.avatar;
+            applyHeaderCollapseState();
+            renderDashboard(); renderTransactions(); renderBills(); renderTasks();
+            renderCalendar(); renderEventsList(); updatePetStatus(); renderCalcHistory();
+            renderQuickNotesWidget();
+        }
+
+        function updateCategorySelects(selectedVal = '') {
+            const cats = state.categories || DEFAULT_CATEGORIES;
+            const html = cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+            if ($('txCategory')) { $('txCategory').innerHTML = html; if (selectedVal) $('txCategory').value = selectedVal; }
+            if ($('billCategory')) { $('billCategory').innerHTML = html; if (selectedVal) $('billCategory').value = selectedVal; }
+        }
+
+        function promptAddCategory() {
+            const name = prompt('กรอกชื่อหมวดหมู่ใหม่ที่ต้องการเพิ่ม:');
+            if (!name || !name.trim()) return;
+            const clean = name.trim();
+            if (!state.categories) state.categories = [...DEFAULT_CATEGORIES];
+            if (state.categories.includes(clean)) return alert('หมวดหมู่นี้มีอยู่แล้ว!');
+            state.categories.push(clean); saveData(); updateCategorySelects(clean); showToast('เพิ่มหมวดหมู่สำเร็จ! ✨');
+        }
+
+        function openTransactionModal(type, editId = null, presetAmount = null) {
+            $('transactionForm').reset(); $('txId').value = ''; $('txType').value = type; setDefaultDates();
+            if (editId) {
+                const t = state.transactions.find(x => x.id === editId);
+                if (t) {
+                    $('txId').value = t.id; $('txType').value = t.type; $('txDate').value = t.date;
+                    $('txTitle').value = t.title; updateCategorySelects(t.category); $('txAmount').value = t.amount;
+                }
+            } else {
+                updateCategorySelects(type === 'income' ? '💰 เงินเดือน/รายรับ' : '🍔 อาหาร/เครื่องดื่ม');
+                if (presetAmount !== null) $('txAmount').value = presetAmount;
+            }
+            openModal('transactionModal');
+        }
+
+        function handleSaveTransaction(e) {
+            e.preventDefault();
+            const id = $('txId').value, type = $('txType').value, amount = parseFloat($('txAmount').value);
+            if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
+
+            if (id) {
+                const t = state.transactions.find(x => x.id === id);
+                if (t) { t.date = $('txDate').value; t.title = $('txTitle').value.trim(); t.category = $('txCategory').value; t.amount = amount; t.type = type; }
+            } else {
+                state.transactions.unshift({ id: 'tx_' + Date.now(), date: $('txDate').value, title: $('txTitle').value.trim(), category: $('txCategory').value, amount, type });
+                triggerPetSpeech(type === 'income' ? `เย้! เงินเข้า +฿${money(amount)} 🎉` : `รายจ่าย -฿${money(amount)} 🥺`);
+            }
+            saveData(); closeModal('transactionModal'); refreshUI();
+        }
+
+        function deleteTransaction(id) { state.transactions = state.transactions.filter(t => t.id !== id); saveData(); refreshUI(); }
+
+        function renderTransactions() {
+            const filterType = $('finFilterType').value, search = $('finSearch').value.toLowerCase();
+            const { inc, exp, net } = calcNetBalance();
+            $('finTotalIncome').innerText = '฿ ' + money(inc);
+            $('finTotalExpense').innerText = '฿ ' + money(exp);
+            $('finNetBalance').innerText = '฿ ' + money(net);
+
+            const filtered = state.transactions.filter(t => (filterType === 'all' || t.type === filterType) && (t.title.toLowerCase().includes(search) || t.category.toLowerCase().includes(search)));
+            $('transactionTableBody').innerHTML = filtered.length ? filtered.map(t => `
+                <tr class="hover:bg-offWhite transition-all">
+                    <td class="p-2.5 border-r border-darkText">${esc(t.date)}</td>
+                    <td class="p-2.5 border-r border-darkText"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.type === 'income' ? 'bg-limeGreen/30 text-green-800' : 'bg-hotPink/20 text-hotPink'}">${t.type === 'income' ? 'รับ' : 'จ่าย'}</span></td>
+                    <td class="p-2.5 border-r border-darkText">${esc(t.category)}</td>
+                    <td class="p-2.5 border-r border-darkText font-bold">${esc(t.title)}</td>
+                    <td class="p-2.5 border-r border-darkText text-right font-extrabold ${t.type === 'income' ? 'text-green-600' : 'text-hotPink'}">${t.type === 'income' ? '+' : '-'}฿ ${money(t.amount)}</td>
+                    <td class="p-2.5 text-center flex items-center justify-center gap-2">
+                        <button onclick="openTransactionModal('${t.type}', '${t.id}')" class="text-popBlue"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteTransaction('${t.id}')" class="text-hotPink"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                </tr>`).join('') : `<tr><td colspan="6" class="text-center py-6 text-gray-400">ไม่พบรายการ 🔎</td></tr>`;
+        }
+
+        function toggleInstallmentInput() { $('installmentInputs').classList.toggle('hidden', !$('billUseInstallment').checked); }
+
+        function openBillModal(editId = null, presetAmount = null) {
+            $('billForm').reset(); $('billId').value = ''; setDefaultDates();
+            $('billUseInstallment').checked = false; $('installmentInputs').classList.add('hidden');
+            updateCategorySelects('💡 บิล/ค่าใช้จ่าย');
+            if (presetAmount !== null) $('billAmount').value = presetAmount;
+            openModal('billModal');
+        }
+
+        function handleSaveBill(e) {
+            e.preventDefault();
+            const amount = parseFloat($('billAmount').value);
+            if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
+            state.bills.unshift({
+                id: 'bill_' + Date.now(), title: $('billTitle').value.trim(), date: $('billDate').value,
+                category: $('billCategory').value, amount, paid: false
+            });
+            saveData(); closeModal('billModal'); refreshUI(); showToast('เพิ่มบิลแล้ว!');
+        }
+
+        function toggleBillPaid(id) {
+            const b = state.bills.find(x => x.id === id);
+            if (!b) return;
+            b.paid = !b.paid;
+            if (b.paid) {
+                b.txId = 'tx_bill_' + b.id;
+                state.transactions.unshift({ id: b.txId, date: localDateKey(), title: 'จ่าย: ' + b.title, category: b.category, amount: b.amount, type: 'expense' });
+            } else if (b.txId) {
+                state.transactions = state.transactions.filter(t => t.id !== b.txId);
+                delete b.txId;
+            }
+            saveData(); refreshUI(); showToast(b.paid ? 'จ่ายบิลแล้ว 💸' : 'ยกเลิกการจ่ายแล้ว');
+        }
+
+        function deleteBill(id) { state.bills = state.bills.filter(x => x.id !== id); saveData(); refreshUI(); }
+        function openBillHistoryModal() { renderBillHistory(); openModal('billHistoryModal'); }
+
+        function renderBillHistory() {
+            const paidBills = state.bills.filter(b => b.paid);
+            $('billHistoryList').innerHTML = paidBills.length ? paidBills.map(b => `
+                <div class="bg-offWhite text-darkText p-3 rounded-xl border border-darkText flex justify-between items-center">
+                    <div><h4 class="font-bold">${esc(b.title)}</h4><span class="text-[10px] text-gray-500">฿ ${money(b.amount)}</span></div>
+                    <button onclick="toggleBillPaid('${b.id}'); renderBillHistory();" class="px-2 py-1 bg-sunnyYellow text-[10px] font-bold rounded border border-darkText">ยกเลิกจ่าย</button>
+                </div>`).join('') : `<div class="text-center py-6 text-gray-400 text-xs">ยังไม่มีประวัติการจ่ายบิล ✨</div>`;
+        }
+
+        function renderBills() {
+            const activeBills = state.bills.filter(b => !b.paid);
+            $('dashPendingBills').innerText = activeBills.length + ' รายการ';
+            let totalAmount = 0; activeBills.forEach(b => totalAmount += Number(b.amount || 0));
+            $('billsTotalSummaryText').innerText = `ยอดรวมที่ต้องเตรียมจ่าย: ฿ ${money(totalAmount)}`;
+            $('billsGrid').innerHTML = activeBills.length ? activeBills.map(b => `
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2">
+                    <div class="flex justify-between"><span class="text-[10px] font-bold bg-retroPurple text-white px-2 py-0.5 rounded">${esc(b.date)}</span><button onclick="deleteBill('${b.id}')" class="text-gray-400 hover:text-hotPink"><i class="fa-solid fa-trash-can"></i></button></div>
+                    <h4 class="font-bold text-sm">${esc(b.title)}</h4>
+                    <span class="text-base font-extrabold text-hotPink block">฿ ${money(b.amount)}</span>
+                    <button onclick="toggleBillPaid('${b.id}')" class="w-full py-1 bg-limeGreen text-darkText font-bold text-xs rounded border border-darkText">จ่าย</button>
+                </div>`).join('') : `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">เย้! ไม่มีบิลค้างจ่ายแล้ว 🎉</div>`;
+        }
+
+        function openTaskModal(editId = null) { $('taskForm').reset(); $('taskId').value = ''; setDefaultDates(); openModal('taskModal'); }
+        function handleSaveTask(e) {
+            e.preventDefault();
+            state.tasks.unshift({ id: 't_' + Date.now(), title: $('taskTitle').value.trim(), date: $('taskDate').value, status: $('taskStatus').value, desc: $('taskDesc').value.trim() });
+            saveData(); closeModal('taskModal'); refreshUI(); showToast('เพิ่มงานแล้ว!');
+        }
+        function updateTaskStatus(id, st) { const t = state.tasks.find(x => x.id === id); if (t) { t.status = st; saveData(); refreshUI(); } }
+        function deleteTask(id) { state.tasks = state.tasks.filter(x => x.id !== id); saveData(); refreshUI(); }
+
+        function renderTasks() {
+            const columns = { todo: ['listTodo', 'countTodo'], progress: ['listProgress', 'countProgress'], done: ['listDone', 'countDone'] };
+            Object.entries(columns).forEach(([st, [listId, countId]]) => {
+                const list = state.tasks.filter(t => t.status === st);
+                $(countId).innerText = list.length;
+                $(listId).innerHTML = list.length ? list.map(t => `
+                    <div class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1">
+                        <div class="flex justify-between text-[10px] font-bold"><span>${esc(t.date)}</span><button onclick="deleteTask('${t.id}')" class="text-gray-400"><i class="fa-solid fa-trash-can"></i></button></div>
+                        <h4 class="font-bold text-xs">${esc(t.title)}</h4>
+                        <div class="flex gap-1 pt-1">
+                            ${st !== 'todo' ? `<button onclick="updateTaskStatus('${t.id}', 'todo')" class="text-[9px] bg-sunnyYellow px-1 rounded border border-darkText">To Do</button>` : ''}
+                            ${st !== 'progress' ? `<button onclick="updateTaskStatus('${t.id}', 'progress')" class="text-[9px] bg-popBlue text-white px-1 rounded border border-darkText">Doing</button>` : ''}
+                            ${st !== 'done' ? `<button onclick="updateTaskStatus('${t.id}', 'done')" class="text-[9px] bg-limeGreen px-1 rounded border border-darkText">Done</button>` : ''}
+                        </div>
+                    </div>`).join('') : `<div class="text-center py-6 text-gray-400 text-[11px]">ไม่มีรายการ</div>`;
+            });
+            $('dashPendingTasks').innerText = state.tasks.filter(t => t.status !== 'done').length + ' รายการ';
+        }
+
+        let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊';
+        function selectMoodEmoji(emoji) { selectedMood = emoji; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('mood-btn-selected', b.id === 'mood-' + emoji)); }
+        function openEventModal(presetDate) { $('eventForm').reset(); setDefaultDates(); selectMoodEmoji('😊'); $('eventDate').value = presetDate || localDateKey(); openModal('eventModal'); }
+
+        async function handleSaveEvent(e) {
+            e.preventDefault();
+            state.events.unshift({ id: 'ev_' + Date.now(), date: $('eventDate').value, mood: selectedMood, title: $('eventTitle').value.trim(), hasPhoto: false });
+            saveData(); closeModal('eventModal'); selectCalendarDate($('eventDate').value); showToast('บันทึกไดอารี่แล้ว!');
+        }
+
+        function selectCalendarDate(dateKey) { selectedCalendarDate = dateKey; renderCalendar(); renderEventsList(); }
+        async function viewEventDetails(eventId) {
+            const ev = state.events.find(e => e.id === eventId);
+            if (!ev) return;
+            $('viewEventMood').innerText = ev.mood || '😊'; $('viewEventDate').innerText = ev.date; $('viewEventTitle').innerText = ev.title;
+            $('deleteEventBtn').onclick = async () => { state.events = state.events.filter(x => x.id !== ev.id); saveData(); renderCalendar(); renderEventsList(); closeModal('viewEventModal'); };
+            openModal('viewEventModal');
+        }
+        function changeMonth(dir) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir); renderCalendar(); }
+
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
+            const label = `${THAI_MONTHS[month]} ${year + 543}`;
+            $('calMonthYearLabel').innerText = label; $('calendarMonthMoodTitle').innerText = `อารมณ์เดือน${label}`;
+            const firstDay = new Date(year, month, 1).getDay(), totalDays = new Date(year, month + 1, 0).getDate();
+            let html = '';
+            for (let i = 0; i < firstDay; i++) html += `<div class="aspect-square"></div>`;
+            for (let day = 1; day <= totalDays; day++) {
+                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const holidayName = getHolidayName(dateKey);
+                const evs = state.events.filter(e => e.date === dateKey);
+                const isSelected = selectedCalendarDate === dateKey;
+                html += `
+                    <div onclick="selectCalendarDate('${dateKey}')" class="${isSelected ? 'bg-sunnyYellow/20 border-limeGreen ring-2 ring-limeGreen' : 'bg-offWhite border-darkText'} p-1 rounded-xl border aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 relative">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold">${day}</span>
+                            ${holidayName ? `<span class="w-2 h-2 rounded-full bg-hotPink shrink-0" title="${esc(holidayName)}"></span>` : ''}
+                        </div>
+                        <div class="space-y-0.5 overflow-y-auto flex-1">
+                            ${holidayName ? `<div class="text-[7px] bg-pink-100 text-hotPink px-1 rounded border border-hotPink/30 truncate font-bold">${esc(holidayName)}</div>` : ''}
+                            ${evs.map(ev => `<div class="text-[8px] bg-white px-1 rounded border border-darkText truncate font-bold">${ev.mood} ${esc(ev.title)}</div>`).join('')}
+                        </div>
+                    </div>`;
+            }
+            $('calendarGrid').innerHTML = html;
+        }
+
+        function renderEventsList() {
+            const list = selectedCalendarDate ? state.events.filter(e => e.date === selectedCalendarDate) : state.events;
+            let holidayNotice = '';
+            if (selectedCalendarDate) {
+                const hName = getHolidayName(selectedCalendarDate);
+                if (hName) {
+                    holidayNotice = `<div class="bg-hotPink/10 text-hotPink p-2.5 rounded-xl border border-hotPink text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-star"></i> วันหยุด: ${esc(hName)}</div>`;
+                }
+            }
+            $('diarySidebarTitle').innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> ${selectedCalendarDate || 'โน้ตทั้งหมด'}`;
+            $('resetDateFilterBtn').classList.toggle('hidden', !selectedCalendarDate);
+            $('eventsListSidebar').innerHTML = holidayNotice + (list.length ? list.map(ev => `
+                <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite p-2.5 rounded-xl border border-darkText cursor-pointer hover:bg-white text-xs">
+                    <span class="text-[10px]">${ev.mood} <b>${esc(ev.date)}</b></span>
+                    <h4 class="font-bold text-popBlue truncate">${esc(ev.title)}</h4>
+                </div>`).join('') : (!holidayNotice ? `<div class="text-center py-6 text-gray-400 text-xs">ไม่มีโน้ต</div>` : ''));
+        }
+
+        let calcExpr = '0';
+        function calcRender() { $('calcScreen').innerText = calcExpr; }
+        function calcClear() { calcExpr = '0'; calcRender(); }
+        function calcAppend(val) { calcExpr = calcExpr === '0' ? val : calcExpr + val; calcRender(); }
+        function calcCalculate() {
+            try {
+                const res = Function('"use strict"; return (' + calcExpr + ')')();
+                state.calcHistory.unshift({ id: 'c_' + Date.now(), expr: calcExpr, result: res });
+                calcExpr = String(res); saveData(); renderCalcHistory();
+            } catch { calcExpr = 'Error'; }
+            calcRender();
+        }
+        function clearCalcHistory() { state.calcHistory = []; saveData(); renderCalcHistory(); }
+        function renderCalcHistory() {
+            $('calcHistoryList').innerHTML = state.calcHistory.length ? state.calcHistory.map(h => `
+                <div class="bg-offWhite p-2 rounded-xl border border-darkText flex justify-between items-center text-xs">
+                    <span>${esc(h.expr)} = <b>฿${money(h.result)}</b></span>
+                    <button onclick="openTransactionModal('expense', null, ${h.result})" class="bg-hotPink text-white px-2 py-0.5 rounded text-[9px] font-bold">บันทึกจ่าย</button>
+                </div>`).join('') : `<div class="text-center py-6 text-gray-400 text-xs">ไม่มีประวัติคำนวณ</div>`;
+        }
+
+        function renderDashboard() {
+            const { inc, exp, net } = calcNetBalance();
+            $('dashNetBalance').innerText = '฿ ' + money(net);
+            $('dashTotalIncome').innerText = '฿ ' + money(inc);
+            $('dashTotalExpense').innerText = '฿ ' + money(exp);
+            renderExpenseChart(); renderBillsChart();
+        }
+
+        let expenseChartInstance = null, billsChartInstance = null;
+        function renderExpenseChart() {
+            const canvas = $('expenseCategoryChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+            const map = {}; state.transactions.filter(t => t.type === 'expense').forEach(t => map[t.category] = (map[t.category] || 0) + t.amount);
+            if (expenseChartInstance) expenseChartInstance.destroy();
+            expenseChartInstance = new Chart(canvas.getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: Object.keys(map).length ? Object.keys(map) : ['ไม่มีรายจ่าย'], datasets: [{ data: Object.keys(map).length ? Object.values(map) : [1], backgroundColor: ['#FF007F', '#0055FF', '#CCFF00', '#FFDD00', '#9D00FF'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function renderBillsChart() {
+            const canvas = $('billsCategoryChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+            const map = {}; state.bills.filter(b => !b.paid).forEach(b => map[b.category || '💡 บิล/ค่าใช้จ่าย'] = (map[b.category || '💡 บิล/ค่าใช้จ่าย'] || 0) + b.amount);
+            if (billsChartInstance) billsChartInstance.destroy();
+            billsChartInstance = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: { labels: Object.keys(map).length ? Object.keys(map) : ['ไม่มีบิลค้างจ่าย'], datasets: [{ data: Object.keys(map).length ? Object.values(map) : [1], backgroundColor: '#9D00FF' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+
+        window.addEventListener('load', async () => {
+            initView(); setDefaultDates(); refreshUI(); initFirebase();
+        });
+    </script>
+</body>
+</html>

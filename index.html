@@ -57,6 +57,10 @@
     </script>
 
     <style>
+        /* ซ่อน Scrollbar แนวนอน */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         .border-3 { border-width: 3px; }
         .border-b-3 { border-bottom-width: 3px; }
 
@@ -189,14 +193,14 @@
             transform: rotate(-.4deg);
         }
 
-        /* ===== โลโก้ Y2K PLANNER: การ์ดสีเหลืองนีออนตามภาพอ้างอิง ===== */
+        /* ===== โลโก้ Y2K PLANNER ===== */
         .y2k-logo {
             position: relative;
             display: flex;
             align-items: center;
             gap: 10px;
-            height: 52px;
-            padding: 0 16px 0 8px;
+            height: 42px; /* ลดขนาดลงตามที่ต้องการ */
+            padding: 0 10px 0 6px;
             border-radius: 16px;
             background: #D9FF2B;
             border: 2.5px solid #1A1A1A;
@@ -219,13 +223,13 @@
         }
         .y2k-logo-icon {
             position: relative;
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 16px;
             animation: logoWiggle 2.8s ease-in-out infinite;
         }
         @keyframes logoWiggle {
@@ -242,7 +246,7 @@
         .y2k-logo-title {
             font-family: 'Prompt', sans-serif;
             font-weight: 800;
-            font-size: 20px;
+            font-size: 15px;
             letter-spacing: .02em;
             color: #1A1A1A;
             white-space: nowrap;
@@ -251,25 +255,25 @@
             margin-top: 3px;
             font-family: 'Prompt', sans-serif;
             font-weight: 500;
-            font-size: 11px;
+            font-size: 8px;
             letter-spacing: .18em;
             color: #1A1A1A;
             white-space: nowrap;
         }
         .y2k-logo-arrow {
             position: absolute;
-            right: 10px;
+            right: 6px;
             top: 50%;
             transform: translateY(-50%);
-            width: 26px;
-            height: 26px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             background: #FFFFFF;
             border: 2px solid #1A1A1A;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 9px;
             color: #1A1A1A;
         }
 
@@ -467,11 +471,14 @@
             box-shadow: 0 3px 0 #1A1A1A;
             border: 2px solid #1A1A1A;
         }
+        
+        /* ปรับขนาดปุ่มบวกให้ไม่ตะโกนเกินไป */
         .bn-add {
-            width: 60px;
-            height: 60px;
-            flex: 0 0 60px;
-            margin-top: -34px;
+            width: 50px !important;
+            height: 50px !important;
+            flex: 0 0 50px !important;
+            margin-top: -22px !important;
+            font-size: 18px !important;
             border-radius: 50%;
             background: #FF007F;
             color: #FFFFFF;
@@ -480,13 +487,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
         }
         .bn-add:active { transform: translateY(3px); box-shadow: 0 2px 0 #1A1A1A; }
 
         @media (max-width: 380px) {
             .bn-item span { font-size: 9px; }
-            .bn-add { width: 54px; height: 54px; flex-basis: 54px; margin-top: -30px; }
+            .bn-add { 
+                width: 44px !important; 
+                height: 44px !important; 
+                flex-basis: 44px !important; 
+                margin-top: -18px !important; 
+            }
         }
 
         /* ===== หน้าสัตว์เลี้ยง ===== */
@@ -673,6 +684,8 @@
             border: 1.5px solid rgba(255,255,255,.7) !important;
             box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 4px 12px -4px rgba(0,0,0,.35) !important;
         }
+        
+        /* สไตล์แก้วใสสำหรับปุ่มบวก */
         .bn-add {
             background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.55), rgba(255,0,127,.85) 45%, rgba(200,0,100,.9) 100%) !important;
             border: 1.5px solid rgba(255,255,255,.7) !important;
@@ -767,8 +780,8 @@
     <div id="appFrame">
 
     <!-- TOP BAR -->
-    <div class="topbar text-white flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold w-full">
-        <div class="flex items-center gap-1.5 flex-wrap">
+    <div class="topbar text-white flex items-center justify-start gap-3 z-50 text-[11px] font-bold w-full overflow-x-auto no-scrollbar shrink-0 px-1 py-2">
+        <div class="flex items-center gap-1.5 shrink-0">
             <i class="fa-solid fa-palette tb-icon" aria-hidden="true"></i>
             <button onclick="setTheme('y2k')" class="tb-btn px-2.5 py-0.5 bg-popBlue text-white">Y2K</button>
             <button onclick="setTheme('pastel')" class="tb-btn px-2.5 py-0.5 bg-pink-400 text-white">พาสเทล</button>
@@ -781,13 +794,13 @@
             </label>
         </div>
 
-        <div class="vs-wrap" role="group" aria-label="เลือกมุมมอง">
+        <div class="vs-wrap shrink-0" role="group" aria-label="เลือกมุมมอง">
             <button class="vs-btn" data-v="desktop" onclick="setView('desktop')"><i class="fa-solid fa-desktop"></i><span>คอม</span></button>
             <button class="vs-btn" data-v="tablet" onclick="setView('tablet')"><i class="fa-solid fa-tablet-screen-button"></i><span>แท็บเล็ต</span></button>
             <button class="vs-btn" data-v="mobile" onclick="setView('mobile')"><i class="fa-solid fa-mobile-screen-button"></i><span>มือถือ</span></button>
         </div>
 
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-2 shrink-0 pr-2">
             <span id="syncStatus" class="text-[10px] opacity-80">กำลังเตรียม...</span>
             <button id="googleLoginBtn" onclick="loginWithGoogle()" class="tb-btn px-2.5 py-0.5 bg-white text-darkText border border-darkText font-bold text-[11px] gap-1.5">
                 <svg class="tb-g" viewBox="0 0 48 48" aria-hidden="true">
@@ -848,7 +861,7 @@
         </div>
 
         <!-- โหมดตอนซ่อน (แปลงร่างเป็นไอคอนอิโมจิกลมๆ ลัดไปแต่ละหน้าทันที) -->
-        <div id="plannerMinimizedBar" class="hidden flex items-center justify-center gap-2 py-1 overflow-x-auto">
+        <div id="plannerMinimizedBar" class="hidden flex items-center justify-start sm:justify-center gap-2 py-1 overflow-x-auto no-scrollbar">
             <button onclick="switchTab('dashboard')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="แดชบอร์ด">📊</button>
             <button onclick="switchTab('finance')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="รายรับ-รายจ่าย">💸</button>
             <button onclick="switchTab('bills')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="เตรียมจ่าย">💡</button>
@@ -1774,7 +1787,7 @@
                 saveData();
                 refreshUI();
                 triggerPetSpeech(`AI เพิ่มบิลเตรียมจ่ายและลงปฏิทินให้แล้วนะ 💸`);
-                showToast(`🤖 AI เพิ่มบิลเตรียมจ่ายสำเร็จ!`);
+                showToast(`🤖 AI เพิ่มบิลเตรียมจ่ายสำเร็จแล้ว!`);
                 return;
             }
 

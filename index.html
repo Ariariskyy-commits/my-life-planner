@@ -71,18 +71,44 @@
             scroll-behavior: smooth;
             -webkit-tap-highlight-color: transparent;
         }
+
+        /* ===== พื้นหลังมีมิติ: ลาย grid + จุด halftone + แสงไล่สีนุ่ม ===== */
         body {
             min-height: 100vh;
             background-color: var(--bg-color, #F9F9FB);
+            background-image:
+                radial-gradient(circle at 85% -5%, var(--glow-1, rgba(204,255,0,.22)) 0, transparent 38%),
+                radial-gradient(circle at -5% 105%, var(--glow-2, rgba(255,0,127,.14)) 0, transparent 42%),
+                radial-gradient(var(--dot-color, rgba(26,26,26,.09)) 1.2px, transparent 1.4px),
+                linear-gradient(var(--grid-color, rgba(26,26,26,.035)) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color, rgba(26,26,26,.035)) 1px, transparent 1px);
+            background-size: auto, auto, 22px 22px, 44px 44px, 44px 44px;
+            background-attachment: fixed;
             color: var(--text-color, #1A1A1A);
             -webkit-font-smoothing: antialiased;
             padding-bottom: 96px;
         }
 
-        body.theme-y2k    { --bg-color: #F9F9FB; --card-bg: #FFFFFF; --text-color: #1A1A1A; }
-        body.theme-pastel { --bg-color: #FFF0F5; --card-bg: #FFFFFF; --text-color: #4A4045; }
-        body.theme-dark   { --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0; }
-        body.theme-minimal{ --bg-color: #F4F4F0; --card-bg: #FFFFFF; --text-color: #2C2C2C; }
+        body.theme-y2k {
+            --bg-color: #F9F9FB; --card-bg: #FFFFFF; --text-color: #1A1A1A;
+            --glow-1: rgba(204,255,0,.26); --glow-2: rgba(0,85,255,.12);
+            --dot-color: rgba(0,85,255,.12); --grid-color: rgba(0,85,255,.05);
+        }
+        body.theme-pastel {
+            --bg-color: #FFF0F5; --card-bg: #FFFFFF; --text-color: #4A4045;
+            --glow-1: rgba(255,221,0,.22); --glow-2: rgba(157,0,255,.10);
+            --dot-color: rgba(255,0,127,.12); --grid-color: rgba(255,0,127,.05);
+        }
+        body.theme-dark {
+            --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0;
+            --glow-1: rgba(204,255,0,.10); --glow-2: rgba(0,85,255,.14);
+            --dot-color: rgba(255,255,255,.06); --grid-color: rgba(255,255,255,.035);
+        }
+        body.theme-minimal {
+            --bg-color: #F4F4F0; --card-bg: #FFFFFF; --text-color: #2C2C2C;
+            --glow-1: rgba(0,0,0,.04); --glow-2: rgba(0,0,0,.03);
+            --dot-color: rgba(0,0,0,.06); --grid-color: rgba(0,0,0,.03);
+        }
 
         body.theme-dark .bg-white { background-color: var(--card-bg) !important; }
         body.theme-dark .bg-white.text-darkText,
@@ -112,10 +138,31 @@
         button, label, select, input, textarea, a {
             transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, filter .2s ease;
         }
+
+        /* ===== การ์ดมีมิติ: เงาทึบแบบ neo-brutalist + เงาฟุ้งรอบนอก ===== */
         .bg-white.rounded-2xl,
         .bg-white.rounded-xl {
-            box-shadow: 0 8px 22px -14px rgba(26,26,26,.28);
+            box-shadow:
+                0 3px 0 rgba(26,26,26,.12),
+                0 14px 28px -18px rgba(26,26,26,.32);
         }
+        .bg-white.rounded-2xl {
+            border-width: 2px;
+        }
+        .pet-title-card,
+        .pet-stats,
+        .pet-scene {
+            box-shadow:
+                0 4px 0 #1A1A1A,
+                0 18px 30px -20px rgba(26,26,26,.35) !important;
+        }
+
+        /* หัวข้อการ์ดมีเส้นคั่นบางให้ดูเป็นระเบียบ */
+        .pet-wrap > .bg-white > h3,
+        section > .bg-white > h3 {
+            letter-spacing: .01em;
+        }
+
         input:focus, select:focus, textarea:focus {
             outline: none;
             box-shadow: 0 0 0 3px rgba(0,85,255,.18);
@@ -127,6 +174,10 @@
             from { opacity: 0; transform: translateY(6px); }
             to   { opacity: 1; transform: none; }
         }
+
+        /* ระยะห่างของแต่ละหน้าให้สม่ำเสมอ */
+        main section.tab-content { gap: 14px; }
+        main section.tab-content > * + * { margin-top: 0; }
 
         .topbar {
             margin: 10px 12px 0;
@@ -208,7 +259,7 @@
             margin: 0 auto;
             min-height: 100vh;
             width: 100%;
-            background: var(--bg-color, #F9F9FB);
+            background: transparent;
             display: flex;
             flex-direction: column;
             transition: max-width .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease;
@@ -578,7 +629,7 @@
             <button id="googleLoginBtn" onclick="loginWithGoogle()" class="tb-btn px-2.5 py-0.5 bg-white text-darkText border border-darkText font-bold text-[11px] gap-1.5">
                 <svg class="tb-g" viewBox="0 0 48 48" aria-hidden="true">
                     <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.650z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
                     <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                     <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                 </svg>

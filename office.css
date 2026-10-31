@@ -375,3 +375,76 @@
  .tycoon-sprites .office-sprite{transform:translate(-50%,-78%);}
  .tycoon-sprites .pixel-person{transform:scale(.86);transform-origin:50% 100%;}
 }
+
+
+/* ===== CHIBI PIXEL STAFF v11 ===== */
+.tycoon-sprites .office-sprite{
+  width:7.2%!important;min-width:34px!important;max-width:54px!important;
+  height:auto!important;min-height:0!important;padding:0!important;margin:0!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;
+  gap:0!important;background:transparent!important;border:0!important;
+  transform:translate(-50%,-82%)!important;filter:drop-shadow(0 3px 1px #34485b55);
+  transition:left .65s ease,top .65s ease,filter .2s ease!important;
+}
+.tycoon-sprites .office-sprite:hover,.tycoon-sprites .office-sprite.is-speaking{
+  filter:drop-shadow(0 0 5px #ffe47a) drop-shadow(0 3px 1px #34485b55);
+}
+.tycoon-sprites .office-avatar{
+  display:flex!important;align-items:flex-end;justify-content:center;
+  width:100%!important;height:auto!important;line-height:0!important;
+  font-size:0!important;filter:none!important;
+}
+.pixel-person-svg{
+  display:block;width:100%;height:auto;max-height:72px;overflow:visible;
+  image-rendering:pixelated;filter:drop-shadow(1px 2px 0 #26384a33);
+  transform-origin:50% 100%;
+}
+.tycoon-sprites .office-sprite.is-idle .pixel-person-svg{
+  animation:chibiIdle 2.8s ease-in-out infinite;
+}
+.tycoon-sprites .office-sprite.is-working .pixel-person-svg{
+  animation:chibiWork .42s steps(2,end) infinite alternate;
+}
+@keyframes chibiIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes chibiWork{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-3px) rotate(2deg)}}
+.tycoon-sprites .office-expression{
+  top:-7px!important;right:-5px!important;z-index:5;
+  width:17px!important;height:17px!important;font-size:10px!important;
+  border:1.5px solid #fff!important;border-radius:50%!important;
+  box-shadow:0 2px 3px #26384a33!important;
+}
+.tycoon-sprites .office-name{
+  position:relative;z-index:4;display:block!important;
+  margin-top:-1px!important;padding:2px 5px!important;
+  border:1.5px solid #9b7652!important;border-radius:3px!important;
+  background:#fff2d9!important;color:#4c3b2d!important;
+  box-shadow:0 2px 0 #79583e!important;
+  font-size:8px!important;line-height:1.15!important;font-weight:900!important;
+  letter-spacing:0!important;white-space:nowrap!important;
+}
+.tycoon-sprites .office-sprite.is-speaking .office-name{
+  background:#fff0a8!important;border-color:#bd8d3b!important;
+}
+.office-dialogue{
+  border:2px solid #e4d6c2!important;
+  background:linear-gradient(115deg,#fffdf8,#fff6eb 58%,#fdf0f4)!important;
+}
+.office-dialogue-avatar{
+  border:2px solid #fff!important;box-shadow:0 2px 7px #47566a20!important;
+}
+.office-dialogue-copy p{font-size:13px!important;color:#4b3d32!important;}
+/* Pixel game environment details */
+.tycoon-scene{background:linear-gradient(180deg,#a8dfff 0%,#dff3ff 58%,#8fc5df 100%)!important;}
+.tycoon-map{filter:drop-shadow(0 8px 0 #496c80)!important;}
+.tycoon-sprites .office-pet-sprite{
+  font-size:23px!important;filter:drop-shadow(0 3px 1px #34485b55);
+  animation:chibiPet 2.6s ease-in-out infinite;
+}
+@keyframes chibiPet{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@media(max-width:560px){
+ .tycoon-sprites .office-sprite{width:8.4%!important;min-width:30px!important;max-width:45px!important;transform:translate(-50%,-82%)!important;}
+ .pixel-person-svg{max-height:59px;}
+ .tycoon-sprites .office-name{font-size:7px!important;padding:2px 4px!important;}
+ .tycoon-sprites .office-expression{width:15px!important;height:15px!important;font-size:9px!important;}
+ .tycoon-sprites .office-pet-sprite{font-size:20px!important;}
+}

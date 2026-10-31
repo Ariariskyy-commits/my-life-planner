@@ -92,7 +92,7 @@
         writer:['กำลังร่างข้อความให้อยู่นะ','ขอเกลาประโยคอีกนิด'],
         designer:['กำลังจัดเลย์เอาต์อยู่','เลือกสีให้เข้ากันก่อนนะ'],
         analyst:['กำลังเช็กตัวเลขอยู่','กำลังสรุปข้อมูลให้ CEO'],
-        secretary:['กำลังจัดตารางนัดหมาย','กำลังอัปเดตเช็กลิสต์ค่ะ']
+        secretary:['กำลังจัดตารางนัดหมาย','กำลังอัปเดตเช็กลิสต์ค่ะ'],coordinator:['กำลังประสานงานกับทุกฝ่าย','กำลังตามเอกสารให้ครับ']
       };
       const lines=workLines[agent.id]||['กำลังทำงานอยู่'];
       return {text:lines[Math.floor(Math.random()*lines.length)],mood:'กำลังทำงาน',face:'🤓',activity:'working'};
@@ -104,7 +104,7 @@
         writer:['นั่งมองหน้ากระดาษเปล่าอยู่...','ขอหาแรงบันดาลใจก่อนนะ'],
         designer:['เลื่อนดู Pinterest แป๊บเดียวเอง','กำลังเลือกวอลเปเปอร์โต๊ะอยู่'],
         analyst:['แอบเล่นเกมตัวเลขอยู่ครับ','ไม่มีข้อมูลให้วิเคราะห์ เลยว่างเลย'],
-        secretary:['แอบไถมือถือแป๊บนึงค่ะ','ขอเติมกาแฟก่อนนะ CEO']
+        secretary:['แอบไถมือถือแป๊บนึงค่ะ','ขอเติมกาแฟก่อนนะ CEO'],coordinator:['ขอหลบไปเติมน้ำก่อนครับ','กำลังหาโต๊ะว่างนั่งพักอยู่ครับ']
       };
       const lines=loaf[agent.id]||['ขอพักแป๊บนึง'];
       return {text:lines[Math.floor(Math.random()*lines.length)],mood:'แอบอู้',face:'😏',activity:'slacking'};
@@ -155,7 +155,7 @@
   }
   function pixelCharacter(a,face){
     const hair=a.hair||'#49332e',shirt=a.shirt||'#638bd8';
-    const female=['manager','writer','secretary'].includes(a.id);
+    const female=['researcher','writer','designer','secretary'].includes(a.id);
     const accessory=a.id==='researcher'?'<path d="M13 24h22M15 24l-2 7m22-7 2 7" stroke="#8ad8ee" stroke-width="2.5" fill="none"/><circle cx="14" cy="25" r="3.5" fill="none" stroke="#8ad8ee" stroke-width="2"/><circle cx="34" cy="25" r="3.5" fill="none" stroke="#8ad8ee" stroke-width="2"/>':a.id==='designer'?'<path d="M8 15h32v4H8z" fill="#e7b94f"/><path d="M12 12h24v3H12z" fill="#f5d36f"/>':a.id==='analyst'?'<rect x="10" y="44" width="28" height="12" rx="2" fill="#40516c"/><rect x="13" y="46" width="22" height="7" fill="#91d8f2"/>':'';
     const hairShape=female?'<path d="M8 24V14L13 6 21 3 32 4 40 12 41 31 37 37 34 23 14 23 12 36 8 32Z" fill="'+hair+'" stroke="#392d31" stroke-width="1.5"/><path d="M10 16L15 7 26 4 37 10 31 13 22 12 15 17Z" fill="'+hair+'"/>':'<path d="M10 19L12 9 20 4 31 5 39 12 39 19 34 15 16 15Z" fill="'+hair+'" stroke="#392d31" stroke-width="1.5"/>';
     return '<svg class="pixel-person-svg" viewBox="0 0 48 68" aria-hidden="true" shape-rendering="crispEdges">'+
@@ -187,13 +187,13 @@
       const pos=positions[i];
       const activityClass=working?'is-working':slacking?'is-slacking':'is-idle';
       const workProp=working?{
-        manager:'📋',researcher:'🔎',writer:'⌨️',designer:'🎨',analyst:'📊',secretary:'🗂️'
+        manager:'📋',researcher:'🔎',writer:'⌨️',designer:'🎨',analyst:'📊',secretary:'🗂️',coordinator:'📞'
       }[a.id]:'';
       const bubble=bubbleAgentId===a.id&&bubbleLine?'<span class="office-mini-bubble">'+safeText(bubbleLine.text)+'</span>':'';
       const action=working?'<span class="office-work-prop">'+workProp+'</span>':slacking?'<span class="office-loaf-prop">💤</span>':'';
       return '<button type="button" class="office-sprite '+activityClass+' role-'+a.id+'" data-agent-id="'+a.id+'" style="left:'+pos.x+'%;top:'+pos.y+'%" title="คุยกับ '+safeText(a.name)+'"><span class="office-expression">'+line.face+'</span>'+bubble+'<span class="office-avatar">'+pixelCharacter(a,line.face)+'</span>'+action+'<span class="office-name">'+a.name+'</span><span class="office-role-tag">'+({manager:'หัวหน้าทีม',researcher:'วิจัย',writer:'เขียน',designer:'ออกแบบ',analyst:'วิเคราะห์',secretary:'ธุรการ',coordinator:'ประสานงาน'}[a.id])+'</span></button>';
     }).join('');
-    const petSprites='<div class="office-pet-sprite cat" title="มะลิ แมวประจำออฟฟิศ">🐈</div><div class="office-pet-sprite dog" title="โมจิ น้องหมาประจำออฟฟิศ">🐕</div><div class="office-pet-sprite bird" title="จิ๊บจิ๊บ นกประจำออฟฟิศ">🦜</div>';
+    const petSprites='<div class="office-pet-sprite cat" data-pet-id="cat" title="ข้าวตัง แมวประจำออฟฟิศ">🐈<small>ข้าวตัง</small></div><div class="office-pet-sprite dog" data-pet-id="dog" title="ถั่วงอก น้องหมาประจำออฟฟิศ">🐕<small>ถั่วงอก</small></div><div class="office-pet-sprite bird" data-pet-id="bird" title="กะทิ นกประจำออฟฟิศ">🦜<small>กะทิ</small></div>';
     $('officeSprites').innerHTML=zoneLabels+people+petSprites;
   }
   function renderPets(){
@@ -241,6 +241,8 @@
     if(action==='feed'){s.hunger=Math.min(100,(s.hunger||50)+28);s.mood='อิ่มท้องแล้ว ขอบคุณนะ';}
     if(action==='play'){s.joy=Math.min(100,(s.joy||50)+26);s.mood='มีความสุขสุด ๆ';}
     data.petState[id]={hunger:s.hunger,joy:s.joy,mood:s.mood};save();renderPets();
+    const petLines={cat:action==='feed'?'ข้าวตังอิ่มแล้ว ขอไปนอนบนเอกสารนะ!':'ข้าวตัง: จับหนูให้ดูมั้ย?',dog:action==='feed'?'ถั่วงอกงั่ม ๆ ขออีกได้มั้ย!':'ถั่วงอก: โยนลูกบอลมาเลย CEO!',bird:action==='feed'?'กะทิอิ่มแล้ว จิ๊บ ๆ':'กะทิ: ขอเกาะไหล่หน่อย!'};
+    const host=agents[Math.floor(Math.random()*agents.length)];bubbleAgentId=host.id;bubbleLine={text:petLines[id],mood:action==='feed'?'อิ่มแปล้':'กำลังเล่นกับสัตว์เลี้ยง',face:action==='feed'?'😋':'🥰'};showDialogue(host,bubbleLine);renderSprites();
     const petLines={cat:action==='feed'?'ข้าวตังอิ่มแล้ว ขอไปนอนบนเอกสารนะ!':'ข้าวตัง: จับหนูให้ดูมั้ย?',dog:action==='feed'?'ถั่วงอกงั่ม ๆ ขออีกได้มั้ย!':'ถั่วงอก: โยนลูกบอลมาเลย CEO!',bird:action==='feed'?'กะทิอิ่มแล้ว จิ๊บ ๆ':'กะทิ: ขอเกาะไหล่หน่อย!'};
     const host=agents[Math.floor(Math.random()*agents.length)];bubbleAgentId=host.id;bubbleLine={text:petLines[id],mood:action==='feed'?'อิ่มแปล้':'กำลังเล่นกับสัตว์เลี้ยง',face:action==='feed'?'😋':'🥰'};showDialogue(host,bubbleLine);renderSprites();
   }

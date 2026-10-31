@@ -638,3 +638,34 @@
 .office-deliverable-preview b,.office-report-preview b{font-size:9px;color:#526c9c}
 .office-deliverable-preview p,.office-report-preview p{margin:5px 0;color:#59657d;font-size:10px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:560px){.office-deliverable-entry{padding:8px}.office-deliverable-entry textarea{font-size:10px}}
+
+
+/* v22 — stronger visual separation for the deliverable workspace */
+.office-deliverable-entry{
+  background:linear-gradient(135deg,#f0efff 0%,#f8f4ff 100%);
+  border:1.5px solid #b9b7ee;
+  border-left:4px solid #8276df;
+  box-shadow:0 3px 10px rgba(103,91,184,.08);
+}
+.office-deliverable-entry label{
+  color:#49418f;
+  font-size:10px;
+}
+.office-deliverable-entry textarea{
+  border:1.5px solid #c9c8e8;
+  background:#fff;
+}
+.office-deliverable-entry textarea::placeholder{color:#9290ad;opacity:1}
+.office-deliverable-entry textarea:focus{
+  border-color:#8276df;
+  box-shadow:0 0 0 3px rgba(130,118,223,.16);
+}
+.office-deliverable-entry button{
+  background:#6658c9;
+  box-shadow:0 2px 0 #4d419f;
+}
+.office-deliverable-preview{
+  background:#f0efff;
+  border:1px solid #d9d5fb;
+}
+.office-deliverable-preview b{color:#49418f}

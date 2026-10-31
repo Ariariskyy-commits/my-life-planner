@@ -199,7 +199,9 @@
     const host=$('officePets'); if(!host)return;
     host.innerHTML=pets.map(p=>{
       const s=petOf(p);
-      return '<article class="office-pet"><span class="office-pet-face">'+p.emoji+'</span><strong>'+p.name+' · '+p.kind+'</strong><small>'+safeText(s.mood)+'</small><div class="office-pet-actions"><button type="button" data-pet-action="feed" data-pet="'+p.id+'">🍎 ให้อาหาร</button><button type="button" data-pet-action="play" data-pet="'+p.id+'">🎾 เล่นด้วย</button></div></article>';
+      const hunger=Math.max(0,Math.min(100,Number(s.hunger)||0)),joy=Math.max(0,Math.min(100,Number(s.joy)||0));
+      const mood=hunger<25?'หิวแล้ว ขอขนมหน่อย':joy<25?'เหงาจัง มาเล่นกัน':'อารมณ์ดี · '+safeText(s.mood);
+      return '<article class="office-pet"><span class="office-pet-face">'+p.emoji+'</span><strong>'+p.name+' · '+p.kind+'</strong><small>'+mood+'</small><div class="office-pet-meter"><span>ความอิ่ม</span><b>'+hunger+'%</b><i><em style="width:'+hunger+'%"></em></i></div><div class="office-pet-meter joy"><span>ความสุข</span><b>'+joy+'%</b><i><em style="width:'+joy+'%"></em></i></div><div class="office-pet-actions"><button type="button" data-pet-action="feed" data-pet="'+p.id+'">🍎 ให้อาหาร</button><button type="button" data-pet-action="play" data-pet="'+p.id+'">🎾 เล่นด้วย</button></div></article>';
     }).join('');
   }
   function renderTasks(){
@@ -235,8 +237,8 @@
   function petAction(id,action){
     const p=pets.find(x=>x.id===id);if(!p)return;
     const s=petOf(p);
-    if(action==='feed'){s.hunger=Math.min(100,(s.hunger||50)+24);s.mood='อิ่มท้องแล้ว ขอบคุณนะ';}
-    if(action==='play'){s.joy=Math.min(100,(s.joy||50)+22);s.mood='มีความสุขสุด ๆ';}
+    if(action==='feed'){s.hunger=Math.min(100,(s.hunger||50)+28);s.mood='อิ่มท้องแล้ว ขอบคุณนะ';}
+    if(action==='play'){s.joy=Math.min(100,(s.joy||50)+26);s.mood='มีความสุขสุด ๆ';}
     data.petState[id]={hunger:s.hunger,joy:s.joy,mood:s.mood};save();renderPets();
   }
   function init(){
@@ -245,6 +247,7 @@
     if(speechTimer)clearInterval(speechTimer);
     showDialogue(agents[0]);
     speechTimer=setInterval(refreshDialogue,6200);
+    setInterval(()=>{pets.forEach(p=>{const s=petOf(p);s.hunger=Math.max(0,(Number(s.hunger)||50)-1);s.joy=Math.max(0,(Number(s.joy)||50)-1);if(s.hunger<25)s.mood='หิวแล้ว ขอขนมหน่อย';else if(s.joy<25)s.mood='เหงาจัง มาเล่นกัน';data.petState[p.id]={hunger:s.hunger,joy:s.joy,mood:s.mood};});save();renderPets();},60000);
     if(loafTimer)clearInterval(loafTimer);
     loafTimer=setInterval(cycleLoafing,9000);
     $('officeTaskForm').addEventListener('submit',addTask);

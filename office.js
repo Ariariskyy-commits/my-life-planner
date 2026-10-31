@@ -243,8 +243,6 @@
     data.petState[id]={hunger:s.hunger,joy:s.joy,mood:s.mood};save();renderPets();
     const petLines={cat:action==='feed'?'ข้าวตังอิ่มแล้ว ขอไปนอนบนเอกสารนะ!':'ข้าวตัง: จับหนูให้ดูมั้ย?',dog:action==='feed'?'ถั่วงอกงั่ม ๆ ขออีกได้มั้ย!':'ถั่วงอก: โยนลูกบอลมาเลย CEO!',bird:action==='feed'?'กะทิอิ่มแล้ว จิ๊บ ๆ':'กะทิ: ขอเกาะไหล่หน่อย!'};
     const host=agents[Math.floor(Math.random()*agents.length)];bubbleAgentId=host.id;bubbleLine={text:petLines[id],mood:action==='feed'?'อิ่มแปล้':'กำลังเล่นกับสัตว์เลี้ยง',face:action==='feed'?'😋':'🥰'};showDialogue(host,bubbleLine);renderSprites();
-    const petLines={cat:action==='feed'?'ข้าวตังอิ่มแล้ว ขอไปนอนบนเอกสารนะ!':'ข้าวตัง: จับหนูให้ดูมั้ย?',dog:action==='feed'?'ถั่วงอกงั่ม ๆ ขออีกได้มั้ย!':'ถั่วงอก: โยนลูกบอลมาเลย CEO!',bird:action==='feed'?'กะทิอิ่มแล้ว จิ๊บ ๆ':'กะทิ: ขอเกาะไหล่หน่อย!'};
-    const host=agents[Math.floor(Math.random()*agents.length)];bubbleAgentId=host.id;bubbleLine={text:petLines[id],mood:action==='feed'?'อิ่มแปล้':'กำลังเล่นกับสัตว์เลี้ยง',face:action==='feed'?'😋':'🥰'};showDialogue(host,bubbleLine);renderSprites();
   }
   function startPetRoaming(){
     const routes={cat:[{x:15,y:72},{x:28,y:61},{x:42,y:76},{x:58,y:64},{x:70,y:75},{x:49,y:81}],dog:[{x:77,y:77},{x:64,y:69},{x:50,y:78},{x:33,y:73},{x:22,y:62},{x:60,y:57}],bird:[{x:82,y:29},{x:70,y:25},{x:58,y:33},{x:45,y:25},{x:66,y:42},{x:84,y:36}]};

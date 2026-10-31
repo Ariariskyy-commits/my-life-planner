@@ -233,11 +233,11 @@
       if(del)deleteTask(del.getAttribute('data-office-delete'));
     });
     $('officeAgents').addEventListener('click',e=>{
-      const btn=e.target.closest('[data-office-agent]');if(btn){const id=btn.getAttribute('data-office-agent');$('officeTaskAgent').value=id;showDialogue(agents.find(a=>a.id===id));}
+      const btn=e.target.closest('[data-office-agent]');if(btn){const id=btn.getAttribute('data-office-agent');$('officeTaskAgent').value=id;const agent=agents.find(a=>a.id===id);bubbleAgentId=id;bubbleLine=lineFor(agent);showDialogue(agent,bubbleLine);renderSprites();}
     });
     $('officeSprites').addEventListener('click',e=>{
       const btn=e.target.closest('[data-agent-id]');
-      if(btn){const id=btn.getAttribute('data-agent-id');showDialogue(agents.find(a=>a.id===id));}
+      if(btn){const id=btn.getAttribute('data-agent-id');const agent=agents.find(a=>a.id===id);bubbleAgentId=id;bubbleLine=lineFor(agent);showDialogue(agent,bubbleLine);renderSprites();}
     });
     $('officePets').addEventListener('click',e=>{
       const btn=e.target.closest('[data-pet-action]');if(btn)petAction(btn.getAttribute('data-pet'),btn.getAttribute('data-pet-action'));

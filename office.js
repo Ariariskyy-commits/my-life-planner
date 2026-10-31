@@ -17,7 +17,7 @@
     {id:'bird',name:'จิ๊บจิ๊บ',kind:'นก',emoji:'🦜',mood:'กำลังร้องเพลง',hunger:76,joy:88}
   ];
   const $ = id => document.getElementById(id);
-  let data = {tasks:[],statuses:{},petState:{}};
+  let data = {tasks:[],statuses:{},petState:{},morale:{}};
   let initialized = false;
   let speechTimer = null;
   let dialogueIndex = 0;
@@ -41,11 +41,31 @@
       if(parsed&&Array.isArray(parsed.tasks))data.tasks=parsed.tasks;
       if(parsed&&parsed.statuses&&typeof parsed.statuses==='object')data.statuses=parsed.statuses;
       if(parsed&&parsed.petState&&typeof parsed.petState==='object')data.petState=parsed.petState;
+      if(parsed&&parsed.morale&&typeof parsed.morale==='object')data.morale=parsed.morale;
     }catch(e){console.warn('Office data could not be loaded',e);}
   }
   function save(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){console.warn('Office data could not be saved',e);}}
   function statusOf(id){return data.statuses[id]||'idle';}
   function petOf(p){return Object.assign({},p,data.petState[p.id]||{});}
+  function moraleOf(id){return Math.max(0,Math.min(100,Number(data.morale[id]??75)));}
+  function setToast(message){const el=$('officeToast');if(!el)return;el.textContent=message;el.classList.add('show');clearTimeout(setToast.timer);setToast.timer=setTimeout(()=>el.classList.remove('show'),2600);}
+  function ceoCommand(command){
+    if(command==='meeting'){
+      agents.forEach(a=>{data.morale[a.id]=Math.min(100,moraleOf(a.id)+4);});
+      bubbleAgentId='manager';bubbleLine={text:'ประชุมทีมด่วน! ทุกคนมาอัปเดตงานกันหน่อยค่ะ',mood:'กำลังประชุม',face:'📣'};
+      showDialogue(agents[0],bubbleLine);setToast('เรียกประชุมทีมแล้ว · ทุกคนพร้อมรายงานตัว!');
+    }else if(command==='praise'){
+      agents.forEach(a=>{data.morale[a.id]=Math.min(100,moraleOf(a.id)+8);});
+      bubbleAgentId='writer';bubbleLine={text:'CEO ชมด้วย! วันนี้มีแรงทำงานขึ้นมาเลย 💗',mood:'ดีใจสุด ๆ',face:'🥰'};
+      showDialogue(agents[2],bubbleLine);setToast('ชมเชยทีมเรียบร้อย · ขวัญกำลังใจเพิ่มขึ้น');
+    }else if(command==='break'){
+      agents.forEach(a=>{data.morale[a.id]=Math.min(100,moraleOf(a.id)+6);});
+      const free=agents.filter(a=>statusOf(a.id)!=='working');
+      if(free.length){const a=free[Math.floor(Math.random()*free.length)];slackingAgentId=a.id;bubbleAgentId=a.id;bubbleLine={text:'พักเบรกแล้ว! ใครเอากาแฟมั้ย ☕',mood:'พักผ่อน',face:'😌'};showDialogue(a,bubbleLine);}
+      setToast('ประกาศพักเบรกให้ทีมแล้ว ☕');
+    }
+    save();render();
+  }
   function renderStats(){
     const active=agents.filter(a=>statusOf(a.id)==='working').length;
     const done=data.tasks.filter(t=>t.status==='done').length;
@@ -58,7 +78,7 @@
     $('officeAgents').innerHTML=agents.map(a=>{
       const working=statusOf(a.id)==='working';
       const slacking=slackingAgentId===a.id&&!working;
-      return '<button type="button" class="office-agent" data-office-agent="'+a.id+'"><span class="office-agent-avatar">'+a.emoji+'</span><span class="office-agent-info"><strong>'+a.name+'</strong><small>'+a.role+'</small></span><span class="office-agent-status '+(working?'working':slacking?'slacking':'')+'">'+(working?'กำลังทำงาน':slacking?'แอบอู้':'ว่าง')+'</span></button>';
+      const morale=moraleOf(a.id);return '<button type="button" class="office-agent" data-office-agent="'+a.id+'"><span class="office-agent-avatar">'+a.emoji+'</span><span class="office-agent-info"><strong>'+a.name+'</strong><small>'+a.role+'</small><span class="office-morale"><i style="width:'+morale+'%"></i></span></span><span class="office-agent-status '+(working?'working':slacking?'slacking':'')+'">'+(working?'กำลังทำงาน':slacking?'แอบอู้':'ว่าง')+'</span></button>';
     }).join('');
     $('officeTaskAgent').innerHTML=agents.map(a=>'<option value="'+a.id+'">'+a.name+' — '+a.role+'</option>').join('');
   }
@@ -196,12 +216,13 @@
     const title=$('officeTaskTitle').value.trim();if(!title)return;
     const agentId=$('officeTaskAgent').value;
     data.tasks.push({id:'office_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),title,detail:$('officeTaskDetail').value.trim(),agent:agentId,status:'doing',created:Date.now()});
-    data.statuses[agentId]='working';if(slackingAgentId===agentId)slackingAgentId=null;save();render();$('officeTaskForm').reset();$('officeTaskTitle').focus();
+    data.statuses[agentId]='working';if(slackingAgentId===agentId)slackingAgentId=null;data.morale[agentId]=Math.min(100,moraleOf(agentId)+2);save();render();$('officeTaskForm').reset();$('officeTaskTitle').focus();
   }
   function completeTask(id){
     const task=data.tasks.find(t=>t.id===id);if(!task)return;
     task.status='done';
     if(slackingAgentId===task.agent)slackingAgentId=null;
+    data.morale[task.agent]=Math.min(100,moraleOf(task.agent)+5);
     if(!data.tasks.some(t=>t.agent===task.agent&&t.status==='doing'))data.statuses[task.agent]='idle';
     save();render();
   }
@@ -239,6 +260,7 @@
       const btn=e.target.closest('[data-agent-id]');
       if(btn){const id=btn.getAttribute('data-agent-id');const agent=agents.find(a=>a.id===id);bubbleAgentId=id;bubbleLine=lineFor(agent);showDialogue(agent,bubbleLine);renderSprites();}
     });
+    $('officeCommandBar').addEventListener('click',e=>{const btn=e.target.closest('[data-ceo-command]');if(btn)ceoCommand(btn.getAttribute('data-ceo-command'));});
     $('officePets').addEventListener('click',e=>{
       const btn=e.target.closest('[data-pet-action]');if(btn)petAction(btn.getAttribute('data-pet'),btn.getAttribute('data-pet-action'));
     });
@@ -246,5 +268,5 @@
   document.addEventListener('DOMContentLoaded',init);
   window.addEventListener('load',init);
   window.addEventListener('storage',e=>{if(e.key===KEY){load();render();}});
-  window.MyLifePlannerOffice={init,render};
+  window.MyLifePlannerOffice={init,render,ceoCommand};
 })();

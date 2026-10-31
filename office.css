@@ -120,3 +120,68 @@
  .office-pet{padding:8px 3px}
  .office-pet-face{font-size:30px}
 }
+
+
+/* ===== Cozy dimensional studio + office banter ===== */
+.office-scene{
+  min-height:470px;
+  background:
+    radial-gradient(ellipse at 52% 18%,#ffffffb8 0 9%,transparent 36%),
+    linear-gradient(180deg,#b9e5ff 0%,#dff4ff 43%,#b7def4 100%);
+  perspective:1000px;
+}
+.office-scene:before{
+  content:"";position:absolute;z-index:1;left:8%;top:8%;width:84%;height:57%;
+  background:linear-gradient(135deg,#fff8e9 0%,#f4dfc2 100%);
+  clip-path:polygon(50% 0,100% 52%,100% 100%,0 100%,0 52%);
+  filter:drop-shadow(0 8px 0 #a7cce0);
+}
+.office-scene:after{
+  content:"";position:absolute;z-index:2;left:9%;top:12%;width:82%;height:52%;
+  pointer-events:none;
+  background:linear-gradient(90deg,#c99e7a22,transparent 22%,transparent 78%,#b98a6a22);
+  clip-path:polygon(50% 0,100% 52%,100% 100%,0 100%,0 52%);
+}
+.office-floor{
+  z-index:2;width:82%;height:70%;left:9%;top:20%;
+  transform:rotate(30deg) skewX(-30deg) scaleY(.86) translateZ(0);
+  background-color:#e9c99b;
+  background-image:linear-gradient(135deg,#fff5df66 0 1px,transparent 1px),linear-gradient(45deg,#b78e6540 0 1px,transparent 1px),linear-gradient(#c39c7040 1px,transparent 1px),linear-gradient(90deg,#c39c7040 1px,transparent 1px);
+  background-size:34px 34px,34px 34px,34px 34px,34px 34px;
+  border:7px solid #fff3dc;
+  box-shadow:0 16px 0 #83b4d0,0 23px 20px #477b9b40,inset 0 0 0 2px #d5b58c;
+}
+.office-rug{z-index:3;box-shadow:0 7px 0 #8eacc1,0 12px 12px #56738b30;}
+.office-window{z-index:3;box-shadow:0 8px 0 #7899b2,0 12px 15px #45657b35;border-radius:3px;}
+.office-shelf{z-index:4;box-shadow:0 8px 0 #714d3a,0 12px 15px #45657b35;transform:perspective(300px) rotateY(-7deg);}
+.office-desk{z-index:4;height:13%;border-width:3px;box-shadow:0 9px 0 #865a43,0 14px 12px #334b6033,inset 0 3px 0 #ffffff70;transform:skewY(-24deg) perspective(300px) rotateX(5deg);}
+.office-desk:after{content:"";position:absolute;left:10%;right:10%;height:22px;top:100%;background:linear-gradient(90deg,#9d6b50,#c18a68 50%,#865a43);transform:skewY(24deg);transform-origin:top;box-shadow:0 5px 5px #39495b25;}
+.office-sofa{z-index:5;filter:drop-shadow(0 8px 3px #40556b55);}
+.office-coffee{z-index:6;filter:drop-shadow(0 5px 2px #40556b55);}
+.office-sprites{z-index:8;pointer-events:none;}
+.office-sprite{width:78px;filter:drop-shadow(0 9px 5px #283c5545);}
+.office-sprite .office-avatar{font-size:46px;filter:drop-shadow(0 5px 2px #24354a44);text-shadow:0 1px 0 #fff8;}
+.office-sprite .office-name{font-size:10px;padding:4px 9px;box-shadow:0 4px 0 #d7dfec,0 7px 10px #34455a25;}
+.office-speech{
+  position:relative;display:block;max-width:148px;width:max-content;margin-bottom:3px;
+  padding:6px 9px;border:1.5px solid #d7dfed;border-radius:12px;
+  background:#fff;color:#39435a;font-size:10px;font-weight:800;line-height:1.35;
+  box-shadow:0 4px 0 #dce4ef,0 7px 12px #35465c22;text-align:center;
+  animation:officeBubbleIn .35s ease-out;
+}
+.office-speech:after{content:"";position:absolute;left:50%;bottom:-6px;width:9px;height:9px;background:#fff;border-right:1.5px solid #d7dfed;border-bottom:1.5px solid #d7dfed;transform:translateX(-50%) rotate(45deg);}
+@keyframes officeBubbleIn{from{opacity:0;transform:translateY(5px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
+.office-sprite.is-working .office-speech{background:#f1fff5;border-color:#b9e6c8;color:#34754c;}
+.office-sprite.is-working .office-speech:after{background:#f1fff5;border-color:#b9e6c8;}
+.office-sprite .office-avatar{animation:office3DBreathe 2.1s ease-in-out infinite;}
+.office-sprite.is-working .office-avatar{animation:office3DWork .48s ease-in-out infinite alternate;}
+.office-scene-caption{z-index:10;letter-spacing:0;background:#ffffffdf;box-shadow:0 3px 9px #35465c15;}
+.office-pet-sprite{z-index:9;font-size:35px;filter:drop-shadow(0 7px 3px #26364a50);}
+@media(max-width:560px){
+ .office-scene{min-height:455px}
+ .office-floor{width:88%;left:6%;height:68%}
+ .office-sprite{width:68px}
+ .office-sprite .office-avatar{font-size:39px}
+ .office-speech{max-width:120px;font-size:9px;padding:5px 7px}
+ .office-sprite .office-name{font-size:9px}
+}

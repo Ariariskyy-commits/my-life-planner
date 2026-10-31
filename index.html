@@ -2643,11 +2643,29 @@
             calcRender();
         }
         function clearCalcHistory() { state.calcHistory = []; saveData(); renderCalcHistory(); }
+        function deleteCalcHistory(id) { state.calcHistory = state.calcHistory.filter(h => h.id !== id); saveData(); renderCalcHistory(); }
+
+        function saveCalcToTx(id, type) {
+            const h = state.calcHistory.find(x => x.id === id);
+            if (!h) return;
+            const note = $('calcNoteDesc').value.trim();
+            openTransactionModal(type, null, h.result);
+            setTimeout(() => {
+                if (note) $('txTitle').value = note;
+            }, 50);
+        }
+
         function renderCalcHistory() {
             $('calcHistoryList').innerHTML = state.calcHistory.length ? state.calcHistory.map(h => `
-                <div class="bg-offWhite p-2 rounded-xl border border-darkText flex justify-between items-center text-xs">
-                    <span>${esc(h.expr)} = <b>฿${money(h.result)}</b></span>
-                    <button onclick="openTransactionModal('expense', null, ${h.result})" class="bg-hotPink text-white px-2 py-0.5 rounded text-[9px] font-bold">บันทึกจ่าย</button>
+                <div class="bg-offWhite p-2.5 rounded-xl border border-darkText flex flex-col gap-2 text-xs">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm font-medium">${esc(h.expr)} = <b class="text-popBlue text-base">฿${money(h.result)}</b></span>
+                        <button onclick="deleteCalcHistory('${h.id}')" class="text-gray-400 hover:text-hotPink shrink-0"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                    <div class="flex gap-1.5 mt-1">
+                        <button onclick="saveCalcToTx('${h.id}', 'income')" class="flex-1 bg-limeGreen text-darkText px-2 py-1.5 rounded-lg border border-darkText text-[10px] font-bold flex items-center justify-center gap-1"><i class="fa-solid fa-plus-circle"></i> บันทึกรับ</button>
+                        <button onclick="saveCalcToTx('${h.id}', 'expense')" class="flex-1 bg-hotPink text-white px-2 py-1.5 rounded-lg border border-darkText text-[10px] font-bold flex items-center justify-center gap-1"><i class="fa-solid fa-minus-circle"></i> บันทึกจ่าย</button>
+                    </div>
                 </div>`).join('') : `<div class="text-center py-6 text-gray-400 text-xs">ไม่มีประวัติคำนวณ</div>`;
         }
 

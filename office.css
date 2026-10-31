@@ -564,3 +564,36 @@
 .office-pet-meter.joy em{background:linear-gradient(90deg,#8ec9e9,#a6d9b4);}
 .office-pet-hint{line-height:1.5;}
 @media(max-width:560px){.office-garden-tree{scale:.78}.office-garden-tree.tree-c,.office-garden-tree.tree-d{scale:.65}}
+
+
+/* v16 — compact mobile office dashboard */
+@media(max-width:560px){
+  .office-panel{padding:14px!important;margin-bottom:12px!important;border-radius:18px!important;}
+  .office-panel-title{margin-bottom:9px!important;}
+  .office-panel-title h3{font-size:16px!important;line-height:1.2!important;}
+  .office-agents{gap:5px!important;}
+  .office-agent{gap:7px!important;padding:6px 8px!important;border-radius:10px!important;min-height:54px!important;}
+  .office-agent-avatar{width:31px!important;height:31px!important;border-radius:9px!important;font-size:18px!important;}
+  .office-agent-info strong{font-size:10px!important;line-height:1.2!important;}
+  .office-agent-info small{font-size:8px!important;line-height:1.2!important;}
+  .office-agent-status{font-size:7px!important;}
+  .office-morale{height:4px!important;margin-top:3px!important;}
+  .office-pets{gap:6px!important;}
+  .office-pet{padding:7px 4px!important;border-radius:12px!important;}
+  .office-pet-face{font-size:27px!important;line-height:1.15!important;}
+  .office-pet strong{font-size:9px!important;}
+  .office-pet small{font-size:8px!important;margin:2px 0 5px!important;min-height:22px;}
+  .office-pet-meter{font-size:7px!important;gap:2px 4px!important;margin:4px 2px 0!important;}
+  .office-pet-meter b{font-size:7px!important;}
+  .office-pet-meter i{height:4px!important;}
+  .office-pet-actions{gap:3px!important;}
+  .office-pet-actions button{padding:4px 5px!important;font-size:8px!important;border-radius:7px!important;}
+  .office-command-bar{gap:5px!important;margin-top:7px!important;}
+  .office-command-bar button{min-height:43px!important;padding:6px 3px!important;font-size:9px!important;border-radius:10px!important;}
+  .office-command-hint{font-size:8px!important;margin-top:6px!important;}
+  .office-task-form{gap:6px!important;}
+  .office-task-form label{font-size:9px!important;margin-top:2px!important;}
+  .office-task-form input,.office-task-form textarea,.office-task-form select{padding:8px!important;font-size:10px!important;}
+  .office-primary-btn{min-height:42px!important;padding:8px!important;font-size:11px!important;}
+  .office-task{padding:9px!important;margin-bottom:6px!important;}
+}

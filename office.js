@@ -1,110 +1,119 @@
-/* MY LIFE PLANNER — isolated virtual office simulation.
-   This module intentionally uses its own localStorage namespace and does not touch planner/Firebase state.
-   AI execution is not implemented here; connect a secured backend before enabling real agent output. */
+/* MY LITTLE OFFICE — isolated local simulation.
+   No planner/Firebase state is accessed. Real AI execution is intentionally not connected. */
 (() => {
   'use strict';
   const KEY = 'myLifePlanner_virtualOffice_v1';
   const agents = [
-    {id:'manager',name:'Mika',role:'Manager · ผู้จัดการ',emoji:'👩🏻‍💼',desk:'desk-b',x:54,y:44},
-    {id:'researcher',name:'Nori',role:'Researcher · นักค้นคว้า',emoji:'🧑🏻‍🔬',desk:'desk-b',x:67,y:50},
-    {id:'writer',name:'Momo',role:'Writer · นักเขียน',emoji:'👩🏻‍🎨',desk:'desk-a',x:29,y:52},
-    {id:'designer',name:'Kiki',role:'Designer · นักออกแบบ',emoji:'🧑🏼‍🎨',desk:'desk-a',x:38,y:61},
-    {id:'analyst',name:'Theo',role:'Analyst · นักวิเคราะห์',emoji:'👨🏻‍💻',desk:'desk-c',x:48,y:76},
-    {id:'secretary',name:'Pim',role:'Secretary · เลขานุการ',emoji:'👩🏻‍💻',desk:'desk-c',x:60,y:78}
+    {id:'manager',name:'Mika',role:'ผู้จัดการ',emoji:'👩🏻‍💼',x:54,y:44},
+    {id:'researcher',name:'Nori',role:'นักค้นคว้า',emoji:'🧑🏻‍🔬',x:67,y:50},
+    {id:'writer',name:'Momo',role:'นักเขียน',emoji:'👩🏻‍🎨',x:29,y:52},
+    {id:'designer',name:'Kiki',role:'นักออกแบบ',emoji:'🧑🏼‍🎨',x:38,y:61},
+    {id:'analyst',name:'Theo',role:'นักวิเคราะห์',emoji:'👨🏻‍💻',x:48,y:76},
+    {id:'secretary',name:'Pim',role:'เลขานุการ',emoji:'👩🏻‍💻',x:60,y:78}
+  ];
+  const pets = [
+    {id:'cat',name:'มะลิ',kind:'แมว',emoji:'🐈',mood:'กำลังงีบ',hunger:68,joy:82},
+    {id:'dog',name:'โมจิ',kind:'น้องหมา',emoji:'🐕',mood:'อยากเล่น',hunger:55,joy:74},
+    {id:'bird',name:'จิ๊บจิ๊บ',kind:'นก',emoji:'🦜',mood:'กำลังร้องเพลง',hunger:76,joy:88}
   ];
   const $ = id => document.getElementById(id);
-  let data = {tasks:[], statuses:{}};
+  let data = {tasks:[],statuses:{},petState:{}};
   let initialized = false;
-  const safeText = value => String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function load() {
-    try {
-      const parsed = JSON.parse(localStorage.getItem(KEY) || '{}');
-      if (parsed && Array.isArray(parsed.tasks)) data.tasks = parsed.tasks;
-      if (parsed && parsed.statuses && typeof parsed.statuses === 'object') data.statuses = parsed.statuses;
-    } catch (e) { console.warn('Office data could not be loaded', e); }
+  const safeText = value => String(value == null ? '' : value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function load(){
+    try{
+      const parsed=JSON.parse(localStorage.getItem(KEY)||'{}');
+      if(parsed&&Array.isArray(parsed.tasks))data.tasks=parsed.tasks;
+      if(parsed&&parsed.statuses&&typeof parsed.statuses==='object')data.statuses=parsed.statuses;
+      if(parsed&&parsed.petState&&typeof parsed.petState==='object')data.petState=parsed.petState;
+    }catch(e){console.warn('Office data could not be loaded',e);}
   }
-  function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(data)); }
-    catch (e) { console.warn('Office data could not be saved', e); }
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){console.warn('Office data could not be saved',e);}}
+  function statusOf(id){return data.statuses[id]||'idle';}
+  function petOf(p){return Object.assign({},p,data.petState[p.id]||{});}
+  function renderStats(){
+    const active=agents.filter(a=>statusOf(a.id)==='working').length;
+    const done=data.tasks.filter(t=>t.status==='done').length;
+    $('officeStats').innerHTML=[
+      ['สมาชิกทีม',agents.length,'fa-users'],['กำลังทำงาน',active,'fa-laptop'],['งานที่เสร็จแล้ว',done,'fa-check-circle']
+    ].map(x=>'<div class="office-stat"><small><i class="fa-solid '+x[2]+'"></i> '+x[0]+'</small><strong>'+x[1]+'</strong></div>').join('');
   }
-  function statusOf(id) { return data.statuses[id] || 'idle'; }
-  function renderStats() {
-    const active = agents.filter(a => statusOf(a.id) === 'working').length;
-    const done = data.tasks.filter(t => t.status === 'done').length;
-    $('officeStats').innerHTML = [
-      ['สมาชิกทีม',agents.length,'fa-users'],
-      ['กำลังทำงาน',active,'fa-laptop'],
-      ['งานที่เสร็จแล้ว',done,'fa-check-circle']
-    ].map(x => '<div class="office-stat"><small><i class="fa-solid '+x[2]+'"></i> '+x[0]+'</small><strong>'+x[1]+'</strong></div>').join('');
-  }
-  function renderAgents() {
-    $('officeTeamCount').textContent = String(agents.length).padStart(2,'0');
-    $('officeAgents').innerHTML = agents.map(a => {
-      const working = statusOf(a.id) === 'working';
+  function renderAgents(){
+    $('officeTeamCount').textContent=String(agents.length).padStart(2,'0');
+    $('officeAgents').innerHTML=agents.map(a=>{
+      const working=statusOf(a.id)==='working';
       return '<button type="button" class="office-agent" data-office-agent="'+a.id+'"><span class="office-agent-avatar">'+a.emoji+'</span><span class="office-agent-info"><strong>'+a.name+'</strong><small>'+a.role+'</small></span><span class="office-agent-status '+(working?'working':'')+'">'+(working?'กำลังทำงาน':'ว่าง')+'</span></button>';
     }).join('');
-    $('officeTaskAgent').innerHTML = agents.map(a => '<option value="'+a.id+'">'+a.name+' — '+a.role.split(' · ')[0]+'</option>').join('');
+    $('officeTaskAgent').innerHTML=agents.map(a=>'<option value="'+a.id+'">'+a.name+' — '+a.role+'</option>').join('');
   }
-  function renderSprites() {
-    $('officeSprites').innerHTML = agents.map((a,i) => {
-      const working = statusOf(a.id) === 'working';
-      const task = data.tasks.find(t => t.agent === a.id && t.status === 'doing');
-      const pos = working ? [{x:54,y:46},{x:67,y:50},{x:29,y:54},{x:38,y:62},{x:48,y:76},{x:60,y:78}][i] : {x:a.x,y:a.y};
-      return '<div class="office-sprite '+(working?'is-working':'')+'" style="left:calc('+pos.x+'% - 25px);top:calc('+pos.y+'% - 20px)" title="'+safeText(a.name+(task?' · '+task.title:''))+'"><span class="office-avatar">'+a.emoji+'</span><span class="office-name">'+a.name+'</span></div>';
+  function renderSprites(){
+    const people=agents.map((a,i)=>{
+      const working=statusOf(a.id)==='working';
+      const pos=working?[{x:54,y:44},{x:67,y:50},{x:29,y:54},{x:38,y:62},{x:48,y:76},{x:60,y:78}][i]:{x:a.x,y:a.y};
+      return '<div class="office-sprite '+(working?'is-working':'is-idle')+'" style="left:calc('+pos.x+'% - 34px);top:calc('+pos.y+'% - 34px)" title="'+safeText(a.name+' · '+a.role)+'"><span class="office-avatar">'+a.emoji+'</span><span class="office-name">'+a.name+(working?' · ทำงาน':'')+'</span></div>';
+    }).join('');
+    const petSprites='<div class="office-pet-sprite cat" title="มะลิ แมวประจำออฟฟิศ">🐈</div><div class="office-pet-sprite dog" title="โมจิ น้องหมาประจำออฟฟิศ">🐕</div><div class="office-pet-sprite bird" title="จิ๊บจิ๊บ นกประจำออฟฟิศ">🦜</div>';
+    $('officeSprites').innerHTML=people+petSprites;
+  }
+  function renderPets(){
+    const host=$('officePets'); if(!host)return;
+    host.innerHTML=pets.map(p=>{
+      const s=petOf(p);
+      return '<article class="office-pet"><span class="office-pet-face">'+p.emoji+'</span><strong>'+p.name+' · '+p.kind+'</strong><small>'+safeText(s.mood)+'</small><div class="office-pet-actions"><button type="button" data-pet-action="feed" data-pet="'+p.id+'">🍎 ให้อาหาร</button><button type="button" data-pet-action="play" data-pet="'+p.id+'">🎾 เล่นด้วย</button></div></article>';
     }).join('');
   }
-  function renderTasks() {
-    const list = $('officeTaskList');
-    if (!data.tasks.length) { list.innerHTML = '<div class="office-empty">ยังไม่มีงานในออฟฟิศ ✦<br>เริ่มมอบหมายงานแรกให้ทีมได้เลย</div>'; return; }
-    list.innerHTML = data.tasks.slice().sort((a,b)=>b.created-a.created).map(t => {
-      const agent = agents.find(a=>a.id===t.agent);
-      const done = t.status === 'done';
-      return '<article class="office-task"><div class="office-task-head"><h4>'+safeText(t.title)+'</h4><span class="office-task-state '+(done?'done':'')+'">'+(done?'เสร็จแล้ว':'กำลังดำเนินการ')+'</span></div><p>'+safeText(t.detail || 'ไม่มีรายละเอียดเพิ่มเติม')+'</p><div class="office-task-meta"><span>'+safeText(agent?agent.name:'ทีม')+'</span><span>'+new Date(t.created).toLocaleDateString('th-TH')+'</span></div><div class="office-task-actions">'+(done?'':'<button type="button" data-office-done="'+t.id+'">ทำเครื่องหมายว่าเสร็จ</button>')+'<button type="button" data-office-delete="'+t.id+'">ลบงาน</button></div></article>';
+  function renderTasks(){
+    const list=$('officeTaskList');
+    if(!data.tasks.length){list.innerHTML='<div class="office-empty">ยังไม่มีงานในออฟฟิศ ✦<br>เริ่มมอบหมายงานแรกให้ทีมได้เลย</div>';return;}
+    list.innerHTML=data.tasks.slice().sort((a,b)=>b.created-a.created).map(t=>{
+      const agent=agents.find(a=>a.id===t.agent),done=t.status==='done';
+      return '<article class="office-task"><div class="office-task-head"><h4>'+safeText(t.title)+'</h4><span class="office-task-state '+(done?'done':'')+'">'+(done?'เสร็จแล้ว':'กำลังดำเนินการ')+'</span></div><p>'+safeText(t.detail||'ไม่มีรายละเอียดเพิ่มเติม')+'</p><div class="office-task-meta"><span>ผู้รับผิดชอบ: '+safeText(agent?agent.name:'ทีม')+'</span><span>'+new Date(t.created).toLocaleDateString('th-TH')+'</span></div><div class="office-task-actions">'+(done?'':'<button type="button" data-office-done="'+t.id+'">✓ ทำงานเสร็จแล้ว</button>')+'<button type="button" data-office-delete="'+t.id+'">ลบงาน</button></div></article>';
     }).join('');
   }
-  function render() { renderStats(); renderAgents(); renderSprites(); renderTasks(); }
-  function addTask(event) {
+  function render(){renderStats();renderAgents();renderSprites();renderPets();renderTasks();}
+  function addTask(event){
     event.preventDefault();
-    const title = $('officeTaskTitle').value.trim();
-    if (!title) return;
-    const agentId = $('officeTaskAgent').value;
-    const task = {id:'office_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),title,detail:$('officeTaskDetail').value.trim(),agent:agentId,status:'doing',created:Date.now()};
-    data.tasks.push(task);
-    data.statuses[agentId] = 'working';
-    save(); render();
-    $('officeTaskForm').reset();
-    $('officeTaskTitle').focus();
+    const title=$('officeTaskTitle').value.trim();if(!title)return;
+    const agentId=$('officeTaskAgent').value;
+    data.tasks.push({id:'office_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),title,detail:$('officeTaskDetail').value.trim(),agent:agentId,status:'doing',created:Date.now()});
+    data.statuses[agentId]='working';save();render();$('officeTaskForm').reset();$('officeTaskTitle').focus();
   }
-  function completeTask(id) {
-    const task = data.tasks.find(t=>t.id===id);
-    if (!task) return;
-    task.status = 'done';
-    if (!data.tasks.some(t=>t.agent===task.agent && t.status==='doing')) data.statuses[task.agent] = 'idle';
-    save(); render();
+  function completeTask(id){
+    const task=data.tasks.find(t=>t.id===id);if(!task)return;
+    task.status='done';
+    if(!data.tasks.some(t=>t.agent===task.agent&&t.status==='doing'))data.statuses[task.agent]='idle';
+    save();render();
   }
-  function deleteTask(id) {
-    const task = data.tasks.find(t=>t.id===id);
-    data.tasks = data.tasks.filter(t=>t.id!==id);
-    if (task && !data.tasks.some(t=>t.agent===task.agent && t.status==='doing')) data.statuses[task.agent] = 'idle';
-    save(); render();
+  function deleteTask(id){
+    const task=data.tasks.find(t=>t.id===id);data.tasks=data.tasks.filter(t=>t.id!==id);
+    if(task&&!data.tasks.some(t=>t.agent===task.agent&&t.status==='doing'))data.statuses[task.agent]='idle';
+    save();render();
   }
-  function init() {
-    if (initialized || !$('officeApp')) return;
-    initialized = true; load(); render();
+  function petAction(id,action){
+    const p=pets.find(x=>x.id===id);if(!p)return;
+    const s=petOf(p);
+    if(action==='feed'){s.hunger=Math.min(100,(s.hunger||50)+24);s.mood='อิ่มท้องแล้ว ขอบคุณนะ';}
+    if(action==='play'){s.joy=Math.min(100,(s.joy||50)+22);s.mood='มีความสุขสุด ๆ';}
+    data.petState[id]={hunger:s.hunger,joy:s.joy,mood:s.mood};save();renderPets();
+  }
+  function init(){
+    if(initialized||!$('officeApp'))return;
+    initialized=true;load();render();
     $('officeTaskForm').addEventListener('submit',addTask);
     $('officeTaskList').addEventListener('click',e=>{
-      const done = e.target.closest('[data-office-done]');
-      const del = e.target.closest('[data-office-delete]');
-      if (done) completeTask(done.getAttribute('data-office-done'));
-      if (del) deleteTask(del.getAttribute('data-office-delete'));
+      const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]');
+      if(done)completeTask(done.getAttribute('data-office-done'));
+      if(del)deleteTask(del.getAttribute('data-office-delete'));
     });
     $('officeAgents').addEventListener('click',e=>{
-      const btn=e.target.closest('[data-office-agent]');
-      if (btn) $('officeTaskAgent').value=btn.getAttribute('data-office-agent');
+      const btn=e.target.closest('[data-office-agent]');if(btn)$('officeTaskAgent').value=btn.getAttribute('data-office-agent');
+    });
+    $('officePets').addEventListener('click',e=>{
+      const btn=e.target.closest('[data-pet-action]');if(btn)petAction(btn.getAttribute('data-pet'),btn.getAttribute('data-pet-action'));
     });
   }
   document.addEventListener('DOMContentLoaded',init);
   window.addEventListener('load',init);
   window.addEventListener('storage',e=>{if(e.key===KEY){load();render();}});
-  window.MyLifePlannerOffice = {init,render};
+  window.MyLifePlannerOffice={init,render};
 })();

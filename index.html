@@ -2,710 +2,203 @@
 <html lang="th" data-view="desktop">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Y2K Playful Life Planner</title>
-
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icon-192.png" type="image/png">
-    <link id="appleIcon" rel="apple-touch-icon" href="icon-512.png">
-    <meta name="theme-color" content="#0055FF">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Y2K Planner">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-
-    <!-- Tailwind, Fonts, Icons, Chart.js (pinned) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y2K Playful Life Planner 🚀</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-
-    <!-- Firebase SDK (pinned) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
+    <!-- Google Fonts: Itim & Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Itim&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script>
-        // ===== ตั้งค่า Firebase โปรเจกต์ y2k-planner (ใส่ให้แล้ว ไม่ต้องแก้) =====
         const firebaseConfig = {
-            apiKey: "AIzaSyAXBrkRElXiLTfeEB5iWDiiZlV-07wfXlc",
-            authDomain: "y2k-planner.firebaseapp.com",
-            projectId: "y2k-planner",
-            storageBucket: "y2k-planner.firebasestorage.app",
-            messagingSenderId: "214890533249",
-            appId: "1:214890533249:web:42f0bf9751f99398f61880",
-            measurementId: "G-6NVER687G3"
+            apiKey: "",
+            authDomain: "",
+            projectId: "",
+            storageBucket: "",
+            messagingSenderId: "",
+            appId: ""
         };
-        const IS_CONFIGURED =
-            !!firebaseConfig.apiKey &&
-            !firebaseConfig.apiKey.startsWith("YOUR_");
-
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        popBlue: '#0055FF', limeGreen: '#CCFF00', hotPink: '#FF007F',
-                        sunnyYellow: '#FFDD00', retroPurple: '#9D00FF', darkText: '#1A1A1A', offWhite: '#F9F9FB'
-                    },
-                    fontFamily: {
-                        sans: ['Prompt', 'sans-serif'],
-                        cute: ['Fredoka', 'Prompt', 'sans-serif']
-                    }
-                }
-            }
-        };
+        const IS_CONFIGURED = Boolean(firebaseConfig.apiKey && firebaseConfig.apiKey !== "");
     </script>
-
     <style>
-        .border-3 { border-width: 3px; }
-        .border-b-3 { border-bottom-width: 3px; }
-
-        html, body {
-            width: 100%;
-            margin: 0;
-            overflow-x: hidden;
-            font-family: 'Prompt', sans-serif;
-            box-sizing: border-box;
-        }
-        html {
-            scroll-behavior: smooth;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body {
-            min-height: 100vh;
-            background-color: var(--bg-color, #F9F9FB);
-            color: var(--text-color, #1A1A1A);
-            -webkit-font-smoothing: antialiased;
-            padding-bottom: 96px;
+        :root {
+            --sunnyYellow: #FFDD00;
+            --hotPink: #FF007F;
+            --popBlue: #0055FF;
+            --limeGreen: #CCFF00;
+            --retroPurple: #9D00FF;
+            --darkText: #1A1A1A;
+            --offWhite: #FFFDF5;
         }
 
-        body.theme-y2k    { --bg-color: #F9F9FB; --card-bg: #FFFFFF; --text-color: #1A1A1A; }
-        body.theme-pastel { --bg-color: #FFF0F5; --card-bg: #FFFFFF; --text-color: #4A4045; }
-        body.theme-dark   { --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #F0F0F0; }
-        body.theme-minimal{ --bg-color: #F4F4F0; --card-bg: #FFFFFF; --text-color: #2C2C2C; }
-
-        body.theme-dark .bg-white { background-color: var(--card-bg) !important; }
-        body.theme-dark .bg-white.text-darkText,
-        body.theme-dark .bg-offWhite.text-darkText { color: var(--text-color) !important; }
-        body.theme-dark .bg-offWhite { background-color: #2A2A2A !important; }
-        body.theme-dark input, body.theme-dark select, body.theme-dark textarea,
-        body.theme-dark td, body.theme-dark th { color: var(--text-color); }
-        body.theme-dark .border-darkText { border-color: #5a5a5a !important; }
-        body.theme-dark .text-gray-500, body.theme-dark .text-gray-400, body.theme-dark .text-gray-600 { color: #aaa !important; }
-
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #eee; }
-        ::-webkit-scrollbar-thumb { background: #0055FF; border-radius: 4px; }
-
-        .mood-btn-selected {
-            border-color: #FF007F !important;
-            background-color: #FFDD00 !important;
-            transform: scale(1.15);
+        body.theme-y2k {
+            --sunnyYellow: #FFDD00;
+            --hotPink: #FF007F;
+            --popBlue: #0055FF;
+            --limeGreen: #CCFF00;
+            --retroPurple: #9D00FF;
+            background-color: #FFF0F5;
+        }
+        body.theme-pastel {
+            --sunnyYellow: #FFE5B4;
+            --hotPink: #FFB3D1;
+            --popBlue: #BFE6FF;
+            --limeGreen: #D4EDDA;
+            --retroPurple: #E2D9F3;
+            background-color: #F8F9FA;
+        }
+        body.theme-dark {
+            --sunnyYellow: #333333;
+            --hotPink: #FF2A85;
+            --popBlue: #2A75FF;
+            --limeGreen: #39FF14;
+            --retroPurple: #BF00FF;
+            --darkText: #F0F0F0;
+            --offWhite: #222222;
+            background-color: #121212;
+        }
+        body.theme-minimal {
+            --sunnyYellow: #E0E0E0;
+            --hotPink: #666666;
+            --popBlue: #333333;
+            --limeGreen: #CCCCCC;
+            --retroPurple: #444444;
+            --darkText: #222222;
+            --offWhite: #FAFAFA;
+            background-color: #FFFFFF;
         }
 
-        button:not(.tb-btn):not(.mood-btn):not(.vs-btn):not(.bn-item):not(.bn-add):hover {
-            transform: translateY(-1px);
-        }
-        button:not(.tb-btn):not(.mood-btn):not(.vs-btn):not(.bn-item):not(.bn-add):active {
-            transform: scale(.97);
-        }
-        button, label, select, input, textarea, a {
-            transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, filter .2s ease;
-        }
-        .bg-white.rounded-2xl,
-        .bg-white.rounded-xl {
-            box-shadow: 0 8px 22px -14px rgba(26,26,26,.28);
-        }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0,85,255,.18);
-        }
-        .tab-content {
-            animation: softFadeUp .35s ease both;
-        }
-        @keyframes softFadeUp {
-            from { opacity: 0; transform: translateY(6px); }
-            to   { opacity: 1; transform: none; }
-        }
+        body { font-family: 'Prompt', sans-serif; color: var(--darkText); }
+        .font-cute { font-family: 'Itim', cursive, sans-serif; }
 
-        .topbar {
-            margin: 10px 12px 0;
-            padding: 8px 12px !important;
-            border-radius: 22px;
-            background: linear-gradient(135deg, #1A1A1A 0%, #2B2B3A 100%);
-            box-shadow: 0 12px 28px -14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
-            row-gap: 6px;
-        }
-        .tb-icon {
-            font-size: .72rem;
-            width: .95rem;
-            text-align: center;
-            opacity: .85;
-        }
-        .tb-icon-sm {
-            font-size: .66rem;
-            margin-right: .2rem;
-        }
-        .tb-g {
-            width: .8rem;
-            height: .8rem;
-            flex: 0 0 .8rem;
-        }
-        .tb-sep {
-            display: inline-block;
-            width: 1px;
-            height: 14px;
-            background: rgba(255,255,255,.22);
-            margin: 0 .25rem;
-        }
-        .tb-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: .15rem;
-            line-height: 1.4;
-            white-space: nowrap;
-            border-radius: 999px;
-            transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
-        }
-        .tb-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 8px -3px rgba(0,0,0,.4);
-            filter: brightness(1.06);
-        }
-        .tb-btn:active {
-            transform: scale(.96);
-        }
+        /* จัดกรอบตามมุมมองหน้าจอ */
+        [data-view="desktop"] .app-frame { max-width: 1280px; margin: 0 auto; border-left: 3px solid var(--darkText); border-right: 3px solid var(--darkText); min-height: 100vh; display: flex; flex-direction: column; }
+        [data-view="tablet"] .app-frame { max-width: 820px; margin: 0 auto; border: 3px solid var(--darkText); border-radius: 2rem; margin-top: 1.5rem; margin-bottom: 1.5rem; min-height: calc(100vh - 3rem); display: flex; flex-direction: column; overflow: hidden; box-shadow: 6px 6px 0px var(--darkText); background: var(--offWhite); }
+        [data-view="mobile"] .app-frame { max-width: 440px; margin: 0 auto; border: 3px solid var(--darkText); border-radius: 2rem; margin-top: 1rem; margin-bottom: 5rem; min-height: calc(100vh - 5rem); display: flex; flex-direction: column; overflow: hidden; box-shadow: 6px 6px 0px var(--darkText); background: var(--offWhite); }
 
-        .vs-wrap {
-            display: inline-flex;
-            align-items: center;
-            gap: 2px;
-            padding: 2px;
-            border-radius: 999px;
-            background: rgba(255,255,255,.08);
-            border: 1px solid rgba(255,255,255,.12);
-        }
-        .vs-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: .3rem;
-            padding: .2rem .55rem;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: 700;
-            color: rgba(255,255,255,.75);
-            transition: background-color .2s ease, color .2s ease, transform .15s ease;
-        }
-        .vs-btn:hover { color: #fff; background: rgba(255,255,255,.12); }
-        .vs-btn.vs-active {
-            background: #CCFF00;
-            color: #1A1A1A;
-            box-shadow: 0 2px 6px -2px rgba(0,0,0,.4);
-        }
-        .vs-btn i { font-size: .75rem; }
+        /* Bottom Nav สำหรับมือถือ */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--offWhite); border-top: 3px solid var(--darkText); display: flex; justify-content: space-around; align-items: center; padding: 0.5rem; z-index: 9999; box-shadow: 0 -4px 0px rgba(0,0,0,0.1); }
+        .bn-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: bold; color: var(--darkText); opacity: 0.7; transition: all 0.2s; background: none; border: none; cursor: pointer; }
+        .bn-item i { font-size: 1.2rem; margin-bottom: 2px; }
+        .bn-item.bn-active { opacity: 1; color: var(--hotPink); transform: scale(1.1); }
+        .bn-add { width: 48px; height: 48px; background: var(--hotPink); color: white; border-radius: 50%; border: 3px solid var(--darkText); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; box-shadow: 3px 3px 0px var(--darkText); cursor: pointer; transform: translateY(-12px); transition: transform 0.2s; }
+        .bn-add:active { transform: translateY(-8px) scale(0.95); }
 
-        #appFrame {
-            margin: 0 auto;
-            min-height: 100vh;
-            width: 100%;
-            background: var(--bg-color, #F9F9FB);
-            display: flex;
-            flex-direction: column;
-            transition: max-width .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease;
-        }
-        html[data-view="desktop"] #appFrame { max-width: 1600px; }
+        /* สไตล์ห้องสัตว์เลี้ยง & อารมณ์ประจำเดือน */
+        .pet-wrap { background: #FFFFFF; border: 3px solid var(--darkText); border-radius: 1.5rem; box-shadow: 4px 4px 0px var(--darkText); overflow: hidden; display: flex; flex-direction: column; }
+        .pet-title-card { background: var(--sunnyYellow); border-bottom: 3px solid var(--darkText); padding: 0.75rem 1rem; }
+        .pet-scene { position: relative; width: 100%; aspect-ratio: 16/10; background: #FFF4B8; overflow: hidden; border-bottom: 3px solid var(--darkText); }
+        .pet-character { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); font-size: 4rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); animation: bouncePet 2s infinite ease-in-out; z-index: 10; cursor: pointer; }
+        @keyframes bouncePet { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-8px); } }
+        .pet-speech { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: #FFFFFF; border: 2.5px solid var(--darkText); border-radius: 1rem; padding: 0.35rem 0.75rem; font-size: 11px; font-weight: bold; box-shadow: 2px 2px 0px var(--darkText); z-index: 20; max-width: 85%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pet-stats { padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; background: var(--offWhite); border-bottom: 3px solid var(--darkText); }
+        .pet-stat-row { display: flex; align-items: center; gap: 0.5rem; font-size: 11px; font-weight: bold; }
+        .pet-stat-icon { width: 22px; text-align: center; }
+        .pet-bar { flex: 1; height: 10px; background: #E0E0E0; border: 2px solid var(--darkText); border-radius: 9999px; overflow: hidden; }
+        .pet-bar-fill { height: 100%; transition: width 0.4s ease; }
+        .pet-stat-val { width: 36px; text-align: right; font-size: 10px; }
+        .pet-type-btn { flex: 1; padding: 0.4rem 0.2rem; background: #FFFFFF; border: 2px solid var(--darkText); border-radius: 0.75rem; font-weight: bold; display: flex; flex-direction: column; align-items: center; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+        .pet-type-btn small { font-size: 8px; font-weight: normal; }
+        .pet-type-btn.pet-type-active { background: var(--sunnyYellow); box-shadow: 2px 2px 0px var(--darkText); transform: translateY(-2px); }
 
-        html[data-view="tablet"] #appFrame,
-        html[data-view="mobile"] #appFrame {
-            border-left: 2px solid #1A1A1A;
-            border-right: 2px solid #1A1A1A;
-            box-shadow: 0 24px 60px -24px rgba(0,0,0,.4);
-            overflow: hidden;
-        }
-        html[data-view="tablet"] #appFrame { max-width: 1024px; border-radius: 24px; }
-        html[data-view="mobile"] #appFrame { max-width: 430px; border-radius: 32px; }
-        html[data-view="tablet"] body,
-        html[data-view="mobile"] body { background-color: #DDE3EE !important; }
-        html[data-view="tablet"].theme-dark body, html[data-view="mobile"] body.theme-dark { background-color: #0a0a0a !important; }
-
-        html[data-view="tablet"] .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
-        html[data-view="tablet"] .md\:grid-cols-2.lg\:grid-cols-3 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
-        html[data-view="tablet"] .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)) !important; }
-        html[data-view="tablet"] .lg\:flex-row { flex-direction: row !important; }
-        html[data-view="tablet"] .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
-
-        html[data-view="mobile"] .lg\:grid-cols-3,
-        html[data-view="mobile"] .md\:grid-cols-2,
-        html[data-view="mobile"] .md\:grid-cols-3 { grid-template-columns: minmax(0,1fr) !important; }
-        html[data-view="mobile"] .lg\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
-        html[data-view="mobile"] .lg\:grid-cols-2 { grid-template-columns: minmax(0,1fr) !important; }
-        html[data-view="mobile"] .lg\:flex-row,
-        html[data-view="mobile"] .md\:flex-row { flex-direction: column !important; }
-
-        /* ===== เมนูการ์ดหน้าหลัก: 3 คอลัมน์ทุกมุมมอง ===== */
-        #navGrid,
-        html[data-view="mobile"] #navGrid,
-        html[data-view="tablet"] #navGrid,
-        html[data-view="desktop"] #navGrid {
-            grid-template-columns: repeat(3, minmax(0,1fr)) !important;
-            gap: 6px !important;
-        }
-        #navGrid > button {
-            min-width: 0;
-            padding: 0.4rem 0.45rem !important;
-            font-size: 0.68rem !important;
-            line-height: 1.2 !important;
-        }
-        #navGrid > button > span {
-            min-width: 0;
-            gap: 0.3rem !important;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        #navGrid > button > span > i {
-            flex-shrink: 0;
-            font-size: 0.75rem;
-        }
-        #navGrid > button > i:last-child {
-            flex-shrink: 0;
-            font-size: 0.55rem !important;
-        }
-
-        /* ===== แถบเมนูล่าง (Bottom Navigation) ===== */
-        .bottom-nav {
-            position: fixed;
-            left: 50%;
-            bottom: 12px;
-            transform: translateX(-50%);
-            width: calc(100% - 24px);
-            max-width: 520px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 12px;
-            background: #0055FF;
-            border: 3px solid #1A1A1A;
-            border-radius: 26px;
-            box-shadow: 0 6px 0 #1A1A1A, 0 14px 26px -12px rgba(0,0,0,.45);
-            z-index: 9000;
-        }
-        .bn-item {
-            flex: 1 1 0;
-            min-width: 0;
-            height: 52px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
-            color: #FFFFFF;
-            border-radius: 18px;
-            font-size: 10px;
-            font-weight: 700;
-            background: transparent;
-            border: none;
-        }
-        .bn-item i {
-            font-size: 17px;
-        }
-        .bn-item span {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-        }
-        .bn-item.bn-active {
-            background: #CCFF00;
-            color: #1A1A1A;
-            box-shadow: 0 3px 0 #1A1A1A;
-            border: 2px solid #1A1A1A;
-        }
-        .bn-add {
-            width: 60px;
-            height: 60px;
-            flex: 0 0 60px;
-            margin-top: -34px;
-            border-radius: 50%;
-            background: #FF007F;
-            color: #FFFFFF;
-            border: 3px solid #1A1A1A;
-            box-shadow: 0 5px 0 #1A1A1A;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-        .bn-add:active { transform: translateY(3px); box-shadow: 0 2px 0 #1A1A1A; }
-
-        @media (max-width: 380px) {
-            .bn-item span { font-size: 9px; }
-            .bn-add { width: 54px; height: 54px; flex-basis: 54px; margin-top: -30px; }
-        }
-
-        /* ===== หน้าสัตว์เลี้ยง ===== */
-        .pet-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-width: 640px;
-            margin: 0 auto;
-            width: 100%;
-        }
-        .pet-title-card {
-            background: #FFFFFF;
-            border: 3px solid #1A1A1A;
-            border-radius: 18px;
-            padding: 12px 14px;
-            text-align: center;
-            box-shadow: 0 6px 14px -10px rgba(0,0,0,.35);
-        }
-        .pet-scene {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 4 / 3;
-            border: 3px solid #1A1A1A;
-            border-radius: 20px;
-            overflow: hidden;
-            background: #FFF4B8;
-            box-shadow: 0 8px 22px -14px rgba(26,26,26,.28);
-        }
-        .pet-scene > svg {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        .pet-character {
-            position: absolute;
-            left: 50%;
-            bottom: 30%;
-            transform: translateX(-50%);
-            font-size: clamp(64px, 26vw, 120px);
-            line-height: 1;
-            z-index: 2;
-            animation: petBob 2.4s ease-in-out infinite;
-            filter: drop-shadow(0 6px 6px rgba(0,0,0,.2));
-            user-select: none;
-        }
-        @keyframes petBob {
-            0%, 100% { transform: translate(-50%, 0); }
-            50% { transform: translate(-50%, -8px); }
-        }
-
-        /* ===== กล่องคำพูดของสัตว์เลี้ยง ===== */
-        .pet-speech {
-            position: absolute;
-            top: 5%;
-            right: 5%;
-            max-width: 56%;
-            background: #FFFFFF;
-            border: 3px solid #1A1A1A;
-            border-radius: 16px;
-            padding: 8px 12px;
-            font-size: clamp(11px, 3vw, 14px);
-            font-weight: 700;
-            color: #1A1A1A;
-            line-height: 1.35;
-            z-index: 3;
-            box-shadow: 0 4px 0 #1A1A1A;
-            animation: speechPop .35s ease both;
-            word-break: break-word;
-        }
-        .pet-speech::before {
-            content: "";
-            position: absolute;
-            left: 26%;
-            bottom: -18px;
-            border: 10px solid transparent;
-            border-top: 14px solid #1A1A1A;
-            border-bottom: 0;
-        }
-        .pet-speech::after {
-            content: "";
-            position: absolute;
-            left: 26%;
-            bottom: -13px;
-            margin-left: 1px;
-            border: 9px solid transparent;
-            border-top: 12px solid #FFFFFF;
-            border-bottom: 0;
-        }
-        @keyframes speechPop {
-            from { opacity: 0; transform: translateY(-6px) scale(.96); }
-            to   { opacity: 1; transform: none; }
-        }
-
-        .pet-stats {
-            background: #FFFFFF;
-            border: 2px solid #1A1A1A;
-            border-radius: 16px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            box-shadow: 0 6px 14px -10px rgba(0,0,0,.35);
-        }
-        .pet-stat-row {
-            display: grid;
-            grid-template-columns: 20px 44px 1fr 44px;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-        .pet-stat-icon {
-            text-align: center;
-            font-size: 14px;
-        }
-        .pet-stat-val {
-            text-align: right;
-        }
-        .pet-bar {
-            height: 14px;
-            border-radius: 999px;
-            border: 2px solid #1A1A1A;
-            background: #EFEFEF;
-            overflow: hidden;
-        }
-        .pet-bar-fill {
-            height: 100%;
-            width: 0%;
-            transition: width .6s ease;
-        }
-        .pet-type-btn {
-            flex: 1 1 0;
-            min-width: 0;
-            padding: 6px 2px;
-            border: 2px solid #1A1A1A;
-            border-radius: 12px;
-            background: #F9F9FB;
-            font-size: 26px;
-            line-height: 1.1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-        }
-        .pet-type-btn small {
-            font-size: 10px;
-            font-weight: 700;
-            color: #1A1A1A;
-        }
-        .pet-type-btn.pet-type-active {
-            background: #FFDD00;
-            box-shadow: 0 0 0 3px rgba(0,85,255,.25);
-        }
-        .pet-type-btn:hover { transform: translateY(-1px); }
-
-        .vs-btn, .tb-btn { font-family: 'Prompt', sans-serif; }
-
-        @media (max-width: 768px) {
-            html[data-view] #appFrame { max-width: 100% !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; }
-            html[data-view] body { background-color: var(--bg-color, #F9F9FB) !important; }
-        }
-        @media (max-width: 640px) {
-            .topbar { margin: 6px 6px 0; border-radius: 18px; }
-        }
+        .mood-btn { transition: all 0.2s; border: 2px solid transparent; }
+        .mood-btn-selected { border: 2px solid var(--darkText) !important; background: var(--sunnyYellow); transform: scale(1.15); box-shadow: 2px 2px 0px var(--darkText); }
     </style>
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
-    <!-- FLOATING PET & QUICK NOTES WIDGET -->
-    <div id="floatingPetWidget" class="fixed bottom-24 left-3 z-[8000] flex flex-col items-start gap-1.5 select-none max-w-[240px]">
-        
-        <!-- รูปแบบตอนย่อ -->
-        <div id="floatingMinimizedBtn" onclick="toggleQuickNoteListVisibility()" class="hidden relative bg-sunnyYellow border-2 border-darkText w-12 h-12 rounded-full shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-all" title="เปิดโน้ตด่วนและสัตว์เลี้ยง">
-            <span id="minimizedPetAvatar" class="text-xl">🐱</span>
-            <span id="quickNoteBadge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-hotPink text-white font-extrabold text-[9px] rounded-full border border-darkText flex items-center justify-center animate-pulse">!</span>
-        </div>
+    <div class="app-frame">
 
-        <!-- รูปแบบตอนกางออก -->
-        <div id="floatingExpandedContainer" class="w-full space-y-1.5">
-            <div id="floatingQuickNoteBox" class="bg-sunnyYellow border-2 border-darkText rounded-xl p-2.5 shadow-md w-full relative space-y-2">
-                <div class="flex justify-between items-center border-b border-darkText/20 pb-1">
-                    <span class="text-[10px] font-extrabold text-darkText flex items-center gap-1">
-                        <i class="fa-solid fa-note-sticky text-hotPink"></i> โน้ตด่วนสัตว์เลี้ยง
-                    </span>
-                    <div class="flex items-center gap-1">
-                        <button onclick="openQuickNoteModal()" class="text-[9px] bg-white border border-darkText px-2 py-0.5 rounded font-bold hover:bg-limeGreen transition-all">+ เพิ่ม</button>
-                        <button onclick="toggleQuickNoteListVisibility()" class="w-5 h-5 bg-white border border-darkText rounded text-[10px] font-bold flex items-center justify-center hover:bg-hotPink hover:text-white transition-all" title="ย่อเป็นวงกลมมินิมอล">✕</button>
-                    </div>
-                </div>
-                <div id="floatingQuickNotesList" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
-            </div>
-
-            <div class="bg-sunnyYellow border-2 border-darkText rounded-xl px-2.5 py-1.5 shadow-sm flex items-center justify-between gap-2 cursor-pointer hover:scale-105 transition-all w-full" onclick="switchTab('pet')">
-                <div class="flex items-center gap-1.5 overflow-hidden">
-                    <div id="petAvatar" class="text-base bg-white w-6 h-6 rounded-lg border border-darkText flex items-center justify-center shrink-0">🐱</div>
-                    <div class="overflow-hidden pr-0.5">
-                        <span id="floatingPetName" class="text-[9px] font-extrabold text-darkText block truncate">สัตว์เลี้ยง</span>
-                        <p id="petSpeechBubble" class="text-[9px] font-bold text-hotPink truncate">ยินดีต้อนรับ! 💰</p>
-                    </div>
-                </div>
-                <span class="text-[10px] font-bold text-darkText opacity-60">🐾</span>
-            </div>
-        </div>
-    </div>
-
-    <div id="appFrame">
-
-    <!-- TOP BAR -->
-    <div class="topbar text-white flex flex-wrap items-center justify-between gap-2 z-50 text-[11px] font-bold w-full">
-        <div class="flex items-center gap-1.5 flex-wrap">
-            <i class="fa-solid fa-palette tb-icon" aria-hidden="true"></i>
-            <button onclick="setTheme('y2k')" class="tb-btn px-2.5 py-0.5 bg-popBlue text-white">Y2K</button>
-            <button onclick="setTheme('pastel')" class="tb-btn px-2.5 py-0.5 bg-pink-400 text-white">พาสเทล</button>
-            <button onclick="setTheme('dark')" class="tb-btn px-2.5 py-0.5 bg-gray-800 text-white">ดาร์ก</button>
-            <button onclick="setTheme('minimal')" class="tb-btn px-2.5 py-0.5 bg-gray-300 text-darkText">มินิมอล</button>
-            <span class="tb-sep" aria-hidden="true"></span>
-            <button onclick="exportBackup()" class="tb-btn px-2.5 py-0.5 bg-limeGreen text-darkText"><i class="fa-solid fa-download tb-icon-sm" aria-hidden="true"></i>สำรองข้อมูล</button>
-            <label class="tb-btn px-2.5 py-0.5 bg-sunnyYellow text-darkText cursor-pointer"><i class="fa-solid fa-upload tb-icon-sm" aria-hidden="true"></i>คืนค่า
-                <input type="file" accept="application/json,.json" onchange="importBackup(event)" class="hidden">
-            </label>
-        </div>
-
-        <div class="vs-wrap" role="group" aria-label="เลือกมุมมอง">
-            <button class="vs-btn" data-v="desktop" onclick="setView('desktop')"><i class="fa-solid fa-desktop"></i><span>คอม</span></button>
-            <button class="vs-btn" data-v="tablet" onclick="setView('tablet')"><i class="fa-solid fa-tablet-screen-button"></i><span>แท็บเล็ต</span></button>
-            <button class="vs-btn" data-v="mobile" onclick="setView('mobile')"><i class="fa-solid fa-mobile-screen-button"></i><span>มือถือ</span></button>
-        </div>
-
-        <div class="flex items-center gap-2 flex-wrap">
-            <span id="syncStatus" class="text-[10px] opacity-80">กำลังเตรียม...</span>
-            <button id="googleLoginBtn" onclick="loginWithGoogle()" class="tb-btn px-2.5 py-0.5 bg-white text-darkText border border-darkText font-bold text-[11px] gap-1.5">
-                <svg class="tb-g" viewBox="0 0 48 48" aria-hidden="true">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.650z"/>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                </svg>
-                ล็อกอิน Gmail
-            </button>
-            <div id="userProfileArea" class="hidden flex items-center gap-1.5 bg-white/20 px-2 py-0.5 rounded-full">
-                <img id="userAvatarImg" class="w-5 h-5 rounded-full" src="" alt="">
-                <span id="userNameText" class="text-[11px] font-bold text-limeGreen max-w-[100px] truncate"></span>
-                <button onclick="logoutGoogle()" class="text-[9px] bg-hotPink text-white px-1.5 py-0.5 rounded-full">ออก</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MAIN HEADER PLANNER CARD (WITH COLLAPSE/EXPAND TOGGLE) -->
-    <header class="bg-popBlue border-3 border-darkText text-darkText p-2.5 md:p-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-2" style="margin:8px 12px 0; width:calc(100% - 24px);">
-        
-        <!-- AI SMART COMMAND BAR -->
-        <div class="bg-white/95 border-2 border-darkText p-2 rounded-xl shadow-sm flex items-center gap-2">
-            <span class="text-base shrink-0 animate-bounce">🤖</span>
-            <div class="flex-1 relative">
-                <input type="text" id="aiCommandInput" onkeydown="if(event.key==='Enter') executeAiCommand()" placeholder="พิมพ์สั่ง AI เช่น 'พรุ่งนี้จ่ายค่าเน็ต 500' หรือ 'อีก 2 วันส่งงาน'..." class="w-full bg-offWhite border-2 border-darkText rounded-lg px-2.5 py-1 text-xs font-bold text-darkText outline-none pr-16">
-            </div>
-            <button onclick="executeAiCommand()" class="bg-hotPink text-white font-extrabold px-3 py-1 rounded-lg border-2 border-darkText text-xs shadow-sm hover:brightness-105 shrink-0 flex items-center gap-1">
-                <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> สั่ง AI
-            </button>
-        </div>
-
-        <div class="flex items-center justify-between gap-2">
-            <div class="bg-limeGreen text-darkText font-cute font-extrabold text-sm sm:text-base px-3.5 py-1 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1.5 flex-1 max-w-[260px]">
-                <span>✨</span> Y2K PLANNER
-            </div>
-            
+    <!-- HEADER -->
+    <header class="bg-white border-b-3 border-darkText p-3 md:p-4 flex flex-col sm:flex-row justify-between items-center gap-3 sticky top-0 z-50">
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
             <div class="flex items-center gap-2">
-                <!-- ปุ่มซ่อน/แสดง (Collapsible Toggle) -->
-                <button onclick="togglePlannerHeader()" id="plannerToggleBtn" class="bg-white border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-xs font-extrabold flex items-center gap-1 hover:bg-sunnyYellow transition-all" title="ซ่อน/แสดงเมนู">
-                    <span id="plannerToggleText">ซ่อน</span>
-                    <i id="plannerToggleIcon" class="fa-solid fa-chevron-up text-xs"></i>
-                </button>
-
-                <div class="bg-white/90 border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-right flex items-center gap-1.5 min-w-0">
-                    <div class="text-right truncate">
-                        <span class="text-[10px] sm:text-[11px] font-extrabold text-darkText block truncate" id="greetingText">สวัสดีตอนค่ำ 🌙</span>
-                        <span class="text-[8px] sm:text-[9px] font-bold text-gray-500 block truncate">* วันนี้ที่ดูยอดแล้ว</span>
-                    </div>
-                    <i class="fa-solid fa-cloud text-gray-400 text-sm sm:text-base shrink-0"></i>
+                <div class="w-10 h-10 bg-sunnyYellow rounded-xl border-2 border-darkText flex items-center justify-center text-xl shadow-sm">🚀</div>
+                <div>
+                    <h1 class="font-cute font-extrabold text-lg md:text-xl leading-tight">Y2K Playful Life Planner</h1>
+                    <p class="text-[10px] font-bold text-gray-500" id="syncStatus">กำลังโหลดข้อมูล...</p>
                 </div>
             </div>
+            <!-- ปุ่มเปลี่ยนมุมมองจอ (Desktop/Tablet/Mobile) -->
+            <div class="hidden md:flex gap-1 bg-offWhite p-1 rounded-xl border-2 border-darkText">
+                <button onclick="setView('desktop')" class="vs-btn px-2.5 py-1 rounded-lg text-xs font-bold transition-all" data-v="desktop"><i class="fa-solid fa-desktop"></i></button>
+                <button onclick="setView('tablet')" class="vs-btn px-2.5 py-1 rounded-lg text-xs font-bold transition-all" data-v="tablet"><i class="fa-solid fa-tablet-screen-button"></i></button>
+                <button onclick="setView('mobile')" class="vs-btn px-2.5 py-1 rounded-lg text-xs font-bold transition-all" data-v="mobile"><i class="fa-solid fa-mobile-screen-button"></i></button>
+            </div>
         </div>
 
-        <!-- โหมดตอนซ่อน (แปลงร่างเป็นไอคอนอิโมจิกลมๆ ลัดไปแต่ละหน้าทันที) -->
-        <div id="plannerMinimizedBar" class="hidden flex items-center justify-center gap-2 py-1 overflow-x-auto">
-            <button onclick="switchTab('dashboard')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="แดชบอร์ด">📊</button>
-            <button onclick="switchTab('finance')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="รายรับ-รายจ่าย">💸</button>
-            <button onclick="switchTab('bills')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="เตรียมจ่าย">💡</button>
-            <button onclick="switchTab('planner')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="แพลนเนอร์">📋</button>
-            <button onclick="switchTab('calendar')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="ปฏิทิน">🗓️</button>
-            <button onclick="switchTab('calculator')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="คำนวณ">🧮</button>
-            <button onclick="switchTab('pet')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="สัตว์เลี้ยง">🐾</button>
-            <button onclick="openModal('quickAddModal')" class="w-9 h-9 bg-hotPink text-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-xs font-extrabold hover:scale-110 transition-all shrink-0" title="เพิ่มด่วน">+</button>
-        </div>
-
-        <!-- ส่วนเนื้อหาหลักที่จะถูกซ่อน/แสดง -->
-        <div id="plannerCollapsibleBody" class="space-y-2 transition-all">
-            <div id="navGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn bg-limeGreen text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-house text-xs"></i> แดชบอร์ด</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
-                </button>
-                <button onclick="switchTab('finance')" id="nav-finance" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-arrow-right-arrow-left text-popBlue text-xs"></i> รายรับ-รายจ่าย</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
-                </button>
-                <button onclick="switchTab('bills')" id="nav-bills" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-receipt text-retroPurple text-xs"></i> เตรียมจ่าย</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
-                </button>
-
-                <button onclick="switchTab('planner')" id="nav-planner" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-list-check text-sunnyYellow text-xs"></i> แพลนเนอร์</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
-                </button>
-                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                    <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-hotPink text-xs"></i> ปฏิทิน</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
-                </button>
-                <button onclick="switchTab('calculator')" id="nav-calculator" class="tab-btn bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-calculator text-popBlue text-xs"></i> คำนวณ</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
-                </button>
+        <!-- แถบเมนูด้านบน (Desktop) & โปรไฟล์ Gmail -->
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end overflow-x-auto pb-1 sm:pb-0">
+            <div class="hidden lg:flex items-center gap-1 bg-offWhite p-1 rounded-xl border-2 border-darkText text-xs font-bold">
+                <button id="nav-dashboard" onclick="switchTab('dashboard')" class="tab-btn px-3 py-1.5 rounded-lg transition-all bg-limeGreen text-darkText shadow-sm border-2 border-darkText">หน้าแรก</button>
+                <button id="nav-finance" onclick="switchTab('finance')" class="tab-btn px-3 py-1.5 rounded-lg transition-all bg-white">การเงิน</button>
+                <button id="nav-bills" onclick="switchTab('bills')" class="tab-btn px-3 py-1.5 rounded-lg transition-all bg-white">เตรียมจ่าย</button>
+                <button id="nav-planner" onclick="switchTab('planner')" class="tab-btn px-3 py-1.5 rounded-lg transition-all bg-white">แพลนเนอร์</button>
+                <button id="nav-calendar" onclick="switchTab('calendar')" class="tab-btn px-3 py-1.5 rounded-lg transition-all bg-white">แกลเลอรี</button>
+                <button id="nav-calculator" onclick="switchTab('calculator')" class="tab-btn px-3 py-1.5 rounded-lg transition-all bg-white">คำนวณ</button>
+                <button id="nav-pet" onclick="switchTab('pet')" class="tab-btn px-3 py-1.5 rounded-lg transition-all bg-white">สัตว์เลี้ยง</button>
             </div>
 
-            <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn w-full bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-paw text-hotPink text-xs"></i> สัตว์เลี้ยง</span>
-                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
+            <!-- ปุ่มล็อกอิน Gmail -->
+            <button id="googleLoginBtn" onclick="loginWithGoogle()" class="bg-white text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5 shadow-sm shrink-0">
+                <i class="fa-brands fa-google text-hotPink"></i> ล็อกอิน Gmail
             </button>
-
-            <button onclick="openModal('quickAddModal')" class="w-full bg-hotPink text-white font-extrabold py-2 px-3 rounded-xl border-2 border-darkText shadow-sm text-xs flex items-center justify-center gap-1.5 hover:brightness-105 active:scale-[0.99] transition-all">
-                <i class="fa-solid fa-plus text-xs"></i> เพิ่มด่วน
-            </button>
+            <div id="userProfileArea" class="hidden items-center gap-2 bg-offWhite px-2.5 py-1 rounded-xl border-2 border-darkText shrink-0">
+                <img id="userAvatarImg" src="" alt="User" class="w-6 h-6 rounded-full border border-darkText object-cover">
+                <span id="userNameText" class="text-xs font-bold truncate max-w-[90px]"></span>
+                <button onclick="logoutGoogle()" class="text-xs text-hotPink font-bold ml-1" title="ออกจากระบบ"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
         </div>
     </header>
 
-    <main class="flex-1 w-full max-w-5xl mx-auto p-3 md:p-5 relative">
+    <main class="flex-1 w-full max-w-5xl mx-auto p-3 md:p-5 relative pb-20 md:pb-6">
 
         <!-- DASHBOARD -->
         <section id="tab-dashboard" class="tab-content space-y-4">
             
-            <!-- การ์ดสีเหลือง: อารมณ์เดือนนี้ -->
-            <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm text-darkText">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">📊 อารมณ์เดือนนี้</span>
-                    <button onclick="switchTab('calendar')" class="text-[10px] font-extrabold bg-white border border-darkText px-3 py-1 rounded-lg shadow-sm hover:bg-limeGreen transition-all">ดูทั้งหมด ›</button>
-                </div>
-                
-                <div class="flex flex-row items-center justify-between gap-3">
-                    <div class="space-y-2 flex-1 min-w-0">
-                        <h2 id="dashCalendarMonthMoodTitle" class="text-base sm:text-lg font-extrabold font-cute truncate">อารมณ์เดือนตุลาคม 2569</h2>
-                        <div class="bg-white/90 border-2 border-darkText p-3 rounded-xl shadow-sm">
-                            <p id="dashCalendarMonthMoodSummary" class="font-bold text-xs text-darkText leading-relaxed">เดือนนี้แฮปปี้สุดๆ ไปเลย! (1 วัน) 🌸</p>
-                        </div>
-                    </div>
+            <!-- ช่องค้นหา/สั่งงาน AI ด้านบน -->
+            <div class="bg-white p-3 rounded-2xl border-2 border-darkText shadow-sm flex items-center gap-2">
+                <div class="w-8 h-8 bg-popBlue/10 rounded-xl border-2 border-darkText flex items-center justify-center text-popBlue shrink-0"><i class="fa-solid fa-robot"></i></div>
+                <input type="text" id="aiCommandInput" placeholder="พิมพ์สั่ง AI เช่น 'พรุ่งนี้จ่ายค่าหอ 3500' หรือ 'ได้เงินเดือน 25000'..." class="flex-1 bg-offWhite border-2 border-darkText rounded-xl px-3 py-1.5 text-xs outline-none font-medium text-darkText" onkeydown="if(event.key==='Enter') executeAiCommand()">
+                <button onclick="executeAiCommand()" class="bg-hotPink text-white font-bold px-3.5 py-1.5 rounded-xl border-2 border-darkText text-xs shrink-0 flex items-center gap-1 shadow-sm"><i class="fa-solid fa-wand-magic-sparkles"></i> สั่ง AI</button>
+            </div>
 
-                    <div class="relative cursor-pointer hover:scale-105 transition-all shrink-0 p-1 flex items-center justify-center" onclick="switchTab('calendar')">
-                        <div id="dashCatAvatar" class="text-5xl sm:text-6xl drop-shadow-md">🐱</div>
-                        <span class="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-hotPink text-white font-extrabold text-[10px] sm:text-xs rounded-full border-2 border-darkText flex items-center justify-center animate-pulse shadow-sm">!</span>
-                    </div>
+            <!-- บล็อกควบคุมด้านบน (Y2K Planner + วันเวลา/สภาพอากาศ) -->
+            <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm text-darkText flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white border-2 border-darkText px-4 py-2 rounded-xl font-cute font-extrabold text-base shadow-sm">✨ Y2K PLANNER</div>
+                    <button onclick="togglePlannerHeader()" class="text-xs font-extrabold bg-white border-2 border-darkText px-3 py-2 rounded-xl shadow-sm hover:bg-limeGreen transition-all flex items-center gap-1.5">
+                        <span id="plannerToggleText">ซ่อน</span> <i id="plannerToggleIcon" class="fa-solid fa-chevron-up text-[10px]"></i>
+                    </button>
                 </div>
+                <div class="bg-white/90 border-2 border-darkText px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-moon text-popBlue"></i> <span>สวัสดีตอนค่ำ 🌙 วันนี้ก็สุดยอดแล้ว</span>
+                </div>
+            </div>
+
+            <!-- ส่วนยุบ/แสดงผลได้ -->
+            <div id="plannerCollapsibleBody" class="space-y-4">
+                <!-- เมนูลัด 8 ไอคอน -->
+                <div class="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                    <button onclick="switchTab('finance')" class="bg-white hover:bg-limeGreen/30 border-2 border-darkText p-2.5 rounded-xl flex flex-col items-center gap-1 shadow-sm transition-all font-bold text-[11px]"><div class="w-8 h-8 bg-limeGreen/40 rounded-lg border border-darkText flex items-center justify-center text-sm"><i class="fa-solid fa-chart-column"></i></div><span>รายรับจ่าย</span></button>
+                    <button onclick="switchTab('bills')" class="bg-white hover:bg-retroPurple/20 border-2 border-darkText p-2.5 rounded-xl flex flex-col items-center gap-1 shadow-sm transition-all font-bold text-[11px]"><div class="w-8 h-8 bg-retroPurple/20 rounded-lg border border-darkText flex items-center justify-center text-sm text-retroPurple"><i class="fa-solid fa-file-invoice-dollar"></i></div><span>เตรียมจ่าย</span></button>
+                    <button onclick="switchTab('calculator')" class="bg-white hover:bg-sunnyYellow/30 border-2 border-darkText p-2.5 rounded-xl flex flex-col items-center gap-1 shadow-sm transition-all font-bold text-[11px]"><div class="w-8 h-8 bg-sunnyYellow/40 rounded-lg border border-darkText flex items-center justify-center text-sm"><i class="fa-solid fa-lightbulb"></i></div><span>คำนวณเงิน</span></button>
+                    <button onclick="switchTab('planner')" class="bg-white hover:bg-popBlue/20 border-2 border-darkText p-2.5 rounded-xl flex flex-col items-center gap-1 shadow-sm transition-all font-bold text-[11px]"><div class="w-8 h-8 bg-popBlue/20 rounded-lg border border-darkText flex items-center justify-center text-sm text-popBlue"><i class="fa-solid fa-list-check"></i></div><span>แพลนงาน</span></button>
+                    <button onclick="switchTab('calendar')" class="bg-white hover:bg-hotPink/20 border-2 border-darkText p-2.5 rounded-xl flex flex-col items-center gap-1 shadow-sm transition-all font-bold text-[11px]"><div class="w-8 h-8 bg-hotPink/20 rounded-lg border border-darkText flex items-center justify-center text-sm text-hotPink"><i class="fa-regular fa-calendar"></i></div><span>ปฏิทิน</span></button>
+                    <button onclick="switchTab('calendar')" class="bg-white hover:bg-limeGreen/30 border-2 border-darkText p-2.5 rounded-xl flex flex-col items-center gap-1 shadow-sm transition-all font-bold text-[11px]"><div class="w-8 h-8 bg-limeGreen/40 rounded-lg border border-darkText flex items-center justify-center text-sm"><i class="fa-regular fa-image"></i></div><span>แกลเลอรี</span></button>
+                    <button onclick="switchTab('pet')" class="bg-white hover:bg-sunnyYellow/30 border-2 border-darkText p-2.5 rounded-xl flex flex-col items-center gap-1 shadow-sm transition-all font-bold text-[11px]"><div class="w-8 h-8 bg-sunnyYellow/50 rounded-lg border border-darkText flex items-center justify-center text-sm">🐾</div><span>สัตว์เลี้ยง</span></button>
+                    <button onclick="openQuickNoteModal()" class="bg-hotPink text-white hover:brightness-105 border-2 border-darkText p-2.5 rounded-xl flex flex-col items-center gap-1 shadow-sm transition-all font-bold text-[11px]"><div class="w-8 h-8 bg-white/20 rounded-lg border border-darkText flex items-center justify-center text-sm"><i class="fa-solid fa-plus"></i></div><span>เพิ่มโน้ต</span></button>
+                </div>
+            </div>
+            <div id="plannerMinimizedBar" class="hidden bg-white border-2 border-darkText p-3 rounded-2xl text-xs font-bold text-center text-gray-500 shadow-sm">
+                📌 แถบเมนูลัดถูกซ่อนอยู่ กด "แสดง" ด้านบนเพื่อเปิดขึ้นมาใหม่
             </div>
 
             <!-- การ์ดคำทักทายสัตว์เลี้ยง -->
@@ -858,36 +351,35 @@
         <!-- CALENDAR -->
         <section id="tab-calendar" class="tab-content hidden space-y-4">
             
-            <!-- การ์ดอารมณ์เดือนนี้ (ดีไซน์สไตล์หน้าสัตว์เลี้ยง พร้อมตัวน้องและกล่องคำพูด) -->
-            <div class="pet-wrap">
-                <div class="pet-title-card flex items-center justify-between">
+            <!-- การ์ดห้องแมวรวมอารมณ์ประจำเดือน (ขนาดเล็กกะทัดรัด ไม่บังหน้าแมว) -->
+            <div class="pet-wrap max-w-md mx-auto">
+                <div class="pet-title-card flex items-center justify-between py-2 px-3">
                     <div>
-                        <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border-2 border-darkText">🗓️ อารมณ์ประจำเดือน</div>
-                        <h2 id="calendarMonthMoodTitle" class="text-xl font-extrabold font-cute mt-1">อารมณ์ประจำเดือนนี้</h2>
+                        <span class="inline-block bg-hotPink text-white font-bold text-[9px] px-2 py-0.5 rounded-full border border-darkText">🗓️ อารมณ์ประจำเดือน</span>
+                        <h3 id="calendarMonthMoodTitle" class="text-sm font-extrabold font-cute mt-0.5">อารมณ์เดือนนี้</h3>
                     </div>
-                    <button onclick="selectCalendarDate(null)" id="resetDateFilterBtnCalendar" class="hidden text-xs bg-gray-200 border-2 border-darkText px-3 py-1 rounded-xl font-bold">แสดงทั้งหมด</button>
+                    <button onclick="selectCalendarDate(null)" id="resetDateFilterBtnCalendar" class="hidden text-[10px] bg-gray-200 border border-darkText px-2 py-0.5 rounded-lg font-bold">ทั้งหมด</button>
                 </div>
 
-                <div class="pet-scene" style="aspect-ratio: 16 / 7;">
-                    <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <div class="pet-scene" style="aspect-ratio: 16/7;">
+                    <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                         <defs>
                             <pattern id="calCheck" width="24" height="24" patternUnits="userSpaceOnUse">
                                 <rect width="24" height="24" fill="#FFFFFF"/>
-                                <rect width="12" height="24" fill="#FFD1DC" opacity=".6"/>
-                                <rect width="24" height="12" fill="#FFD1DC" opacity=".6"/>
+                                <rect width="12" height="24" fill="#BFE6FF" opacity=".75"/>
+                                <rect width="24" height="12" fill="#BFE6FF" opacity=".75"/>
                             </pattern>
                         </defs>
-                        <rect x="0" y="0" width="400" height="180" fill="#E0F7FA"/>
-                        <rect x="0" y="120" width="400" height="60" fill="#FFE0B2"/>
-                        <line x1="0" y1="120" x2="400" y2="120" stroke="#FFCC80" stroke-width="3"/>
-                        <ellipse cx="200" cy="150" rx="130" ry="18" fill="#FFCDD2" stroke="#1A1A1A" stroke-width="3"/>
+                        <rect x="0" y="0" width="400" height="200" fill="#FFF4B8"/>
+                        <rect x="0" y="150" width="400" height="50" fill="#FFE98A"/>
+                        <rect x="0" y="200" width="400" height="100" fill="#F9C7A6"/>
+                        <ellipse cx="200" cy="264" rx="150" ry="24" fill="#FFB3D1" stroke="#1A1A1A" stroke-width="3"/>
+                        <ellipse cx="200" cy="232" rx="118" ry="42" fill="url(#calCheck)" stroke="#1A1A1A" stroke-width="4"/>
                     </svg>
-
-                    <!-- กล่องคำพูดอารมณ์ประจำเดือน -->
-                    <div id="calendarMonthMoodSpeech" class="pet-speech">กำลังประมวลผลอารมณ์เดือนนี้... ✨</div>
-
+                    <!-- กล่องคำพูดอารมณ์ประจำเดือน (วางไว้ตำแหน่งที่ไม่บังหน้าแมว) -->
+                    <div id="calendarMonthMoodSpeech" class="pet-speech text-[10px] py-1 px-2">กำลังประมวลผลอารมณ์... ✨</div>
                     <!-- ตัวสัตว์เลี้ยงประจำหน้าปฏิทิน -->
-                    <div id="calendarMonthPetAvatar" class="pet-character" style="bottom: 22%;">🐱</div>
+                    <div id="calendarMonthPetAvatar" class="pet-character" style="font-size: 3rem; bottom: 16px;">🐱</div>
                 </div>
             </div>
 
@@ -952,10 +444,7 @@
                         <h3 class="font-cute font-bold text-base">📜 ประวัติคำนวณ (เลือกรายการเพื่อโน้ต)</h3>
                         <button onclick="clearCalcHistory()" class="text-[10px] font-bold text-hotPink underline">ล้างทั้งหมด</button>
                     </div>
-                    <div class="bg-offWhite p-3 rounded-xl border border-darkText space-y-2 text-xs">
-                        <input type="text" id="calcNoteDesc" placeholder="รายละเอียด เช่น ค่าข้าว" class="w-full bg-white border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium text-darkText">
-                    </div>
-                    <div id="calcHistoryList" class="space-y-1.5 overflow-y-auto max-h-[260px] flex-1 pr-1 text-xs"></div>
+                    <div id="calcHistoryList" class="space-y-1.5 overflow-y-auto max-h-[300px] flex-1 pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
@@ -963,15 +452,12 @@
         <!-- PET -->
         <section id="tab-pet" class="tab-content hidden space-y-4">
             <div class="pet-wrap">
-
-                <!-- การ์ดชื่อ -->
                 <div class="pet-title-card">
                     <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border-2 border-darkText">🐾 สัตว์เลี้ยงการเงิน</div>
                     <h2 id="petHeaderTitle" class="text-2xl font-extrabold font-cute mt-1.5">สัตว์เลี้ยงการเงิน</h2>
                     <p class="text-xs font-bold text-darkText/70">เลี้ยงด้วยการจดรายรับรายจ่าย</p>
                 </div>
 
-                <!-- ฉากห้อง (SVG ทั้งห้องในภาพเดียว) -->
                 <div class="pet-scene">
                     <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                         <defs>
@@ -981,90 +467,16 @@
                                 <rect width="24" height="12" fill="#BFE6FF" opacity=".75"/>
                             </pattern>
                         </defs>
-
-                        <!-- ผนัง -->
                         <rect x="0" y="0" width="400" height="200" fill="#FFF4B8"/>
                         <rect x="0" y="150" width="400" height="50" fill="#FFE98A"/>
-                        <line x1="0" y1="150" x2="400" y2="150" stroke="#E8C94A" stroke-width="3"/>
-
-                        <!-- พื้น -->
                         <rect x="0" y="200" width="400" height="100" fill="#F9C7A6"/>
-                        <line x1="0" y1="230" x2="400" y2="230" stroke="#E9A985" stroke-width="2"/>
-                        <line x1="0" y1="262" x2="400" y2="262" stroke="#E9A985" stroke-width="2"/>
-                        <line x1="100" y1="200" x2="100" y2="230" stroke="#E9A985" stroke-width="2"/>
-                        <line x1="260" y1="230" x2="260" y2="262" stroke="#E9A985" stroke-width="2"/>
-                        <line x1="180" y1="262" x2="180" y2="300" stroke="#E9A985" stroke-width="2"/>
-                        <rect x="0" y="197" width="400" height="6" fill="#1A1A1A"/>
-
-                        <!-- หน้าต่าง + ม่าน -->
-                        <rect x="262" y="26" width="108" height="96" rx="8" fill="#BDEBFF" stroke="#1A1A1A" stroke-width="5"/>
-                        <line x1="316" y1="26" x2="316" y2="122" stroke="#1A1A1A" stroke-width="4"/>
-                        <line x1="262" y1="74" x2="370" y2="74" stroke="#1A1A1A" stroke-width="4"/>
-                        <ellipse cx="282" cy="98" rx="14" ry="8" fill="#FFFFFF"/>
-                        <ellipse cx="294" cy="94" rx="10" ry="8" fill="#FFFFFF"/>
-                        <rect x="252" y="122" width="128" height="8" rx="3" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="3"/>
-                        <path d="M246 18 Q272 40 262 128 L246 128 Z" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="3"/>
-                        <path d="M386 18 Q360 40 370 128 L386 128 Z" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="3"/>
-
-                        <!-- ชั้นหนังสือ -->
-                        <rect x="24" y="70" width="120" height="8" rx="2" fill="#C88B4A" stroke="#1A1A1A" stroke-width="3"/>
-                        <rect x="30" y="40" width="12" height="30" fill="#FF007F" stroke="#1A1A1A" stroke-width="2"/>
-                        <rect x="44" y="46" width="10" height="24" fill="#0055FF" stroke="#1A1A1A" stroke-width="2"/>
-                        <rect x="56" y="36" width="12" height="34" fill="#CCFF00" stroke="#1A1A1A" stroke-width="2"/>
-                        <rect x="70" y="50" width="14" height="20" fill="#9D00FF" stroke="#1A1A1A" stroke-width="2"/>
-                        <rect x="86" y="42" width="10" height="28" fill="#FFDD00" stroke="#1A1A1A" stroke-width="2"/>
-                        <rect x="110" y="56" width="16" height="14" rx="2" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="2"/>
-                        <ellipse cx="118" cy="48" rx="10" ry="9" fill="#7BD389" stroke="#1A1A1A" stroke-width="2"/>
-
-                        <!-- กรอบรูป -->
-                        <rect x="164" y="42" width="60" height="46" rx="4" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="4"/>
-                        <rect x="170" y="48" width="48" height="34" fill="#BDEBFF"/>
-                        <path d="M170 82 L186 62 L198 74 L206 66 L218 82 Z" fill="#7BD389"/>
-                        <circle cx="200" cy="58" r="5" fill="#FFDD00"/>
-
-                        <!-- ต้นไม้ในกระถาง -->
-                        <path d="M26 226 L58 226 L54 258 L30 258 Z" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="3"/>
-                        <ellipse cx="42" cy="196" rx="14" ry="26" fill="#7BD389" stroke="#1A1A1A" stroke-width="3"/>
-                        <ellipse cx="24" cy="208" rx="11" ry="18" fill="#7BD389" stroke="#1A1A1A" stroke-width="3" transform="rotate(-25 24 208)"/>
-                        <ellipse cx="60" cy="208" rx="11" ry="18" fill="#7BD389" stroke="#1A1A1A" stroke-width="3" transform="rotate(25 60 208)"/>
-
-                        <!-- พรม -->
                         <ellipse cx="200" cy="264" rx="150" ry="24" fill="#FFB3D1" stroke="#1A1A1A" stroke-width="3"/>
-                        <ellipse cx="200" cy="264" rx="122" ry="16" fill="none" stroke="#FFFFFF" stroke-width="3" opacity=".6"/>
-
-                        <!-- เงาที่นอน -->
-                        <ellipse cx="200" cy="274" rx="118" ry="8" fill="#000000" opacity=".12"/>
-
-                        <!-- ที่นอนลายตาราง -->
                         <ellipse cx="200" cy="232" rx="118" ry="42" fill="url(#petCheck)" stroke="#1A1A1A" stroke-width="4"/>
-                        <ellipse cx="200" cy="232" rx="96" ry="30" fill="none" stroke="#FFFFFF" stroke-width="5" opacity=".55"/>
-
-                        <!-- หมอน -->
-                        <rect x="86" y="222" width="64" height="26" rx="12" fill="#FFDD00" stroke="#1A1A1A" stroke-width="3" transform="rotate(-6 118 235)"/>
-                        <rect x="98" y="229" width="34" height="5" rx="3" fill="#FFFFFF" opacity=".7" transform="rotate(-6 118 235)"/>
-
-                        <!-- กล่องกระดาษ -->
-                        <rect x="330" y="200" width="54" height="36" rx="3" fill="#E0A96D" stroke="#1A1A1A" stroke-width="3"/>
-                        <rect x="353" y="200" width="8" height="36" fill="#FFFFFF" opacity=".6"/>
-                        <path d="M330 200 L338 190 L376 190 L384 200 Z" fill="#C98B4E" stroke="#1A1A1A" stroke-width="3"/>
-
-                        <!-- ชามอาหาร -->
-                        <path d="M318 262 L372 262 Q368 288 345 288 Q322 288 318 262 Z" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="3"/>
-                        <ellipse cx="345" cy="262" rx="27" ry="5" fill="#FFDD00" stroke="#1A1A1A" stroke-width="2"/>
-
-                        <!-- ดาวระยิบ -->
-                        <path d="M364 150 L367 157 L374 160 L367 163 L364 170 L361 163 L354 160 L361 157 Z" fill="#FFDD00" stroke="#1A1A1A" stroke-width="1.5"/>
-                        <path d="M38 150 L40 155 L45 157 L40 159 L38 164 L36 159 L31 157 L36 155 Z" fill="#FF007F" stroke="#1A1A1A" stroke-width="1.5"/>
                     </svg>
-
-                    <!-- กล่องคำพูดของสัตว์เลี้ยง -->
                     <div id="petRoomSpeech" class="pet-speech">ยินดีต้อนรับ! 💰</div>
-
-                    <!-- ตัวสัตว์เลี้ยง -->
                     <div id="petRoomAvatar" class="pet-character">🐱</div>
                 </div>
 
-                <!-- สถานะ -->
                 <div class="pet-stats">
                     <div class="flex items-center justify-between gap-2">
                         <div class="min-w-0">
@@ -1100,7 +512,6 @@
                     </button>
                 </div>
 
-                <!-- ตั้งค่า + ประวัติคำพูด -->
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
                     <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ตั้งค่าสัตว์เลี้ยง</h3>
                     <div class="space-y-3 text-xs">
@@ -1119,15 +530,7 @@
                                 <button type="button" class="pet-type-btn" data-avatar="🐾" onclick="selectPetType('🐾')">🐾<small>อื่นๆ</small></button>
                             </div>
                             <select id="petAvatarSelect" onchange="updatePetSettings()" class="hidden">
-                                <option value="🐱">🐱 แมว</option>
-                                <option value="🐶">🐶 หมา</option>
-                                <option value="🐰">🐰 กระต่าย</option>
-                                <option value="🐦">🐦 นก</option>
-                                <option value="🐟">🐟 ปลา</option>
-                                <option value="🐾">🐾 อื่นๆ</option>
-                                <option value="🐹">🐹 แฮมสเตอร์</option>
-                                <option value="🐻">🐻 หมี</option>
-                                <option value="🦆">🦆 เป็ด</option>
+                                <option value="🐱">🐱 แมว</option><option value="🐶">🐶 หมา</option><option value="🐰">🐰 กระต่าย</option><option value="🐦">🐦 นก</option><option value="🐟">🐟 ปลา</option><option value="🐾">🐾 อื่นๆ</option>
                             </select>
                         </div>
                     </div>
@@ -1144,6 +547,29 @@
         </section>
     </main>
 
+    <!-- FLOATING PET WIDGET (มุมขวาล่าง) -->
+    <div id="floatingPetWidget" class="fixed bottom-16 right-4 z-[9998] flex flex-col items-end pointer-events-auto">
+        <div id="floatingPetBubble" class="bg-white border-2 border-darkText rounded-xl px-3 py-1.5 text-xs font-bold shadow-sm mb-1 max-w-[200px] text-center truncate">งับ! 🐾</div>
+        <div onclick="switchTab('pet')" class="w-12 h-12 bg-sunnyYellow border-2 border-darkText rounded-full flex items-center justify-center text-2xl shadow-sm cursor-pointer hover:scale-105 transition-all">
+            <span id="floatingPetAvatar">🐱</span>
+        </div>
+    </div>
+
+    <!-- FLOATING QUICK NOTES (มุมซ้ายล่าง) -->
+    <div id="floatingQuickNotesWidget" class="fixed bottom-16 left-4 z-[9998] flex flex-col items-start pointer-events-auto max-w-[220px]">
+        <div id="floatingExpandedContainer" class="bg-white/95 backdrop-blur-sm border-2 border-darkText rounded-2xl p-2.5 shadow-sm space-y-1.5 mb-2 w-full">
+            <div class="flex justify-between items-center border-b border-darkText/20 pb-1">
+                <span class="font-cute font-bold text-xs flex items-center gap-1"><i class="fa-solid fa-thumbtack text-hotPink"></i> โน้ตด่วน</span>
+                <button onclick="toggleQuickNoteListVisibility()" class="text-[10px] font-bold text-gray-400 hover:text-darkText">ซ่อน</button>
+            </div>
+            <div id="floatingQuickNotesList" class="space-y-1 max-h-[140px] overflow-y-auto pr-1"></div>
+            <button onclick="openQuickNoteModal()" class="w-full bg-hotPink text-white font-bold py-1 rounded-lg border border-darkText text-[10px]">+ เพิ่มโน้ต</button>
+        </div>
+        <button id="floatingMinimizedBtn" onclick="toggleQuickNoteListVisibility()" class="hidden bg-sunnyYellow border-2 border-darkText px-3 py-1.5 rounded-full font-bold text-xs shadow-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-thumbtack text-hotPink"></i> โน้ตด่วน <span id="quickNoteBadge" class="bg-hotPink text-white rounded-full w-4 h-4 text-[9px] flex items-center justify-center">0</span>
+        </button>
+    </div>
+
     <footer class="bg-darkText text-white py-4 px-3 mt-auto border-t-2 border-darkText text-center text-xs w-full shrink-0">
         <p>✨ Y2K Playful Life Planner 🚀</p>
     </footer>
@@ -1151,7 +577,7 @@
     </div><!-- /appFrame -->
 
     <!-- BOTTOM NAVIGATION -->
-    <nav class="bottom-nav" aria-label="เมนูหลัก">
+    <nav class="bottom-nav md:hidden" aria-label="เมนูหลัก">
         <button class="bn-item" id="bn-dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-house"></i><span>หน้าแรก</span></button>
         <button class="bn-item" id="bn-planner" onclick="switchTab('planner')"><i class="fa-solid fa-calendar-check"></i><span>แพลนเนอร์</span></button>
         <button class="bn-add" onclick="openModal('quickAddModal')" aria-label="เพิ่มด่วน"><i class="fa-solid fa-plus"></i></button>
@@ -1219,7 +645,7 @@
     <!-- QUICK NOTE MODAL -->
     <div id="quickNoteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">📌 เพิ่มโน้ตด่วนสัตว์เลี้ยง</h3><button onclick="closeModal('quickNoteModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
+            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 class="font-cute font-bold text-lg">📌 เพิ่มโน้ตด่วน</h3><button onclick="closeModal('quickNoteModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
             <form id="quickNoteForm" onsubmit="handleSaveQuickNote(event)" class="space-y-3">
                 <div><label class="block font-bold mb-0.5">ข้อความโน้ตด่วน</label><textarea id="quickNoteInputText" rows="3" placeholder="เช่น อย่าลืมโอนค่าเน็ต! 💸" required class="w-full bg-offWhite border border-darkText rounded-xl p-2.5 outline-none font-medium text-darkText"></textarea></div>
                 <div class="pt-1 flex gap-2">
@@ -1260,7 +686,7 @@
     <!-- BILL MODAL -->
     <div id="billModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
-            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 id="billModalTitle" class="font-cute font-bold text-lg">💡 เพิ่มบิลเตรียมจ่าย</h3><button onclick="closeModal('billModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
+            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 id="billModalTitle" class="font-cute font-bold text-lg">💡 เพิ่ม/แก้ไขบิลเตรียมจ่าย</h3><button onclick="closeModal('billModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
             <form id="billForm" onsubmit="handleSaveBill(event)" class="space-y-3">
                 <input type="hidden" id="billId" value="">
                 <div><label class="block font-bold mb-0.5">ชื่อบิล</label><input type="text" id="billTitle" placeholder="เช่น ค่าหอ" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
@@ -1351,19 +777,6 @@
                     </div>
                 </div>
                 <div><label class="block font-bold mb-0.5">หัวข้อโน้ต</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้มีความสุข 🌸" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                <div>
-                    <label class="block font-bold mb-0.5">แนบรูป</label>
-                    <label class="flex flex-col items-center justify-center w-full p-3 bg-offWhite border border-dashed border-darkText rounded-xl cursor-pointer text-center">
-                        <i class="fa-solid fa-camera text-xl text-popBlue mb-1"></i>
-                        <span class="text-[10px] font-bold text-gray-600">กดเพื่อเลือกรูปภาพ</span>
-                        <input type="file" id="eventPhotoInput" accept="image/*" onchange="handlePhotoSelection(event)" class="hidden">
-                    </label>
-                    <p id="photoHint" class="text-[10px] text-gray-500 mt-1"></p>
-                    <div id="photoPreviewArea" class="hidden relative mt-2">
-                        <img id="eventPhotoPreview" class="w-full h-32 object-cover rounded-lg border border-darkText">
-                        <button type="button" onclick="removeSelectedPhoto()" class="absolute top-1 right-1 bg-hotPink text-white w-6 h-6 rounded-full border border-darkText text-[10px]">✕</button>
-                    </div>
-                </div>
                 <div class="pt-1 flex gap-2">
                     <button type="button" onclick="closeModal('eventModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button>
                     <button type="submit" id="eventSubmitBtn" class="flex-1 bg-retroPurple text-white font-bold py-2 rounded-lg border border-darkText">บันทึก</button>
@@ -1372,6 +785,7 @@
         </div>
     </div>
 
+    <!-- VIEW EVENT MODAL -->
     <div id="viewEventModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
             <div class="flex justify-between items-center pb-2 border-b border-darkText">
@@ -1379,8 +793,6 @@
                 <button onclick="closeModal('viewEventModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button>
             </div>
             <h3 id="viewEventTitle" class="font-cute font-extrabold text-lg text-popBlue"></h3>
-            <div id="viewEventPhotoContainer" class="hidden"><img id="viewEventPhoto" class="w-full max-h-56 object-cover rounded-xl border border-darkText"></div>
-            <p id="viewEventPhotoNote" class="hidden text-[10px] text-gray-500"></p>
             <div class="pt-2 border-t border-darkText flex gap-2">
                 <button id="deleteEventBtn" class="flex-1 bg-hotPink text-white font-bold py-2 rounded-lg border border-darkText text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ลบโน้ตนี้</button>
             </div>
@@ -1402,9 +814,7 @@
         function localDateKey(d = new Date()) {
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
-        const thisMonthKey = () => localDateKey().slice(0, 7);
 
-        // ===== ฟังก์ชันคำนวณวันอัจฉริยะ (รองรับ พรุ่งนี้, เมื่อวาน, อีก X วัน) =====
         function parseDateFromText(text) {
             const d = new Date();
             const lower = text.toLowerCase();
@@ -1423,7 +833,6 @@
             return localDateKey(d);
         }
 
-        // ===== วันหยุดราชการไทย =====
         const THAI_FIXED_HOLIDAYS = {
             '01-01': 'วันขึ้นปีใหม่', '04-06': 'วันจักรี', '04-13': 'วันสงกรานต์', '04-14': 'วันสงกรานต์',
             '04-15': 'วันสงกรานต์', '05-01': 'วันแรงงานแห่งชาติ', '05-04': 'วันฉัตรมงคล', '06-03': 'วันเฉลิมพระชนมพรรษาสมเด็จพระราชินี',
@@ -1439,8 +848,6 @@
             return THAI_MOVABLE_HOLIDAYS[dateKey] || THAI_FIXED_HOLIDAYS[dateKey.slice(5)] || '';
         }
 
-        const MAX_PHOTO_PX = 1024;
-        const MAX_PHOTO_CHARS = 900000;
         const CLOUD_TIMEOUT_MS = 20000;
 
         function showToast(message) {
@@ -1454,7 +861,6 @@
         function openModal(id) { $(id).classList.remove('hidden'); $(id).classList.add('flex'); }
         function closeModal(id) { $(id).classList.add('hidden'); $(id).classList.remove('flex'); }
 
-        // ===== หน้าต่างตั้งค่า (เปิดจากแถบเมนูล่าง) =====
         function openSettingsModal() {
             document.querySelectorAll('.settings-theme-btn').forEach(b => {
                 b.classList.toggle('ring-4', b.dataset.themeBtn === state.theme);
@@ -1466,19 +872,10 @@
             openModal('settingsModal');
         }
 
-        // ===== ไฮไลต์แถบเมนูล่างตามหน้าที่เปิดอยู่ =====
         function setBottomNavActive(tabId) {
             document.querySelectorAll('.bn-item').forEach(b => b.classList.remove('bn-active'));
             const map = { dashboard: 'bn-dashboard', planner: 'bn-planner', calendar: 'bn-calendar' };
             if (map[tabId]) $(map[tabId]).classList.add('bn-active');
-        }
-
-        function withTimeout(promise, ms, msg) {
-            let timer;
-            return Promise.race([
-                promise,
-                new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(msg)), ms); })
-            ]).finally(() => clearTimeout(timer));
         }
 
         function setView(view, save = true) {
@@ -1499,7 +896,6 @@
             setView(saved || auto, false);
         }
 
-        // ===== ระบบ AI Smart Command =====
         function executeAiCommand() {
             const input = $('aiCommandInput');
             const text = input.value.trim();
@@ -1633,89 +1029,6 @@
                     toggleIcon.classList.add('fa-chevron-up');
                 }
             }
-        }
-
-        let photoDbPromise = null;
-        function photoDB() {
-            if (!photoDbPromise) {
-                photoDbPromise = new Promise((resolve, reject) => {
-                    if (!('indexedDB' in window)) return reject(new Error('เบราว์เซอร์นี้ไม่รองรับการเก็บรูป'));
-                    const req = indexedDB.open('y2k_photos', 1);
-                    req.onupgradeneeded = () => req.result.createObjectStore('photos', { keyPath: 'id' });
-                    req.onsuccess = () => resolve(req.result);
-                    req.onerror = () => { photoDbPromise = null; reject(req.error); };
-                });
-            }
-            return photoDbPromise;
-        }
-
-        async function idbTx(mode, fn) {
-            const db = await photoDB();
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction('photos', mode);
-                const req = fn(tx.objectStore('photos'));
-                let result;
-                if (req) req.onsuccess = () => { result = req.result; };
-                tx.oncomplete = () => resolve(result);
-                tx.onerror = () => reject(tx.error || new Error('บันทึกรูปในเครื่องไม่สำเร็จ'));
-                tx.onabort = () => reject(tx.error || new Error('บันทึกรูปในเครื่องไม่สำเร็จ'));
-            });
-        }
-
-        async function savePhotoLocal(id, data, synced) {
-            await idbTx('readwrite', s => s.put({ id, data, synced, createdAt: Date.now() }));
-        }
-
-        async function markPhotoSynced(id) {
-            const rec = await idbTx('readonly', s => s.get(id));
-            if (rec) await idbTx('readwrite', s => s.put({ ...rec, synced: true }));
-        }
-
-        function photosCol(uid) {
-            return db.collection('users').doc(uid).collection('photos');
-        }
-
-        async function uploadPhoto(id, data) {
-            await withTimeout(
-                photosCol(currentUser.uid).doc(id).set({
-                    data, eventId: id, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }),
-                CLOUD_TIMEOUT_MS, 'อัปโหลดรูปขึ้นคลาวด์ไม่สำเร็จ'
-            );
-        }
-
-        async function getPhotoData(eventId) {
-            const rec = await idbTx('readonly', s => s.get(eventId));
-            if (rec && rec.data) return rec.data;
-            if (!currentUser || !isFirebaseActive) return null;
-            const snap = await withTimeout(photosCol(currentUser.uid).doc(eventId).get(), CLOUD_TIMEOUT_MS, 'โหลดรูปจากคลาวด์ไม่สำเร็จ');
-            if (!snap.exists) return null;
-            const data = snap.data().data;
-            await savePhotoLocal(eventId, data, true);
-            return data;
-        }
-
-        async function deletePhotoEverywhere(id) {
-            try { await idbTx('readwrite', s => s.delete(id)); } catch (e) { console.warn(e); }
-            if (currentUser && isFirebaseActive) {
-                try { await withTimeout(photosCol(currentUser.uid).doc(id).delete(), CLOUD_TIMEOUT_MS, 'ลบรูปบนคลาวด์ไม่สำเร็จ'); } catch (e) { console.warn(e); }
-            }
-        }
-
-        async function syncPendingPhotos() {
-            if (!currentUser || !isFirebaseActive) return;
-            try {
-                const all = (await idbTx('readonly', s => s.getAll())) || [];
-                for (const rec of all) {
-                    if (rec.synced) continue;
-                    const ev = state.events.find(e => e.id === rec.id);
-                    if (!ev || !ev.hasPhoto) continue;
-                    try {
-                        await uploadPhoto(rec.id, rec.data);
-                        await markPhotoSynced(rec.id);
-                    } catch (e) { console.warn('sync photo failed:', e); }
-                }
-            } catch (e) { console.warn(e); }
         }
 
         const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show', headerCollapsed:'y2k_header_collapsed' };
@@ -1870,7 +1183,7 @@
                 const snap = await db.collection('users').doc(uid).get();
                 if (snap.exists) { applyRemote(snap.data()); setSyncStatus('โหลดจากคลาวด์แล้ว ☁️'); }
                 else { await pushToCloud(); }
-                refreshUI(); syncPendingPhotos();
+                refreshUI();
             } catch { setSyncStatus('โหลดข้อมูลไม่สำเร็จ ⚠️'); }
         }
 
@@ -1919,6 +1232,7 @@
             state.quickNotes.unshift({ id: 'qn_' + Date.now(), text });
             state.quickNoteShow = true;
             saveData(); renderQuickNotesWidget(); showToast('เพิ่มโน้ตด่วนแล้ว! 📌');
+            closeModal('quickNoteModal');
         }
         function deleteQuickNote(id) { state.quickNotes = state.quickNotes.filter(n => n.id !== id); saveData(); renderQuickNotesWidget(); }
         function toggleQuickNoteListVisibility() { state.quickNoteShow = !state.quickNoteShow; saveData(); renderQuickNotesWidget(); }
@@ -1931,6 +1245,7 @@
             const hasNotes = state.quickNotes.length > 0;
 
             badge.classList.toggle('hidden', !hasNotes);
+            badge.innerText = state.quickNotes.length;
             if (state.quickNoteShow) {
                 expandedContainer.classList.remove('hidden');
                 minimizedBtn.classList.add('hidden');
@@ -1951,10 +1266,7 @@
             '🐰': { sad: '😭', low: '🐰', good: '🐰✨', rich: '🐇💖' },
             '🐦': { sad: '🥺', low: '🐦', good: '🐦✨', rich: '🐦👑' },
             '🐟': { sad: '😭', low: '🐟', good: '🐠', rich: '🐡🌟' },
-            '🐾': { sad: '🥺', low: '🐾', good: '🐾✨', rich: '🐾👑' },
-            '🐹': { sad: '🥺', low: '🐹', good: '🐹✨', rich: '🐹👑' },
-            '🐻': { sad: '🐻‍❄️', low: '🐻', good: '🧸', rich: '🐻✨' },
-            '🦆': { sad: '😭', low: '🦆', good: '🦆✨', rich: '🐣🌟' }
+            '🐾': { sad: '🥺', low: '🐾', good: '🐾✨', rich: '🐾👑' }
         };
 
         function setTheme(themeName, save = true) {
@@ -1969,7 +1281,6 @@
             saveData(); updatePetStatus(); showToast('อัปเดตสัตว์เลี้ยงแล้ว! ✨');
         }
 
-        // ===== ฟังก์ชันสำหรับห้องสัตว์เลี้ยง =====
         function selectPetType(emoji) {
             $('petAvatarSelect').value = emoji;
             updatePetSettings();
@@ -2005,28 +1316,25 @@
             
             const titleLabel = `อารมณ์เดือน${THAI_MONTHS[month]} ${year + 543}`;
             if ($('calendarMonthMoodTitle')) $('calendarMonthMoodTitle').innerText = titleLabel;
-            if ($('dashCalendarMonthMoodTitle')) $('dashCalendarMonthMoodTitle').innerText = titleLabel;
 
-            let speechText = 'เดือนนี้ยังไม่มีการบันทึกโน้ตหรืออารมณ์เลย ลองกดเพิ่มไดอารี่ดูสิคะ! 🌸';
+            let speechText = 'เดือนนี้ยังไม่มีการบันทึกโน้ตหรืออารมณ์เลย 🌸';
             let avatar = state.pet.avatar || '🐱';
 
             if (monthEvents.length > 0) {
                 const moods = monthEvents.map(e => e.mood).filter(Boolean);
                 const count = monthEvents.length;
                 if (moods.includes('🥰') || moods.includes('😊')) {
-                    speechText = `เดือนนี้แฮปปี้สุดๆ มีเรื่องราวดีๆ บันทึกไว้ ${count} วันเลย! 💖✨`;
+                    speechText = `แฮปปี้สุดๆ มีเรื่องราวดีๆ ${count} วันแล้ว! 💖`;
                     avatar = '😺';
                 } else if (moods.includes('😭') || moods.includes('😡')) {
-                    speechText = `เดือนนี้ดูเหมือนจะเหนื่อยหรือมีเรื่องให้เครียด ${count} วัน สู้ๆ นะคะ! 💪`;
+                    speechText = `เดือนนี้เหนื่อยหน่อยนะ ${count} วัน สู้ๆ! 💪`;
                     avatar = '😿';
                 } else {
-                    speechText = `เดือนนี้บันทึกความทรงจำไว้ ${count} วันแล้ว เยี่ยมมาก! 📝`;
+                    speechText = `บันทึกความทรงจำไว้ ${count} วัน เยี่ยมมาก! 📝`;
                     avatar = '🐱';
                 }
             }
 
-            if ($('calendarMonthMoodSummary')) $('calendarMonthMoodSummary').innerText = speechText;
-            if ($('dashCalendarMonthMoodSummary')) $('dashCalendarMonthMoodSummary').innerText = speechText;
             if ($('calendarMonthMoodSpeech')) $('calendarMonthMoodSpeech').innerText = speechText;
             if ($('calendarMonthPetAvatar')) $('calendarMonthPetAvatar').innerText = avatar;
         }
@@ -2036,14 +1344,12 @@
             const faces = PET_MOOD_FACES[state.pet.avatar] || PET_MOOD_FACES['🐱'];
             const clamp = v => Math.max(0, Math.min(100, Math.round(v)));
 
-            // ความอิ่ม: ตามยอดคงเหลือสุทธิ
             let hunger, avatar, moodText, defaultSpeech;
             if (net <= 0)       { hunger = 0;   avatar = faces.sad;  moodText = 'หิวม๊าก 🥺';   defaultSpeech = 'เงินเป็น 0 แล้ว ช่วยเติมรายรับที! 😭'; }
             else if (net < 1000){ hunger = 40;  avatar = faces.low;  moodText = 'ประหยัด...';    defaultSpeech = 'ประหยัดไว้ก่อนน้า 💸'; }
             else if (net < 5000){ hunger = 75;  avatar = faces.good; moodText = 'อิ่มสบาย 😊';   defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟'; }
             else                { hunger = 100; avatar = faces.rich; moodText = 'เศรษฐี! 🤑';     defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖'; }
 
-            // ความสุข: สัดส่วนรายรับเทียบกับรายรับ+รายจ่ายทั้งหมด
             const happiness = (inc + exp) > 0 ? clamp(inc / (inc + exp) * 100) : 0;
             const stable = inc > 0 ? clamp(net / inc * 100) : 0;
 
@@ -2051,17 +1357,17 @@
             if (!state.pet.speech || state.pet.speech.includes('ยินดีต้อนรับ')) state.pet.speech = defaultSpeech;
 
             const pName = state.pet.name || 'สัตว์เลี้ยง';
-            $('floatingPetName').innerText = pName;
             $('petHeaderTitle').innerText = `${pName} (Tamagotchi)`;
-            $('petAvatar').innerText = avatar; $('minimizedPetAvatar').innerText = avatar;
-            $('petRoomAvatar').innerText = avatar; $('dashCatAvatar').innerText = avatar;
+            $('petAvatar') && ($('petAvatar').innerText = avatar);
+            $('floatingPetAvatar').innerText = avatar;
+            $('petRoomAvatar').innerText = avatar;
             $('petRoomName').innerText = `${pName} (${moodText})`;
             $('petRoomStatus').innerText = `สุทธิ ฿${money(net)}`;
             $('petHungerVal').innerText = hunger + '%'; $('petHungerBar').style.width = hunger + '%';
             $('petHappyVal').innerText = happiness + '%'; $('petHappyBar').style.width = happiness + '%';
             $('petStableVal').innerText = stable + '%'; $('petStableBar').style.width = stable + '%';
-            $('petSpeechBubble').innerText = state.pet.speech;
             $('petRoomSpeech').innerText = state.pet.speech;
+            $('floatingPetBubble').innerText = state.pet.speech;
             $('dashCatSpeechText').innerText = state.pet.speech;
 
             document.querySelectorAll('.pet-type-btn').forEach(b => {
@@ -2098,7 +1404,7 @@
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border-2', 'border-darkText');
-                if (btn.id !== 'nav-dashboard') btn.classList.add('bg-white', 'text-darkText');
+                btn.classList.add('bg-white');
             });
             $('tab-' + tabId).classList.remove('hidden');
             const active = $('nav-' + tabId);
@@ -2132,7 +1438,7 @@
 
         function updateCategorySelects(selectedVal = '') {
             const cats = state.categories || DEFAULT_CATEGORIES;
-            const html = cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+            const html = cats.map(c => `<option value="${esc(c)}"${c === selectedVal ? ' selected' : ''}>${esc(c)}</option>`).join('');
             if ($('txCategory')) { $('txCategory').innerHTML = html; if (selectedVal) $('txCategory').value = selectedVal; }
             if ($('billCategory')) { $('billCategory').innerHTML = html; if (selectedVal) $('billCategory').value = selectedVal; }
         }
@@ -2280,11 +1586,12 @@
                     <div class="flex justify-between items-center">
                         <span class="text-[10px] font-bold bg-retroPurple text-white px-2 py-0.5 rounded">${esc(b.date)}</span>
                         <div class="flex items-center gap-1.5">
-                            <button onclick="openBillModal('${b.id}')" class="text-popBlue"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="openBillModal('${b.id}')" class="text-popBlue" title="แก้ไขบิล"><i class="fa-solid fa-pen-to-square"></i></button>
                             <button onclick="deleteBill('${b.id}')" class="text-gray-400 hover:text-hotPink"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                     <h4 class="font-bold text-sm">${esc(b.title)}</h4>
+                    <span class="text-xs font-bold text-gray-500 block">หมวด: ${esc(b.category || '💡 บิล/ค่าใช้จ่าย')}</span>
                     <span class="text-base font-extrabold text-hotPink block">฿ ${money(b.amount)}</span>
                     <button onclick="toggleBillPaid('${b.id}')" class="w-full py-1 bg-limeGreen text-darkText font-bold text-xs rounded border border-darkText">จ่าย</button>
                 </div>`).join('') : `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">เย้! ไม่มีบิลค้างจ่ายแล้ว 🎉</div>`;

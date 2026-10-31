@@ -87,6 +87,28 @@
     dialogueIndex++;
     showDialogue(agent);
   }
+  function pixelCharacter(a,face){
+    const hair=a.hair||'#49332e',shirt=a.shirt||'#638bd8';
+    const female=['manager','writer','secretary'].includes(a.id);
+    const accessory=a.id==='researcher'?'<path d="M13 24h22M15 24l-2 7m22-7 2 7" stroke="#8ad8ee" stroke-width="2.5" fill="none"/><circle cx="14" cy="25" r="3.5" fill="none" stroke="#8ad8ee" stroke-width="2"/><circle cx="34" cy="25" r="3.5" fill="none" stroke="#8ad8ee" stroke-width="2"/>':a.id==='designer'?'<path d="M8 15h32v4H8z" fill="#e7b94f"/><path d="M12 12h24v3H12z" fill="#f5d36f"/>':a.id==='analyst'?'<rect x="10" y="44" width="28" height="12" rx="2" fill="#40516c"/><rect x="13" y="46" width="22" height="7" fill="#91d8f2"/>':'';
+    const hairShape=female?'<path d="M8 24V14L13 6 21 3 32 4 40 12 41 31 37 37 34 23 14 23 12 36 8 32Z" fill="'+hair+'" stroke="#392d31" stroke-width="1.5"/><path d="M10 16L15 7 26 4 37 10 31 13 22 12 15 17Z" fill="'+hair+'"/>':'<path d="M10 19L12 9 20 4 31 5 39 12 39 19 34 15 16 15Z" fill="'+hair+'" stroke="#392d31" stroke-width="1.5"/>';
+    return '<svg class="pixel-person-svg" viewBox="0 0 48 68" aria-hidden="true" shape-rendering="crispEdges">'+
+      '<ellipse cx="24" cy="64" rx="15" ry="3" fill="#34465a" opacity=".18"/>'+
+      '<path d="M17 48h6v12h-6zM26 48h6v12h-6z" fill="#f0bd96"/>'+
+      '<path d="M14 58h10v5H12v-2zM25 58h11v5H24v-2z" fill="#4b5065"/>'+
+      '<path d="M10 36l5-4h18l5 4 3 15-7 3H14l-7-3z" fill="'+shirt+'" stroke="#39445b" stroke-width="1.5"/>'+
+      '<path d="M18 33h12v5H18z" fill="#fff0d9"/>'+
+      '<path d="M10 37L5 47l4 3 6-9M37 37l6 10-4 3-6-9" fill="#f0bd96" stroke="#cf9b7c" stroke-width="1"/>'+
+      '<rect x="17" y="28" width="14" height="8" fill="#edbd98"/>'+
+      '<rect x="11" y="10" width="26" height="25" rx="7" fill="#f5cba6" stroke="#bd8b70" stroke-width="1.5"/>'+
+      hairShape+
+      '<path d="M17 23h3v3h-3zM29 23h3v3h-3z" fill="#34313a"/>'+
+      '<path d="M21 30h6v2h-6z" fill="#bd6570"/>'+
+      '<path d="M13 18h5v2h-5zM30 18h5v2h-5z" fill="'+hair+'"/>'+
+      accessory+
+      '<path d="M15 34h18v3H15z" fill="#fff" opacity=".18"/>'+
+      '</svg>';
+  }
   function renderSprites(){
     const people=agents.map((a,i)=>{
       const working=statusOf(a.id)==='working';
@@ -94,8 +116,7 @@
       const pos=working?[
         {x:39,y:40},{x:62,y:34},{x:29,y:55},{x:45,y:66},{x:55,y:70},{x:68,y:58}
       ][i]:{x:a.x,y:a.y};
-      const pixel='<span class="pixel-person" style="--shirt:'+a.shirt+';--hair:'+a.hair+'"><i class="hair"></i><i class="face"></i><i class="body"></i><i class="arm left"></i><i class="arm right"></i><i class="legs"></i></span>';
-      return '<button type="button" class="office-sprite '+(working?'is-working':'is-idle')+'" data-agent-id="'+a.id+'" style="left:'+pos.x+'%;top:'+pos.y+'%" title="คุยกับ '+safeText(a.name)+'"><span class="office-expression">'+line.face+'</span><span class="office-avatar">'+pixel+'</span><span class="office-name">'+a.name+'</span></button>';
+      return '<button type="button" class="office-sprite '+(working?'is-working':'is-idle')+'" data-agent-id="'+a.id+'" style="left:'+pos.x+'%;top:'+pos.y+'%" title="คุยกับ '+safeText(a.name)+'"><span class="office-expression">'+line.face+'</span><span class="office-avatar">'+pixelCharacter(a,line.face)+'</span><span class="office-name">'+a.name+'</span></button>';
     }).join('');
     const petSprites='<div class="office-pet-sprite cat" title="มะลิ แมวประจำออฟฟิศ">🐈</div><div class="office-pet-sprite dog" title="โมจิ น้องหมาประจำออฟฟิศ">🐕</div><div class="office-pet-sprite bird" title="จิ๊บจิ๊บ นกประจำออฟฟิศ">🦜</div>';
     $('officeSprites').innerHTML=people+petSprites;

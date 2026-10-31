@@ -625,3 +625,16 @@
 .office-report-card p{margin:8px 0;color:#68738a;font-size:10px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
 .office-report-card small{font-size:8px;color:#9aa2b1}
 @media(max-width:560px){.office-report-entry{padding:7px}.office-report-entry textarea{font-size:10px}.office-report-card{padding:9px}}
+
+
+/* v20 — actual work content workspace */
+.office-deliverable-entry{display:grid;gap:6px;margin-top:10px;padding:10px;border:1px solid #dce6f7;border-radius:11px;background:#f5f8ff}
+.office-deliverable-entry label{font-size:9px;font-weight:900;color:#526c9c}
+.office-deliverable-entry textarea{width:100%;min-width:0;resize:vertical;padding:9px 10px;border:1px solid #dce2ed;border-radius:8px;background:#fff;color:#30384d;font:inherit;font-size:10px;line-height:1.6;outline:none;white-space:pre-wrap}
+.office-deliverable-entry textarea:focus{border-color:#86bfff;box-shadow:0 0 0 3px #86bfff2b}
+.office-deliverable-entry button{justify-self:start;padding:7px 11px;border:0;border-radius:8px;background:#4f78d3;color:#fff;font-size:9px;font-weight:900}
+.office-deliverable-entry small,.office-deliverable-preview small,.office-report-preview small{font-size:8px;color:#929caf}
+.office-deliverable-preview,.office-report-preview{margin-top:9px;padding:9px;border-radius:9px;background:#f4f7ff}
+.office-deliverable-preview b,.office-report-preview b{font-size:9px;color:#526c9c}
+.office-deliverable-preview p,.office-report-preview p{margin:5px 0;color:#59657d;font-size:10px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:560px){.office-deliverable-entry{padding:8px}.office-deliverable-entry textarea{font-size:10px}}

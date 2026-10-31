@@ -211,7 +211,7 @@
     list.innerHTML=data.tasks.slice().sort((a,b)=>b.created-a.created).map(t=>{
       const agent=agents.find(a=>a.id===t.agent),done=t.status==='done',review=t.status==='review';
       const stateLabel=done?'เสร็จแล้ว':review?'ส่งรายงานแล้ว · รอตรวจ':'กำลังดำเนินการ';
-      return '<article class="office-task"><div class="office-task-head"><h4>'+safeText(t.title)+'</h4><span class="office-task-state '+(done?'done':review?'review':'')+'">'+stateLabel+'</span></div><p>'+safeText(t.detail||'ไม่มีรายละเอียดเพิ่มเติม')+'</p><div class="office-task-meta"><span>ผู้รับผิดชอบ: '+safeText(agent?agent.name:'ทีม')+'</span><span>'+new Date(t.created).toLocaleDateString('th-TH')+'</span></div><div class="office-deliverable-entry"><label>ผลงานที่สร้าง / เนื้อหาส่งมอบ</label><textarea data-office-work-input="'+t.id+'" rows="4" placeholder="วางเนื้อหาบทความ แนวคิดออกแบบ ผลค้นคว้า ตารางสรุป หรือรายละเอียดผลงานที่ทำจริง...">'+safeText(t.work||'')+'</textarea><button type="button" data-office-work-save="'+t.id+'">'+(t.workSavedAt?'บันทึกผลงานอีกครั้ง':'บันทึกผลงาน')+'</button>'+(t.workSavedAt?'<div class="office-work-saved"><span>✓ บันทึกผลงานแล้ว</span><small>ล่าสุด '+new Date(t.workSavedAt).toLocaleString('th-TH')+'</small></div>':'')+'</div>'+(done?'':'<div class="office-report-entry"><label>รายงานผลการทำงาน</label><textarea data-office-report-input="'+t.id+'" rows="2" placeholder="สรุปสิ่งที่ทำ ผลลัพธ์ หรือแนบลิงก์ผลงาน...">'+safeText(t.report||'')+'</textarea><button type="button" data-office-report="'+t.id+'">ส่งรายงานให้ขุนพล</button></div>')+'<div class="office-task-actions">'+(done?'':'<button type="button" data-office-done="'+t.id+'">✓ รับรองงานเสร็จ</button>')+'<button type="button" data-office-delete="'+t.id+'">ลบงาน</button></div></article>';
+      return '<article class="office-task"><div class="office-task-head"><h4>'+safeText(t.title)+'</h4><span class="office-task-state '+(done?'done':review?'review':'')+'">'+stateLabel+'</span></div><p>'+safeText(t.detail||'ไม่มีรายละเอียดเพิ่มเติม')+'</p><div class="office-task-meta"><span>ผู้รับผิดชอบ: '+safeText(agent?agent.name:'ทีม')+'</span><span>'+new Date(t.created).toLocaleDateString('th-TH')+'</span></div><div class="office-deliverable-entry"><label>ผลงานที่สร้าง / เนื้อหาส่งมอบ</label><textarea data-office-work-input="'+t.id+'" rows="4" placeholder="วางเนื้อหาบทความ แนวคิดออกแบบ ผลค้นคว้า ตารางสรุป หรือรายละเอียดผลงานที่ทำจริง...">'+safeText(t.work||'')+'</textarea><button type="button" data-office-work-save="'+t.id+'">'+(t.workSavedAt?'บันทึกผลงานอีกครั้ง':'บันทึกผลงาน')+'</button>'+(t.workSavedAt?'<div class="office-work-saved"><span>✓ บันทึกผลงานแล้ว</span><small>ล่าสุด '+new Date(t.workSavedAt).toLocaleString('th-TH')+'</small></div>':'')+'</div>'+(done?'':'<div class="office-report-entry"><label>รายงานผลการทำงาน</label><textarea data-office-report-input="'+t.id+'" rows="2" placeholder="สรุปสิ่งที่ทำ ผลลัพธ์ หรือแนบลิงก์ผลงาน...">'+safeText(t.report||'')+'</textarea><button type="button" data-office-report="'+t.id+'">ส่งรายงานให้ขุนพล</button></div>')+'<div class="office-task-actions">'+(done?'':'<button type="button" data-office-done="'+t.id+'">✓ รับรองงานเสร็จ</button>')+'<button type="button" data-office-edit="'+t.id+'">แก้ไขงาน</button><button type="button" data-office-delete="'+t.id+'">ลบงาน</button></div></article>';
     }).join('');
   }
   function renderManagerReports(){
@@ -287,6 +287,16 @@
     if(!data.tasks.some(t=>t.agent===task.agent&&t.status==='doing'))data.statuses[task.agent]='idle';
     save();render();
   }
+  function editTask(id){
+    const task=data.tasks.find(t=>t.id===id);if(!task)return;
+    const title=window.prompt('แก้ไขชื่องาน',task.title||'');
+    if(title===null)return;
+    if(!title.trim()){setToast('กรุณาระบุชื่องาน');return;}
+    const detail=window.prompt('แก้ไขรายละเอียดงาน',task.detail||'');
+    if(detail===null)return;
+    task.title=title.trim();task.detail=detail.trim();
+    save();render();setToast('บันทึกการแก้ไขงานเรียบร้อยแล้ว');
+  }
   function deleteTask(id){
     const task=data.tasks.find(t=>t.id===id);data.tasks=data.tasks.filter(t=>t.id!==id);
     if(task&&slackingAgentId===task.agent)slackingAgentId=null;
@@ -326,9 +336,10 @@
     startPetRoaming();
     $('officeTaskForm').addEventListener('submit',addTask);
     $('officeTaskList').addEventListener('click',e=>{
-      const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]'),report=e.target.closest('[data-office-report]'),work=e.target.closest('[data-office-work-save]');
+      const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]'),edit=e.target.closest('[data-office-edit]'),report=e.target.closest('[data-office-report]'),work=e.target.closest('[data-office-work-save]');
       if(done)completeTask(done.getAttribute('data-office-done'));
       if(del)deleteTask(del.getAttribute('data-office-delete'));
+      if(edit)editTask(edit.getAttribute('data-office-edit'));
       if(report)submitReport(report.getAttribute('data-office-report'));
       if(work)saveWork(work.getAttribute('data-office-work-save'));
     });

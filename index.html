@@ -262,45 +262,53 @@
         </div>
     </div>
 
-    <!-- MAIN HEADER PLANNER CARD -->
-    <header class="bg-popBlue border-3 border-darkText text-darkText p-2.5 md:p-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-2" style="margin:8px 12px 0; width:calc(100% - 24px);">
-        <div class="bg-white/95 border-2 border-darkText p-2 rounded-xl shadow-sm flex items-center gap-2">
-            <span class="text-base shrink-0 animate-bounce">🤖</span>
-            <div class="flex-1 relative">
-                <input type="text" id="aiCommandInput" onkeydown="if(event.key==='Enter') executeAiCommand()" placeholder="พิมพ์สั่ง AI เช่น 'พรุ่งนี้จ่ายค่าเน็ต 500'..." class="w-full bg-offWhite border-2 border-darkText rounded-lg px-2.5 py-1 text-xs font-bold text-darkText outline-none pr-16">
+    <!-- MAIN HEADER PLANNER CARD (แก้ไขปรับเป็นไอคอนหรูขึ้นตามบรีฟ) -->
+    <header class="bg-popBlue border-3 border-darkText text-darkText p-2.5 md:p-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-2.5" style="margin:8px 12px 0; width:calc(100% - 24px);">
+        
+        <!-- AI SMART COMMAND BAR -->
+        <div class="bg-white/95 border-2 border-darkText p-1.5 rounded-xl shadow-[0_2px_0_#1A1A1A] flex items-center gap-2">
+            <div class="w-8 h-8 bg-popBlue text-white rounded-lg flex items-center justify-center shrink-0 border-2 border-darkText shadow-sm">
+                <i class="fa-solid fa-robot text-[13px]"></i>
             </div>
-            <button onclick="executeAiCommand()" class="bg-hotPink text-white font-extrabold px-3 py-1 rounded-lg border-2 border-darkText text-xs shadow-sm hover:brightness-105 shrink-0 flex items-center gap-1">
-                <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> สั่ง AI
+            <div class="flex-1 relative">
+                <input type="text" id="aiCommandInput" onkeydown="if(event.key==='Enter') executeAiCommand()" placeholder="พิมพ์สั่ง AI เช่น 'พรุ่งนี้จ่ายค่าเน็ต 500'..." class="w-full bg-offWhite border-2 border-darkText rounded-lg px-2.5 py-1.5 text-xs font-bold text-darkText outline-none pr-1 focus:bg-white transition-colors">
+            </div>
+            <button onclick="executeAiCommand()" class="bg-hotPink text-white font-extrabold px-3 py-1.5 rounded-lg border-2 border-darkText text-[11px] shadow-sm hover:scale-105 active:scale-95 shrink-0 flex items-center gap-1.5 transition-all">
+                <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i> สั่ง AI
             </button>
         </div>
+
         <div class="flex items-center justify-between gap-2">
-            <div class="bg-limeGreen text-darkText font-cute font-extrabold text-sm sm:text-base px-3.5 py-1 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1.5 flex-1 max-w-[260px]">
-                <span>✨</span> Y2K PLANNER
+            <div class="bg-limeGreen text-darkText font-cute font-extrabold text-sm sm:text-base px-3.5 py-1.5 rounded-xl border-2 border-darkText shadow-sm -rotate-1 flex items-center gap-1.5 flex-1 max-w-[260px]">
+                <i class="fa-solid fa-bolt text-popBlue text-sm drop-shadow-sm"></i> Y2K PLANNER
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="togglePlannerHeader()" id="plannerToggleBtn" class="bg-white border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-xs font-extrabold flex items-center gap-1 hover:bg-sunnyYellow transition-all" title="ซ่อน/แสดงเมนู">
+                <button onclick="togglePlannerHeader()" id="plannerToggleBtn" class="bg-white border-2 border-darkText px-2.5 py-1.5 rounded-xl shadow-[0_2px_0_#1A1A1A] text-[11px] font-extrabold flex items-center gap-1 hover:bg-sunnyYellow active:translate-y-0.5 active:shadow-none transition-all" title="ซ่อน/แสดงเมนู">
                     <span id="plannerToggleText">ซ่อน</span>
-                    <i id="plannerToggleIcon" class="fa-solid fa-chevron-up text-xs"></i>
+                    <i id="plannerToggleIcon" class="fa-solid fa-chevron-up text-[10px]"></i>
                 </button>
-                <div class="bg-white/90 border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-right flex items-center gap-1.5 min-w-0">
+                <div class="bg-white/90 border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-right flex items-center gap-2 min-w-0">
                     <div class="text-right truncate">
-                        <span class="text-[10px] sm:text-[11px] font-extrabold text-darkText block truncate" id="greetingText">สวัสดีตอนค่ำ 🌙</span>
+                        <span class="text-[10px] sm:text-[11px] font-extrabold text-darkText block truncate" id="greetingText">สวัสดีตอนค่ำ</span>
                         <span class="text-[8px] sm:text-[9px] font-bold text-gray-500 block truncate">* วันนี้ที่ดูยอดแล้ว</span>
                     </div>
-                    <i class="fa-solid fa-cloud text-gray-400 text-sm sm:text-base shrink-0"></i>
+                    <div class="w-6 h-6 bg-offWhite border border-darkText rounded-full flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-moon text-retroPurple text-[10px]"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="plannerMinimizedBar" class="hidden flex items-center justify-center gap-2 py-1 overflow-x-auto">
-            <button onclick="switchTab('dashboard')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="แดชบอร์ด">📊</button>
-            <button onclick="switchTab('finance')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="รายรับ-รายจ่าย">💸</button>
-            <button onclick="switchTab('bills')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="เตรียมจ่าย">💡</button>
-            <button onclick="switchTab('planner')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="แพลนเนอร์">📋</button>
-            <button onclick="switchTab('calendar')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="ปฏิทิน">🗓️</button>
-            <button onclick="switchTab('calculator')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="คำนวณ">🧮</button>
-            <button onclick="switchTab('pet')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-base hover:scale-110 transition-all shrink-0" title="สัตว์เลี้ยง">🐾</button>
-            <button onclick="openModal('quickAddModal')" class="w-9 h-9 bg-hotPink text-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-xs font-extrabold hover:scale-110 transition-all shrink-0" title="เพิ่มด่วน">+</button>
+        <!-- MINIMIZED SHORTCUTS (เปลี่ยนจากอิโมจิเป็นไอคอนที่ดูโปรและน่าเชื่อถือ) -->
+        <div id="plannerMinimizedBar" class="hidden flex items-center justify-center gap-1.5 py-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-0.5">
+            <button onclick="switchTab('dashboard')" class="w-[38px] h-[38px] bg-white border-2 border-darkText rounded-full shadow-[0_2px_0_#1A1A1A] flex items-center justify-center text-[14px] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all shrink-0 text-popBlue" title="แดชบอร์ด"><i class="fa-solid fa-chart-pie"></i></button>
+            <button onclick="switchTab('finance')" class="w-[38px] h-[38px] bg-white border-2 border-darkText rounded-full shadow-[0_2px_0_#1A1A1A] flex items-center justify-center text-[14px] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all shrink-0 text-green-600" title="รายรับ-รายจ่าย"><i class="fa-solid fa-wallet"></i></button>
+            <button onclick="switchTab('bills')" class="w-[38px] h-[38px] bg-white border-2 border-darkText rounded-full shadow-[0_2px_0_#1A1A1A] flex items-center justify-center text-[14px] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all shrink-0 text-retroPurple" title="เตรียมจ่าย"><i class="fa-solid fa-file-invoice-dollar"></i></button>
+            <button onclick="switchTab('planner')" class="w-[38px] h-[38px] bg-white border-2 border-darkText rounded-full shadow-[0_2px_0_#1A1A1A] flex items-center justify-center text-[14px] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all shrink-0 text-orange-500" title="แพลนเนอร์"><i class="fa-solid fa-list-check"></i></button>
+            <button onclick="switchTab('calendar')" class="w-[38px] h-[38px] bg-white border-2 border-darkText rounded-full shadow-[0_2px_0_#1A1A1A] flex items-center justify-center text-[14px] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all shrink-0 text-hotPink" title="ปฏิทิน"><i class="fa-solid fa-calendar-days"></i></button>
+            <button onclick="switchTab('calculator')" class="w-[38px] h-[38px] bg-white border-2 border-darkText rounded-full shadow-[0_2px_0_#1A1A1A] flex items-center justify-center text-[14px] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all shrink-0 text-gray-700" title="คำนวณ"><i class="fa-solid fa-calculator"></i></button>
+            <button onclick="switchTab('pet')" class="w-[38px] h-[38px] bg-white border-2 border-darkText rounded-full shadow-[0_2px_0_#1A1A1A] flex items-center justify-center text-[14px] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all shrink-0 text-amber-500" title="สัตว์เลี้ยง"><i class="fa-solid fa-paw"></i></button>
+            <button onclick="openModal('quickAddModal')" class="w-[38px] h-[38px] bg-hotPink text-white border-2 border-darkText rounded-full shadow-[0_2px_0_#1A1A1A] flex items-center justify-center text-[15px] font-extrabold hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all shrink-0" title="เพิ่มด่วน"><i class="fa-solid fa-plus"></i></button>
         </div>
 
         <div id="plannerCollapsibleBody" class="space-y-2 transition-all">
@@ -469,7 +477,6 @@
 
         <!-- CALENDAR -->
         <section id="tab-calendar" class="tab-content hidden space-y-4">
-            <!-- การ์ดอารมณ์เดือนนี้ (ดีไซน์เดียวกับหน้าสัตว์เลี้ยง ปรับขนาดให้พอดี) -->
             <div class="pet-wrap">
                 <div class="pet-title-card flex justify-between items-center py-2 px-3">
                     <div class="flex items-center gap-2">
@@ -487,10 +494,7 @@
                         <ellipse cx="200" cy="150" rx="130" ry="18" fill="#FFCDD2" stroke="#1A1A1A" stroke-width="3"/>
                     </svg>
 
-                    <!-- กล่องคำพูดของสัตว์เลี้ยง ปรับให้ไม่บังหน้า -->
                     <div id="calendarMonthMoodSpeech" class="pet-speech" style="top: 10%; right: 8%;">กำลังประมวลผลอารมณ์เดือนนี้... ✨</div>
-
-                    <!-- ตัวสัตว์เลี้ยง -->
                     <div id="calendarMonthPetAvatar" class="pet-character" style="bottom: 20%;">🐱</div>
                 </div>
             </div>
@@ -1241,7 +1245,6 @@
             $('dashPendingBills').innerText = activeBills.length + ' รายการ'; let totalAmount = 0; activeBills.forEach(b => totalAmount += Number(b.amount || 0));
             $('billsTotalSummaryText').innerText = `ยอดรวมที่ต้องเตรียมจ่าย: ฿ ${money(totalAmount)}`;
             
-            // เพิ่มการแสดงหมวดหมู่ในการ์ดบิล เพื่อให้ทราบว่าบันทึกหมวดไหนไป
             $('billsGrid').innerHTML = activeBills.length ? activeBills.map(b => `
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2">
                     <div class="flex justify-between items-center">

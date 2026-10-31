@@ -76,7 +76,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ===== พื้นหลัง: ตารางหมากรุกพาสเทล + จุดฮาล์ฟโทน + แสงสี (ตามโทนภาพอ้างอิง) ===== */
+        /* ===== พื้นหลัง: ตารางหมากรุกพาสเทล + จุดฮาล์ฟโทน + แสงสี ===== */
         body {
             min-height: 100vh;
             background-color: var(--bg-color, #FFF0F7);
@@ -181,7 +181,6 @@
             to   { opacity: 1; transform: none; }
         }
 
-        /* หัวการ์ดสีสันแบบสติกเกอร์ */
         .pet-title-card {
             position: relative;
             background: #FFFFFF;
@@ -472,7 +471,6 @@
             border: 2px solid #1A1A1A;
         }
         
-        /* ปรับขนาดปุ่มบวกให้ไม่ตะโกนเกินไป */
         .bn-add {
             width: 50px !important;
             height: 50px !important;
@@ -500,7 +498,6 @@
             }
         }
 
-        /* ===== หน้าสัตว์เลี้ยง ===== */
         .pet-wrap {
             display: flex;
             flex-direction: column;
@@ -543,7 +540,6 @@
             50% { transform: translate(-50%, -8px); }
         }
 
-        /* ===== กล่องคำพูดของสัตว์เลี้ยง ===== */
         .pet-speech {
             position: absolute;
             top: 5%;
@@ -586,7 +582,6 @@
             to   { opacity: 1; transform: none; }
         }
 
-        /* ปรับขนาดกล่องคำพูดเฉพาะในหน้าปฏิทินให้เล็กลง */
         #calendarMonthMoodSpeech {
             max-width: 42%;
             padding: 6px 10px;
@@ -695,14 +690,12 @@
             box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 4px 12px -4px rgba(0,0,0,.35) !important;
         }
         
-        /* สไตล์แก้วใสสำหรับปุ่มบวก */
         .bn-add {
             background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.55), rgba(255,0,127,.85) 45%, rgba(200,0,100,.9) 100%) !important;
             border: 1.5px solid rgba(255,255,255,.7) !important;
             box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 8px 18px -6px rgba(255,0,127,.6) !important;
         }
 
-        /* ===== Liquid Glass สำหรับปุ่มอื่น: ปุ่มทางลัด โหมดมุมมอง ปุ่มในหัวการ์ด ===== */
         .tab-btn,
         .vs-btn,
         #plannerToggleBtn,
@@ -719,7 +712,6 @@
             background-color: rgba(255,255,255,.72) !important;
         }
 
-        /* ===== Liquid Glass ตอนสัมผัส: แสงสะท้อนตามนิ้ว + ขยับแบบสปริง ===== */
         .glass-press {
             transform: scale(.93) !important;
             transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, filter .2s ease !important;
@@ -753,13 +745,11 @@
     <!-- FLOATING PET & QUICK NOTES WIDGET -->
     <div id="floatingPetWidget" class="fixed bottom-24 left-3 z-[8000] flex flex-col items-start gap-1.5 select-none max-w-[240px]">
         
-        <!-- รูปแบบตอนย่อ -->
         <div id="floatingMinimizedBtn" onclick="toggleQuickNoteListVisibility()" class="hidden relative bg-sunnyYellow border-2 border-darkText w-12 h-12 rounded-full shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-all" title="เปิดโน้ตด่วนและสัตว์เลี้ยง">
             <span id="minimizedPetAvatar" class="text-xl">🐱</span>
             <span id="quickNoteBadge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-hotPink text-white font-extrabold text-[9px] rounded-full border border-darkText flex items-center justify-center animate-pulse">!</span>
         </div>
 
-        <!-- รูปแบบตอนกางออก -->
         <div id="floatingExpandedContainer" class="w-full space-y-1.5">
             <div id="floatingQuickNoteBox" class="bg-sunnyYellow border-2 border-darkText rounded-xl p-2.5 shadow-md w-full relative space-y-2">
                 <div class="flex justify-between items-center border-b border-darkText/20 pb-1">
@@ -829,10 +819,9 @@
         </div>
     </div>
 
-    <!-- MAIN HEADER PLANNER CARD (WITH COLLAPSE/EXPAND TOGGLE) -->
+    <!-- MAIN HEADER PLANNER CARD -->
     <header class="bg-popBlue border-3 border-darkText text-darkText p-2.5 md:p-3 shadow-[0_3px_0px_#1A1A1A] w-full rounded-2xl shrink-0 space-y-2" style="margin:8px 12px 0; width:calc(100% - 24px);">
         
-        <!-- AI SMART COMMAND BAR -->
         <div class="bg-white/95 border-2 border-darkText p-2 rounded-xl shadow-sm flex items-center gap-2">
             <span class="text-base shrink-0 animate-bounce">🤖</span>
             <div class="flex-1 relative">
@@ -854,7 +843,6 @@
             </div>
             
             <div class="flex items-center gap-2">
-                <!-- ปุ่มซ่อน/แสดง (Collapsible Toggle) -->
                 <button onclick="togglePlannerHeader()" id="plannerToggleBtn" class="bg-white border-2 border-darkText px-2.5 py-1 rounded-xl shadow-sm text-xs font-extrabold flex items-center gap-1 hover:bg-sunnyYellow transition-all" title="ซ่อน/แสดงเมนู">
                     <span id="plannerToggleText">ซ่อน</span>
                     <i id="plannerToggleIcon" class="fa-solid fa-chevron-up text-xs"></i>
@@ -870,7 +858,6 @@
             </div>
         </div>
 
-        <!-- โหมดตอนซ่อน (แปลงร่างเป็นไอคอนแอปวงกลม ลัดไปแต่ละหน้าทันที) -->
         <div id="plannerMinimizedBar" class="hidden flex items-center justify-start sm:justify-center gap-2 py-1 overflow-x-auto no-scrollbar">
             <button onclick="switchTab('dashboard')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm text-blue-600 hover:scale-110 transition-all shrink-0" title="แดชบอร์ด"><i class="fa-solid fa-chart-pie"></i></button>
             <button onclick="switchTab('finance')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm text-green-600 hover:scale-110 transition-all shrink-0" title="รายรับ-รายจ่าย"><i class="fa-solid fa-wallet"></i></button>
@@ -882,7 +869,6 @@
             <button onclick="openModal('quickAddModal')" class="w-9 h-9 bg-hotPink text-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm font-extrabold hover:scale-110 transition-all shrink-0" title="เพิ่มด่วน"><i class="fa-solid fa-plus"></i></button>
         </div>
 
-        <!-- ส่วนเนื้อหาหลักที่จะถูกซ่อน/แสดง -->
         <div id="plannerCollapsibleBody" class="space-y-2 transition-all">
             <div id="navGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
                 <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn bg-limeGreen text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
@@ -928,7 +914,6 @@
         <!-- DASHBOARD -->
         <section id="tab-dashboard" class="tab-content space-y-4">
             
-            <!-- การ์ดสีเหลือง: อารมณ์เดือนนี้ -->
             <div class="bg-gradient-to-r from-sunnyYellow via-pink-200 to-limeGreen p-4 rounded-2xl border-3 border-darkText shadow-sm text-darkText">
                 <div class="flex items-center justify-between mb-2">
                     <span class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-darkText">📊 อารมณ์เดือนนี้</span>
@@ -950,7 +935,6 @@
                 </div>
             </div>
 
-            <!-- การ์ดคำทักทายสัตว์เลี้ยง -->
             <div class="bg-white text-darkText p-3 rounded-2xl border-2 border-darkText shadow-sm flex items-center justify-between gap-3 cursor-pointer hover:bg-offWhite transition-all" onclick="switchTab('pet')">
                 <div class="flex items-center gap-2 overflow-hidden">
                     <div class="w-8 h-8 bg-sunnyYellow rounded-xl border-2 border-darkText flex items-center justify-center text-base shrink-0 shadow-sm">🐾</div>
@@ -962,7 +946,6 @@
                 <i class="fa-solid fa-chevron-right text-xs opacity-60 shrink-0"></i>
             </div>
 
-            <!-- ยอดเงินสุทธิคงเหลือ -->
             <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div class="space-y-0.5">
                     <span class="text-xs font-bold text-gray-500">ยอดเงินสุทธิคงเหลือ (ทั้งหมด)</span>
@@ -1100,7 +1083,6 @@
         <!-- CALENDAR -->
         <section id="tab-calendar" class="tab-content hidden space-y-4">
             
-            <!-- การ์ดอารมณ์เดือนนี้ (ดีไซน์สไตล์หน้าสัตว์เลี้ยง พร้อมตัวน้องและกล่องคำพูด) -->
             <div class="pet-wrap">
                 <div class="pet-title-card flex items-center justify-between">
                     <div>
@@ -1125,10 +1107,7 @@
                         <ellipse cx="200" cy="150" rx="130" ry="18" fill="#FFCDD2" stroke="#1A1A1A" stroke-width="3"/>
                     </svg>
 
-                    <!-- กล่องคำพูดอารมณ์ประจำเดือน (ปรับขนาดเล็กลงแล้ว) -->
                     <div id="calendarMonthMoodSpeech" class="pet-speech">กำลังประมวลผลอารมณ์เดือนนี้... ✨</div>
-
-                    <!-- ตัวสัตว์เลี้ยงประจำหน้าปฏิทิน -->
                     <div id="calendarMonthPetAvatar" class="pet-character" style="bottom: 22%;">🐱</div>
                 </div>
             </div>
@@ -1206,14 +1185,12 @@
         <section id="tab-pet" class="tab-content hidden space-y-4">
             <div class="pet-wrap">
 
-                <!-- การ์ดชื่อ -->
                 <div class="pet-title-card">
                     <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border-2 border-darkText">🐾 สัตว์เลี้ยงการเงิน</div>
                     <h2 id="petHeaderTitle" class="text-2xl font-extrabold font-cute mt-1.5">สัตว์เลี้ยงการเงิน</h2>
                     <p class="text-xs font-bold text-darkText/70">เลี้ยงด้วยการจดรายรับรายจ่าย</p>
                 </div>
 
-                <!-- ฉากห้อง (SVG ทั้งห้องในภาพเดียว) -->
                 <div class="pet-scene">
                     <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                         <defs>
@@ -1224,12 +1201,10 @@
                             </pattern>
                         </defs>
 
-                        <!-- ผนัง -->
                         <rect x="0" y="0" width="400" height="200" fill="#FFF4B8"/>
                         <rect x="0" y="150" width="400" height="50" fill="#FFE98A"/>
                         <line x1="0" y1="150" x2="400" y2="150" stroke="#E8C94A" stroke-width="3"/>
 
-                        <!-- พื้น -->
                         <rect x="0" y="200" width="400" height="100" fill="#F9C7A6"/>
                         <line x1="0" y1="230" x2="400" y2="230" stroke="#E9A985" stroke-width="2"/>
                         <line x1="0" y1="262" x2="400" y2="262" stroke="#E9A985" stroke-width="2"/>
@@ -1238,7 +1213,6 @@
                         <line x1="180" y1="262" x2="180" y2="300" stroke="#E9A985" stroke-width="2"/>
                         <rect x="0" y="197" width="400" height="6" fill="#1A1A1A"/>
 
-                        <!-- หน้าต่าง + ม่าน -->
                         <rect x="262" y="26" width="108" height="96" rx="8" fill="#BDEBFF" stroke="#1A1A1A" stroke-width="5"/>
                         <line x1="316" y1="26" x2="316" y2="122" stroke="#1A1A1A" stroke-width="4"/>
                         <line x1="262" y1="74" x2="370" y2="74" stroke="#1A1A1A" stroke-width="4"/>
@@ -1248,7 +1222,6 @@
                         <path d="M246 18 Q272 40 262 128 L246 128 Z" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="3"/>
                         <path d="M386 18 Q360 40 370 128 L386 128 Z" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="3"/>
 
-                        <!-- ชั้นหนังสือ -->
                         <rect x="24" y="70" width="120" height="8" rx="2" fill="#C88B4A" stroke="#1A1A1A" stroke-width="3"/>
                         <rect x="30" y="40" width="12" height="30" fill="#FF007F" stroke="#1A1A1A" stroke-width="2"/>
                         <rect x="44" y="46" width="10" height="24" fill="#0055FF" stroke="#1A1A1A" stroke-width="2"/>
@@ -1258,55 +1231,42 @@
                         <rect x="110" y="56" width="16" height="14" rx="2" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="2"/>
                         <ellipse cx="118" cy="48" rx="10" ry="9" fill="#7BD389" stroke="#1A1A1A" stroke-width="2"/>
 
-                        <!-- กรอบรูป -->
                         <rect x="164" y="42" width="60" height="46" rx="4" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="4"/>
                         <rect x="170" y="48" width="48" height="34" fill="#BDEBFF"/>
                         <path d="M170 82 L186 62 L198 74 L206 66 L218 82 Z" fill="#7BD389"/>
                         <circle cx="200" cy="58" r="5" fill="#FFDD00"/>
 
-                        <!-- ต้นไม้ในกระถาง -->
                         <path d="M26 226 L58 226 L54 258 L30 258 Z" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="3"/>
                         <ellipse cx="42" cy="196" rx="14" ry="26" fill="#7BD389" stroke="#1A1A1A" stroke-width="3"/>
                         <ellipse cx="24" cy="208" rx="11" ry="18" fill="#7BD389" stroke="#1A1A1A" stroke-width="3" transform="rotate(-25 24 208)"/>
                         <ellipse cx="60" cy="208" rx="11" ry="18" fill="#7BD389" stroke="#1A1A1A" stroke-width="3" transform="rotate(25 60 208)"/>
 
-                        <!-- พรม -->
                         <ellipse cx="200" cy="264" rx="150" ry="24" fill="#FFB3D1" stroke="#1A1A1A" stroke-width="3"/>
                         <ellipse cx="200" cy="264" rx="122" ry="16" fill="none" stroke="#FFFFFF" stroke-width="3" opacity=".6"/>
 
-                        <!-- เงาที่นอน -->
                         <ellipse cx="200" cy="274" rx="118" ry="8" fill="#000000" opacity=".12"/>
 
-                        <!-- ที่นอนลายตาราง -->
                         <ellipse cx="200" cy="232" rx="118" ry="42" fill="url(#petCheck)" stroke="#1A1A1A" stroke-width="4"/>
                         <ellipse cx="200" cy="232" rx="96" ry="30" fill="none" stroke="#FFFFFF" stroke-width="5" opacity=".55"/>
 
-                        <!-- หมอน -->
                         <rect x="86" y="222" width="64" height="26" rx="12" fill="#FFDD00" stroke="#1A1A1A" stroke-width="3" transform="rotate(-6 118 235)"/>
                         <rect x="98" y="229" width="34" height="5" rx="3" fill="#FFFFFF" opacity=".7" transform="rotate(-6 118 235)"/>
 
-                        <!-- กล่องกระดาษ -->
                         <rect x="330" y="200" width="54" height="36" rx="3" fill="#E0A96D" stroke="#1A1A1A" stroke-width="3"/>
                         <rect x="353" y="200" width="8" height="36" fill="#FFFFFF" opacity=".6"/>
                         <path d="M330 200 L338 190 L376 190 L384 200 Z" fill="#C98B4E" stroke="#1A1A1A" stroke-width="3"/>
 
-                        <!-- ชามอาหาร -->
                         <path d="M318 262 L372 262 Q368 288 345 288 Q322 288 318 262 Z" fill="#FF9EC4" stroke="#1A1A1A" stroke-width="3"/>
                         <ellipse cx="345" cy="262" rx="27" ry="5" fill="#FFDD00" stroke="#1A1A1A" stroke-width="2"/>
 
-                        <!-- ดาวระยิบ -->
                         <path d="M364 150 L367 157 L374 160 L367 163 L364 170 L361 163 L354 160 L361 157 Z" fill="#FFDD00" stroke="#1A1A1A" stroke-width="1.5"/>
                         <path d="M38 150 L40 155 L45 157 L40 159 L38 164 L36 159 L31 157 L36 155 Z" fill="#FF007F" stroke="#1A1A1A" stroke-width="1.5"/>
                     </svg>
 
-                    <!-- กล่องคำพูดของสัตว์เลี้ยง -->
                     <div id="petRoomSpeech" class="pet-speech">ยินดีต้อนรับ! 💰</div>
-
-                    <!-- ตัวสัตว์เลี้ยง -->
                     <div id="petRoomAvatar" class="pet-character">🐱</div>
                 </div>
 
-                <!-- สถานะ -->
                 <div class="pet-stats">
                     <div class="flex items-center justify-between gap-2">
                         <div class="min-w-0">
@@ -1342,7 +1302,6 @@
                     </button>
                 </div>
 
-                <!-- ตั้งค่า + ประวัติคำพูด -->
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
                     <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">ตั้งค่าสัตว์เลี้ยง</h3>
                     <div class="space-y-3 text-xs">
@@ -1646,7 +1605,6 @@
         }
         const thisMonthKey = () => localDateKey().slice(0, 7);
 
-        // ===== ฟังก์ชันคำนวณวันอัจฉริยะ (รองรับ พรุ่งนี้, เมื่อวาน, อีก X วัน) =====
         function parseDateFromText(text) {
             const d = new Date();
             const lower = text.toLowerCase();
@@ -1665,7 +1623,6 @@
             return localDateKey(d);
         }
 
-        // ===== วันหยุดราชการไทย =====
         const THAI_FIXED_HOLIDAYS = {
             '01-01': 'วันขึ้นปีใหม่', '04-06': 'วันจักรี', '04-13': 'วันสงกรานต์', '04-14': 'วันสงกรานต์',
             '04-15': 'วันสงกรานต์', '05-01': 'วันแรงงานแห่งชาติ', '05-04': 'วันฉัตรมงคล', '06-03': 'วันเฉลิมพระชนมพรรษาสมเด็จพระราชินี',
@@ -1696,7 +1653,6 @@
         function openModal(id) { $(id).classList.remove('hidden'); $(id).classList.add('flex'); }
         function closeModal(id) { $(id).classList.add('hidden'); $(id).classList.remove('flex'); }
 
-        // ===== หน้าต่างตั้งค่า (เปิดจากแถบเมนูล่าง) =====
         function openSettingsModal() {
             document.querySelectorAll('.settings-theme-btn').forEach(b => {
                 b.classList.toggle('ring-4', b.dataset.themeBtn === state.theme);
@@ -1708,7 +1664,6 @@
             openModal('settingsModal');
         }
 
-        // ===== ไฮไลต์แถบเมนูล่างตามหน้าที่เปิดอยู่ =====
         function setBottomNavActive(tabId) {
             document.querySelectorAll('.bn-item').forEach(b => b.classList.remove('bn-active'));
             const map = { dashboard: 'bn-dashboard', planner: 'bn-planner', calendar: 'bn-calendar' };
@@ -1741,7 +1696,6 @@
             setView(saved || auto, false);
         }
 
-        // ===== ระบบ AI Smart Command =====
         function executeAiCommand() {
             const input = $('aiCommandInput');
             const text = input.value.trim();
@@ -2211,7 +2165,6 @@
             saveData(); updatePetStatus(); showToast('อัปเดตสัตว์เลี้ยงแล้ว! ✨');
         }
 
-        // ===== ฟังก์ชันสำหรับห้องสัตว์เลี้ยง =====
         function selectPetType(emoji) {
             $('petAvatarSelect').value = emoji;
             updatePetSettings();
@@ -2278,14 +2231,12 @@
             const faces = PET_MOOD_FACES[state.pet.avatar] || PET_MOOD_FACES['🐱'];
             const clamp = v => Math.max(0, Math.min(100, Math.round(v)));
 
-            // ความอิ่ม: ตามยอดคงเหลือสุทธิ
             let hunger, avatar, moodText, defaultSpeech;
             if (net <= 0)       { hunger = 0;   avatar = faces.sad;  moodText = 'หิวม๊าก 🥺';   defaultSpeech = 'เงินเป็น 0 แล้ว ช่วยเติมรายรับที! 😭'; }
             else if (net < 1000){ hunger = 40;  avatar = faces.low;  moodText = 'ประหยัด...';    defaultSpeech = 'ประหยัดไว้ก่อนน้า 💸'; }
             else if (net < 5000){ hunger = 75;  avatar = faces.good; moodText = 'อิ่มสบาย 😊';   defaultSpeech = 'การเงินมั่นคงดีจังงับ 🌟'; }
             else                { hunger = 100; avatar = faces.rich; moodText = 'เศรษฐี! 🤑';     defaultSpeech = 'รวยมากๆ สุขใจสุดๆ! 👑💖'; }
 
-            // ความสุข: สัดส่วนรายรับเทียบกับรายรับ+รายจ่ายทั้งหมด
             const happiness = (inc + exp) > 0 ? clamp(inc / (inc + exp) * 100) : 0;
             const stable = inc > 0 ? clamp(net / inc * 100) : 0;
 
@@ -2535,10 +2486,10 @@
                 </div>`).join('') : `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">เย้! ไม่มีบิลค้างจ่ายแล้ว 🎉</div>`;
         }
 
-        function openTaskModal(editId = null) { $('taskForm').reset(); $('taskId').value = ''; setDefaultDates(); openModal('taskModal'); }
+        function openTaskModal(editId = null) { $('taskForm'].reset(); $('taskId'].value = ''; setDefaultDates(); openModal('taskModal'); }
         function handleSaveTask(e) {
             e.preventDefault();
-            state.tasks.unshift({ id: 't_' + Date.now(), title: $('taskTitle').value.trim(), date: $('taskDate').value, status: $('taskStatus').value, desc: $('taskDesc').value.trim() });
+            state.tasks.unshift({ id: 't_' + Date.now(), title: $('taskTitle'].value.trim(), date: $('taskDate'].value, status: $('taskStatus'].value, desc: $('taskDesc'].value.trim() });
             saveData(); closeModal('taskModal'); refreshUI(); showToast('เพิ่มงานแล้ว!');
         }
         function updateTaskStatus(id, st) { const t = state.tasks.find(x => x.id === id); if (t) { t.status = st; saveData(); refreshUI(); } }
@@ -2565,20 +2516,20 @@
 
         let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊';
         function selectMoodEmoji(emoji) { selectedMood = emoji; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('mood-btn-selected', b.id === 'mood-' + emoji)); }
-        function openEventModal(presetDate) { $('eventForm').reset(); setDefaultDates(); selectMoodEmoji('😊'); $('eventDate').value = presetDate || localDateKey(); openModal('eventModal'); }
+        function openEventModal(presetDate) { $('eventForm'].reset(); setDefaultDates(); selectMoodEmoji('😊'); $('eventDate'].value = presetDate || localDateKey(); openModal('eventModal'); }
 
         async function handleSaveEvent(e) {
             e.preventDefault();
-            state.events.unshift({ id: 'ev_' + Date.now(), date: $('eventDate').value, mood: selectedMood, title: $('eventTitle').value.trim(), hasPhoto: false });
-            saveData(); closeModal('eventModal'); selectCalendarDate($('eventDate').value); showToast('บันทึกไดอารี่แล้ว!');
+            state.events.unshift({ id: 'ev_' + Date.now(), date: $('eventDate'].value, mood: selectedMood, title: $('eventTitle'].value.trim(), hasPhoto: false });
+            saveData(); closeModal('eventModal'); selectCalendarDate($('eventDate'].value); showToast('บันทึกไดอารี่แล้ว!');
         }
 
         function selectCalendarDate(dateKey) { selectedCalendarDate = dateKey; renderCalendar(); renderEventsList(); }
         async function viewEventDetails(eventId) {
             const ev = state.events.find(e => e.id === eventId);
             if (!ev) return;
-            $('viewEventMood').innerText = ev.mood || '😊'; $('viewEventDate').innerText = ev.date; $('viewEventTitle').innerText = ev.title;
-            $('deleteEventBtn').onclick = async () => { state.events = state.events.filter(x => x.id !== ev.id); saveData(); renderCalendar(); renderEventsList(); closeModal('viewEventModal'); updatepetCalendarMoodDisplay(); };
+            $('viewEventMood'].innerText = ev.mood || '😊'; $('viewEventDate'].innerText = ev.date; $('viewEventTitle'].innerText = ev.title;
+            $('deleteEventBtn'].onclick = async () => { state.events = state.events.filter(x => x.id !== ev.id); saveData(); renderCalendar(); renderEventsList(); closeModal('viewEventModal'); updatepetCalendarMoodDisplay(); };
             openModal('viewEventModal');
         }
         function changeMonth(dir) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir); renderCalendar(); }
@@ -2586,7 +2537,7 @@
         function renderCalendar() {
             const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
             const label = `${THAI_MONTHS[month]} ${year + 543}`;
-            $('calMonthYearLabel').innerText = label;
+            $('calMonthYearLabel'].innerText = label;
             updatepetCalendarMoodDisplay();
 
             const firstDay = new Date(year, month, 1).getDay(), totalDays = new Date(year, month + 1, 0).getDate();
@@ -2609,7 +2560,7 @@
                         </div>
                     </div>`;
             }
-            $('calendarGrid').innerHTML = html;
+            $('calendarGrid'].innerHTML = html;
         }
 
         function renderEventsList() {
@@ -2621,9 +2572,9 @@
                     holidayNotice = `<div class="bg-hotPink/10 text-hotPink p-2.5 rounded-xl border border-hotPink text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-star"></i> วันหยุด: ${esc(hName)}</div>`;
                 }
             }
-            $('diarySidebarTitle').innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> ${selectedCalendarDate || 'โน้ตทั้งหมด'}`;
-            $('resetDateFilterBtnCalendar').classList.toggle('hidden', !selectedCalendarDate);
-            $('eventsListSidebar').innerHTML = holidayNotice + (list.length ? list.map(ev => `
+            $('diarySidebarTitle'].innerHTML = `<i class="fa-solid fa-book-open text-hotPink"></i> ${selectedCalendarDate || 'โน้ตทั้งหมด'}`;
+            $('resetDateFilterBtnCalendar'].classList.toggle('hidden', !selectedCalendarDate);
+            $('eventsListSidebar'].innerHTML = holidayNotice + (list.length ? list.map(ev => `
                 <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite p-2.5 rounded-xl border border-darkText cursor-pointer hover:bg-white text-xs">
                     <span class="text-[10px]">${ev.mood} <b>${esc(ev.date)}</b></span>
                     <h4 class="font-bold text-popBlue truncate">${esc(ev.title)}</h4>
@@ -2631,7 +2582,7 @@
         }
 
         let calcExpr = '0';
-        function calcRender() { $('calcScreen').innerText = calcExpr; }
+        function calcRender() { $('calcScreen'].innerText = calcExpr; }
         function calcClear() { calcExpr = '0'; calcRender(); }
         function calcAppend(val) { calcExpr = calcExpr === '0' ? val : calcExpr + val; calcRender(); }
         function calcCalculate() {
@@ -2648,15 +2599,15 @@
         function saveCalcToTx(id, type) {
             const h = state.calcHistory.find(x => x.id === id);
             if (!h) return;
-            const note = $('calcNoteDesc').value.trim();
+            const note = $('calcNoteDesc'].value.trim();
             openTransactionModal(type, null, h.result);
             setTimeout(() => {
-                if (note) $('txTitle').value = note;
+                if (note) $('txTitle'].value = note;
             }, 50);
         }
 
         function renderCalcHistory() {
-            $('calcHistoryList').innerHTML = state.calcHistory.length ? state.calcHistory.map(h => `
+            $('calcHistoryList'].innerHTML = state.calcHistory.length ? state.calcHistory.map(h => `
                 <div class="bg-offWhite p-2.5 rounded-xl border border-darkText flex flex-col gap-2 text-xs">
                     <div class="flex justify-between items-start">
                         <span class="text-sm font-medium">${esc(h.expr)} = <b class="text-popBlue text-base">฿${money(h.result)}</b></span>
@@ -2671,9 +2622,9 @@
 
         function renderDashboard() {
             const { inc, exp, net } = calcNetBalance();
-            $('dashNetBalance').innerText = '฿ ' + money(net);
-            $('dashTotalIncome').innerText = '฿ ' + money(inc);
-            $('dashTotalExpense').innerText = '฿ ' + money(exp);
+            $('dashNetBalance'].innerText = '฿ ' + money(net);
+            $('dashTotalIncome'].innerText = '฿ ' + money(inc);
+            $('dashTotalExpense'].innerText = '฿ ' + money(exp);
             renderExpenseChart(); renderBillsChart();
             updatepetCalendarMoodDisplay();
         }
@@ -2708,7 +2659,6 @@
             setBottomNavActive('dashboard');
         });
 
-        /* ===== Liquid Glass: แสงสะท้อนตามนิ้วตอนสัมผัส ===== */
         (function () {
             const SEL = '.bottom-nav button, .tab-btn, .vs-btn, .tb-btn, #floatingMinimizedBtn, #plannerToggleBtn';
             document.addEventListener('pointerdown', function (e) {

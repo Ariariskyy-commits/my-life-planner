@@ -4,17 +4,17 @@
   'use strict';
   const KEY = 'myLifePlanner_virtualOffice_v1';
   const agents = [
-    {id:'manager',name:'Mika',role:'ผู้จัดการ',emoji:'👩🏻‍💼',x:38,y:39,shirt:'#7558a8',hair:'#49332e'},
-    {id:'researcher',name:'Nori',role:'นักค้นคว้า',emoji:'🧑🏻‍🔬',x:62,y:34,shirt:'#4f91c7',hair:'#382b27'},
-    {id:'writer',name:'Momo',role:'นักเขียน',emoji:'👩🏻‍🎨',x:29,y:55,shirt:'#e58b9f',hair:'#33251f'},
-    {id:'designer',name:'Kiki',role:'นักออกแบบ',emoji:'🧑🏼‍🎨',x:45,y:66,shirt:'#e5b34c',hair:'#b27a3c'},
-    {id:'analyst',name:'Theo',role:'นักวิเคราะห์',emoji:'👨🏻‍💻',x:55,y:70,shirt:'#5e789a',hair:'#262b32'},
-    {id:'secretary',name:'Pim',role:'เลขานุการ',emoji:'👩🏻‍💻',x:68,y:58,shirt:'#62a77b',hair:'#30231f'}
+    {id:'manager',name:'ขุนพล',role:'ผู้จัดการ',emoji:'👩🏻‍💼',x:38,y:39,shirt:'#7558a8',hair:'#49332e'},
+    {id:'researcher',name:'ออม',role:'นักค้นคว้า',emoji:'🧑🏻‍🔬',x:62,y:34,shirt:'#4f91c7',hair:'#382b27'},
+    {id:'writer',name:'ไนท์',role:'นักเขียน',emoji:'👩🏻‍🎨',x:29,y:55,shirt:'#e58b9f',hair:'#33251f'},
+    {id:'designer',name:'ตุงตวง',role:'นักออกแบบ',emoji:'🧑🏼‍🎨',x:45,y:66,shirt:'#e5b34c',hair:'#b27a3c'},
+    {id:'analyst',name:'ข้าวผัด',role:'นักวิเคราะห์',emoji:'👨🏻‍💻',x:55,y:70,shirt:'#5e789a',hair:'#262b32'},
+    {id:'secretary',name:'ต้นกล้า',role:'เลขานุการ',emoji:'👩🏻‍💻',x:68,y:58,shirt:'#62a77b',hair:'#30231f'}
   ];
   const pets = [
-    {id:'cat',name:'มะลิ',kind:'แมว',emoji:'🐈',mood:'กำลังงีบ',hunger:68,joy:82},
-    {id:'dog',name:'โมจิ',kind:'น้องหมา',emoji:'🐕',mood:'อยากเล่น',hunger:55,joy:74},
-    {id:'bird',name:'จิ๊บจิ๊บ',kind:'นก',emoji:'🦜',mood:'กำลังร้องเพลง',hunger:76,joy:88}
+    {id:'cat',name:'ข้าวตัง',kind:'แมว',emoji:'🐈',mood:'กำลังงีบ',hunger:68,joy:82},
+    {id:'dog',name:'ถั่วงอก',kind:'น้องหมา',emoji:'🐕',mood:'อยากเล่น',hunger:55,joy:74},
+    {id:'bird',name:'กะทิ',kind:'นก',emoji:'🦜',mood:'กำลังร้องเพลง',hunger:76,joy:88}
   ];
   const $ = id => document.getElementById(id);
   let data = {tasks:[],statuses:{},petState:{},morale:{}};

@@ -209,11 +209,30 @@
     const list=$('officeTaskList');
     if(!data.tasks.length){list.innerHTML='<div class="office-empty">ยังไม่มีงานในออฟฟิศ ✦<br>เริ่มมอบหมายงานแรกให้ทีมได้เลย</div>';return;}
     list.innerHTML=data.tasks.slice().sort((a,b)=>b.created-a.created).map(t=>{
-      const agent=agents.find(a=>a.id===t.agent),done=t.status==='done';
-      return '<article class="office-task"><div class="office-task-head"><h4>'+safeText(t.title)+'</h4><span class="office-task-state '+(done?'done':'')+'">'+(done?'เสร็จแล้ว':'กำลังดำเนินการ')+'</span></div><p>'+safeText(t.detail||'ไม่มีรายละเอียดเพิ่มเติม')+'</p><div class="office-task-meta"><span>ผู้รับผิดชอบ: '+safeText(agent?agent.name:'ทีม')+'</span><span>'+new Date(t.created).toLocaleDateString('th-TH')+'</span></div><div class="office-task-actions">'+(done?'':'<button type="button" data-office-done="'+t.id+'">✓ ทำงานเสร็จแล้ว</button>')+'<button type="button" data-office-delete="'+t.id+'">ลบงาน</button></div></article>';
+      const agent=agents.find(a=>a.id===t.agent),done=t.status==='done',review=t.status==='review';
+      const stateLabel=done?'เสร็จแล้ว':review?'ส่งรายงานแล้ว · รอตรวจ':'กำลังดำเนินการ';
+      return '<article class="office-task"><div class="office-task-head"><h4>'+safeText(t.title)+'</h4><span class="office-task-state '+(done?'done':review?'review':'')+'">'+stateLabel+'</span></div><p>'+safeText(t.detail||'ไม่มีรายละเอียดเพิ่มเติม')+'</p><div class="office-task-meta"><span>ผู้รับผิดชอบ: '+safeText(agent?agent.name:'ทีม')+'</span><span>'+new Date(t.created).toLocaleDateString('th-TH')+'</span></div>'+(done?'':'<div class="office-report-entry"><label>รายงานผลการทำงาน</label><textarea data-office-report-input="'+t.id+'" rows="2" placeholder="เขียนสรุปสิ่งที่ทำ ผลลัพธ์ หรือลิงก์ผลงาน...">'+safeText(t.report||'')+'</textarea><button type="button" data-office-report="'+t.id+'">ส่งรายงานให้ขุนพล</button></div>')+'<div class="office-task-actions">'+(done?'':'<button type="button" data-office-done="'+t.id+'">✓ รับรองงานเสร็จ</button>')+'<button type="button" data-office-delete="'+t.id+'">ลบงาน</button></div></article>';
     }).join('');
   }
-  function render(){renderStats();renderAgents();renderSprites();renderPets();renderTasks();}
+  function renderManagerReports(){
+    const host=$('officeManagerReports');if(!host)return;
+    const reports=data.tasks.filter(t=>String(t.report||'').trim()).sort((a,b)=>(b.reportedAt||0)-(a.reportedAt||0));
+    if(!reports.length){host.innerHTML='<div class="office-empty">ยังไม่มีรายงานจากทีม เมื่อพนักงานส่งรายงานแล้ว จะปรากฏที่นี่</div>';return;}
+    host.innerHTML=reports.map(t=>{
+      const agent=agents.find(a=>a.id===t.agent);
+      return '<article class="office-report-card"><div><strong>'+safeText(agent?agent.name:'ทีม')+'</strong><span>'+safeText(t.title)+'</span></div><p>'+safeText(t.report)+'</p><small>ส่งรายงานเมื่อ '+new Date(t.reportedAt||t.created).toLocaleString('th-TH')+'</small></article>';
+    }).join('');
+  }
+  function submitReport(id){
+    const task=data.tasks.find(t=>t.id===id);if(!task||task.status==='done')return;
+    const input=document.querySelector('[data-office-report-input="'+id+'"]');
+    const report=input?input.value.trim():'';
+    if(!report){setToast('เขียนรายงานก่อนส่งให้ขุนพลนะคะ');return;}
+    task.report=report;task.reportedAt=Date.now();task.status='review';
+    if(!data.tasks.some(t=>t.agent===task.agent&&t.status==='doing'))data.statuses[task.agent]='idle';
+    save();render();setToast('ส่งรายงานให้ขุนพลเรียบร้อยแล้ว');
+  }
+  function render(){renderStats();renderAgents();renderSprites();renderPets();renderTasks();renderManagerReports();}
   function addTask(event){
     event.preventDefault();
     const title=$('officeTaskTitle').value.trim();if(!title)return;
@@ -299,9 +318,10 @@
     startPetRoaming();
     $('officeTaskForm').addEventListener('submit',addTask);
     $('officeTaskList').addEventListener('click',e=>{
-      const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]');
+      const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]'),report=e.target.closest('[data-office-report]');
       if(done)completeTask(done.getAttribute('data-office-done'));
       if(del)deleteTask(del.getAttribute('data-office-delete'));
+      if(report)submitReport(report.getAttribute('data-office-report'));
     });
     $('officeAgents').addEventListener('click',e=>{
       const btn=e.target.closest('[data-office-agent]');if(btn){const id=btn.getAttribute('data-office-agent');$('officeTaskAgent').value=id;const agent=agents.find(a=>a.id===id);bubbleAgentId=id;bubbleLine=lineFor(agent);showDialogue(agent,bubbleLine);renderSprites();}

@@ -207,16 +207,21 @@
   }
   function renderTasks(){
     const list=$('officeTaskList');
-    if(!data.tasks.length){list.innerHTML='<div class="office-empty">ยังไม่มีงานในออฟฟิศ ✦<br>เริ่มมอบหมายงานแรกให้ทีมได้เลย</div>';return;}
+    if(!data.tasks.length){list.innerHTML='<div class="office-empty">ยังไม่มีงานในออฟฟิศ ✦<br>พิมพ์คำสั่งให้ขุนพลได้เลย</div>';return;}
     list.innerHTML=data.tasks.slice().sort((a,b)=>b.created-a.created).map(t=>{
-      const agent=agents.find(a=>a.id===t.agent),done=t.status==='done',review=t.status==='review';
-      const queued=t.status==='queued';const stateLabel=done?'เสร็จแล้ว':review?'ส่งรายงานแล้ว · รอตรวจ':queued?'รอรับช่วงต่อ':'กำลังดำเนินการ';
-      return '<article class="office-task"><div class="office-task-head"><h4>'+safeText(t.title)+'</h4><span class="office-task-state '+(done?'done':review?'review':'')+'">'+stateLabel+'</span></div><p>'+safeText(t.detail||'ไม่มีรายละเอียดเพิ่มเติม')+'</p><div class="office-task-meta"><span>ผู้รับผิดชอบ: '+safeText(agent?agent.name:'ทีม')+'</span><span>'+new Date(t.created).toLocaleDateString('th-TH')+'</span></div><div class="office-deliverable-entry"><label>ผลงานที่สร้าง / เนื้อหาส่งมอบ</label><textarea data-office-work-input="'+t.id+'" rows="4" placeholder="วางเนื้อหาบทความ แนวคิดออกแบบ ผลค้นคว้า ตารางสรุป หรือรายละเอียดผลงานที่ทำจริง...">'+safeText(t.work||'')+'</textarea><button type="button" data-office-work-save="'+t.id+'">'+(t.workSavedAt?'บันทึกผลงานอีกครั้ง':'บันทึกผลงาน')+'</button>'+(t.workSavedAt?'<div class="office-work-saved"><span>✓ บันทึกผลงานแล้ว</span><small>ล่าสุด '+new Date(t.workSavedAt).toLocaleString('th-TH')+'</small></div>':'')+'</div>'+(done?'':'<div class="office-report-entry"><label>รายงานผลการทำงาน</label><textarea data-office-report-input="'+t.id+'" rows="2" placeholder="สรุปสิ่งที่ทำ ผลลัพธ์ หรือแนบลิงก์ผลงาน...">'+safeText(t.report||'')+'</textarea><button type="button" data-office-report="'+t.id+'">ส่งรายงานให้ขุนพล</button></div>')+'<div class="office-task-actions">'+(done?'':'<button type="button" data-office-done="'+t.id+'">✓ รับรองงานเสร็จ</button>')+'<button type="button" data-office-edit="'+t.id+'">แก้ไขงาน</button><button type="button" data-office-delete="'+t.id+'">ลบงาน</button></div></article>';
+      if(t.isCEOFlow){
+        const done=t.status==='done',revision=t.status==='revision';
+        const team=(t.workflowSteps||[]).map(s=>safeText(s.name)).join(' → ');
+        return '<article class="office-task office-ceo-review"><div class="office-task-head"><h4>'+safeText(t.title)+'</h4><span class="office-task-state '+(done?'done':revision?'review':'review')+'">'+(done?'CEO อนุมัติแล้ว':revision?'ส่งกลับให้ทีมแก้ไข':'รอ CEO ตรวจงาน')+'</span></div><p>'+safeText(t.detail||'ทีมได้รับคำสั่งจาก CEO และจัดลำดับงานแล้ว')+'</p><div class="office-flow-line"><b>ทีมที่ร่วมงาน</b><span>'+team+'</span></div><div class="office-flow-progress">'+(t.workflowSteps||[]).map(s=>'<span class="is-complete">✓ '+safeText(s.name)+'</span>').join('')+'</div><section class="office-ceo-deliverable"><div class="office-ceo-deliverable-head"><b>ผลงานสำหรับตรวจ</b><small>ฉบับจำลอง · ยังไม่ใช่ข้อมูลที่ AI ค้นคว้าจริง</small></div><div class="office-ceo-deliverable-body">'+safeText(t.work||'ยังไม่มีเนื้อหาผลงาน')+'</div></section>'+(t.revisionNote?'<div class="office-revision-note"><b>คำสั่งแก้ไขล่าสุด</b><p>'+safeText(t.revisionNote)+'</p></div>':'')+(done?'<div class="office-approved-note">✓ งานนี้ได้รับการอนุมัติแล้ว</div>':'<div class="office-ceo-actions"><textarea data-office-revision-input="'+t.id+'" rows="2" placeholder="ถ้ายังไม่โอเค บอกขุนพลว่าต้องแก้ตรงไหน...">'+(revision?'':'')+'</textarea><div><button type="button" class="office-approve-btn" data-office-approve="'+t.id+'">✓ อนุมัติและจบงาน</button><button type="button" class="office-revise-btn" data-office-revise="'+t.id+'">↻ ส่งกลับให้ทีมแก้ไข</button></div></div>')+'</article>';
+      }
+      const agent=agents.find(a=>a.id===t.agent),done=t.status==='done',review=t.status==='review',queued=t.status==='queued';
+      const stateLabel=done?'เสร็จแล้ว':review?'ส่งรายงานแล้ว · รอตรวจ':queued?'รอรับช่วงต่อ':'งานเดิม · กำลังดำเนินการ';
+      return '<details class="office-legacy-task"><summary><b>'+safeText(t.title)+'</b><span>'+stateLabel+'</span></summary><article class="office-task"><p>'+safeText(t.detail||'ไม่มีรายละเอียดเพิ่มเติม')+'</p><div class="office-task-meta"><span>ผู้รับผิดชอบ: '+safeText(agent?agent.name:'ทีม')+'</span><span>'+new Date(t.created).toLocaleDateString('th-TH')+'</span></div>'+(t.work?'<section class="office-deliverable-preview"><b>ผลงานเดิม</b><p>'+safeText(t.work)+'</p></section>':'')+(done?'':'<button type="button" data-office-done="'+t.id+'">✓ รับรองงานเสร็จ</button>')+' <button type="button" data-office-delete="'+t.id+'">ลบงานเดิม</button></article></details>';
     }).join('');
   }
   function renderManagerReports(){
     const host=$('officeManagerReports');if(!host)return;
-    const reports=data.tasks.filter(t=>String(t.report||'').trim()||String(t.work||'').trim()).sort((a,b)=>(b.reportedAt||b.workSavedAt||0)-(a.reportedAt||a.workSavedAt||0));
+    const reports=data.tasks.filter(t=>!t.isCEOFlow&&(String(t.report||'').trim()||String(t.work||'').trim())).sort((a,b)=>(b.reportedAt||b.workSavedAt||0)-(a.reportedAt||a.workSavedAt||0));
     if(!reports.length){host.innerHTML='<div class="office-empty">ยังไม่มีผลงานหรือรายงานจากทีม เมื่อบันทึกผลงานแล้ว จะปรากฏที่นี่</div>';return;}
     host.innerHTML=reports.map(t=>{
       const agent=agents.find(a=>a.id===t.agent);
@@ -241,42 +246,53 @@
     save();render();setToast('ส่งรายงานให้ขุนพลเรียบร้อยแล้ว');
   }
 
-  const agentByName = name => agents.find(a => a.name === name);
+  function buildOfficeDraft(command, revisionNote){
+    const subject=command.replace(/^(ช่วย|ขอให้|รบกวน|ทำ|สร้าง|จัดทำ)+/,'').trim()||command;
+    const isContent=/(บทความ|แคปชัน|ประชาสัมพันธ์|คอนเทนต์|โพสต์)/.test(command);
+    const isDesign=/(ออกแบบ|โปสเตอร์|อินโฟกราฟิก|ภาพประกอบ|กราฟิก)/.test(command);
+    const isPlan=/(แผน|โครงการ|กิจกรรม|กำหนดการ|ตาราง)/.test(command);
+    let draft='สรุปคำสั่ง CEO\n'+subject+'\n\n';
+    if(isContent){
+      draft+='แนวทางเนื้อหาเบื้องต้น\nหัวข้อ: '+subject+'\n\nโครงสร้างที่ทีมเสนอ\n1. เปิดเรื่องด้วยปัญหาหรือความสนใจของกลุ่มเป้าหมาย\n2. อธิบายสาระสำคัญด้วยภาษาที่เข้าใจง่าย\n3. เพิ่มคำแนะนำหรือขั้นตอนที่นำไปใช้ได้\n4. ปิดท้ายด้วยข้อความเชิญชวนให้ลงมือทำ\n\nร่างข้อความ\n“เริ่มดูแลตัวเองได้จากเรื่องเล็ก ๆ ในทุกวัน เลือกวิธีที่เหมาะกับไลฟ์สไตล์ของคุณ แล้วค่อย ๆ ทำอย่างสม่ำเสมอ”\n\nจุดที่ต้องเติมก่อนเผยแพร่: ข้อมูลอ้างอิง ตัวเลข ชื่อหน่วยงาน วันเวลา และช่องทางติดต่อที่ตรวจสอบแล้ว\n';
+    }else if(isDesign){
+      draft+='แนวทางออกแบบเบื้องต้น\nแนวคิด: สื่อสารประเด็นหลักให้เห็นชัดใน 3 วินาทีแรก\nMood & Tone: สดใส เป็นมิตร อ่านง่าย และสอดคล้องกับภาพลักษณ์หน่วยงาน\nองค์ประกอบ: พาดหัวหลัก 1 จุด ภาพประกอบที่ตรงประเด็น ข้อมูลสำคัญไม่เกิน 3 กลุ่ม และช่องทางติดต่อ\nรูปแบบส่งมอบที่แนะนำ: โพสต์สี่เหลี่ยม 1:1 และ Story 9:16\n';
+    }else if(isPlan){
+      draft+='แผนดำเนินงานเบื้องต้น\n1. กำหนดวัตถุประสงค์และกลุ่มเป้าหมาย\n2. รวบรวมข้อมูลและผู้เกี่ยวข้อง\n3. จัดทำเนื้อหา/สื่อ/กำหนดการ\n4. ตรวจสอบความถูกต้องและความพร้อม\n5. เผยแพร่หรือดำเนินกิจกรรม และสรุปผล\n\nสิ่งที่ต้องยืนยัน: ผู้รับผิดชอบ วันเวลา สถานที่ งบประมาณ และตัวชี้วัด\n';
+    }else{
+      draft+='ข้อเสนอการดำเนินงาน\n1. ทำความเข้าใจเป้าหมายและผลลัพธ์ที่ต้องการ\n2. ค้นคว้าและรวบรวมข้อมูลที่เกี่ยวข้อง\n3. จัดทำเนื้อหาและชิ้นงานตามโจทย์\n4. ตรวจสอบความครบถ้วนก่อนส่งมอบ\n5. สรุปผลและรายการที่ต้องให้ CEO ตัดสินใจ\n';
+    }
+    draft+='\nสรุปจากทีม\nออม: ระบุหัวข้อข้อมูลที่ต้องค้นคว้าและตรวจสอบ\nข้าวผัด: ตรวจความครบถ้วนและข้อควรระวัง\nไนท์: เรียบเรียงเนื้อหาให้พร้อมนำไปปรับใช้\nตุงตวง: เสนอแนวทางภาพและรูปแบบการนำเสนอ\nต้นกล้า: จัดรายการข้อมูลและเอกสารประกอบ\nภีม: สรุปขั้นตอนประสานงานและสิ่งที่ต้องติดตาม\n\nหมายเหตุ: นี่คือผลงานตัวอย่างจากระบบจำลองออฟฟิศ ไม่ได้ค้นเว็บ สร้างภาพ หรือยืนยันข้อเท็จจริงอัตโนมัติ ต้องตรวจข้อมูลจริงก่อนนำไปใช้';
+    if(revisionNote)draft+='\n\nคำขอแก้ไขจาก CEO\n'+revisionNote+'\n\nสถานะ: รับคำขอแก้ไขแล้ว (การปรับเนื้อหาในเวอร์ชันนี้ยังเป็นการจำลอง)';
+    return draft;
+  }
   function routeOfficeCommand(raw){
     const command=String(raw||'').trim();
     if(!command){setToast('พิมพ์คำสั่งก่อนนะคะ');return;}
-    const ordered=agents.filter(a=>a.id!=='manager'&&command.includes(a.name));
-    const keywordRoutes=[
-      {re:/(ค้นคว้า|ค้นหา|หาข้อมูล|สืบค้น)/,id:'researcher'},
-      {re:/(เขียน|รายงาน|บทความ|แคปชัน|คำโปรย)/,id:'writer'},
-      {re:/(ออกแบบ|กราฟิก|โปสเตอร์|อินโฟกราฟิก)/,id:'designer'},
-      {re:/(วิเคราะห์|สรุปตัวเลข|งบประมาณ)/,id:'analyst'},
-      {re:/(จัดตาราง|ปฏิทิน|กำหนดการ|บันทึก)/,id:'secretary'},
-      {re:/(ประสานงาน|ติดตามงาน|ติดต่อ)/,id:'coordinator'}
-    ];
-    let route=ordered;
-    if(!route.length){
-      route=keywordRoutes.filter(x=>x.re.test(command)).map(x=>agents.find(a=>a.id===x.id)).filter(Boolean);
-    }
-    if(!route.length)route=[agents.find(a=>a.id==='coordinator')];
-    route=[...new Map(route.map(a=>[a.id,a])).values()];
-    const title=command.length>90?command.slice(0,87)+'…':command;
-    const workflowId='flow_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    const route=agents.filter(a=>a.id!=='manager');
     const now=Date.now();
-    route.forEach((agent,index)=>{
-      const previous=index?route[index-1]:null;
-      const detail=(index===0?'คำสั่งจาก CEO: ':'รับช่วงต่อจาก '+previous.name+': ')+command+
-        (index===0?'\n\nหน้าที่: '+agent.role+' ดำเนินงานตามคำสั่ง':'\n\nรอรับมอบผลงานจากขั้นตอนก่อนหน้า แล้วดำเนินงานในหน้าที่ '+agent.role);
-      const id='office_'+now+'_'+index+'_'+Math.random().toString(36).slice(2,5);
-      data.tasks.push({id,title:(index?'ส่งต่องาน: ':'คำสั่ง: ')+title,detail,agent:agent.id,status:index===0?'doing':'queued',created:now+index,workflowId,workflowOrder:index,workflowTotal:route.length});
-      if(index===0){data.statuses[agent.id]='working';data.morale[agent.id]=Math.min(100,moraleOf(agent.id)+2);}
-    });
-    save();render();
-    const names=route.map(a=>a.name).join(' → ');
-    bubbleAgentId='manager';bubbleLine={text:'รับคำสั่งแล้วค่ะ จัดลำดับงานให้ '+names+' เรียบร้อย งานถัดไปจะเริ่มเมื่อขั้นก่อนหน้าส่งมอบผลงาน',mood:'กำลังจัดการงาน',face:'📋'};
-    showDialogue(agents[0],bubbleLine);
-    setToast('ขุนพลจัดลำดับงานแล้ว: '+names);
+    const id='office_ceo_'+now+'_'+Math.random().toString(36).slice(2,7);
+    const title=command.length>90?command.slice(0,87)+'…':command;
+    const steps=route.map((a,index)=>({id:a.id,name:a.name,role:a.role,status:'completed',order:index}));
+    data.tasks.push({id,title:'คำสั่ง CEO: '+title,detail:'ขุนพลรับคำสั่งแล้ว และจัดทีมทำงานต่อเนื่องโดยไม่ต้องส่งต่องานทีละคน',agent:'manager',status:'review',created:now,isCEOFlow:true,workflowSteps:steps,work:buildOfficeDraft(command),workSavedAt:now});
+    route.forEach(a=>{data.statuses[a.id]='idle';data.morale[a.id]=Math.min(100,moraleOf(a.id)+2);});
+    data.statuses.manager='idle';save();render();
+    bubbleAgentId='manager';bubbleLine={text:'รับทราบค่ะ CEO! ขุนพลจัดทีมและรวบรวมผลงานฉบับทดลองไว้ให้ตรวจแล้วค่ะ',mood:'ส่งงานให้ CEO ตรวจ',face:'📋'};
+    showDialogue(agents[0],bubbleLine);setToast('ทีมจำลองทำงานครบแล้ว · รอ CEO ตรวจผลงาน');
     const input=$('officeAiCommandInput');if(input)input.value='';
+  }
+  function approveOfficeWorkflow(id){
+    const task=data.tasks.find(t=>t.id===id&&t.isCEOFlow);if(!task)return;
+    task.status='done';task.approvedAt=Date.now();save();render();
+    setToast('CEO อนุมัติแล้ว · ปิดงานเรียบร้อย');
+    bubbleAgentId='manager';bubbleLine={text:'ขอบคุณค่ะ CEO! งานนี้ปิดเรียบร้อยแล้วนะคะ',mood:'ปิดงานสำเร็จ',face:'🎉'};showDialogue(agents[0],bubbleLine);
+  }
+  function reviseOfficeWorkflow(id){
+    const task=data.tasks.find(t=>t.id===id&&t.isCEOFlow);if(!task||task.status==='done')return;
+    const input=document.querySelector('[data-office-revision-input="'+id+'"]');
+    const note=input?input.value.trim():'';
+    if(!note){setToast('บอกขุนพลก่อนนะคะว่าต้องการให้แก้ตรงไหน');return;}
+    task.revisionNote=note;task.revisionCount=(task.revisionCount||0)+1;task.status='review';task.work=buildOfficeDraft(task.title.replace(/^คำสั่ง CEO: /,''),note);task.workSavedAt=Date.now();task.revisionAt=Date.now();
+    save();render();setToast('ทีมรับคำขอแก้ไขแล้ว · แสดงฉบับจำลองให้ตรวจอีกครั้ง');
   }
 
   function render(){renderStats();renderAgents();renderSprites();renderPets();renderTasks();renderManagerReports();}
@@ -386,12 +402,14 @@
     $('officeTaskForm').addEventListener('submit',addTask);
     const aiForm=$('officeAiCommandForm');if(aiForm)aiForm.addEventListener('submit',e=>{e.preventDefault();routeOfficeCommand($('officeAiCommandInput').value);});
     $('officeTaskList').addEventListener('click',e=>{
-      const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]'),edit=e.target.closest('[data-office-edit]'),report=e.target.closest('[data-office-report]'),work=e.target.closest('[data-office-work-save]');
+      const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]'),edit=e.target.closest('[data-office-edit]'),report=e.target.closest('[data-office-report]'),work=e.target.closest('[data-office-work-save]'),approve=e.target.closest('[data-office-approve]'),revise=e.target.closest('[data-office-revise]');
       if(done)completeTask(done.getAttribute('data-office-done'));
       if(del)deleteTask(del.getAttribute('data-office-delete'));
       if(edit)editTask(edit.getAttribute('data-office-edit'));
       if(report)submitReport(report.getAttribute('data-office-report'));
       if(work)saveWork(work.getAttribute('data-office-work-save'));
+      if(approve)approveOfficeWorkflow(approve.getAttribute('data-office-approve'));
+      if(revise)reviseOfficeWorkflow(revise.getAttribute('data-office-revise'));
     });
     $('officeAgents').addEventListener('click',e=>{
       const btn=e.target.closest('[data-office-agent]');if(btn){const id=btn.getAttribute('data-office-agent');$('officeTaskAgent').value=id;const agent=agents.find(a=>a.id===id);bubbleAgentId=id;bubbleLine=lineFor(agent);showDialogue(agent,bubbleLine);renderSprites();}
@@ -408,5 +426,5 @@
   document.addEventListener('DOMContentLoaded',init);
   window.addEventListener('load',init);
   window.addEventListener('storage',e=>{if(e.key===KEY){load();render();}});
-  window.MyLifePlannerOffice={init,render,ceoCommand};
+  window.MyLifePlannerOffice={init,render,ceoCommand,routeOfficeCommand,approveOfficeWorkflow,reviseOfficeWorkflow};
 })();

@@ -719,3 +719,30 @@
 .office-legacy-task summary span{white-space:nowrap;}
 .office-legacy-task .office-task{margin:0;border:0;box-shadow:none;}
 @media(max-width:560px){.office-flow-progress span{font-size:7px;padding:4px 6px}.office-ceo-deliverable-body{font-size:10px}.office-ceo-actions>div{display:grid;grid-template-columns:1fr 1fr}.office-ceo-actions button{font-size:9px;padding:9px 5px}}
+
+
+/* v26 — desktop-first balanced office workspace */
+@media(min-width:851px){
+  #tab-office .office-layout{grid-template-columns:minmax(0,1fr);gap:16px;}
+  #tab-office .office-scene-card{width:100%;}
+  #tab-office .tycoon-scene{aspect-ratio:1.85/1;max-height:620px;}
+  #tab-office .office-side{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start;gap:14px;}
+  #tab-office .office-side>.office-panel{height:100%;}
+  #tab-office .office-side>.office-single-command-note{grid-column:1/-1;height:auto;}
+  #tab-office .office-side>.office-single-command-note p{margin:4px 0;}
+  #tab-office .office-side>.office-single-command-note small{display:block;}
+  #tab-office .office-dialogue{min-height:82px;}
+}
+@media(min-width:561px) and (max-width:850px){
+  #tab-office .office-layout{grid-template-columns:minmax(0,1fr);}
+  #tab-office .office-side{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;}
+  #tab-office .office-side>.office-panel:first-child{grid-column:1/-1;}
+  #tab-office .office-side>.office-single-command-note{grid-column:1/-1;}
+  #tab-office .tycoon-scene{aspect-ratio:1.55/1;}
+}
+@media(max-width:560px){
+  #tab-office .office-layout{grid-template-columns:minmax(0,1fr);}
+  #tab-office .office-side{grid-template-columns:minmax(0,1fr);}
+  #tab-office .office-side>.office-panel:first-child,#tab-office .office-side>.office-single-command-note{grid-column:auto;}
+  #tab-office .tycoon-scene{aspect-ratio:1.15/1;}
+}

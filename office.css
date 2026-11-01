@@ -789,3 +789,18 @@
 .tycoon-scene.office-night .tycoon-map{filter:drop-shadow(0 7px 0 #233753) brightness(.78) saturate(.82);}
 .tycoon-scene.office-night .office-name,.tycoon-scene.office-night .office-role-tag{filter:brightness(1.15);}
 @media(min-width:851px){#tab-office .office-life-panel{grid-column:1/-1;}}
+
+/* MY LITTLE OFFICE — actual seated workstation states */
+.tycoon-sprites .office-sprite.is-working{height:102px;}
+.tycoon-sprites .office-sprite.is-working .office-avatar{position:relative;z-index:4;width:100%;transform:translateY(2px);}
+.tycoon-sprites .office-sprite.is-working .pixel-person-seated{width:52px;height:70px;overflow:visible;filter:drop-shadow(1px 2px 0 #273a4b35);}
+.tycoon-sprites .office-sprite.is-working:before{content:"";position:absolute;z-index:5;left:-8%;top:54px;width:116%;height:17px;background:linear-gradient(180deg,#d7a16d 0%,#a96f43 65%,#805333 66%,#986342 100%);border:1.5px solid #704b34;border-radius:3px 3px 2px 2px;box-shadow:0 3px 0 #6f4b36,0 5px 5px #4c392b35;}
+.tycoon-sprites .office-sprite.is-working:after{content:"";position:absolute;z-index:6;left:34%;top:34px;width:32%;height:18px;border:2px solid #5c6578;border-radius:3px 3px 1px 1px;background:linear-gradient(135deg,#c9f2ff 0 45%,#79bde1 46% 100%);box-shadow:0 2px 0 #34465d;}
+.tycoon-sprites .office-sprite.is-working .office-work-prop{z-index:8;top:29px;left:calc(100% - 1px);}
+.tycoon-sprites .office-sprite.is-working .office-name{position:relative;z-index:8;margin-top:3px;}
+.tycoon-sprites .office-sprite.is-working .office-role-tag{position:relative;z-index:8;}
+.tycoon-sprites .office-sprite.is-working .office-expression{z-index:9;}
+.tycoon-sprites .office-sprite.is-working .office-energy-badge{z-index:10;}
+.tycoon-sprites .office-sprite.is-working .office-avatar{animation:officeTypingSeat .6s steps(2,end) infinite alternate;}
+@keyframes officeTypingSeat{from{transform:translateY(1px)}to{transform:translateY(0) scale(1.012)}}
+.tycoon-sprites .office-sprite.is-paused .office-avatar,.tycoon-sprites .office-sprite.is-sleeping .office-avatar{filter:grayscale(.15) opacity(.85)}

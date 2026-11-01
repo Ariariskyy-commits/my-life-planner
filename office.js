@@ -81,7 +81,6 @@
       const slacking=slackingAgentId===a.id&&!working;
       const morale=moraleOf(a.id);return '<button type="button" class="office-agent" data-office-agent="'+a.id+'"><span class="office-agent-avatar">'+a.emoji+'</span><span class="office-agent-info"><strong>'+a.name+'</strong><small>'+a.role+'</small><span class="office-morale"><i style="width:'+morale+'%"></i></span></span><span class="office-agent-status '+(working?'working':slacking?'slacking':'')+'">'+(working?'กำลังทำงาน':slacking?'แอบอู้':'ว่าง')+'</span></button>';
     }).join('');
-    $('officeTaskAgent').innerHTML=agents.map(a=>'<option value="'+a.id+'">'+a.name+' — '+a.role+'</option>').join('');
   }
   function lineFor(agent){
     const working=statusOf(agent.id)==='working';
@@ -296,44 +295,6 @@
   }
 
   function render(){renderStats();renderAgents();renderSprites();renderPets();renderTasks();renderManagerReports();}
-  function addTask(event){
-    event.preventDefault();
-    const title=$('officeTaskTitle').value.trim();if(!title)return;
-    const detail=$('officeTaskDetail').value.trim();
-    const agentId=$('officeTaskAgent').value;
-    const now=Date.now();
-    const makeId=()=> 'office_'+now+'_'+Math.random().toString(36).slice(2,7);
-    const parentId=makeId();
-    data.tasks.push({id:parentId,title,detail,agent:agentId,status:'doing',created:now});
-    data.statuses[agentId]='working';
-    if(slackingAgentId===agentId)slackingAgentId=null;
-    data.morale[agentId]=Math.min(100,moraleOf(agentId)+2);
-
-    // Rule-based team delegation: create individual task cards only for employees
-    // explicitly named in the CEO's instruction. This is a local simulation, not AI.
-    const commandText=(title+' '+detail).normalize('NFC');
-    const delegationRequested=agentId==='manager'&&/(แบ่งงาน|มอบหมายงาน|กระจายงาน)/.test(commandText);
-    const namedAgents=delegationRequested?agents.filter(a=>a.id!=='manager'&&commandText.normalize('NFC').includes(String(a.name).normalize('NFC'))):[];
-    const duties={
-      researcher:'ค้นคว้าข้อมูลตลาด กลุ่มเป้าหมาย และตัวอย่างที่เกี่ยวข้อง พร้อมสรุปข้อค้นพบ',
-      writer:'จัดทำข้อความเปิดตัว คำโปรย และเนื้อหาประชาสัมพันธ์ให้เหมาะกับกลุ่มเป้าหมาย',
-      designer:'กำหนดแนวทางภาพ Mood & Tone สี ฟอนต์ และออกแบบสื่อประชาสัมพันธ์',
-      analyst:'วิเคราะห์งบประมาณ ตัวชี้วัด และผลลัพธ์ที่ต้องติดตาม',
-      secretary:'รวบรวมข้อมูล จัดทำเอกสาร และบันทึกกำหนดส่งของโครงการ',
-      coordinator:'ประสานงานผู้เกี่ยวข้อง ติดตามความคืบหน้า และรวบรวมสถานะจากทุกฝ่าย'
-    };
-    namedAgents.forEach((a,index)=>{
-      const subTitle='งานย่อย: '+a.name+' — '+(title||'ดำเนินงานตามโครงการ');
-      const subDetail=(duties[a.id]||('ดำเนินงานในส่วน '+a.role+' ตามโครงการ'))+'\n\nงานหลัก: '+title;
-      data.tasks.push({id:makeId(),title:subTitle,detail:subDetail,agent:a.id,status:'doing',created:now+index+1,parentId});
-      data.statuses[a.id]='working';
-      if(slackingAgentId===a.id)slackingAgentId=null;
-      data.morale[a.id]=Math.min(100,moraleOf(a.id)+2);
-    });
-    save();render();
-    if(namedAgents.length)showToast('ขุนพลแบ่งงานย่อยให้ '+namedAgents.map(a=>a.name).join(' · ')+' เรียบร้อยค่ะ');
-    $('officeTaskForm').reset();$('officeTaskTitle').focus();
-  }
   function completeTask(id){
     const task=data.tasks.find(t=>t.id===id);if(!task)return;
     task.status='done';
@@ -399,7 +360,6 @@
     if(loafTimer)clearInterval(loafTimer);
     loafTimer=setInterval(cycleLoafing,9000);
     startPetRoaming();
-    $('officeTaskForm').addEventListener('submit',addTask);
     const aiForm=$('officeAiCommandForm');if(aiForm)aiForm.addEventListener('submit',e=>{e.preventDefault();routeOfficeCommand($('officeAiCommandInput').value);});
     $('officeTaskList').addEventListener('click',e=>{
       const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]'),edit=e.target.closest('[data-office-edit]'),report=e.target.closest('[data-office-report]'),work=e.target.closest('[data-office-work-save]'),approve=e.target.closest('[data-office-approve]'),revise=e.target.closest('[data-office-revise]');
@@ -412,7 +372,7 @@
       if(revise)reviseOfficeWorkflow(revise.getAttribute('data-office-revise'));
     });
     $('officeAgents').addEventListener('click',e=>{
-      const btn=e.target.closest('[data-office-agent]');if(btn){const id=btn.getAttribute('data-office-agent');$('officeTaskAgent').value=id;const agent=agents.find(a=>a.id===id);bubbleAgentId=id;bubbleLine=lineFor(agent);showDialogue(agent,bubbleLine);renderSprites();}
+      const btn=e.target.closest('[data-office-agent]');if(btn){const id=btn.getAttribute('data-office-agent');const agent=agents.find(a=>a.id===id);bubbleAgentId=id;bubbleLine=lineFor(agent);showDialogue(agent,bubbleLine);renderSprites();}
     });
     $('officeSprites').addEventListener('click',e=>{
       const btn=e.target.closest('[data-agent-id]');

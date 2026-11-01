@@ -297,7 +297,7 @@
     const id='office_ceo_'+now+'_'+Math.random().toString(36).slice(2,7);
     const title=command.length>90?command.slice(0,87)+'…':command;
     const steps=route.map((a,index)=>({id:a.id,name:a.name,role:a.role,status:'completed',order:index}));
-    data.tasks.push({id,title:'คำสั่ง CEO: '+title,detail:'ขุนพลรับคำสั่งแล้ว และจัดทีมทำงานต่อเนื่องโดยไม่ต้องส่งต่องานทีละคน',agent:'manager',status:'review',created:now,isCEOFlow:true,workflowSteps:steps,work:buildOfficeDraft(command),workSavedAt:now});
+    data.tasks.push({id,title:'คำสั่ง CEO: '+title,detail:'ขุนพลรับคำสั่งแล้ว และจัดทีมทำงานต่อเนื่องโดยไม่ต้องส่งต่องานทีละคน',command:command,agent:'manager',status:'review',created:now,isCEOFlow:true,workflowSteps:steps,work:buildOfficeDraft(command),workSavedAt:now});
     route.forEach(a=>{data.statuses[a.id]='idle';data.morale[a.id]=Math.min(100,moraleOf(a.id)+2);});
     data.statuses.manager='idle';save();render();
     bubbleAgentId='manager';bubbleLine={text:'รับทราบค่ะ CEO! ขุนพลจัดทีมและรวบรวมผลงานฉบับทดลองไว้ให้ตรวจแล้วค่ะ',mood:'ส่งงานให้ CEO ตรวจ',face:'📋'};
@@ -315,7 +315,7 @@
     const input=document.querySelector('[data-office-revision-input="'+id+'"]');
     const note=input?input.value.trim():'';
     if(!note){setToast('บอกขุนพลก่อนนะคะว่าต้องการให้แก้ตรงไหน');return;}
-    task.revisionNote=note;task.revisionCount=(task.revisionCount||0)+1;task.status='review';task.work=buildOfficeDraft(task.title.replace(/^คำสั่ง CEO: /,''),note);task.workSavedAt=Date.now();task.revisionAt=Date.now();
+    task.revisionNote=note;task.revisionCount=(task.revisionCount||0)+1;task.status='review';const originalCommand=task.command||((task.work||'').match(/คำสั่ง: ([^\\n]+)/)||[])[1]||task.title.replace(/^คำสั่ง CEO: /,'');task.command=originalCommand;task.work=buildOfficeDraft(originalCommand,note);task.workSavedAt=Date.now();task.revisionAt=Date.now();
     save();render();setToast('ทีมรับคำขอแก้ไขแล้ว · แสดงฉบับจำลองให้ตรวจอีกครั้ง');
   }
 

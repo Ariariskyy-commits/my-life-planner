@@ -85,7 +85,7 @@
         def, x: SPAWNS[i][0], y: SPAWNS[i][1], path: [], sit: false, walking: false,
         phase: null, task: null, timer: 0, idleT: 1 + Math.random() * 3, t: Math.random() * 10,
         state: 'idle', label: null, lastState: '',
-        speechText: '', speechUntil: 0, nextSpeechAt: Date.now() + 1800 + Math.random() * 5000
+        speechText: '', speechUntil: 0, nextSpeechAt: Date.now() - 1
     }));
     const byId = id => rt.find(a => a.def.id === id);
     const chairOf = a => ({ x: a.def.desk[0], y: a.def.desk[1] + 1 });
@@ -849,8 +849,8 @@
             const speaker = rt.find(a => now >= a.nextSpeechAt);
             if (speaker) {
                 speaker.speechText = nextLine(speaker);
-                speaker.speechUntil = now + 3400;
-                speaker.nextSpeechAt = now + 10500 + Math.random() * 6500;
+                speaker.speechUntil = now + 5600;
+                speaker.nextSpeechAt = now + 7200 + Math.random() * 1800;
                 speechLockUntil = speaker.speechUntil;
             }
         }

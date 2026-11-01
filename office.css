@@ -39,6 +39,41 @@
     font-family: 'Prompt', sans-serif;
 }
 #tab-office .of-label b { display: block; font-weight: 700; }
+#tab-office .of-speech {
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 7px);
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 150px;
+    white-space: normal;
+    background: #FFFDF8;
+    color: #3B2A22;
+    border: 2px solid #4A3226;
+    border-radius: 10px;
+    padding: 5px 8px;
+    font-size: 10px;
+    line-height: 1.35;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 2px 3px 0 rgba(74, 50, 38, .28);
+    z-index: 30;
+    pointer-events: none;
+}
+#tab-office .of-speech.show { display: block; }
+#tab-office .of-speech::after {
+    content: '';
+    position: absolute;
+    left: calc(50% - 5px);
+    top: 100%;
+    width: 8px;
+    height: 8px;
+    background: #FFFDF8;
+    border-right: 2px solid #4A3226;
+    border-bottom: 2px solid #4A3226;
+    transform: rotate(45deg) translateY(-3px);
+}
 #tab-office .of-label small {
     display: flex;
     align-items: center;

@@ -320,6 +320,16 @@
   function completeTask(id){
     const task=data.tasks.find(t=>t.id===id);if(!task)return;
     task.status='done';
+    if(task.workflowId){
+      const next=data.tasks.find(t=>t.workflowId===task.workflowId&&t.workflowOrder===Number(task.workflowOrder)+1);
+      if(next&&next.status==='queued'){
+        next.status='doing';
+        next.detail+='\n\nผลงานส่งต่อจาก '+(agents.find(a=>a.id===task.agent)?.name||'ทีม')+':\n'+(task.work||task.report||'ยังไม่มีรายละเอียดผลงานแนบมา');
+        data.statuses[next.agent]='working';
+        data.morale[next.agent]=Math.min(100,moraleOf(next.agent)+2);
+        setToast('ส่งต่องานให้ '+(agents.find(a=>a.id===next.agent)?.name||'ทีม')+' แล้ว');
+      }
+    }
     if(slackingAgentId===task.agent)slackingAgentId=null;
     data.morale[task.agent]=Math.min(100,moraleOf(task.agent)+5);
     if(!data.tasks.some(t=>t.agent===task.agent&&t.status==='doing'))data.statuses[task.agent]='idle';

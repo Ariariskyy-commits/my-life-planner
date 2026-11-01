@@ -1,10 +1,11 @@
-const CACHE = 'y2k-planner-v10';
+const CACHE = 'y2k-planner-v11';
 const ASSETS = [
     './',
     './index.html',
     './manifest.json',
     './icon.png',
     './office.js',
+    './office-thai.js',
     './office.css'
 ];
 

@@ -278,7 +278,8 @@
     setToast('ขุนพลจัดลำดับงานแล้ว: '+names);
     const input=$('officeAiCommandInput');if(input)input.value='';
   }
-\n  function render(){renderStats();renderAgents();renderSprites();renderPets();renderTasks();renderManagerReports();}
+
+  function render(){renderStats();renderAgents();renderSprites();renderPets();renderTasks();renderManagerReports();}
   function addTask(event){
     event.preventDefault();
     const title=$('officeTaskTitle').value.trim();if(!title)return;

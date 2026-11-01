@@ -687,3 +687,35 @@
 #officeAiCommandInput:focus{outline:none;border-color:#8979d5;box-shadow:0 0 0 3px #8979d522}
 #officeAiCommandForm button{border:0;border-radius:9px;padding:10px 12px;background:#6b5ac7;color:#fff;font-weight:800;font-size:11px;cursor:pointer}
 .office-ai-command>small{display:block;margin-top:7px;color:#9290a4;font-size:9px}
+
+
+/* v25 — CEO one-command review workflow */
+.office-single-command-note{background:linear-gradient(135deg,#fff,#f5f7ff 70%,#fff5fa);}
+.office-single-command-note p{margin:8px 0;color:#626d83;font-size:11px;line-height:1.65;}
+.office-single-command-note small{color:#9995aa;font-size:9px;}
+.office-ceo-review{border:1.5px solid #c9c3f0!important;background:linear-gradient(145deg,#fff,#faf8ff)!important;}
+.office-flow-line{display:grid;gap:4px;margin:10px 0;padding:9px;border-radius:10px;background:#f3f5fb;}
+.office-flow-line b{font-size:9px;color:#67718a;}
+.office-flow-line span{font-size:10px;line-height:1.6;color:#4f5c76;}
+.office-flow-progress{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0;}
+.office-flow-progress span{padding:4px 7px;border-radius:99px;background:#e9f7ef;color:#43805b;font-size:8px;font-weight:800;}
+.office-ceo-deliverable{margin-top:10px;border:1px solid #d9d4f5;border-radius:12px;overflow:hidden;background:#fff;}
+.office-ceo-deliverable-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;padding:9px 10px;background:#f0efff;color:#51478d;}
+.office-ceo-deliverable-head b{font-size:10px;}
+.office-ceo-deliverable-head small{font-size:8px;color:#8a84b3;}
+.office-ceo-deliverable-body{padding:12px;color:#4d566c;font-size:10px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;}
+.office-ceo-actions{display:grid;gap:8px;margin-top:10px;}
+.office-ceo-actions textarea{width:100%;resize:vertical;padding:10px;border:1px solid #dce2ed;border-radius:9px;background:#fff;color:#394158;font:inherit;font-size:10px;}
+.office-ceo-actions>div{display:flex;flex-wrap:wrap;gap:7px;}
+.office-ceo-actions button{padding:9px 11px;border:0;border-radius:9px;color:#fff;font-size:10px;font-weight:900;}
+.office-approve-btn{background:#398c65;box-shadow:0 2px 0 #286c4b;}
+.office-revise-btn{background:#6b5ac7;box-shadow:0 2px 0 #4f419e;}
+.office-revision-note,.office-approved-note{margin-top:9px;padding:9px;border-radius:9px;background:#fff4e8;color:#87633d;font-size:10px;line-height:1.6;}
+.office-revision-note p{margin:4px 0 0;white-space:pre-wrap;}
+.office-approved-note{background:#e9f7ef;color:#347b54;font-weight:900;}
+.office-legacy-task{margin:8px 0;border:1px solid #e3e8f2;border-radius:10px;background:#fafbfe;}
+.office-legacy-task summary{display:flex;justify-content:space-between;gap:8px;padding:10px;cursor:pointer;font-size:10px;color:#69758d;}
+.office-legacy-task summary b{color:#4b5870;}
+.office-legacy-task summary span{white-space:nowrap;}
+.office-legacy-task .office-task{margin:0;border:0;box-shadow:none;}
+@media(max-width:560px){.office-flow-progress span{font-size:7px;padding:4px 6px}.office-ceo-deliverable-body{font-size:10px}.office-ceo-actions>div{display:grid;grid-template-columns:1fr 1fr}.office-ceo-actions button{font-size:9px;padding:9px 5px}}

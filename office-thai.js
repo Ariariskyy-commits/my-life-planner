@@ -84,7 +84,8 @@
     const rt = AGENTS.map((def, i) => ({
         def, x: SPAWNS[i][0], y: SPAWNS[i][1], path: [], sit: false, walking: false,
         phase: null, task: null, timer: 0, idleT: 1 + Math.random() * 3, t: Math.random() * 10,
-        state: 'idle', label: null, lastState: ''
+        state: 'idle', label: null, lastState: '',
+        speechText: '', speechUntil: 0, nextSpeechAt: Date.now() + 1800 + Math.random() * 5000
     }));
     const byId = id => rt.find(a => a.def.id === id);
     const chairOf = a => ({ x: a.def.desk[0], y: a.def.desk[1] + 1 });
@@ -802,28 +803,64 @@
 
     /* ---------- เรนเดอร์ ---------- */
     const labelEls = {};
+    let speechLockUntil = 0;
+    const CHATTER = {
+        brief: ['เดี๋ยวก่อน ขอจับประเด็นก่อน!', 'โจทย์ชัด งานก็ปัง!', 'ใครมีบรีฟ ส่งมาเลยจ้า'],
+        research: ['ขอเปิดตำราก่อนนะ', 'ข้อมูลต้องแน่น ไม่เน้นมโน', 'เจอแหล่งข้อมูลเด็ดแล้ว!'],
+        writer: ['กำลังปั่นคำอยู่จ้า', 'ประโยคนี้ต้องได้!', 'ขอกาแฟอีกหนึ่งแก้ว'],
+        designer: ['สีนี้มันใช่เลยแม่!', 'ขอจัดเลย์เอาต์แป๊บ', 'ความสวยรอไม่ได้'],
+        director: ['ทีมคะ ขอความเป๊ะ!', 'ไอเดียนี้ผ่านค่ะ!', 'ประชุมด่วนค่าา'],
+        qc: ['สะกดผิดไม่ได้ กะปิไม่ยอม!', 'ขอตรวจอีกรอบนะ', 'ผ่านค่ะ แต่ขอเนียนกว่านี้']
+    };
+    const WORK_CHATTER = {
+        brief: ['กำลังแยกโจทย์อยู่!', 'ขอเช็กบรีฟก่อนนะ'],
+        research: ['กำลังขุดข้อมูลอยู่!', 'ขอเช็กแหล่งอ้างอิงแป๊บ'],
+        writer: ['กำลังเรียบเรียงจ้า!', 'ขอปั่นต้นฉบับก่อน'],
+        designer: ['กำลังจัดองค์ประกอบ!', 'เลือกสีอยู่ อย่าเพิ่งเร่ง'],
+        director: ['กำลังรวบรวมความเห็น!', 'ขอสรุปภาพรวมก่อนค่ะ'],
+        qc: ['กำลังตรวจความเรียบร้อย!', 'ขอจับผิดแป๊บนึง']
+    };
+    function nextLine(a) {
+        const pool = a.phase === 'celebrate'
+            ? (a.task && a.task.status === 'error' ? ['อุ๊ย งานมีจุดให้แก้!', 'ไม่เป็นไร เดี๋ยวลองใหม่'] : ['เสร็จแล้วค่าา!', 'ส่งงานเรียบร้อย เย้!'])
+            : (a.phase === 'working' ? WORK_CHATTER[a.def.id] : CHATTER[a.def.id]);
+        return pool[Math.floor(Math.random() * pool.length)];
+    }
     function buildLabels() {
         const wrap = $('officeLabels');
         wrap.innerHTML = '';
         rt.forEach(a => {
             const b = document.createElement('button');
             b.type = 'button'; b.className = 'of-label'; b.dataset.id = a.def.id;
+            const say = document.createElement('span'); say.className = 'of-speech';
             const n = document.createElement('b'); n.textContent = a.def.name;
             const s = document.createElement('small');
             const dt = document.createElement('span'); dt.className = 'of-dot';
             const tx = document.createElement('span');
-            s.append(dt, tx); b.append(n, s); wrap.appendChild(b);
+            s.append(dt, tx); b.append(say, n, s); wrap.appendChild(b);
             b.addEventListener('click', () => selectAgent(a.def.id));
-            labelEls[a.def.id] = { b, dot: dt, tx };
+            labelEls[a.def.id] = { b, dot: dt, tx, say };
             a.label = labelEls[a.def.id];
         });
     }
     function updateLabels() {
+        const now = Date.now();
+        if (now >= speechLockUntil) {
+            const speaker = rt.find(a => now >= a.nextSpeechAt);
+            if (speaker) {
+                speaker.speechText = nextLine(speaker);
+                speaker.speechUntil = now + 3400;
+                speaker.nextSpeechAt = now + 10500 + Math.random() * 6500;
+                speechLockUntil = speaker.speechUntil;
+            }
+        }
         rt.forEach(a => {
             const [sx, sy] = proj(a.x + .5, a.y + (a.sit ? .34 : .5), 0);
             const L = a.label;
             L.b.style.left = (sx / W * 100).toFixed(2) + '%';
             L.b.style.top = ((sy - (a.sit ? 24 : 22) - (a.state === 'working' || a.state === 'thinking' ? 0 : 0)) / H * 100).toFixed(2) + '%';
+            L.say.textContent = a.speechText;
+            L.say.classList.toggle('show', now < a.speechUntil);
             if (a.lastState !== a.state) {
                 a.lastState = a.state;
                 L.tx.textContent = STATE_ICON[a.state] + STATE_TH[a.state];

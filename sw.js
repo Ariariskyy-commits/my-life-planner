@@ -1,9 +1,11 @@
-const CACHE = 'y2k-planner-v9';
+const CACHE = 'y2k-planner-v10';
 const ASSETS = [
     './',
     './index.html',
     './manifest.json',
-    './icon.png'
+    './icon.png',
+    './office.js',
+    './office.css'
 ];
 
 self.addEventListener('install', event => {

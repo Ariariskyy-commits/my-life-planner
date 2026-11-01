@@ -36,7 +36,7 @@
     secretary:['วันนี้มีอะไรต้องจดบ้างคะ?','CEO คะ งานค้างเริ่มมองแรงแล้วนะ','ฉันเตรียมตารางไว้แล้ว อย่าลืมเปิดดูนะ'],coordinator:['ภีมพร้อมประสานงานครับ','ใครเห็นเอกสารประชุมบ้างครับ?','ขอรายชื่อคนเข้าร่วมอีกนิดครับ']
   };
   const safeText = value => String(value == null ? '' : value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function load(){try{const p=JSON.parse(localStorage.getItem(KEY)||'{}');if(Array.isArray(p.tasks))data.tasks=p.tasks;['statuses','petState','morale','energy','salary'].forEach(k=>{if(p[k]&&typeof p[k]==='object')data[k]=p[k];});if(p.life&&typeof p.life==='object')data.life=Object.assign(data.life,p.life);}catch(e){console.warn('Office data could not be loaded',e);}agents.forEach(a=>{if(!Number.isFinite(Number(data.energy[a.id])))data.energy[a.id]=82;if(!Number.isFinite(Number(data.salary[a.id])))data.salary[a.id]=({manager:28000,researcher:22000,writer:21000,designer:22000,analyst:23000,secretary:19000,coordinator:20000})[a.id]||18000;});if(!data.life.lastTick)data.life.lastTick=Date.now();tickLife(true);}
+  function load(){try{const p=JSON.parse(localStorage.getItem(KEY)||'{}');if(Array.isArray(p.tasks))data.tasks=p.tasks;['statuses','petState','morale','energy','salary'].forEach(k=>{if(p[k]&&typeof p[k]==='object')data[k]=p[k];});if(p.life&&typeof p.life==='object')data.life=Object.assign(data.life,p.life);}catch(e){console.warn('Office data could not be loaded',e);}agents.forEach(a=>{if(!Number.isFinite(Number(data.energy[a.id])))data.energy[a.id]=82;if(!Number.isFinite(Number(data.salary[a.id])))data.salary[a.id]=({manager:28000,researcher:22000,writer:21000,designer:22000,analyst:23000,secretary:19000,coordinator:20000})[a.id]||18000;if(statusOf(a.id)==='idle'&&!isPaused(a.id))data.statuses[a.id]='working';});if(!data.life.lastTick)data.life.lastTick=Date.now();tickLife(true);}
   function save(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){console.warn('Office data could not be saved',e);}}
   function statusOf(id){return data.statuses[id]||'idle';}
   function petOf(p){return Object.assign({},p,data.petState[p.id]||{});}
@@ -150,6 +150,23 @@
     const female=['researcher','writer','designer','secretary'].includes(a.id);
     const accessory=a.id==='researcher'?'<path d="M13 24h22M15 24l-2 7m22-7 2 7" stroke="#8ad8ee" stroke-width="2.5" fill="none"/><circle cx="14" cy="25" r="3.5" fill="none" stroke="#8ad8ee" stroke-width="2"/><circle cx="34" cy="25" r="3.5" fill="none" stroke="#8ad8ee" stroke-width="2"/>':a.id==='designer'?'<path d="M8 15h32v4H8z" fill="#e7b94f"/><path d="M12 12h24v3H12z" fill="#f5d36f"/>':a.id==='analyst'?'<rect x="10" y="44" width="28" height="12" rx="2" fill="#40516c"/><rect x="13" y="46" width="22" height="7" fill="#91d8f2"/>':'';
     const hairShape=female?'<path d="M8 24V14L13 6 21 3 32 4 40 12 41 31 37 37 34 23 14 23 12 36 8 32Z" fill="'+hair+'" stroke="#392d31" stroke-width="1.5"/><path d="M10 16L15 7 26 4 37 10 31 13 22 12 15 17Z" fill="'+hair+'"/>':'<path d="M10 19L12 9 20 4 31 5 39 12 39 19 34 15 16 15Z" fill="'+hair+'" stroke="#392d31" stroke-width="1.5"/>';
+    if(statusOf(a.id)==='working'){
+      return '<svg class="pixel-person-svg pixel-person-seated" viewBox="0 0 48 68" aria-hidden="true" shape-rendering="crispEdges">'+
+        '<ellipse cx="24" cy="65" rx="17" ry="3" fill="#34465a" opacity=".18"/>'+
+        '<path d="M8 45h32v9H8z" fill="#9b7658" stroke="#684a36" stroke-width="2"/>'+
+        '<path d="M12 50h24v8H12z" fill="#4b5065"/>'+
+        '<path d="M10 36l5-4h18l5 4 3 13-7 4H14l-7-4z" fill="'+shirt+'" stroke="#39445b" stroke-width="1.5"/>'+
+        '<path d="M6 39l8 4 6 5-3 3-9-4zM42 39l-8 4-6 5 3 3 9-4z" fill="#f0bd96" stroke="#cf9b7c" stroke-width="1"/>'+
+        '<rect x="17" y="28" width="14" height="8" fill="#edbd98"/>'+
+        '<rect x="11" y="10" width="26" height="25" rx="7" fill="#f5cba6" stroke="#bd8b70" stroke-width="1.5"/>'+
+        hairShape+
+        '<path d="M17 23h3v3h-3zM29 23h3v3h-3z" fill="#34313a"/>'+
+        '<path d="M21 30h6v2h-6z" fill="#bd6570"/>'+
+        '<path d="M13 18h5v2h-5zM30 18h5v2h-5z" fill="'+hair+'"/>'+
+        accessory+
+        '<path d="M15 34h18v3H15z" fill="#fff" opacity=".18"/>'+
+        '</svg>';
+    }
     return '<svg class="pixel-person-svg" viewBox="0 0 48 68" aria-hidden="true" shape-rendering="crispEdges">'+
       '<ellipse cx="24" cy="64" rx="15" ry="3" fill="#34465a" opacity=".18"/>'+
       '<path d="M17 48h6v12h-6zM26 48h6v12h-6z" fill="#f0bd96"/>'+

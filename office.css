@@ -765,3 +765,27 @@
   #tab-office .office-side{align-items:start;grid-auto-rows:max-content;}
   #tab-office .office-side>.office-panel{height:auto;min-height:0;align-self:start;}
 }
+
+
+/* v28 — living office: day/night, energy, HR and facilities */
+.office-life-clock{display:grid;grid-template-columns:1fr auto;gap:3px 8px;padding:10px 11px;border-radius:12px;background:linear-gradient(120deg,#fff3ce,#fff9ec);color:#735b32;font-size:11px;}
+.office-life-clock.night{background:linear-gradient(120deg,#26365e,#4b5484);color:#f1edff;}
+.office-life-clock b{font-size:12px}.office-life-clock>span{font-weight:900;font-size:14px;font-variant-numeric:tabular-nums}.office-life-clock small{grid-column:1/-1;opacity:.75;font-size:9px;}
+.office-life-summary{display:grid;gap:5px;padding:9px 1px;color:#68748b;font-size:9px}.office-life-summary span{display:flex;justify-content:space-between;gap:6px}.office-life-summary b{color:#43506a;}
+.office-life-facilities{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 0;border-top:1px solid #edf0f6;border-bottom:1px solid #edf0f6;}
+.office-life-facilities button,.office-salary-row button{border:1px solid #dfe5f1;border-radius:9px;background:#f8faff;padding:7px 9px;color:#52627d;font-size:9px;font-weight:800;cursor:pointer;}
+.office-life-facilities button:disabled{opacity:.45;cursor:not-allowed}.office-ac-state{font-size:8px;color:#8b93a5;}
+.office-hr-controls{display:grid;gap:8px;padding-top:9px}.office-hr-controls label{display:grid;gap:5px;font-size:9px;font-weight:800;color:#68748b;}
+.office-hr-controls select{width:100%;border:1px solid #dce3f0;border-radius:9px;padding:8px;background:#fff;color:#39445b;font:inherit;font-size:10px;}
+.office-hr-stats{display:flex;justify-content:space-between;gap:8px;color:#77839a;font-size:9px}.office-hr-stats b{color:#4e5d79;}
+.office-energy-track,.office-energy-mini{display:block;height:5px;overflow:hidden;border-radius:99px;background:#e9edf5}.office-energy-track i,.office-energy-mini i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#f2bd56,#78c99a);}
+.office-salary-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}.office-salary-row button{font-size:8px;padding:8px 4px;}
+.office-life-footnote{font-size:8px;line-height:1.5;color:#a0a6b4;}
+.office-energy-mini{height:4px;margin-top:4px}.office-agent-info{min-width:0}.office-agent-status.paused{color:#a06b76}.office-agent-status.sleeping{color:#6b65a8}.office-agent-status{white-space:nowrap;font-size:8px;}
+.office-energy-badge{position:absolute;z-index:12;left:50%;top:-17px;transform:translateX(-50%);padding:2px 5px;border-radius:99px;background:#fff9d9;border:1px solid #f0d98d;color:#8c7131;font-size:8px;font-weight:900;white-space:nowrap;box-shadow:0 2px 5px #33415520;}
+.office-sprite.is-paused .office-avatar{filter:grayscale(.65);opacity:.7}.office-sprite.is-sleeping .office-avatar{filter:saturate(.65);}
+.tycoon-scene.office-night{background:linear-gradient(180deg,#18284f 0%,#344a79 53%,#24385e 100%);}
+.tycoon-scene.office-night:before{background:radial-gradient(ellipse at 50% 10%,#dbe7ff35 0 8%,transparent 38%),linear-gradient(180deg,#17294b44 0%,#17294b55 100%);}
+.tycoon-scene.office-night .tycoon-map{filter:drop-shadow(0 7px 0 #233753) brightness(.78) saturate(.82);}
+.tycoon-scene.office-night .office-name,.tycoon-scene.office-night .office-role-tag{filter:brightness(1.15);}
+@media(min-width:851px){#tab-office .office-life-panel{grid-column:1/-1;}}

@@ -111,6 +111,7 @@
     function arrive(a) {
         if (a.phase === 'going') {
             a.phase = 'working'; a.sit = true;
+            speakAgent(a, ({ brief: 'ได้เวลาเริ่มงานแล้ว!', research: 'ไปหาข้อมูลมาให้แน่นเลย!', writer: 'เริ่มปั่นงานเขียนแล้วจ้า', designer: 'ขอเสกงานสวย ๆ ก่อนนะ', director: 'ทีมลุยได้เลยค่ะ!', qc: 'เดี๋ยวกะปิตรวจให้ละเอียด!' })[a.def.id]);
             execute(a, a.task);
         } else if (!a.task) {
             a.idleT = 2 + Math.random() * 5;
@@ -188,6 +189,7 @@
         if (t) { t.status = ok ? 'done' : 'error'; t.result = text; t.finishedAt = Date.now(); t.mode = cfg.apiUrl ? 'ai' : 'sim'; }
         save(); renderTasks();
         a.phase = 'celebrate'; a.timer = 2.4;
+        speakAgent(a, ok ? ({ brief: 'สรุปโจทย์เรียบร้อย!', research: 'ข้อมูลมาแล้วจ้า!', writer: 'ส่งต้นฉบับแล้ว เย้!', designer: 'งานดีไซน์เสร็จแล้ว!', director: 'งานนี้ผ่านค่ะ!', qc: 'ตรวจแล้ว ผ่านฉลุย!' })[a.def.id] : 'งานสะดุดนิดนึง ขอแก้ก่อนนะ');
         if (ok) toast(`✅ ${a.def.name} ทำงานเสร็จแล้ว`);
     }
 
@@ -826,6 +828,14 @@
             : (a.phase === 'working' ? WORK_CHATTER[a.def.id] : CHATTER[a.def.id]);
         return pool[Math.floor(Math.random() * pool.length)];
     }
+    function speakAgent(agent, line, duration = 5200) {
+        const now = Date.now();
+        rt.forEach(other => { if (other !== agent) other.speechUntil = 0; });
+        agent.speechText = line;
+        agent.speechUntil = now + duration;
+        agent.nextSpeechAt = agent.speechUntil + 1800;
+        speechLockUntil = agent.speechUntil;
+    }
     function buildLabels() {
         const wrap = $('officeLabels');
         wrap.innerHTML = '';
@@ -923,6 +933,8 @@
         cfg.tasks.unshift(t);
         if (cfg.tasks.length > 60) cfg.tasks.length = 60;
         save(); renderTasks();
+        const worker = byId(agentId);
+        if (worker) speakAgent(worker, ({ brief: 'รับบรีฟแล้วจ้า!', research: 'รับทราบ ไปค้นข้อมูลก่อนนะ', writer: 'โอเค เดี๋ยวเรียบเรียงให้!', designer: 'ได้เลย ขอคิดภาพแป๊บ!', director: 'รับงานแล้วค่ะทีม!', qc: 'ส่งมาเลย กะปิพร้อมตรวจ!' })[agentId]);
         toast('📋 มอบหมายงานให้ ' + AGENTS.find(a => a.id === agentId).name + ' แล้ว');
     }
     function fmtTime(ms) { return ms ? new Date(ms).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : ''; }
@@ -996,6 +1008,8 @@
             goTo(a, s[0], s[1]);
             a.idleT = 8;
         });
+        const boss = byId('director');
+        if (boss) speakAgent(boss, 'ทุกคนเข้าประชุมด่วนค่ะ! 📣');
         toast('📣 เรียกประชุมแล้ว');
     }
 

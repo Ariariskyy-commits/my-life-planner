@@ -832,19 +832,21 @@
         rt.forEach(a => {
             const b = document.createElement('button');
             b.type = 'button'; b.className = 'of-label'; b.dataset.id = a.def.id;
-            const say = document.createElement('span'); say.className = 'of-speech';
-            say.textContent = CHATTER[a.def.id][0];
-            say.style.position = 'absolute'; say.style.zIndex = '9999';
-            say.style.left = '0'; say.style.top = '0'; say.style.bottom = 'auto';
-            say.style.transform = 'translate(-50%, -100%)';
             const n = document.createElement('b'); n.textContent = a.def.name;
             const s = document.createElement('small');
             const dt = document.createElement('span'); dt.className = 'of-dot';
             const tx = document.createElement('span');
-            s.append(dt, tx); b.append(n, s); wrap.appendChild(b); wrap.appendChild(say);
+            s.append(dt, tx); b.append(n, s); wrap.appendChild(b);
+            b.dataset.speech = '';
             b.addEventListener('click', () => selectAgent(a.def.id));
-            labelEls[a.def.id] = { b, dot: dt, tx, say };
+            labelEls[a.def.id] = { b, dot: dt, tx };
             a.label = labelEls[a.def.id];
+            if (a.def.id === 'brief') {
+                a.speechText = CHATTER[a.def.id][0];
+                a.speechUntil = Date.now() + 5600;
+                a.nextSpeechAt = a.speechUntil;
+                speechLockUntil = a.speechUntil;
+            }
         });
     }
     function updateLabels() {
@@ -863,10 +865,7 @@
             const L = a.label;
             L.b.style.left = (sx / W * 100).toFixed(2) + '%';
             L.b.style.top = ((sy - (a.sit ? 24 : 22) - (a.state === 'working' || a.state === 'thinking' ? 0 : 0)) / H * 100).toFixed(2) + '%';
-            L.say.textContent = a.speechText || CHATTER[a.def.id][0];
-            L.say.style.left = (sx / W * 100).toFixed(2) + '%';
-            L.say.style.top = ((sy - (a.sit ? 48 : 46)) / H * 100).toFixed(2) + '%';
-            L.say.style.display = now < a.speechUntil ? 'block' : 'none';
+            L.b.dataset.speech = now < a.speechUntil ? a.speechText : '';
             if (a.lastState !== a.state) {
                 a.lastState = a.state;
                 L.tx.textContent = STATE_ICON[a.state] + STATE_TH[a.state];

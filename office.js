@@ -18,7 +18,7 @@
     {id:'bird',name:'กะทิ',kind:'นก',emoji:'🦜',mood:'กำลังร้องเพลง',hunger:76,joy:88}
   ];
   const $ = id => document.getElementById(id);
-  let data = {tasks:[],statuses:{},petState:{},morale:{}};
+  let data = {tasks:[],statuses:{},petState:{},morale:{},energy:{},salary:{},life:{acOn:true,snackStock:12,companyCash:50000,lastTick:Date.now(),paused:{}}};
   let initialized = false;
   let speechTimer = null;
   let dialogueIndex = 0;
@@ -36,19 +36,17 @@
     secretary:['วันนี้มีอะไรต้องจดบ้างคะ?','CEO คะ งานค้างเริ่มมองแรงแล้วนะ','ฉันเตรียมตารางไว้แล้ว อย่าลืมเปิดดูนะ'],coordinator:['ภีมพร้อมประสานงานครับ','ใครเห็นเอกสารประชุมบ้างครับ?','ขอรายชื่อคนเข้าร่วมอีกนิดครับ']
   };
   const safeText = value => String(value == null ? '' : value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function load(){
-    try{
-      const parsed=JSON.parse(localStorage.getItem(KEY)||'{}');
-      if(parsed&&Array.isArray(parsed.tasks))data.tasks=parsed.tasks;
-      if(parsed&&parsed.statuses&&typeof parsed.statuses==='object')data.statuses=parsed.statuses;
-      if(parsed&&parsed.petState&&typeof parsed.petState==='object')data.petState=parsed.petState;
-      if(parsed&&parsed.morale&&typeof parsed.morale==='object')data.morale=parsed.morale;
-    }catch(e){console.warn('Office data could not be loaded',e);}
-  }
+  function load(){try{const p=JSON.parse(localStorage.getItem(KEY)||'{}');if(Array.isArray(p.tasks))data.tasks=p.tasks;['statuses','petState','morale','energy','salary'].forEach(k=>{if(p[k]&&typeof p[k]==='object')data[k]=p[k];});if(p.life&&typeof p.life==='object')data.life=Object.assign(data.life,p.life);}catch(e){console.warn('Office data could not be loaded',e);}agents.forEach(a=>{if(!Number.isFinite(Number(data.energy[a.id])))data.energy[a.id]=82;if(!Number.isFinite(Number(data.salary[a.id])))data.salary[a.id]=({manager:28000,researcher:22000,writer:21000,designer:22000,analyst:23000,secretary:19000,coordinator:20000})[a.id]||18000;});if(!data.life.lastTick)data.life.lastTick=Date.now();tickLife(true);}
   function save(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){console.warn('Office data could not be saved',e);}}
   function statusOf(id){return data.statuses[id]||'idle';}
   function petOf(p){return Object.assign({},p,data.petState[p.id]||{});}
   function moraleOf(id){return Math.max(0,Math.min(100,Number(data.morale[id]??75)));}
+  function officePeriod(){const h=new Date().getHours();return h>=6&&h<18?'day':'night';}
+  function energyOf(id){return Math.max(0,Math.min(100,Number(data.energy[id]??82)));}
+  function isPaused(id){return !!(data.life.paused&&data.life.paused[id]);}
+  function tickLife(initial){const now=Date.now(),last=Number(data.life.lastTick)||now,minutes=Math.min(240,Math.max(0,(now-last)/60000));if(minutes>=1)agents.forEach(a=>{let e=energyOf(a.id),st=statusOf(a.id);if(isPaused(a.id)||st==='sleeping'||officePeriod()==='night')e=Math.min(100,e+minutes*(officePeriod()==='night'?1.2:1.5));else if(st==='working')e=Math.max(0,e-minutes*1.3);else e=Math.min(100,e+minutes*.35);data.energy[a.id]=Math.round(e);});data.life.lastTick=now;if(!initial)save();}
+  function renderLife(){const host=$('officeLifeControls');if(!host)return;const period=officePeriod(),time=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),selected=$('officeLifeEmployee')?.value||'manager',a=agents.find(x=>x.id===selected)||agents[0],paused=isPaused(a.id),salary=Number(data.salary[a.id]||0),payroll=agents.reduce((sum,x)=>sum+Number(data.salary[x.id]||0),0);host.innerHTML='<div class="office-life-clock '+period+'"><b>'+(period==='day'?'☀ กลางวัน':'☾ กลางคืน')+'</b><span>'+time+'</span><small>เวลาจริงของเครื่อง · พนักงานฟื้นพลังตามช่วงเวลา</small></div><div class="office-life-summary"><span>💰 เงินเดือนรวม/เดือน <b>'+payroll.toLocaleString('th-TH')+' ฿</b></span><span>🏦 งบบริษัท <b>'+Number(data.life.companyCash||0).toLocaleString('th-TH')+' ฿</b></span></div><div class="office-life-facilities"><button type="button" data-life-action="snack" '+(Number(data.life.snackStock)<=0?'disabled':'')+'>🥤 ตู้ขนม · เหลือ '+Number(data.life.snackStock)+'</button><button type="button" data-life-action="ac">'+(data.life.acOn?'❄️ ปิดแอร์':'❄️ เปิดแอร์')+'</button><span class="office-ac-state">'+(data.life.acOn?'แอร์กำลังทำงาน':'ปิดเครื่องปรับอากาศ')+'</span></div><div class="office-hr-controls"><label>จัดการพนักงาน<select id="officeLifeEmployee">'+agents.map(x=>'<option value="'+x.id+'" '+(x.id===a.id?'selected':'')+'>'+safeText(x.name)+' — '+safeText(x.role)+'</option>').join('')+'</select></label><div class="office-hr-stats"><span>พลังงาน <b>'+energyOf(a.id)+'%</b></span><span>เงินเดือน <b>'+salary.toLocaleString('th-TH')+' ฿</b></span></div><div class="office-energy-track"><i style="width:'+energyOf(a.id)+'%"></i></div><div class="office-salary-row"><button type="button" data-life-action="raise">＋ เพิ่มเงินเดือน 1,000 ฿</button><button type="button" data-life-action="bonus">🎁 โบนัส 500 ฿</button></div><div class="office-salary-row"><button type="button" data-life-action="'+(paused?'resume':'pause')+'">'+(paused?'▶ เรียกกลับเข้าทำงาน':'⏸ สั่งพักงาน')+'</button><button type="button" data-life-action="rest">😴 ให้พักผ่อน</button></div><small class="office-life-footnote">ระบบจำลอง: เงินเดือนและงบบริษัทเป็นตัวเลขภายในเกม ไม่เกี่ยวกับเงินจริง</small></div>';const scene=document.querySelector('#tab-office .tycoon-scene');if(scene)scene.classList.toggle('office-night',period==='night');}
+  function lifeAction(action){const id=$('officeLifeEmployee')?.value||'manager',a=agents.find(x=>x.id===id)||agents[0];if(action==='snack'){if(Number(data.life.snackStock)<=0){setToast('ตู้ขนมหมดแล้ว');return;}data.life.snackStock--;agents.forEach(x=>{if(!isPaused(x.id))data.energy[x.id]=Math.min(100,energyOf(x.id)+12);});data.life.companyCash=Math.max(0,Number(data.life.companyCash||0)-80);setToast('ทีมแวะเติมพลังจากตู้ขนมแล้ว 🥤');}else if(action==='ac'){data.life.acOn=!data.life.acOn;agents.forEach(x=>data.morale[x.id]=Math.min(100,moraleOf(x.id)+(data.life.acOn?3:-1)));setToast(data.life.acOn?'เปิดแอร์แล้ว ❄️':'ปิดแอร์แล้ว');}else if(action==='raise'||action==='bonus'){const cost=action==='raise'?1000:500;if(Number(data.life.companyCash||0)<cost){setToast('งบบริษัทไม่เพียงพอ');return;}data.life.companyCash-=cost;data.salary[id]=Number(data.salary[id]||0)+(action==='raise'?1000:500);data.morale[id]=Math.min(100,moraleOf(id)+8);setToast((action==='raise'?'ปรับเงินเดือน':'มอบโบนัส')+'ให้'+a.name+'แล้ว');}else if(action==='pause'){data.life.paused[id]=true;data.statuses[id]='paused';setToast('พักงาน'+a.name+'แล้ว');}else if(action==='resume'){delete data.life.paused[id];data.statuses[id]='idle';setToast('เรียก'+a.name+'กลับเข้าทำงานแล้ว');}else if(action==='rest'){data.statuses[id]='sleeping';data.energy[id]=Math.min(100,energyOf(id)+20);setToast(a.name+'กำลังพักผ่อน 😴');}save();render();}
   function setToast(message){const el=$('officeToast');if(!el)return;el.textContent=message;el.classList.add('show');clearTimeout(setToast.timer);setToast.timer=setTimeout(()=>el.classList.remove('show'),2600);}
   function ceoCommand(command){
     if(command==='meeting'){
@@ -74,16 +72,7 @@
       ['สมาชิกทีม',agents.length,'fa-users'],['กำลังทำงาน',active,'fa-laptop'],['งานที่เสร็จแล้ว',done,'fa-check-circle']
     ].map(x=>'<div class="office-stat"><small><i class="fa-solid '+x[2]+'"></i> '+x[0]+'</small><strong>'+x[1]+'</strong></div>').join('');
   }
-  function renderAgents(){
-    $('officeTeamCount').textContent=String(agents.length).padStart(2,'0');
-    $('officeAgents').innerHTML=agents.map(a=>{
-      const st=statusOf(a.id),working=st==='working',paused=isPaused(a.id),sleeping=st==='sleeping';
-      const slacking=slackingAgentId===a.id&&!working&&!paused&&!sleeping;
-      const morale=moraleOf(a.id),energy=energyOf(a.id);
-      const label=paused?'พักงาน':sleeping?'พักผ่อน':working?'กำลังทำงาน':slacking?'พักเบรก':'ว่าง';
-      return '<button type="button" class="office-agent" data-office-agent="'+a.id+'"><span class="office-agent-avatar">'+a.emoji+'</span><span class="office-agent-info"><strong>'+a.name+'</strong><small>'+a.role+'</small><span class="office-energy-mini"><i style="width:'+energy+'%"></i></span><span class="office-morale"><i style="width:'+morale+'%"></i></span></span><span class="office-agent-status '+(working?'working':paused?'paused':sleeping?'sleeping':slacking?'slacking':'')+'">'+label+' · '+energy+'%</span></button>';
-    }).join('');
-  }
+  function renderAgents(){$('officeTeamCount').textContent=String(agents.length).padStart(2,'0');$('officeAgents').innerHTML=agents.map(a=>{const st=statusOf(a.id),working=st==='working',paused=isPaused(a.id),sleeping=st==='sleeping',slacking=slackingAgentId===a.id&&!working&&!paused&&!sleeping,morale=moraleOf(a.id),energy=energyOf(a.id),label=paused?'พักงาน':sleeping?'พักผ่อน':working?'กำลังทำงาน':slacking?'พักเบรก':'ว่าง';return '<button type="button" class="office-agent" data-office-agent="'+a.id+'"><span class="office-agent-avatar">'+a.emoji+'</span><span class="office-agent-info"><strong>'+a.name+'</strong><small>'+a.role+'</small><span class="office-energy-mini"><i style="width:'+energy+'%"></i></span><span class="office-morale"><i style="width:'+morale+'%"></i></span></span><span class="office-agent-status '+(working?'working':paused?'paused':sleeping?'sleeping':slacking?'slacking':'')+'">'+label+' · '+energy+'%</span></button>';}).join('');}
   function lineFor(agent){
     const working=statusOf(agent.id)==='working';
     if(isPaused(agent.id))return {text:'วันนี้พักงานอยู่ค่ะ',mood:'พักงาน',face:'⏸️',activity:'paused'};
@@ -392,7 +381,7 @@
     loafTimer=setInterval(cycleLoafing,9000);
     startPetRoaming();
     const aiForm=$('officeAiCommandForm');if(aiForm)aiForm.addEventListener('submit',e=>{e.preventDefault();routeOfficeCommand($('officeAiCommandInput').value);});
-    const lifeHost=$('officeLifeControls');if(lifeHost){lifeHost.addEventListener('click',e=>{const b=e.target.closest('[data-life-action]');if(b)lifeAction(b.getAttribute('data-life-action'));});lifeHost.addEventListener('change',e=>{if(e.target.id==='officeLifeEmployee')renderLife();});}
+    const lifeHost=$('officeLifeControls');if(lifeHost){lifeHost.addEventListener('click',e=>{const b=e.target.closest('[data-life-action]');if(b)lifeAction(b.getAttribute('data-life-action'));});lifeHost.addEventListener('change',e=>{if(e.target.id==='officeLifeEmployee')renderLife();});}setInterval(()=>{tickLife(false);renderAgents();renderSprites();renderLife();},30000);
     setInterval(()=>{tickLife(false);renderAgents();renderSprites();renderLife();},30000);
     $('officeTaskList').addEventListener('click',e=>{
       const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]'),edit=e.target.closest('[data-office-edit]'),report=e.target.closest('[data-office-report]'),work=e.target.closest('[data-office-work-save]'),approve=e.target.closest('[data-office-approve]'),revise=e.target.closest('[data-office-revise]');

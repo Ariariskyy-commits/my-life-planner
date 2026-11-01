@@ -77,13 +77,17 @@
   function renderAgents(){
     $('officeTeamCount').textContent=String(agents.length).padStart(2,'0');
     $('officeAgents').innerHTML=agents.map(a=>{
-      const working=statusOf(a.id)==='working';
-      const slacking=slackingAgentId===a.id&&!working;
-      const morale=moraleOf(a.id);return '<button type="button" class="office-agent" data-office-agent="'+a.id+'"><span class="office-agent-avatar">'+a.emoji+'</span><span class="office-agent-info"><strong>'+a.name+'</strong><small>'+a.role+'</small><span class="office-morale"><i style="width:'+morale+'%"></i></span></span><span class="office-agent-status '+(working?'working':slacking?'slacking':'')+'">'+(working?'กำลังทำงาน':slacking?'แอบอู้':'ว่าง')+'</span></button>';
+      const st=statusOf(a.id),working=st==='working',paused=isPaused(a.id),sleeping=st==='sleeping';
+      const slacking=slackingAgentId===a.id&&!working&&!paused&&!sleeping;
+      const morale=moraleOf(a.id),energy=energyOf(a.id);
+      const label=paused?'พักงาน':sleeping?'พักผ่อน':working?'กำลังทำงาน':slacking?'พักเบรก':'ว่าง';
+      return '<button type="button" class="office-agent" data-office-agent="'+a.id+'"><span class="office-agent-avatar">'+a.emoji+'</span><span class="office-agent-info"><strong>'+a.name+'</strong><small>'+a.role+'</small><span class="office-energy-mini"><i style="width:'+energy+'%"></i></span><span class="office-morale"><i style="width:'+morale+'%"></i></span></span><span class="office-agent-status '+(working?'working':paused?'paused':sleeping?'sleeping':slacking?'slacking':'')+'">'+label+' · '+energy+'%</span></button>';
     }).join('');
   }
   function lineFor(agent){
     const working=statusOf(agent.id)==='working';
+    if(isPaused(agent.id))return {text:'วันนี้พักงานอยู่ค่ะ',mood:'พักงาน',face:'⏸️',activity:'paused'};
+    if(statusOf(agent.id)==='sleeping')return {text:'ขอพักเติมพลังสักครู่นะ 😴',mood:'พักผ่อน',face:'😴',activity:'sleeping'};
     if(working){
       const workLines={
         manager:['กำลังจัดคิวงานให้ทุกคนค่ะ','เช็กความคืบหน้าทีมอยู่ค่ะ'],
@@ -178,18 +182,20 @@
     const zoneLabels='<span class="office-zone manager">บริหารทีม</span><span class="office-zone researcher">วิจัย</span><span class="office-zone writer">เขียนคอนเทนต์</span><span class="office-zone designer">ออกแบบ</span><span class="office-zone analyst">วิเคราะห์</span><span class="office-zone secretary">ธุรการ</span>';
     const people=agents.map((a,i)=>{
       const working=statusOf(a.id)==='working';
-      const slacking=slackingAgentId===a.id&&!working;
+      const paused=isPaused(a.id),sleeping=statusOf(a.id)==='sleeping';
+      const slacking=slackingAgentId===a.id&&!working&&!paused&&!sleeping;
       const line=(bubbleAgentId===a.id&&bubbleLine)?bubbleLine:lineFor(a);
       const positions=[
         {x:37,y:41},{x:63,y:37},{x:25,y:58},{x:46,y:67},{x:56,y:73},{x:72,y:59},{x:78,y:68},{x:78,y:68}
       ];
       const pos=positions[i];
-      const activityClass=working?'is-working':slacking?'is-slacking':'is-idle';
+      const activityClass=working?'is-working':paused?'is-paused':sleeping?'is-sleeping':slacking?'is-slacking':'is-idle';
       const workProp=working?{
         manager:'📋',researcher:'🔎',writer:'⌨️',designer:'🎨',analyst:'📊',secretary:'🗂️',coordinator:'📞'
       }[a.id]:'';
       const bubble=bubbleAgentId===a.id&&bubbleLine?'<span class="office-mini-bubble">'+safeText(bubbleLine.text)+'</span>':'';
-      const action=working?'<span class="office-work-prop">'+workProp+'</span>':slacking?'<span class="office-loaf-prop">💤</span>':'';
+      const action=working?'<span class="office-work-prop">'+workProp+'</span>':(slacking||sleeping)?'<span class="office-loaf-prop">💤</span>':'';
+      const energyBadge='<span class="office-energy-badge" title="พลังงาน '+energyOf(a.id)+'%">⚡ '+energyOf(a.id)+'%</span>';
       return '<button type="button" class="office-sprite '+activityClass+' role-'+a.id+'" data-agent-id="'+a.id+'" style="left:'+pos.x+'%;top:'+pos.y+'%" title="คุยกับ '+safeText(a.name)+'"><span class="office-expression">'+line.face+'</span>'+bubble+'<span class="office-avatar">'+pixelCharacter(a,line.face)+'</span>'+action+'<span class="office-name">'+a.name+'</span><span class="office-role-tag">'+({manager:'หัวหน้าทีม',researcher:'วิจัย',writer:'เขียน',designer:'ออกแบบ',analyst:'วิเคราะห์',secretary:'ธุรการ',coordinator:'ประสานงาน'}[a.id])+'</span></button>';
     }).join('');
     const petSprites='<div class="office-pet-sprite cat" data-pet-id="cat" title="ข้าวตัง แมวประจำออฟฟิศ">🐈<small>ข้าวตัง</small></div><div class="office-pet-sprite dog" data-pet-id="dog" title="ถั่วงอก น้องหมาประจำออฟฟิศ">🐕<small>ถั่วงอก</small></div><div class="office-pet-sprite bird" data-pet-id="bird" title="กะทิ นกประจำออฟฟิศ">🦜<small>กะทิ</small></div>';
@@ -319,7 +325,7 @@
     save();render();setToast('ทีมรับคำขอแก้ไขแล้ว · แสดงฉบับจำลองให้ตรวจอีกครั้ง');
   }
 
-  function render(){renderStats();renderAgents();renderSprites();renderPets();renderTasks();renderManagerReports();}
+  function render(){renderStats();renderAgents();renderSprites();renderPets();renderTasks();renderManagerReports();renderLife();}
   function completeTask(id){
     const task=data.tasks.find(t=>t.id===id);if(!task)return;
     task.status='done';
@@ -381,11 +387,13 @@
     if(speechTimer)clearInterval(speechTimer);
     showDialogue(agents[0]);
     speechTimer=setInterval(refreshDialogue,6200);
-    setInterval(()=>{pets.forEach(p=>{const s=petOf(p);s.hunger=Math.max(0,(Number(s.hunger)||50)-1);s.joy=Math.max(0,(Number(s.joy)||50)-1);if(s.hunger<25)s.mood='หิวแล้ว ขอขนมหน่อย';else if(s.joy<25)s.mood='เหงาจัง มาเล่นกัน';data.petState[p.id]={hunger:s.hunger,joy:s.joy,mood:s.mood};});save();renderPets();},60000);
+    setInterval(()=>{tickLife(false);pets.forEach(p=>{const s=petOf(p);s.hunger=Math.max(0,(Number(s.hunger)||50)-1);s.joy=Math.max(0,(Number(s.joy)||50)-1);if(s.hunger<25)s.mood='หิวแล้ว ขอขนมหน่อย';else if(s.joy<25)s.mood='เหงาจัง มาเล่นกัน';data.petState[p.id]={hunger:s.hunger,joy:s.joy,mood:s.mood};});save();render();},60000);
     if(loafTimer)clearInterval(loafTimer);
     loafTimer=setInterval(cycleLoafing,9000);
     startPetRoaming();
     const aiForm=$('officeAiCommandForm');if(aiForm)aiForm.addEventListener('submit',e=>{e.preventDefault();routeOfficeCommand($('officeAiCommandInput').value);});
+    const lifeHost=$('officeLifeControls');if(lifeHost){lifeHost.addEventListener('click',e=>{const b=e.target.closest('[data-life-action]');if(b)lifeAction(b.getAttribute('data-life-action'));});lifeHost.addEventListener('change',e=>{if(e.target.id==='officeLifeEmployee')renderLife();});}
+    setInterval(()=>{tickLife(false);renderAgents();renderSprites();renderLife();},30000);
     $('officeTaskList').addEventListener('click',e=>{
       const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]'),edit=e.target.closest('[data-office-edit]'),report=e.target.closest('[data-office-report]'),work=e.target.closest('[data-office-work-save]'),approve=e.target.closest('[data-office-approve]'),revise=e.target.closest('[data-office-revise]');
       if(done)completeTask(done.getAttribute('data-office-done'));
@@ -411,5 +419,5 @@
   document.addEventListener('DOMContentLoaded',init);
   window.addEventListener('load',init);
   window.addEventListener('storage',e=>{if(e.key===KEY){load();render();}});
-  window.MyLifePlannerOffice={init,render,ceoCommand,routeOfficeCommand,approveOfficeWorkflow,reviseOfficeWorkflow};
+  window.MyLifePlannerOffice={init,render,ceoCommand,routeOfficeCommand,approveOfficeWorkflow,reviseOfficeWorkflow,lifeAction};
 })();

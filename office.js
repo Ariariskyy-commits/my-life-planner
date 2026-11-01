@@ -383,7 +383,8 @@
     if(loafTimer)clearInterval(loafTimer);
     loafTimer=setInterval(cycleLoafing,9000);
     startPetRoaming();
-    $('officeTaskForm').addEventListener('submit',addTask);\n    const aiForm=$('officeAiCommandForm');if(aiForm)aiForm.addEventListener('submit',e=>{e.preventDefault();routeOfficeCommand($('officeAiCommandInput').value);});
+    $('officeTaskForm').addEventListener('submit',addTask);
+    const aiForm=$('officeAiCommandForm');if(aiForm)aiForm.addEventListener('submit',e=>{e.preventDefault();routeOfficeCommand($('officeAiCommandInput').value);});
     $('officeTaskList').addEventListener('click',e=>{
       const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]'),edit=e.target.closest('[data-office-edit]'),report=e.target.closest('[data-office-report]'),work=e.target.closest('[data-office-work-save]');
       if(done)completeTask(done.getAttribute('data-office-done'));

@@ -676,3 +676,14 @@
 .office-work-saved span{font-size:10px;font-weight:900;color:#24784a}
 .office-work-saved small{font-size:9px;color:#52866a}
 .office-deliverable-entry button:active{transform:translateY(1px)}
+
+/* v24 — free rule-based office command workflow */
+.office-ai-command{margin:12px 0 2px;padding:13px;border:1.5px solid #d9d3f5;border-radius:14px;background:linear-gradient(135deg,#f7f4ff,#fff8fb)}
+.office-ai-command-title{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#51458c;font-size:12px}
+.office-ai-command-title span{font-size:9px;font-weight:900;letter-spacing:.08em;color:#47856a;background:#e8f7ef;border-radius:99px;padding:4px 7px}
+.office-ai-command p{margin:6px 0 9px;color:#687086;font-size:10px;line-height:1.5}
+#officeAiCommandForm{display:grid;gap:8px}
+#officeAiCommandInput{width:100%;min-height:68px;resize:vertical;border:1.5px solid #d9d3f5;border-radius:10px;padding:10px;background:#fff;color:#394158;font:inherit;font-size:12px}
+#officeAiCommandInput:focus{outline:none;border-color:#8979d5;box-shadow:0 0 0 3px #8979d522}
+#officeAiCommandForm button{border:0;border-radius:9px;padding:10px 12px;background:#6b5ac7;color:#fff;font-weight:800;font-size:11px;cursor:pointer}
+.office-ai-command>small{display:block;margin-top:7px;color:#9290a4;font-size:9px}

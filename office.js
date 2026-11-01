@@ -210,7 +210,7 @@
     if(!data.tasks.length){list.innerHTML='<div class="office-empty">ยังไม่มีงานในออฟฟิศ ✦<br>เริ่มมอบหมายงานแรกให้ทีมได้เลย</div>';return;}
     list.innerHTML=data.tasks.slice().sort((a,b)=>b.created-a.created).map(t=>{
       const agent=agents.find(a=>a.id===t.agent),done=t.status==='done',review=t.status==='review';
-      const stateLabel=done?'เสร็จแล้ว':review?'ส่งรายงานแล้ว · รอตรวจ':'กำลังดำเนินการ';
+      const queued=t.status==='queued';const stateLabel=done?'เสร็จแล้ว':review?'ส่งรายงานแล้ว · รอตรวจ':queued?'รอรับช่วงต่อ':'กำลังดำเนินการ';
       return '<article class="office-task"><div class="office-task-head"><h4>'+safeText(t.title)+'</h4><span class="office-task-state '+(done?'done':review?'review':'')+'">'+stateLabel+'</span></div><p>'+safeText(t.detail||'ไม่มีรายละเอียดเพิ่มเติม')+'</p><div class="office-task-meta"><span>ผู้รับผิดชอบ: '+safeText(agent?agent.name:'ทีม')+'</span><span>'+new Date(t.created).toLocaleDateString('th-TH')+'</span></div><div class="office-deliverable-entry"><label>ผลงานที่สร้าง / เนื้อหาส่งมอบ</label><textarea data-office-work-input="'+t.id+'" rows="4" placeholder="วางเนื้อหาบทความ แนวคิดออกแบบ ผลค้นคว้า ตารางสรุป หรือรายละเอียดผลงานที่ทำจริง...">'+safeText(t.work||'')+'</textarea><button type="button" data-office-work-save="'+t.id+'">'+(t.workSavedAt?'บันทึกผลงานอีกครั้ง':'บันทึกผลงาน')+'</button>'+(t.workSavedAt?'<div class="office-work-saved"><span>✓ บันทึกผลงานแล้ว</span><small>ล่าสุด '+new Date(t.workSavedAt).toLocaleString('th-TH')+'</small></div>':'')+'</div>'+(done?'':'<div class="office-report-entry"><label>รายงานผลการทำงาน</label><textarea data-office-report-input="'+t.id+'" rows="2" placeholder="สรุปสิ่งที่ทำ ผลลัพธ์ หรือแนบลิงก์ผลงาน...">'+safeText(t.report||'')+'</textarea><button type="button" data-office-report="'+t.id+'">ส่งรายงานให้ขุนพล</button></div>')+'<div class="office-task-actions">'+(done?'':'<button type="button" data-office-done="'+t.id+'">✓ รับรองงานเสร็จ</button>')+'<button type="button" data-office-edit="'+t.id+'">แก้ไขงาน</button><button type="button" data-office-delete="'+t.id+'">ลบงาน</button></div></article>';
     }).join('');
   }
@@ -240,7 +240,45 @@
     if(!data.tasks.some(t=>t.agent===task.agent&&t.status==='doing'))data.statuses[task.agent]='idle';
     save();render();setToast('ส่งรายงานให้ขุนพลเรียบร้อยแล้ว');
   }
-  function render(){renderStats();renderAgents();renderSprites();renderPets();renderTasks();renderManagerReports();}
+
+  const agentByName = name => agents.find(a => a.name === name);
+  function routeOfficeCommand(raw){
+    const command=String(raw||'').trim();
+    if(!command){setToast('พิมพ์คำสั่งก่อนนะคะ');return;}
+    const ordered=agents.filter(a=>a.id!=='manager'&&command.includes(a.name));
+    const keywordRoutes=[
+      {re:/(ค้นคว้า|ค้นหา|หาข้อมูล|สืบค้น)/,id:'researcher'},
+      {re:/(เขียน|รายงาน|บทความ|แคปชัน|คำโปรย)/,id:'writer'},
+      {re:/(ออกแบบ|กราฟิก|โปสเตอร์|อินโฟกราฟิก)/,id:'designer'},
+      {re:/(วิเคราะห์|สรุปตัวเลข|งบประมาณ)/,id:'analyst'},
+      {re:/(จัดตาราง|ปฏิทิน|กำหนดการ|บันทึก)/,id:'secretary'},
+      {re:/(ประสานงาน|ติดตามงาน|ติดต่อ)/,id:'coordinator'}
+    ];
+    let route=ordered;
+    if(!route.length){
+      route=keywordRoutes.filter(x=>x.re.test(command)).map(x=>agents.find(a=>a.id===x.id)).filter(Boolean);
+    }
+    if(!route.length)route=[agents.find(a=>a.id==='coordinator')];
+    route=[...new Map(route.map(a=>[a.id,a])).values()];
+    const title=command.length>90?command.slice(0,87)+'…':command;
+    const workflowId='flow_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    const now=Date.now();
+    route.forEach((agent,index)=>{
+      const previous=index?route[index-1]:null;
+      const detail=(index===0?'คำสั่งจาก CEO: ':'รับช่วงต่อจาก '+previous.name+': ')+command+
+        (index===0?'\n\nหน้าที่: '+agent.role+' ดำเนินงานตามคำสั่ง':'\n\nรอรับมอบผลงานจากขั้นตอนก่อนหน้า แล้วดำเนินงานในหน้าที่ '+agent.role);
+      const id='office_'+now+'_'+index+'_'+Math.random().toString(36).slice(2,5);
+      data.tasks.push({id,title:(index?'ส่งต่องาน: ':'คำสั่ง: ')+title,detail,agent:agent.id,status:index===0?'doing':'queued',created:now+index,workflowId,workflowOrder:index,workflowTotal:route.length});
+      if(index===0){data.statuses[agent.id]='working';data.morale[agent.id]=Math.min(100,moraleOf(agent.id)+2);}
+    });
+    save();render();
+    const names=route.map(a=>a.name).join(' → ');
+    bubbleAgentId='manager';bubbleLine={text:'รับคำสั่งแล้วค่ะ จัดลำดับงานให้ '+names+' เรียบร้อย งานถัดไปจะเริ่มเมื่อขั้นก่อนหน้าส่งมอบผลงาน',mood:'กำลังจัดการงาน',face:'📋'};
+    showDialogue(agents[0],bubbleLine);
+    setToast('ขุนพลจัดลำดับงานแล้ว: '+names);
+    const input=$('officeAiCommandInput');if(input)input.value='';
+  }
+\n  function render(){renderStats();renderAgents();renderSprites();renderPets();renderTasks();renderManagerReports();}
   function addTask(event){
     event.preventDefault();
     const title=$('officeTaskTitle').value.trim();if(!title)return;
@@ -334,7 +372,7 @@
     if(loafTimer)clearInterval(loafTimer);
     loafTimer=setInterval(cycleLoafing,9000);
     startPetRoaming();
-    $('officeTaskForm').addEventListener('submit',addTask);
+    $('officeTaskForm').addEventListener('submit',addTask);\n    const aiForm=$('officeAiCommandForm');if(aiForm)aiForm.addEventListener('submit',e=>{e.preventDefault();routeOfficeCommand($('officeAiCommandInput').value);});
     $('officeTaskList').addEventListener('click',e=>{
       const done=e.target.closest('[data-office-done]'),del=e.target.closest('[data-office-delete]'),edit=e.target.closest('[data-office-edit]'),report=e.target.closest('[data-office-report]'),work=e.target.closest('[data-office-work-save]');
       if(done)completeTask(done.getAttribute('data-office-done'));

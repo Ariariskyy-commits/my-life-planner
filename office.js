@@ -12,12 +12,12 @@
     const INK = '#4A3226', EDGE = 'rgba(74,50,38,.55)';
 
     const AGENTS = [
-        { id: 'brief',    name: 'Brief Analyst',     role: 'ถอดโจทย์ให้ชัด',      desk: [1, 1], hair: '#3B2A22', skin: '#F2C9A0', shirt: '#EC5E8B' },
-        { id: 'research', name: 'Researcher',        role: 'หาข้อมูลและแนวทาง',   desk: [4, 1], hair: '#7A4A2A', skin: '#E8B88A', shirt: '#3FA9C9' },
-        { id: 'writer',   name: 'Writer',            role: 'เขียนเนื้อหา',        desk: [7, 1], hair: '#1F1F2B', skin: '#F2C9A0', shirt: '#FFD36B' },
-        { id: 'designer', name: 'Designer',          role: 'ไอเดียภาพและดีไซน์',  desk: [1, 4], hair: '#B03060', skin: '#F6D3B3', shirt: '#8E5BD6' },
-        { id: 'director', name: 'Creative Director', role: 'ตัดสินใจและรวมงาน',   desk: [4, 4], hair: '#2B2B3A', skin: '#D9A679', shirt: '#F29A4B' },
-        { id: 'qc',       name: 'QC',                role: 'ตรวจคุณภาพ',          desk: [7, 4], hair: '#4A3A2A', skin: '#F2C9A0', shirt: '#5BBF7A' }
+        { id: 'brief',    name: 'ปลาทู',     role: 'ถอดโจทย์ให้ชัด',      desk: [1, 1], hair: '#3B2A22', skin: '#F2C9A0', shirt: '#EC5E8B' },
+        { id: 'research', name: 'หมูเด้ง',        role: 'หาข้อมูลและแนวทาง',   desk: [4, 1], hair: '#7A4A2A', skin: '#E8B88A', shirt: '#3FA9C9' },
+        { id: 'writer',   name: 'น้องเป็ด',            role: 'เขียนเนื้อหา',        desk: [7, 1], hair: '#1F1F2B', skin: '#F2C9A0', shirt: '#FFD36B' },
+        { id: 'designer', name: 'แมวส้ม',          role: 'ไอเดียภาพและดีไซน์',  desk: [1, 4], hair: '#B03060', skin: '#F6D3B3', shirt: '#8E5BD6' },
+        { id: 'director', name: 'คุณนายไข่ตุ๋น', role: 'ตัดสินใจและรวมงาน',   desk: [4, 4], hair: '#2B2B3A', skin: '#D9A679', shirt: '#F29A4B' },
+        { id: 'qc',       name: 'กะปิ',                role: 'ตรวจคุณภาพ',          desk: [7, 4], hair: '#4A3A2A', skin: '#F2C9A0', shirt: '#5BBF7A' }
     ];
     const SPAWNS = [[2, 3], [3, 3], [5, 3], [6, 3], [8, 3], [3, 6]];
     const WANDER = [[8, 1], [5, 1], [7, 6], [7, 7], [3, 3], [6, 3], [3, 6], [2, 7], [8, 5], [1, 3]];

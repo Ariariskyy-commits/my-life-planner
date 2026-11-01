@@ -746,3 +746,22 @@
   #tab-office .office-side>.office-panel:first-child,#tab-office .office-side>.office-single-command-note{grid-column:auto;}
   #tab-office .tycoon-scene{aspect-ratio:1.15/1;}
 }
+
+
+/* v27 — natural-height cards and compact CEO workflow strip */
+@media(min-width:851px){
+  #tab-office .office-side{align-items:start;grid-auto-rows:max-content;}
+  #tab-office .office-side>.office-panel{height:auto;min-height:0;align-self:start;}
+  #tab-office .office-side>.office-panel:first-child{min-height:0;}
+  #tab-office .office-side>.office-pets-panel{height:auto;}
+  #tab-office .office-side>.office-ceo-panel{height:auto;}
+  #tab-office .office-side>.office-single-command-note{height:auto;min-height:0;padding:10px 14px;}
+  #tab-office .office-single-command-note .office-panel-title{margin-bottom:3px;}
+  #tab-office .office-single-command-note .office-panel-title>b{width:26px;height:26px;}
+  #tab-office .office-single-command-note p{margin:3px 0;font-size:10px;}
+  #tab-office .office-single-command-note small{font-size:8px;}
+}
+@media(min-width:561px) and (max-width:850px){
+  #tab-office .office-side{align-items:start;grid-auto-rows:max-content;}
+  #tab-office .office-side>.office-panel{height:auto;min-height:0;align-self:start;}
+}

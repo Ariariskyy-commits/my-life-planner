@@ -2782,6 +2782,23 @@
             window.addEventListener('blur', release);
         })();
     </script>
+    <script>
+        window.addEventListener('error', function (e) {
+            var stage = document.querySelector('#tab-office .of-stage');
+            if (!stage) return;
+            if (e.target && e.target.tagName === 'SCRIPT') {
+                stage.textContent = 'โหลดไฟล์ออฟฟิศไม่สำเร็จ: ' + (e.target.src || 'unknown script');
+            } else if (e.message) {
+                stage.textContent = 'ข้อผิดพลาดในระบบออฟฟิศ: ' + e.message + ' (' + (e.filename || '') + ':' + (e.lineno || '') + ')';
+            }
+        }, true);
+        window.addEventListener('load', function () {
+            if (!document.documentElement.dataset.officeRenderer) {
+                var stage = document.querySelector('#tab-office .of-stage');
+                if (stage) stage.textContent = 'ไฟล์ออฟฟิศโหลดแล้ว แต่ระบบวาดภาพยังไม่เริ่มทำงาน';
+            }
+        });
+    </script>
     <script src="./office-recovery.js?v=recovery-25"></script>
 </body>
 </html>

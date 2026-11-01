@@ -1,4 +1,4 @@
-const CACHE = 'y2k-planner-v17';
+const CACHE = 'y2k-planner-v18';
 const ASSETS = [
     './',
     './index.html',

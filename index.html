@@ -747,6 +747,7 @@
             .glass-press { transition: none !important; }
         }
     </style>
+    <link rel="stylesheet" href="./office.css">
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
@@ -879,6 +880,7 @@
             <button onclick="switchTab('calendar')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm text-pink-500 hover:scale-110 transition-all shrink-0" title="ปฏิทิน"><i class="fa-regular fa-calendar-check"></i></button>
             <button onclick="switchTab('calculator')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm text-gray-700 hover:scale-110 transition-all shrink-0" title="คำนวณ"><i class="fa-solid fa-calculator"></i></button>
             <button onclick="switchTab('pet')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm text-orange-500 hover:scale-110 transition-all shrink-0" title="สัตว์เลี้ยง"><i class="fa-solid fa-paw"></i></button>
+            <button onclick="switchTab('office')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm text-blue-600 hover:scale-110 transition-all shrink-0" title="ออฟฟิศ"><i class="fa-solid fa-building"></i></button>
             <button onclick="openModal('quickAddModal')" class="w-9 h-9 bg-hotPink text-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm font-extrabold hover:scale-110 transition-all shrink-0" title="เพิ่มด่วน"><i class="fa-solid fa-plus"></i></button>
         </div>
 
@@ -914,6 +916,11 @@
 
             <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn w-full bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
                 <span class="flex items-center gap-1.5"><i class="fa-solid fa-paw text-hotPink text-xs"></i> สัตว์เลี้ยง</span>
+                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
+            </button>
+
+            <button onclick="switchTab('office')" id="nav-office" class="tab-btn w-full bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-building text-popBlue text-xs"></i> ออฟฟิศ (MY LITTLE OFFICE)</span>
                 <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
             </button>
 
@@ -990,8 +997,7 @@
                 <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
                     <div><p class="text-xs font-bold text-gray-500">งานค้างอยู่</p><h3 id="dashPendingTasks" class="text-lg font-extrabold text-popBlue">0 รายการ</h3></div>
                     <div class="w-9 h-9 bg-popBlue/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-popBlue"><i class="fa-solid fa-list-check"></i></div>
-                </div>
-            </div>
+                </div>            </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
@@ -1381,6 +1387,56 @@
                         <button onclick="clearPetSpeechHistory()" class="text-[10px] font-bold text-hotPink underline">ล้างแชท</button>
                     </div>
                     <div id="petSpeechHistory" class="space-y-2 overflow-y-auto max-h-[200px] flex-1 pr-1 text-xs"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- OFFICE : MY LITTLE OFFICE (ส่วนเสริม ใช้ office.js / office.css) -->
+        <section id="tab-office" class="tab-content hidden space-y-4">
+            <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-building text-popBlue"></i> MY LITTLE OFFICE</h2>
+                    <p id="officeModeBadge" class="text-[11px] font-bold text-gray-500 mt-0.5"></p>
+                </div>
+                <button id="officeMeetingBtn" type="button" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5 self-start sm:self-auto"><i class="fa-solid fa-bullhorn"></i> เรียกประชุม</button>
+            </div>
+
+            <div class="of-stage">
+                <canvas id="officeCanvas" width="400" height="270" aria-label="ออฟฟิศพิกเซลอาร์ต"></canvas>
+                <div id="officeLabels"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
+                    <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">📋 สั่งงานพนักงาน</h3>
+                    <form id="officeForm" class="space-y-2 text-xs">
+                        <div>
+                            <label class="block font-bold mb-0.5" for="officeAgentSelect">มอบหมายให้</label>
+                            <select id="officeAgentSelect" class="w-full bg-offWhite border-2 border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium"></select>
+                            <p id="officeAgentRole" class="text-[10px] text-gray-500 mt-0.5"></p>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-0.5" for="officeTaskInput">งานที่ต้องการ</label>
+                            <textarea id="officeTaskInput" rows="3" maxlength="2000" placeholder="เช่น ช่วยร่างโพสต์เปิดตัวสินค้าใหม่ 3 แบบ" class="w-full bg-offWhite border-2 border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-hotPink text-white font-extrabold py-2 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-center gap-1.5"><i class="fa-solid fa-paper-plane"></i> สั่งงาน</button>
+                    </form>
+                    <details class="text-xs bg-offWhite border-2 border-darkText rounded-xl p-2.5">
+                        <summary class="font-bold cursor-pointer">⚙️ เชื่อม AI จริง (ตั้งค่าขั้นสูง)</summary>
+                        <p class="text-[10px] text-gray-500 mt-1.5">ใส่ URL ของ backend ของคุณ (ต้องเป็น https://) แอปจะส่ง {agentId, task} ไปและรอรับ {text} กลับมา — ไม่ต้องใส่ API key ในหน้านี้ ปล่อยว่างไว้ = โหมดจำลอง</p>
+                        <div class="flex gap-1.5 mt-1.5">
+                            <input type="url" id="officeApiUrl" placeholder="https://your-worker.example.workers.dev" class="flex-1 min-w-0 bg-white border border-darkText rounded-lg px-2 py-1 outline-none">
+                            <button type="button" id="officeApiSave" class="bg-limeGreen text-darkText font-bold px-2.5 rounded-lg border border-darkText">บันทึก</button>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
+                    <div class="flex items-center justify-between border-b border-darkText pb-2">
+                        <h3 class="font-cute font-bold text-base">🗂️ สถานะงาน</h3>
+                        <button type="button" id="officeClearDone" class="text-[10px] font-bold text-hotPink underline">ล้างที่เสร็จแล้ว</button>
+                    </div>
+                    <div id="officeTaskList" class="space-y-2 overflow-y-auto max-h-[420px] pr-1"></div>
                 </div>
             </div>
         </section>
@@ -1940,8 +1996,7 @@
         async function deletePhotoEverywhere(id) {
             try { await idbTx('readwrite', s => s.delete(id)); } catch (e) { console.warn(e); }
             if (currentUser && isFirebaseActive) {
-                try { await withTimeout(photosCol(currentUser.uid).doc(id).delete(), CLOUD_TIMEOUT_MS, 'ลบรูปบนคลาวด์ไม่สำเร็จ'); } catch (e) { console.warn(e); }
-            }
+                try { await withTimeout(photosCol(currentUser.uid).doc(id).delete(), CLOUD_TIMEOUT_MS, 'ลบรูปบนคลาวด์ไม่สำเร็จ'); } catch (e) { console.warn(e); }            }
         }
 
         async function syncPendingPhotos() {
@@ -2727,5 +2782,6 @@
             window.addEventListener('blur', release);
         })();
     </script>
+    <script src="./office.js"></script>
 </body>
 </html>

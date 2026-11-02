@@ -1751,6 +1751,18 @@
                         <button type="button" onclick="selectMoodEmoji('😡')" class="mood-btn p-1.5 rounded-lg border border-transparent" id="mood-😡">😡</button>
                     </div>
                 </div>
+                <div>
+                    <label class="block font-bold mb-1">สีจุดบนปฏิทิน</label>
+                    <div class="flex flex-wrap items-center gap-2" id="eventDotColorPicker">
+                        <button type="button" data-dot-color="#0055FF" onclick="selectEventDotColor('#0055FF')" aria-label="สีน้ำเงิน" class="event-dot-color w-8 h-8 rounded-full border-2 border-darkText" style="background:#0055FF"></button>
+                        <button type="button" data-dot-color="#FF007F" onclick="selectEventDotColor('#FF007F')" aria-label="สีชมพู" class="event-dot-color w-8 h-8 rounded-full border-2 border-darkText" style="background:#FF007F"></button>
+                        <button type="button" data-dot-color="#CCFF00" onclick="selectEventDotColor('#CCFF00')" aria-label="สีเขียว" class="event-dot-color w-8 h-8 rounded-full border-2 border-darkText" style="background:#CCFF00"></button>
+                        <button type="button" data-dot-color="#9D00FF" onclick="selectEventDotColor('#9D00FF')" aria-label="สีม่วง" class="event-dot-color w-8 h-8 rounded-full border-2 border-darkText" style="background:#9D00FF"></button>
+                        <button type="button" data-dot-color="#FFDD00" onclick="selectEventDotColor('#FFDD00')" aria-label="สีเหลือง" class="event-dot-color w-8 h-8 rounded-full border-2 border-darkText" style="background:#FFDD00"></button>
+                        <button type="button" data-dot-color="#16A34A" onclick="selectEventDotColor('#16A34A')" aria-label="สีเขียวเข้ม" class="event-dot-color w-8 h-8 rounded-full border-2 border-darkText" style="background:#16A34A"></button>
+                        <button type="button" data-dot-color="#64748B" onclick="selectEventDotColor('#64748B')" aria-label="สีเทา" class="event-dot-color w-8 h-8 rounded-full border-2 border-darkText" style="background:#64748B"></button>
+                    </div>
+                </div>
                 <div><label class="block font-bold mb-0.5">หัวข้อโน้ต</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้มีความสุข 🌸" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div>
                     <label class="block font-bold mb-0.5">แนบรูป</label>
@@ -2553,23 +2565,11 @@
             if ($('calendarMonthMoodTitle')) $('calendarMonthMoodTitle').innerText = titleLabel;
             if ($('dashCalendarMonthMoodTitle')) $('dashCalendarMonthMoodTitle').innerText = titleLabel;
 
-            let speechText = 'เดือนนี้ยังไม่มีการบันทึกโน้ตหรืออารมณ์เลย ลองกดเพิ่มไดอารี่ดูสิคะ! 🌸';
-            let avatar = state.pet.avatar || '🐱';
-
-            if (monthEvents.length > 0) {
-                const moods = monthEvents.map(e => e.mood).filter(Boolean);
-                const count = monthEvents.length;
-                if (moods.includes('🥰') || moods.includes('😊')) {
-                    speechText = `เดือนนี้แฮปปี้สุดๆ มีเรื่องราวดีๆ บันทึกไว้ ${count} วันเลย! 💖✨`;
-                    avatar = '😺';
-                } else if (moods.includes('😭') || moods.includes('😡')) {
-                    speechText = `เดือนนี้ดูเหมือนจะเหนื่อยหรือมีเรื่องให้เครียด ${count} วัน สู้ๆ นะคะ! 💪`;
-                    avatar = '😿';
-                } else {
-                    speechText = `เดือนนี้บันทึกความทรงจำไว้ ${count} วันแล้ว เยี่ยมมาก! 📝`;
-                    avatar = '🐱';
-                }
-            }
+            const uniqueDays = new Set(monthEvents.map(e => e.date).filter(Boolean)).size;
+            const noteCount = monthEvents.length;
+            const speechText = noteCount
+                ? `เดือนนี้มีบันทึก ${uniqueDays} วัน รวม ${noteCount} โน้ต`
+                : 'เดือนนี้ยังไม่มีบันทึกไดอารี่';
 
             if ($('calendarMonthMoodSummary')) $('calendarMonthMoodSummary').innerText = speechText;
             if ($('dashCalendarMonthMoodSummary')) $('dashCalendarMonthMoodSummary').innerText = speechText;
@@ -3176,8 +3176,17 @@
             }
         }
 
-        let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊';
+        let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊', selectedEventDotColor = '#0055FF';
         function selectMoodEmoji(emoji) { selectedMood = emoji; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('mood-btn-selected', b.id === 'mood-' + emoji)); }
+        function selectEventDotColor(color) {
+            selectedEventDotColor = color;
+            document.querySelectorAll('.event-dot-color').forEach(button => {
+                const active = button.dataset.dotColor === color;
+                button.style.outline = active ? '3px solid #1A1A1A' : 'none';
+                button.style.outlineOffset = active ? '2px' : '0';
+                button.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+        }
         let editingEventId = null;
         let selectedEventPhotoData = null;
         let removeExistingEventPhoto = false;
@@ -3253,6 +3262,7 @@
             showEventPhotoPreview(null);
             const existing = editId ? state.events.find(e => e.id === editId) : null;
             selectMoodEmoji(existing?.mood || '😊');
+            selectEventDotColor(existing?.dotColor || '#0055FF');
             $('eventDate').value = existing?.date || presetDate || localDateKey();
             $('eventTitle').value = existing?.title || '';
             const heading = $('eventModal').querySelector('h3');
@@ -3284,6 +3294,7 @@
             const eventData = existing || { id: eventId, date, mood: selectedMood, title, hasPhoto: false };
             eventData.date = date;
             eventData.mood = selectedMood;
+            eventData.dotColor = selectedEventDotColor;
             eventData.title = title;
             try {
                 if (selectedEventPhotoData) {
@@ -3372,9 +3383,8 @@
                             <span class="text-[10px] font-bold">${day}</span>
                             ${holidayName ? `<span class="w-2 h-2 rounded-full bg-hotPink shrink-0" title="${esc(holidayName)}"></span>` : ''}
                         </div>
-                        <div class="space-y-0.5 overflow-y-auto flex-1">
-                            ${holidayName ? `<div class="text-[7px] bg-pink-100 text-hotPink px-1 rounded border border-hotPink/30 truncate font-bold">${esc(holidayName)}</div>` : ''}
-                            ${evs.map(ev => `<div class="text-[8px] bg-white px-1 rounded border border-darkText truncate font-bold">${ev.mood} ${esc(ev.title)}</div>`).join('')}
+                        <div class="flex-1 flex items-end justify-center pb-1 min-h-0">
+                            ${evs.length ? `<div class="flex flex-wrap justify-center items-center gap-1 max-w-full">${evs.slice(0,4).map(ev => `<span class="w-2.5 h-2.5 rounded-full border border-darkText/30 shrink-0" style="background:${/^#[0-9A-Fa-f]{6}$/.test(ev.dotColor || '') ? ev.dotColor : '#0055FF'}" title="${esc(ev.title)}"></span>`).join('')}${evs.length > 4 ? `<span class="text-[8px] font-bold text-gray-600">+${evs.length-4}</span>` : ''}</div>` : ''}
                         </div>
                     </div>`;
             }

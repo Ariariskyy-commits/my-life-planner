@@ -2178,7 +2178,7 @@
                     if (user) {
                         await activateAllowedUser(user);
                     } else {
-                        clearPrivateSession('กรุณาเข้าสู่ระบบด้วย ' + ALLOWED_EMAIL + ' เพื่อดูข้อมูลส่วนตัว');
+                        clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
                         setSyncStatus('ออกจากระบบแล้ว · ข้อมูลถูกล็อกไว้');
                     }
                 });

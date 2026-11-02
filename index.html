@@ -1017,14 +1017,19 @@
                     <div class="w-9 h-9 bg-popBlue/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-popBlue"><i class="fa-solid fa-list-check"></i></div>
                 </button>            </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
-                    <h3 class="font-cute font-bold text-base mb-3 flex items-center gap-2"><i class="fa-solid fa-chart-pie text-popBlue"></i> สัดส่วนรายจ่ายตามหมวดหมู่ (ทั้งหมด)</h3>
-                    <div class="relative flex-1 flex items-center justify-center min-h-[220px]"><canvas id="expenseCategoryChart"></canvas></div>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 items-stretch">
+                <div class="min-w-0 bg-white text-darkText p-3 sm:p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
+                    <h3 class="font-cute font-bold text-sm sm:text-base leading-snug mb-3 flex items-start gap-2 min-h-[2.5rem]"><i class="fa-solid fa-chart-pie text-popBlue mt-0.5 shrink-0"></i><span>สัดส่วนรายจ่ายตามหมวดหมู่</span></h3>
+                    <div class="relative w-full h-[230px] sm:h-[260px]"><canvas id="expenseCategoryChart"></canvas></div>
                 </div>
-                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
-                    <h3 class="font-cute font-bold text-base mb-3 flex items-center gap-2"><i class="fa-solid fa-chart-bar text-retroPurple"></i> สัดส่วนบิลเตรียมจ่าย (ที่ต้องจ่าย)</h3>
-                    <div class="relative flex-1 flex items-center justify-center min-h-[220px]"><canvas id="billsCategoryChart"></canvas></div>
+                <div class="min-w-0 bg-white text-darkText p-3 sm:p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
+                    <h3 class="font-cute font-bold text-sm sm:text-base leading-snug mb-3 flex items-start gap-2 min-h-[2.5rem]"><i class="fa-solid fa-chart-bar text-retroPurple mt-0.5 shrink-0"></i><span>สัดส่วนบิลเตรียมจ่าย</span></h3>
+                    <div class="relative w-full h-[230px] sm:h-[260px]"><canvas id="billsCategoryChart"></canvas></div>
+                </div>
+                <div class="min-w-0 xl:col-span-2 bg-white text-darkText p-3 sm:p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
+                    <h3 class="font-cute font-bold text-sm sm:text-base leading-snug mb-3 flex items-start gap-2 min-h-[2.5rem]"><i class="fa-solid fa-hand-holding-dollar text-green-600 mt-0.5 shrink-0"></i><span>สัดส่วนเงินเตรียมรับตามหมวดหมู่</span></h3>
+                    <div class="relative w-full h-[240px] sm:h-[280px]"><canvas id="receivablesCategoryChart"></canvas></div>
+                    <p class="text-[10px] text-gray-500 mt-2">แสดงเฉพาะรายการที่ยังรอรับเงิน โดยรวมยอดตามหมวดหมู่</p>
                 </div>
             </div>
 
@@ -3298,11 +3303,11 @@
             $('dashNetBalance').innerText = '฿ ' + money(net);
             $('dashTotalIncome').innerText = '฿ ' + money(inc);
             $('dashTotalExpense').innerText = '฿ ' + money(exp);
-            renderExpenseChart(); renderBillsChart();
+            renderExpenseChart(); renderBillsChart(); renderReceivablesChart();
             updatepetCalendarMoodDisplay();
         }
 
-        let expenseChartInstance = null, billsChartInstance = null;
+        let expenseChartInstance = null, billsChartInstance = null, receivablesChartInstance = null;
         function renderExpenseChart() {
             const canvas = $('expenseCategoryChart');
             if (!canvas || typeof Chart === 'undefined') return;
@@ -3312,6 +3317,55 @@
                 type: 'doughnut',
                 data: { labels: Object.keys(map).length ? Object.keys(map) : ['ไม่มีรายจ่าย'], datasets: [{ data: Object.keys(map).length ? Object.values(map) : [1], backgroundColor: ['#FF007F', '#0055FF', '#CCFF00', '#FFDD00', '#9D00FF'] }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function renderReceivablesChart() {
+            const canvas = $('receivablesCategoryChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+            const map = {};
+            (state.receivables || []).filter(r => !r.received).forEach(r => {
+                const category = (r.category || '💸 ยืมเงิน').trim() || 'ไม่ระบุหมวด';
+                map[category] = (map[category] || 0) + Number(r.amount || 0);
+            });
+            if (receivablesChartInstance) receivablesChartInstance.destroy();
+            const hasData = Object.keys(map).length > 0;
+            receivablesChartInstance = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: hasData ? Object.keys(map) : ['ยังไม่มีรายการรอรับ'],
+                    datasets: [{
+                        label: 'ยอดเงินที่รอรับ (บาท)',
+                        data: hasData ? Object.values(map) : [0],
+                        backgroundColor: '#16A34A',
+                        borderColor: '#166534',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        barThickness: 'flex',
+                        maxBarThickness: 34
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: context => ' ฿ ' + money(context.parsed.x) } }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { font: { family: 'Prompt', size: 10 }, callback: value => '฿' + Number(value).toLocaleString('th-TH') },
+                            grid: { color: 'rgba(26,26,26,.08)' }
+                        },
+                        y: {
+                            ticks: { autoSkip: false, font: { family: 'Prompt', size: 11 }, color: '#1A1A1A' },
+                            grid: { display: false }
+                        }
+                    }
+                }
             });
         }
 

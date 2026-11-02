@@ -1083,29 +1083,38 @@
             </div>
         </section>
 
-        <!-- BILLS -->
+        <!-- BILLS: แยกเตรียมจ่าย / เตรียมรับเป็นสองบล็อก -->
         <section id="tab-bills" class="tab-content hidden space-y-4">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <div>
-                    <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย</h2>
-                    <p class="text-xs font-bold text-retroPurple mt-0.5" id="billsTotalSummaryText">ยอดรวมที่ต้องเตรียมจ่าย: ฿ 0.00</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+                <!-- บล็อกซ้าย: เตรียมจ่าย -->
+                <div class="min-w-0 space-y-3">
+                    <div class="flex flex-col gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
+                        <div>
+                            <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย</h2>
+                            <p class="text-xs font-bold text-retroPurple mt-0.5" id="billsTotalSummaryText">ยอดรวมที่ต้องเตรียมจ่าย: ฿ 0.00</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" onclick="openBillHistoryModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติจ่ายบิล</button>
+                            <button type="button" onclick="openBillModal()" class="bg-retroPurple text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มบิล</button>
+                        </div>
+                    </div>
+                    <p class="text-[11px] font-bold text-gray-500 px-1">กด “จ่าย” เพื่อบันทึกเป็นรายจ่ายอัตโนมัติ</p>
+                    <div id="billsCategorySummary" class="space-y-2"></div>
+                    <div class="grid grid-cols-1 gap-3" id="billsGrid"></div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="openBillHistoryModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติจ่ายบิล</button>
-                    <button onclick="openBillModal()" class="bg-retroPurple text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มบิล</button>
-                </div>
-            </div>
-            <p class="text-[11px] font-bold text-gray-500">กด "จ่าย" เพื่อบันทึกเป็นรายจ่ายอัตโนมัติ (กดจ่ายแล้วบิลจะซ่อนจากหน้านี้ สามารถดูประวัติได้ที่ปุ่มด้านบน)</p>
-            <div id="billsCategorySummary" class="space-y-2"></div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="billsGrid"></div>
 
-            <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div><h3 class="font-extrabold text-lg flex items-center gap-2"><i class="fa-solid fa-hand-holding-dollar text-green-600"></i> รายการเตรียมรับ</h3><p id="receivablesSummary" class="text-xs font-bold text-green-700 mt-0.5">ยอดเงินที่รอรับ: ฿ 0.00</p></div>
-                    <button type="button" onclick="openReceivableModal()" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มรายการเตรียมรับ</button>
+                <!-- บล็อกขวา: เตรียมรับ -->
+                <div class="min-w-0 space-y-3">
+                    <div class="flex flex-col gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
+                        <div>
+                            <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-hand-holding-dollar text-green-600"></i> รายการเตรียมรับ</h2>
+                            <p id="receivablesSummary" class="text-xs font-bold text-green-700 mt-0.5">ยอดเงินที่รอรับ: ฿ 0.00</p>
+                        </div>
+                        <button type="button" onclick="openReceivableModal()" class="self-start bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มรายการเตรียมรับ</button>
+                    </div>
+                    <p class="text-[11px] text-gray-500 px-1">บันทึกเงินที่มีคนยืม หรือเงินที่กำลังจะได้รับ กด “รับเงินแล้ว” เพื่อบันทึกเป็นรายรับอัตโนมัติ</p>
+                    <div id="receivablesGrid" class="grid grid-cols-1 gap-3"></div>
                 </div>
-                <p class="text-[11px] text-gray-500">บันทึกเงินที่มีคนยืม หรือเงินที่กำลังจะได้รับ กด “รับเงินแล้ว” เพื่อบันทึกเป็นรายรับอัตโนมัติ</p>
-                <div id="receivablesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
             </div>
         </section>
 

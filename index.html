@@ -2012,7 +2012,8 @@
             } catch (e) { console.warn(e); }
         }
 
-        const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show', headerCollapsed:'y2k_header_collapsed' };
+        // Legacy keys are retained for a one-time, non-destructive migration.
+        const LEGACY_KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show', headerCollapsed:'y2k_header_collapsed' };
         const DEFAULT_CATEGORIES = [
             "🍔 อาหาร/เครื่องดื่ม", "🛍️ ช้อปปิ้ง", "🚗 เดินทาง",
             "🎮 บันเทิง/เกม", "💡 บิล/ค่าใช้จ่าย", "💰 เงินเดือน/รายรับ", "✨ อื่นๆ"
@@ -2022,42 +2023,82 @@
             speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭',
             speechHistory: [{ time: 'เริ่มต้น', text: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭' }]
         });
+        function makeDefaultState() {
+            return {
+                theme: 'y2k', transactions: [], bills: [], tasks: [], events: [],
+                calcHistory: [], categories: [...DEFAULT_CATEGORIES], pet: makeDefaultPet(),
+                quickNotes: [], quickNoteShow: true, headerCollapsed: false
+            };
+        }
         function readLS(key, fallback) {
             try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
         }
+        function scopedKeys(uid) {
+            const prefix = 'y2k_user_' + uid + '_';
+            return {
+                transactions: prefix+'transactions', bills: prefix+'bills', tasks: prefix+'tasks',
+                events: prefix+'events', calcHistory: prefix+'calchistory', pet: prefix+'pet',
+                theme: prefix+'theme', categories: prefix+'categories', quickNotes: prefix+'quicknotes',
+                quickNoteShow: prefix+'quicknote_show', headerCollapsed: prefix+'header_collapsed',
+                migrated: prefix+'legacy_migrated'
+            };
+        }
+        let state = makeDefaultState();
+        let activeStorageKeys = null, activeStorageUid = null, dataReady = false;
 
-        let state = {
-            theme: localStorage.getItem(KEYS.theme) || 'y2k',
-            transactions: readLS(KEYS.transactions, []),
-            bills: readLS(KEYS.bills, []),
-            tasks: readLS(KEYS.tasks, []),
-            events: readLS(KEYS.events, []),
-            calcHistory: readLS(KEYS.calcHistory, []),
-            categories: readLS(KEYS.categories, DEFAULT_CATEGORIES),
-            pet: Object.assign(makeDefaultPet(), readLS(KEYS.pet, {})),
-            quickNotes: readLS(KEYS.quickNotes, []),
-            quickNoteShow: localStorage.getItem(KEYS.quickNoteShow) !== 'false',
-            headerCollapsed: localStorage.getItem(KEYS.headerCollapsed) === 'true'
-        };
-        if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
+        function loadLocalForUser(uid) {
+            const keys = scopedKeys(uid);
+            try {
+                if (localStorage.getItem(keys.migrated) !== 'true') {
+                    // Copy old device data into the authorized account namespace; never delete the originals.
+                    for (const name of Object.keys(LEGACY_KEYS)) {
+                        const oldValue = localStorage.getItem(LEGACY_KEYS[name]);
+                        if (oldValue !== null && localStorage.getItem(keys[name]) === null) {
+                            localStorage.setItem(keys[name], oldValue);
+                        }
+                    }
+                    localStorage.setItem(keys.migrated, 'true');
+                }
+            } catch (e) { console.warn('Local data migration skipped:', e); }
+            activeStorageKeys = keys;
+            activeStorageUid = uid;
+            state = {
+                theme: localStorage.getItem(keys.theme) || 'y2k',
+                transactions: readLS(keys.transactions, []),
+                bills: readLS(keys.bills, []),
+                tasks: readLS(keys.tasks, []),
+                events: readLS(keys.events, []),
+                calcHistory: readLS(keys.calcHistory, []),
+                categories: readLS(keys.categories, [...DEFAULT_CATEGORIES]),
+                pet: Object.assign(makeDefaultPet(), readLS(keys.pet, {})),
+                quickNotes: readLS(keys.quickNotes, []),
+                quickNoteShow: localStorage.getItem(keys.quickNoteShow) !== 'false',
+                headerCollapsed: localStorage.getItem(keys.headerCollapsed) === 'true'
+            };
+            if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
+            dataReady = true;
+        }
 
         function saveLocal() {
+            if (!dataReady || !currentUser || !activeStorageKeys || activeStorageUid !== currentUser.uid ||
+                (currentUser.email || '').toLowerCase() !== ALLOWED_EMAIL) return;
             try {
-                localStorage.setItem(KEYS.transactions, JSON.stringify(state.transactions));
-                localStorage.setItem(KEYS.bills, JSON.stringify(state.bills));
-                localStorage.setItem(KEYS.tasks, JSON.stringify(state.tasks));
-                localStorage.setItem(KEYS.events, JSON.stringify(state.events));
-                localStorage.setItem(KEYS.calcHistory, JSON.stringify(state.calcHistory));
-                localStorage.setItem(KEYS.categories, JSON.stringify(state.categories));
-                localStorage.setItem(KEYS.pet, JSON.stringify(state.pet));
-                localStorage.setItem(KEYS.theme, state.theme);
-                localStorage.setItem(KEYS.quickNotes, JSON.stringify(state.quickNotes));
-                localStorage.setItem(KEYS.quickNoteShow, String(state.quickNoteShow));
-                localStorage.setItem(KEYS.headerCollapsed, String(state.headerCollapsed));
+                localStorage.setItem(activeStorageKeys.transactions, JSON.stringify(state.transactions));
+                localStorage.setItem(activeStorageKeys.bills, JSON.stringify(state.bills));
+                localStorage.setItem(activeStorageKeys.tasks, JSON.stringify(state.tasks));
+                localStorage.setItem(activeStorageKeys.events, JSON.stringify(state.events));
+                localStorage.setItem(activeStorageKeys.calcHistory, JSON.stringify(state.calcHistory));
+                localStorage.setItem(activeStorageKeys.categories, JSON.stringify(state.categories));
+                localStorage.setItem(activeStorageKeys.pet, JSON.stringify(state.pet));
+                localStorage.setItem(activeStorageKeys.theme, state.theme);
+                localStorage.setItem(activeStorageKeys.quickNotes, JSON.stringify(state.quickNotes));
+                localStorage.setItem(activeStorageKeys.quickNoteShow, String(state.quickNoteShow));
+                localStorage.setItem(activeStorageKeys.headerCollapsed, String(state.headerCollapsed));
             } catch (e) { console.error(e); }
         }
 
         function saveData() {
+            if (!dataReady || !currentUser || !activeStorageKeys || activeStorageUid !== currentUser.uid) return;
             saveLocal();
             scheduleCloudSave();
         }
@@ -2065,6 +2106,10 @@
         let auth = null, db = null, currentUser = null, isFirebaseActive = false, syncTimer = null;
         let googleLoginInProgress = false;
         const ALLOWED_EMAIL = 'arisky.studio@gmail.com';
+        window.getOfficeFirebaseIdToken = async function () {
+            if (!dataReady || !currentUser || !currentUser.email || currentUser.email.toLowerCase() !== ALLOWED_EMAIL) return null;
+            return await currentUser.getIdToken();
+        };
 
         function setSyncStatus(text) { $('syncStatus').innerText = text; }
         function isAllowedUser(user) {
@@ -2087,6 +2132,27 @@
             const panel = document.getElementById('accountAccessLock');
             if (panel) panel.style.display = 'none';
         }
+        function clearPrivateSession(message) {
+            clearTimeout(syncTimer);
+            currentUser = null;
+            activeStorageKeys = null;
+            activeStorageUid = null;
+            dataReady = false;
+            state = makeDefaultState();
+            renderAuthUI();
+            refreshUI();
+            showAccessLock(message || 'กรุณาเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต');
+        }
+        async function activateAllowedUser(user) {
+            if (!isAllowedUser(user)) return;
+            if (dataReady && activeStorageUid === user.uid && currentUser && currentUser.uid === user.uid) return;
+            currentUser = user;
+            loadLocalForUser(user.uid);
+            renderAuthUI();
+            refreshUI();
+            hideAccessLock();
+            await pullFromCloud(user.uid);
+        }
 
         async function initFirebase() {
             showAccessLock('กำลังตรวจสอบสิทธิ์การเข้าใช้งาน…');
@@ -2101,34 +2167,26 @@
                 db = firebase.firestore();
                 try { await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch {}
                 isFirebaseActive = true;
+
                 auth.onAuthStateChanged(async user => {
                     if (user && !isAllowedUser(user)) {
-                        currentUser = null;
-                        renderAuthUI();
-                        showAccessLock('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
+                        clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
                         setSyncStatus('ไม่มีสิทธิ์เข้าใช้งานแอปนี้');
                         try { await auth.signOut(); } catch {}
                         alert('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
                         return;
                     }
                     if (user) {
-                        const isNewUser = !currentUser || currentUser.uid !== user.uid;
-                        currentUser = user;
-                        renderAuthUI();
-                        hideAccessLock();
-                        if (isNewUser) await pullFromCloud(user.uid);
+                        await activateAllowedUser(user);
                     } else {
-                        currentUser = null;
-                        renderAuthUI();
-                        showAccessLock('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
+                        clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
                         setSyncStatus('ออกจากระบบแล้ว · ข้อมูลถูกล็อกไว้');
                     }
                 });
                 setSyncStatus('กำลังตรวจสอบบัญชี Google…');
             } catch (error) {
                 isFirebaseActive = false;
-                currentUser = null;
-                showAccessLock('เชื่อมต่อ Firebase ไม่สำเร็จ จึงล็อกข้อมูลไว้เพื่อความเป็นส่วนตัว');
+                clearPrivateSession('เชื่อมต่อ Firebase ไม่สำเร็จ จึงล็อกข้อมูลไว้เพื่อความเป็นส่วนตัว');
                 setSyncStatus('เชื่อมต่อ Firebase ไม่สำเร็จ ⚠️');
             }
         }
@@ -2154,33 +2212,22 @@
                 const result = await auth.signInWithPopup(provider);
                 if (result && result.user) {
                     if (!isAllowedUser(result.user)) {
-                        currentUser = null;
-                        renderAuthUI();
-                        showAccessLock('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
+                        clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
                         await auth.signOut();
                         alert('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
                         return;
                     }
-                    currentUser = result.user;
-                    renderAuthUI();
-                    hideAccessLock();
-                    await pullFromCloud(result.user.uid);
+                    await activateAllowedUser(result.user);
                     showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
                 }
             } catch (error) {
-                showAccessLock('กรุณาเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต');
                 alert('ล็อกอินไม่สำเร็จ: ' + error.message);
             } finally { googleLoginInProgress = false; }
         }
 
         async function logoutGoogle() {
             if (!auth) return;
-            showAccessLock('กำลังออกจากระบบและล็อกข้อมูลส่วนตัว…');
-            currentUser = null;
-            renderAuthUI();
-            try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch {
-                showAccessLock('ข้อมูลถูกล็อกไว้ กรุณาตรวจสอบสถานะการเข้าสู่ระบบ');
-            }
+            try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch {}
         }
 
         function scheduleCloudSave() {

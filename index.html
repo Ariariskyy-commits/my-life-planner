@@ -883,6 +883,27 @@
 }
 </style>
 
+<style id="transaction-history-soft-cards">
+.transaction-history-wrap { width:100%; min-width:0; }
+.transaction-history-table { border-collapse:separate; border-spacing:0 7px; }
+.transaction-history-table thead th { white-space:nowrap; color:#555; font-size:11px; }
+.transaction-history-row { background:#F9F9FB; }
+.transaction-history-row td { border-top:1px solid rgba(26,26,26,.12); border-bottom:1px solid rgba(26,26,26,.12); vertical-align:middle; }
+.transaction-history-row td:first-child { border-left:1px solid rgba(26,26,26,.12); border-radius:12px 0 0 12px; }
+.transaction-history-row td:last-child { border-right:1px solid rgba(26,26,26,.12); border-radius:0 12px 12px 0; }
+@media(max-width:640px) {
+ .transaction-history-wrap { overflow:visible; }
+ .transaction-history-table, .transaction-history-table tbody { display:block; width:100%; }
+ .transaction-history-table thead { display:none; }
+ .transaction-history-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0 12px; margin:0 0 10px; padding:8px 11px; border:1.5px solid #D9DDE7; border-radius:16px; background:#fff; box-shadow:0 3px 0 rgba(26,26,26,.12); }
+ .transaction-history-row td { display:flex; flex-direction:column; align-items:flex-start; justify-content:center; min-width:0; padding:7px 2px !important; border:0 !important; border-radius:0 !important; text-align:left !important; overflow-wrap:anywhere; }
+ .transaction-history-row td::before { content:attr(data-label); margin-bottom:3px; color:#9297A5; font-size:9px; font-weight:600; }
+ .transaction-history-row td:nth-child(4) { font-weight:700; }
+ .transaction-history-row td:nth-child(5) { color:inherit; }
+ .transaction-history-row td:nth-child(6) { align-items:flex-end; flex-direction:row; justify-content:flex-start; gap:14px; }
+ .transaction-history-row td:nth-child(6)::before { margin-right:auto; }
+}
+</style>
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
@@ -1189,19 +1210,19 @@
                         <input type="text" id="finSearch" oninput="renderTransactions()" placeholder="ค้นหารายการ..." class="bg-offWhite border-2 border-darkText font-medium text-xs rounded-xl px-2 py-1.5 outline-none w-full sm:w-48">
                     </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs">
+                <div class="transaction-history-wrap">
+                    <table class="transaction-history-table w-full text-left text-xs">
                         <thead>
-                            <tr class="bg-offWhite border-b-2 border-darkText font-bold">
-                                <th class="p-2.5 border-r border-darkText">วันที่</th>
-                                <th class="p-2.5 border-r border-darkText">ประเภท</th>
-                                <th class="p-2.5 border-r border-darkText">หมวดหมู่</th>
-                                <th class="p-2.5 border-r border-darkText">รายการ</th>
-                                <th class="p-2.5 border-r border-darkText text-right">จำนวน (฿)</th>
+                            <tr class="bg-offWhite font-bold">
+                                <th class="p-2.5">วันที่</th>
+                                <th class="p-2.5">ประเภท</th>
+                                <th class="p-2.5">หมวดหมู่</th>
+                                <th class="p-2.5">รายการ</th>
+                                <th class="p-2.5 text-right">จำนวน (฿)</th>
                                 <th class="p-2.5 text-center">จัดการ</th>
                             </tr>
                         </thead>
-                        <tbody id="transactionTableBody" class="divide-y divide-darkText font-medium"></tbody>
+                        <tbody id="transactionTableBody" class="font-medium"></tbody>
                     </table>
                 </div>
             </div>
@@ -2950,13 +2971,13 @@
 
             const filtered = state.transactions.filter(t => (filterType === 'all' || t.type === filterType) && (t.title.toLowerCase().includes(search) || t.category.toLowerCase().includes(search)));
             $('transactionTableBody').innerHTML = filtered.length ? filtered.map(t => `
-                <tr class="hover:bg-offWhite transition-all">
-                    <td class="p-2.5 border-r border-darkText">${esc(t.date)}</td>
-                    <td class="p-2.5 border-r border-darkText"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.type === 'income' ? 'bg-limeGreen/30 text-green-800' : 'bg-hotPink/20 text-hotPink'}">${t.type === 'income' ? 'รับ' : 'จ่าย'}</span></td>
-                    <td class="p-2.5 border-r border-darkText">${esc(t.category)}</td>
-                    <td class="p-2.5 border-r border-darkText font-bold">${esc(t.title)}</td>
-                    <td class="p-2.5 border-r border-darkText text-right font-extrabold ${t.type === 'income' ? 'text-green-600' : 'text-hotPink'}">${t.type === 'income' ? '+' : '-'}฿ ${money(t.amount)}</td>
-                    <td class="p-2.5 text-center flex items-center justify-center gap-2">
+                <tr class="transaction-history-row">
+                    <td data-label="วันที่" class="p-2.5">${esc(t.date)}</td>
+                    <td data-label="ประเภท" class="p-2.5"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${t.type === 'income' ? 'bg-limeGreen/30 text-green-800' : 'bg-hotPink/20 text-hotPink'}">${t.type === 'income' ? 'รายรับ' : 'รายจ่าย'}</span></td>
+                    <td data-label="หมวดหมู่" class="p-2.5">${esc(t.category)}</td>
+                    <td data-label="รายการ" class="p-2.5 font-bold">${esc(t.title)}</td>
+                    <td data-label="จำนวนเงิน" class="p-2.5 font-extrabold ${t.type === 'income' ? 'text-green-600' : 'text-hotPink'}">${t.type === 'income' ? '+' : '-'}฿ ${money(t.amount)}</td>
+                    <td data-label="จัดการ" class="p-2.5 text-center flex items-center justify-center gap-3">
                         <button onclick="openTransactionModal('${t.type}', '${t.id}')" class="text-popBlue"><i class="fa-solid fa-pen-to-square"></i></button>
                         <button onclick="deleteTransaction('${t.id}')" class="text-hotPink"><i class="fa-solid fa-trash-can"></i></button>
                     </td>

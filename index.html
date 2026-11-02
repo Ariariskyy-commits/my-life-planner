@@ -1806,6 +1806,15 @@
                         <input type="file" id="eventPhotoInput" accept="image/*" onchange="handlePhotoSelection(event)" class="hidden">
                     </label>
                     <p id="photoHint" class="text-[10px] text-gray-500 mt-1"></p>
+                    <div id="photoBadgePicker" class="hidden mt-2 rounded-lg border border-gray-200 bg-white p-2">
+                        <label class="block text-[10px] font-bold mb-1">ไอคอนบอกว่ามีรูปภาพแนบ</label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="selectEventPhotoBadge('📗')" data-photo-badge="📗" class="event-photo-badge rounded-lg border border-darkText px-3 py-1 text-2xl bg-limeGreen">📗</button>
+                            <button type="button" onclick="selectEventPhotoBadge('📘')" data-photo-badge="📘" class="event-photo-badge rounded-lg border border-darkText px-3 py-1 text-2xl bg-offWhite">📘</button>
+                            <button type="button" onclick="selectEventPhotoBadge('📙')" data-photo-badge="📙" class="event-photo-badge rounded-lg border border-darkText px-3 py-1 text-2xl bg-offWhite">📙</button>
+                            <span class="text-[10px] text-gray-500">ค่าเริ่มต้น 📗 เปลี่ยนเองได้</span>
+                        </div>
+                    </div>
                     <div id="photoPreviewArea" class="hidden relative mt-2">
                         <img id="eventPhotoPreview" class="w-full h-32 object-cover rounded-lg border border-darkText">
                         <button type="button" onclick="removeSelectedPhoto()" class="absolute top-1 right-1 bg-hotPink text-white w-6 h-6 rounded-full border border-darkText text-[10px]">✕</button>
@@ -3220,8 +3229,22 @@
             }
         }
 
-        let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊', selectedEventDotColor = '#0055FF', selectedEventSticker = '', selectedEventMarkerShape = 'circle', calendarHolidayMarkerColor = '#FF0000';
+        let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊', selectedEventDotColor = '#0055FF', selectedEventSticker = '', selectedEventMarkerShape = 'circle', calendarHolidayMarkerColor = '#FF0000', selectedEventPhotoBadge = '📗';
         function selectMoodEmoji(emoji) { selectedMood = emoji; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('mood-btn-selected', b.id === 'mood-' + emoji)); }
+        function selectEventPhotoBadge(badge) {
+            selectedEventPhotoBadge = ['📗','📘','📙'].includes(badge) ? badge : '📗';
+            document.querySelectorAll('.event-photo-badge').forEach(button => {
+                const active = button.dataset.photoBadge === selectedEventPhotoBadge;
+                button.classList.toggle('bg-limeGreen', active);
+                button.classList.toggle('bg-offWhite', !active);
+                button.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+        }
+        function updatePhotoBadgePicker() {
+            const picker = $('photoBadgePicker');
+            if (picker) picker.classList.toggle('hidden', !(selectedEventPhotoData || (editingEventId && state.events.find(x => x.id === editingEventId)?.hasPhoto)));
+        }
+
         function selectEventMarkerShape(shape) {
             selectedEventMarkerShape = shape;
             document.querySelectorAll('.event-marker-shape').forEach(button => {
@@ -3314,6 +3337,7 @@
                 selectedEventPhotoData = await readAndResizeEventPhoto(file);
                 removeExistingEventPhoto = false;
                 showEventPhotoPreview(selectedEventPhotoData);
+                updatePhotoBadgePicker();
             } catch (error) {
                 selectedEventPhotoData = null;
                 showEventPhotoPreview(null);
@@ -3326,6 +3350,7 @@
             selectedEventPhotoData = null;
             removeExistingEventPhoto = true;
             showEventPhotoPreview(null);
+            updatePhotoBadgePicker();
         }
 
         async function openEventModal(presetDate, editId = null) {
@@ -3339,12 +3364,14 @@
             selectEventDotColor(existing?.dotColor || '#0055FF');
             selectEventSticker(existing?.sticker || '');
             selectEventMarkerShape(existing?.markerShape || 'circle');
+            selectEventPhotoBadge(existing?.photoBadge || '📗');
             $('eventDate').value = existing?.date || presetDate || localDateKey();
             $('eventTitle').value = existing?.title || '';
             const heading = $('eventModal').querySelector('h3');
             if (heading) heading.innerText = existing ? '✏️ แก้ไขไดอารี่' : '📸 บันทึกไดอารี่';
             $('eventSubmitBtn').innerText = existing ? 'บันทึกการแก้ไข' : 'บันทึก';
             openModal('eventModal');
+            updatePhotoBadgePicker();
             if (existing?.hasPhoto) {
                 try {
                     const photo = await getPhotoData(existing.id);
@@ -3373,6 +3400,7 @@
             eventData.dotColor = selectedEventDotColor;
             eventData.sticker = selectedEventSticker;
             eventData.markerShape = selectedEventMarkerShape;
+            eventData.photoBadge = selectedEventPhotoBadge || '📗';
             eventData.title = title;
             try {
                 if (selectedEventPhotoData) {
@@ -3511,7 +3539,7 @@ ${decorations.length ? `<div class="flex flex-wrap justify-center items-center g
             $('eventsListSidebar').innerHTML = holidayNotice + (list.length ? list.map(ev => `
                 <div onclick="viewEventDetails('${ev.id}')" class="bg-offWhite p-2.5 rounded-xl border border-darkText cursor-pointer hover:bg-white text-xs">
                     <span class="text-[10px]">${ev.mood} <b>${esc(ev.date)}</b></span>
-                    <h4 class="font-bold text-popBlue truncate">${esc(ev.title)}</h4>
+                    <div class="flex items-center gap-1.5 min-w-0"><h4 class="font-bold text-popBlue truncate">${esc(ev.title)}</h4>${ev.hasPhoto ? `<span class="text-lg leading-none shrink-0" title="มีรูปภาพแนบ">${['📗','📘','📙'].includes(ev.photoBadge) ? ev.photoBadge : '📗'}</span>` : ''}</div>
                 </div>`).join('') : (!holidayNotice ? `<div class="text-center py-6 text-gray-400 text-xs">ไม่มีโน้ต</div>` : ''));
         }
 

@@ -2230,7 +2230,7 @@
         }
 
         function scheduleCloudSave() {
-            if (!currentUser || !db) return;
+            if (!dataReady || !isAllowedUser(currentUser) || !activeStorageUid || activeStorageUid !== currentUser.uid || !db) return;
             clearTimeout(syncTimer);
             setSyncStatus('กำลังซิงก์...');
             syncTimer = setTimeout(pushToCloud, 800);

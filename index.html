@@ -1763,6 +1763,13 @@
                         <button type="button" data-dot-color="#64748B" onclick="selectEventDotColor('#64748B')" aria-label="สีเทา" class="event-dot-color w-8 h-8 rounded-full border-2 border-darkText" style="background:#64748B"></button>
                     </div>
                 </div>
+                <div>
+                    <label class="block font-bold mb-1">สติกเกอร์ประจำโน้ต</label>
+                    <div id="eventStickerPicker" class="grid grid-cols-7 gap-1.5">
+                        <button type="button" data-sticker="" onclick="selectEventSticker('')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">ไม่มี</button><button type="button" data-sticker="🌸" onclick="selectEventSticker('🌸')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🌸</button><button type="button" data-sticker="⭐" onclick="selectEventSticker('⭐')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">⭐</button><button type="button" data-sticker="💖" onclick="selectEventSticker('💖')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">💖</button><button type="button" data-sticker="✨" onclick="selectEventSticker('✨')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">✨</button><button type="button" data-sticker="🌈" onclick="selectEventSticker('🌈')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🌈</button><button type="button" data-sticker="☁️" onclick="selectEventSticker('☁️')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">☁️</button><button type="button" data-sticker="🍀" onclick="selectEventSticker('🍀')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🍀</button><button type="button" data-sticker="🎀" onclick="selectEventSticker('🎀')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🎀</button><button type="button" data-sticker="🧸" onclick="selectEventSticker('🧸')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🧸</button><button type="button" data-sticker="🐻" onclick="selectEventSticker('🐻')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🐻</button><button type="button" data-sticker="🐱" onclick="selectEventSticker('🐱')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🐱</button><button type="button" data-sticker="🐰" onclick="selectEventSticker('🐰')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🐰</button><button type="button" data-sticker="🍓" onclick="selectEventSticker('🍓')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🍓</button><button type="button" data-sticker="🍒" onclick="selectEventSticker('🍒')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🍒</button><button type="button" data-sticker="🌷" onclick="selectEventSticker('🌷')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🌷</button><button type="button" data-sticker="🦋" onclick="selectEventSticker('🦋')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🦋</button><button type="button" data-sticker="🎧" onclick="selectEventSticker('🎧')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🎧</button><button type="button" data-sticker="☀️" onclick="selectEventSticker('☀️')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">☀️</button><button type="button" data-sticker="🌙" onclick="selectEventSticker('🌙')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🌙</button><button type="button" data-sticker="🔥" onclick="selectEventSticker('🔥')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🔥</button>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-1">เลือกสติกเกอร์ให้แต่ละโน้ตได้ ปฏิทินจะแสดงสติกเกอร์แทนจุดสี</p>
+                </div>
                 <div><label class="block font-bold mb-0.5">หัวข้อโน้ต</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้มีความสุข 🌸" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div>
                     <label class="block font-bold mb-0.5">แนบรูป</label>
@@ -3177,8 +3184,19 @@
             }
         }
 
-        let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊', selectedEventDotColor = '#0055FF';
+        let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊', selectedEventDotColor = '#0055FF', selectedEventSticker = '';
         function selectMoodEmoji(emoji) { selectedMood = emoji; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('mood-btn-selected', b.id === 'mood-' + emoji)); }
+        function selectEventSticker(sticker) {
+            selectedEventSticker = sticker;
+            document.querySelectorAll('.event-sticker-btn').forEach(button => {
+                const active = button.dataset.sticker === sticker;
+                button.style.background = active ? '#CCFF00' : '#F8F8F8';
+                button.style.boxShadow = active ? '0 2px 0 #1A1A1A' : 'none';
+                button.style.transform = active ? 'translateY(-1px)' : 'none';
+                button.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+        }
+
         function selectEventDotColor(color) {
             selectedEventDotColor = color;
             document.querySelectorAll('.event-dot-color').forEach(button => {
@@ -3264,6 +3282,7 @@
             const existing = editId ? state.events.find(e => e.id === editId) : null;
             selectMoodEmoji(existing?.mood || '😊');
             selectEventDotColor(existing?.dotColor || '#0055FF');
+            selectEventSticker(existing?.sticker || '');
             $('eventDate').value = existing?.date || presetDate || localDateKey();
             $('eventTitle').value = existing?.title || '';
             const heading = $('eventModal').querySelector('h3');
@@ -3296,6 +3315,7 @@
             eventData.date = date;
             eventData.mood = selectedMood;
             eventData.dotColor = selectedEventDotColor;
+            eventData.sticker = selectedEventSticker;
             eventData.title = title;
             try {
                 if (selectedEventPhotoData) {
@@ -3385,7 +3405,7 @@
                             ${holidayName ? `<span class="w-2 h-2 rounded-full bg-hotPink shrink-0" title="${esc(holidayName)}"></span>` : ''}
                         </div>
                         <div class="flex-1 flex items-end justify-center pb-1 min-h-0">
-                            ${evs.length ? `<div class="flex flex-wrap justify-center items-center gap-1 max-w-full">${evs.slice(0,4).map(ev => `<span class="w-2.5 h-2.5 rounded-full border border-darkText/30 shrink-0" style="background:${/^#[0-9A-Fa-f]{6}$/.test(ev.dotColor || '') ? ev.dotColor : '#0055FF'}" title="${esc(ev.title)}"></span>`).join('')}${evs.length > 4 ? `<span class="text-[8px] font-bold text-gray-600">+${evs.length-4}</span>` : ''}</div>` : ''}
+                            ${evs.length ? `<div class="flex flex-wrap justify-center items-center gap-1 max-w-full">${evs.slice(0,4).map(ev => ev.sticker ? `<span class="text-base leading-none drop-shadow-sm" title="${esc(ev.title)}">${esc(ev.sticker)}</span>` : `<span class="w-2.5 h-2.5 rounded-full border border-darkText/30 shrink-0" style="background:${/^#[0-9A-Fa-f]{6}$/.test(ev.dotColor || '') ? ev.dotColor : '#0055FF'}" title="${esc(ev.title)}"></span>`).join('')}${evs.length > 4 ? `<span class="text-[8px] font-bold text-gray-600">+${evs.length-4}</span>` : ''}</div>` : ''}
                         </div>
                     </div>`;
             }

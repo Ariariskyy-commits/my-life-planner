@@ -2830,14 +2830,44 @@
                 </div>`).join('') : `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">เย้! ไม่มีบิลค้างจ่ายแล้ว 🎉</div>`;
         }
 
-        function openTaskModal(editId = null) { $('taskForm').reset(); $('taskId').value = ''; setDefaultDates(); openModal('taskModal'); }
+        function openTaskModal(editId = null) {
+            $('taskForm').reset();
+            const existing = editId ? state.tasks.find(t => t.id === editId) : null;
+            $('taskId').value = existing?.id || '';
+            setDefaultDates();
+            $('taskTitle').value = existing?.title || '';
+            $('taskDate').value = existing?.date || localDateKey();
+            $('taskStatus').value = existing?.status || 'todo';
+            $('taskDesc').value = existing?.desc || '';
+            $('taskModalTitle').innerText = existing ? 'แก้ไขแพลนงาน' : 'เพิ่มแพลนงานใหม่';
+            const submitBtn = $('taskForm').querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.innerText = existing ? 'บันทึกการแก้ไข' : 'บันทึก';
+            openModal('taskModal');
+        }
         function handleSaveTask(e) {
             e.preventDefault();
-            state.tasks.unshift({ id: 't_' + Date.now(), title: $('taskTitle').value.trim(), date: $('taskDate').value, status: $('taskStatus').value, desc: $('taskDesc').value.trim() });
-            saveData(); closeModal('taskModal'); refreshUI(); showToast('เพิ่มงานแล้ว!');
+            const id = $('taskId').value;
+            const taskData = {
+                title: $('taskTitle').value.trim(),
+                date: $('taskDate').value,
+                status: $('taskStatus').value,
+                desc: $('taskDesc').value.trim()
+            };
+            if (id) {
+                const existing = state.tasks.find(t => t.id === id);
+                if (existing) Object.assign(existing, taskData);
+            } else {
+                state.tasks.unshift({ id: 't_' + Date.now(), ...taskData });
+            }
+            saveData(); closeModal('taskModal'); refreshUI();
+            showToast(id ? 'แก้ไขแพลนงานแล้ว!' : 'เพิ่มงานแล้ว!');
         }
         function updateTaskStatus(id, st) { const t = state.tasks.find(x => x.id === id); if (t) { t.status = st; saveData(); refreshUI(); } }
-        function deleteTask(id) { state.tasks = state.tasks.filter(x => x.id !== id); saveData(); refreshUI(); }
+        function deleteTask(id) {
+            if (!confirm('ต้องการลบแพลนงานนี้ใช่หรือไม่?')) return;
+            state.tasks = state.tasks.filter(x => x.id !== id);
+            saveData(); refreshUI(); showToast('ลบแพลนงานแล้ว');
+        }
 
         function renderTasks() {
             const columns = { todo: ['listTodo', 'countTodo'], progress: ['listProgress', 'countProgress'], done: ['listDone', 'countDone'] };
@@ -2845,13 +2875,20 @@
                 const list = state.tasks.filter(t => t.status === st);
                 $(countId).innerText = list.length;
                 $(listId).innerHTML = list.length ? list.map(t => `
-                    <div class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1">
-                        <div class="flex justify-between text-[10px] font-bold"><span>${esc(t.date)}</span><button onclick="deleteTask('${t.id}')" class="text-gray-400"><i class="fa-solid fa-trash-can"></i></button></div>
+                    <div class="bg-offWhite text-darkText p-2.5 rounded-xl border border-darkText space-y-1.5">
+                        <div class="flex justify-between items-center text-[10px] font-bold gap-2">
+                            <span>${esc(t.date || 'ไม่กำหนดวันที่')}</span>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="openTaskModal('${t.id}')" class="text-popBlue hover:opacity-70" aria-label="แก้ไขงาน" title="แก้ไขงาน"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button type="button" onclick="deleteTask('${t.id}')" class="text-gray-400 hover:text-hotPink" aria-label="ลบงาน" title="ลบงาน"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>
                         <h4 class="font-bold text-xs">${esc(t.title)}</h4>
-                        <div class="flex gap-1 pt-1">
-                            ${st !== 'todo' ? `<button onclick="updateTaskStatus('${t.id}', 'todo')" class="text-[9px] bg-sunnyYellow px-1 rounded border border-darkText">To Do</button>` : ''}
-                            ${st !== 'progress' ? `<button onclick="updateTaskStatus('${t.id}', 'progress')" class="text-[9px] bg-popBlue text-white px-1 rounded border border-darkText">Doing</button>` : ''}
-                            ${st !== 'done' ? `<button onclick="updateTaskStatus('${t.id}', 'done')" class="text-[9px] bg-limeGreen px-1 rounded border border-darkText">Done</button>` : ''}
+                        ${t.desc ? `<p class="text-[11px] text-gray-600 whitespace-pre-wrap break-words leading-relaxed">${esc(t.desc)}</p>` : ''}
+                        <div class="flex gap-1 pt-1 flex-wrap">
+                            ${st !== 'todo' ? `<button onclick="updateTaskStatus('${t.id}', 'todo')" class="text-[9px] bg-sunnyYellow px-1.5 py-0.5 rounded border border-darkText">To Do</button>` : ''}
+                            ${st !== 'progress' ? `<button onclick="updateTaskStatus('${t.id}', 'progress')" class="text-[9px] bg-popBlue text-white px-1.5 py-0.5 rounded border border-darkText">Doing</button>` : ''}
+                            ${st !== 'done' ? `<button onclick="updateTaskStatus('${t.id}', 'done')" class="text-[9px] bg-limeGreen px-1.5 py-0.5 rounded border border-darkText">Done</button>` : ''}
                         </div>
                     </div>`).join('') : `<div class="text-center py-6 text-gray-400 text-[11px]">ไม่มีรายการ</div>`;
             });

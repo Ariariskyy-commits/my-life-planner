@@ -845,13 +845,23 @@
         </div>
 
         <div class="flex items-center justify-between gap-2">
-            <div class="y2k-logo">
-                <span class="y2k-logo-icon" aria-hidden="true">📓</span>
+            <div class="flex items-center gap-2 min-w-0">
+                <div class="y2k-logo">
+                    <span class="y2k-logo-icon" aria-hidden="true">📓</span>
                 <span class="y2k-logo-text">
                     <span class="y2k-logo-title">Y2K</span>
                     <span class="y2k-logo-sub">PLANNER</span>
                 </span>
-                <span class="y2k-logo-arrow" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+                    <span class="y2k-logo-arrow" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0" aria-label="ย้อนกลับและไปข้างหน้า">
+                    <button type="button" id="appNavBack" onclick="navigateAppHistory(-1)" disabled class="w-8 h-8 rounded-lg border-2 border-darkText bg-white text-darkText shadow-sm flex items-center justify-center disabled:opacity-35 disabled:cursor-not-allowed hover:bg-sunnyYellow transition-all" title="ย้อนกลับ" aria-label="ย้อนกลับ">
+                        <i class="fa-solid fa-arrow-left text-xs"></i>
+                    </button>
+                    <button type="button" id="appNavForward" onclick="navigateAppHistory(1)" disabled class="w-8 h-8 rounded-lg border-2 border-darkText bg-white text-darkText shadow-sm flex items-center justify-center disabled:opacity-35 disabled:cursor-not-allowed hover:bg-sunnyYellow transition-all" title="ไปข้างหน้า" aria-label="ไปข้างหน้า">
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
             </div>
             
             <div class="flex items-center gap-2">
@@ -2539,7 +2549,35 @@
                 </div>`).join('') : `<div class="text-center py-4 text-gray-400 text-[10px]">ไม่มีประวัติแชท</div>`;
         }
 
-        function switchTab(tabId) {
+        // ประวัติการเปลี่ยนหน้าในแอป: ย้อนกลับ/ไปข้างหน้าโดยไม่รีเซ็ตข้อมูล
+        let appNavHistory = ['dashboard'];
+        let appNavHistoryIndex = 0;
+
+        function updateAppHistoryButtons() {
+            const back = $('appNavBack');
+            const forward = $('appNavForward');
+            if (back) back.disabled = appNavHistoryIndex <= 0;
+            if (forward) forward.disabled = appNavHistoryIndex >= appNavHistory.length - 1;
+        }
+
+        function navigateAppHistory(direction) {
+            const nextIndex = appNavHistoryIndex + direction;
+            if (nextIndex < 0 || nextIndex >= appNavHistory.length) return;
+            appNavHistoryIndex = nextIndex;
+            switchTab(appNavHistory[appNavHistoryIndex], true);
+        }
+
+        function switchTab(tabId, fromHistory = false) {
+            if (!$('tab-' + tabId)) return;
+            if (!fromHistory) {
+                const currentTab = appNavHistory[appNavHistoryIndex];
+                if (currentTab !== tabId) {
+                    appNavHistory = appNavHistory.slice(0, appNavHistoryIndex + 1);
+                    appNavHistory.push(tabId);
+                    appNavHistoryIndex = appNavHistory.length - 1;
+                }
+            }
+            updateAppHistoryButtons();
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('bg-limeGreen', 'text-darkText', 'shadow-sm', 'border-2', 'border-darkText');
@@ -3093,6 +3131,9 @@
 
         window.addEventListener('load', async () => {
             showAccessLock('กำลังตรวจสอบสิทธิ์การเข้าใช้งาน…'); initView(); setDefaultDates(); refreshUI(); initFirebase();
+            appNavHistory = ['dashboard'];
+            appNavHistoryIndex = 0;
+            updateAppHistoryButtons();
             setBottomNavActive('dashboard');
         });
 

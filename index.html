@@ -440,6 +440,22 @@
             box-shadow: 0 6px 0 #1A1A1A, 0 14px 26px -12px rgba(0,0,0,.45);
             z-index: 9000;
         }
+        .bn-history {
+            flex: 0 0 32px;
+            width: 32px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255,255,255,.75);
+            border-radius: 12px;
+            background: rgba(255,255,255,.16);
+            color: #FFFFFF;
+            font-size: 13px;
+            transition: background .15s ease, transform .15s ease, opacity .15s ease;
+        }
+        .bn-history:not(:disabled):hover { background: #CCFF00; color: #1A1A1A; transform: translateY(-1px); }
+        .bn-history:disabled { opacity: .3; cursor: not-allowed; }
         .bn-item {
             flex: 1 1 0;
             min-width: 0;
@@ -853,14 +869,6 @@
                     <span class="y2k-logo-sub">PLANNER</span>
                 </span>
                     <span class="y2k-logo-arrow" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
-                </div>
-                <div class="flex items-center gap-1 shrink-0" aria-label="ย้อนกลับและไปข้างหน้า">
-                    <button type="button" id="appNavBack" onclick="navigateAppHistory(-1)" disabled class="w-8 h-8 rounded-lg border-2 border-darkText bg-white text-darkText shadow-sm flex items-center justify-center disabled:opacity-35 disabled:cursor-not-allowed hover:bg-sunnyYellow transition-all" title="ย้อนกลับ" aria-label="ย้อนกลับ">
-                        <i class="fa-solid fa-arrow-left text-xs"></i>
-                    </button>
-                    <button type="button" id="appNavForward" onclick="navigateAppHistory(1)" disabled class="w-8 h-8 rounded-lg border-2 border-darkText bg-white text-darkText shadow-sm flex items-center justify-center disabled:opacity-35 disabled:cursor-not-allowed hover:bg-sunnyYellow transition-all" title="ไปข้างหน้า" aria-label="ไปข้างหน้า">
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </button>
                 </div>
             </div>
             
@@ -1454,11 +1462,13 @@
 
     <!-- BOTTOM NAVIGATION -->
     <nav class="bottom-nav" aria-label="เมนูหลัก">
+        <button type="button" id="appNavBack" onclick="navigateAppHistory(-1)" disabled class="bn-history" title="ย้อนกลับ" aria-label="ย้อนกลับ"><i class="fa-solid fa-arrow-left"></i></button>
         <button class="bn-item" id="bn-dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-house"></i><span>หน้าแรก</span></button>
         <button class="bn-item" id="bn-planner" onclick="switchTab('planner')"><i class="fa-solid fa-calendar-check"></i><span>แพลนเนอร์</span></button>
         <button class="bn-add" onclick="openModal('quickAddModal')" aria-label="เพิ่มด่วน"><i class="fa-solid fa-plus"></i></button>
         <button class="bn-item" id="bn-calendar" onclick="switchTab('calendar')"><i class="fa-regular fa-image"></i><span>แกลเลอรี</span></button>
         <button class="bn-item" onclick="openSettingsModal()"><i class="fa-solid fa-gear"></i><span>ตั้งค่า</span></button>
+        <button type="button" id="appNavForward" onclick="navigateAppHistory(1)" disabled class="bn-history" title="ไปข้างหน้า" aria-label="ไปข้างหน้า"><i class="fa-solid fa-arrow-right"></i></button>
     </nav>
 
     <!-- MODALS -->

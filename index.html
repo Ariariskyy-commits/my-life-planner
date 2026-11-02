@@ -1098,6 +1098,15 @@
             <p class="text-[11px] font-bold text-gray-500">กด "จ่าย" เพื่อบันทึกเป็นรายจ่ายอัตโนมัติ (กดจ่ายแล้วบิลจะซ่อนจากหน้านี้ สามารถดูประวัติได้ที่ปุ่มด้านบน)</p>
             <div id="billsCategorySummary" class="space-y-2"></div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="billsGrid"></div>
+
+            <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div><h3 class="font-extrabold text-lg flex items-center gap-2"><i class="fa-solid fa-hand-holding-dollar text-green-600"></i> รายการเตรียมรับ</h3><p id="receivablesSummary" class="text-xs font-bold text-green-700 mt-0.5">ยอดเงินที่รอรับ: ฿ 0.00</p></div>
+                    <button type="button" onclick="openReceivableModal()" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มรายการเตรียมรับ</button>
+                </div>
+                <p class="text-[11px] text-gray-500">บันทึกเงินที่มีคนยืม หรือเงินที่กำลังจะได้รับ กด “รับเงินแล้ว” เพื่อบันทึกเป็นรายรับอัตโนมัติ</p>
+                <div id="receivablesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+            </div>
         </section>
 
         <!-- PLANNER -->
@@ -1607,6 +1616,22 @@
         </div>
     </div>
 
+    <!-- RECEIVABLE MODAL -->
+    <div id="receivableModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
+        <div class="bg-white text-darkText w-full max-w-sm p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
+            <div class="flex justify-between items-center pb-2 border-b border-darkText"><h3 id="receivableModalTitle" class="font-cute font-bold text-lg">💰 เพิ่มรายการเตรียมรับ</h3><button type="button" onclick="closeModal('receivableModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button></div>
+            <form id="receivableForm" onsubmit="handleSaveReceivable(event)" class="space-y-3">
+                <input type="hidden" id="receivableId" value="">
+                <div><label class="block font-bold mb-0.5">ชื่อคนที่ยืม / ผู้จ่ายคืน</label><input type="text" id="receivablePerson" placeholder="เช่น พี่เอ, เพื่อน..." required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
+                <div><label class="block font-bold mb-0.5">รายการ / เหตุผล</label><input type="text" id="receivableTitle" placeholder="เช่น ยืมเงิน, ค่าแชร์..." required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
+                <div><label class="block font-bold mb-0.5">วันที่คาดว่าจะได้รับคืน</label><input type="date" id="receivableDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
+                <div><label class="block font-bold mb-0.5">จำนวนเงินที่ต้องได้รับ (฿)</label><input type="number" id="receivableAmount" step="0.01" min="0.01" placeholder="0.00" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
+                <div><label class="block font-bold mb-0.5">หมายเหตุ (ไม่บังคับ)</label><textarea id="receivableNote" rows="2" placeholder="รายละเอียดเพิ่มเติม..." class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none resize-y"></textarea></div>
+                <div class="flex gap-2"><button type="button" onclick="closeModal('receivableModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button><button type="submit" class="flex-1 bg-limeGreen text-darkText font-bold py-2 rounded-lg border border-darkText">บันทึก</button></div>
+            </form>
+        </div>
+    </div>
+
     <!-- BILL HISTORY MODAL -->
     <div id="billHistoryModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
         <div class="bg-white text-darkText w-full max-w-lg p-5 rounded-2xl border-3 border-darkText shadow-sm space-y-3 text-xs">
@@ -2092,7 +2117,7 @@
         });
         function makeDefaultState() {
             return {
-                theme: 'y2k', transactions: [], bills: [], tasks: [], events: [],
+                theme: 'y2k', transactions: [], bills: [], receivables: [], tasks: [], events: [],
                 calcHistory: [], categories: [...DEFAULT_CATEGORIES], pet: makeDefaultPet(),
                 quickNotes: [], quickNoteShow: true, headerCollapsed: false
             };
@@ -2103,7 +2128,7 @@
         function scopedKeys(uid) {
             const prefix = 'y2k_user_' + uid + '_';
             return {
-                transactions: prefix+'transactions', bills: prefix+'bills', tasks: prefix+'tasks',
+                transactions: prefix+'transactions', bills: prefix+'bills', receivables: prefix+'receivables', tasks: prefix+'tasks',
                 events: prefix+'events', calcHistory: prefix+'calchistory', pet: prefix+'pet',
                 theme: prefix+'theme', categories: prefix+'categories', quickNotes: prefix+'quicknotes',
                 quickNoteShow: prefix+'quicknote_show', headerCollapsed: prefix+'header_collapsed',
@@ -2133,6 +2158,7 @@
                 theme: localStorage.getItem(keys.theme) || 'y2k',
                 transactions: readLS(keys.transactions, []),
                 bills: readLS(keys.bills, []),
+                receivables: readLS(keys.receivables, []),
                 tasks: readLS(keys.tasks, []),
                 events: readLS(keys.events, []),
                 calcHistory: readLS(keys.calcHistory, []),
@@ -2152,6 +2178,7 @@
             try {
                 localStorage.setItem(activeStorageKeys.transactions, JSON.stringify(state.transactions));
                 localStorage.setItem(activeStorageKeys.bills, JSON.stringify(state.bills));
+                localStorage.setItem(activeStorageKeys.receivables, JSON.stringify(state.receivables || []));
                 localStorage.setItem(activeStorageKeys.tasks, JSON.stringify(state.tasks));
                 localStorage.setItem(activeStorageKeys.events, JSON.stringify(state.events));
                 localStorage.setItem(activeStorageKeys.calcHistory, JSON.stringify(state.calcHistory));
@@ -2310,7 +2337,7 @@
 
         function cloudPayload() {
             return {
-                transactions: state.transactions, bills: state.bills, tasks: state.tasks,
+                transactions: state.transactions, bills: state.bills, receivables: state.receivables || [], tasks: state.tasks,
                 events: state.events, calcHistory: state.calcHistory, categories: state.categories,
                 pet: state.pet, theme: state.theme, quickNotes: state.quickNotes,
                 quickNoteShow: state.quickNoteShow, headerCollapsed: state.headerCollapsed,
@@ -2342,6 +2369,7 @@
             if (!dataReady || !isAllowedUser(currentUser) || !activeStorageUid || activeStorageUid !== currentUser.uid) return;
             state.transactions = d.transactions || [];
             state.bills = d.bills || [];
+            state.receivables = d.receivables || [];
             state.tasks = d.tasks || [];
             state.events = d.events || [];
             state.calcHistory = d.calcHistory || [];
@@ -2781,6 +2809,78 @@
             saveData(); refreshUI();
         }
 
+        function openReceivableModal(editId = null) {
+            $('receivableForm').reset();
+            $('receivableId').value = '';
+            setDefaultDates();
+            const item = editId ? (state.receivables || []).find(r => r.id === editId) : null;
+            $('receivableModalTitle').innerText = item ? '✏️ แก้ไขรายการเตรียมรับ' : '💰 เพิ่มรายการเตรียมรับ';
+            $('receivableId').value = item?.id || '';
+            $('receivablePerson').value = item?.person || '';
+            $('receivableTitle').value = item?.title || '';
+            $('receivableDate').value = item?.date || localDateKey();
+            $('receivableAmount').value = item?.amount ?? '';
+            $('receivableNote').value = item?.note || '';
+            openModal('receivableModal');
+        }
+
+        function handleSaveReceivable(e) {
+            e.preventDefault();
+            if (!Array.isArray(state.receivables)) state.receivables = [];
+            const id = $('receivableId').value;
+            const data = { person: $('receivablePerson').value.trim(), title: $('receivableTitle').value.trim(), date: $('receivableDate').value, amount: Number($('receivableAmount').value), note: $('receivableNote').value.trim() };
+            if (!(data.amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
+            if (id) {
+                const item = state.receivables.find(r => r.id === id);
+                if (item) Object.assign(item, data);
+            } else state.receivables.unshift({ id: 'recv_' + Date.now(), ...data, received: false });
+            saveData(); closeModal('receivableModal'); refreshUI();
+            showToast(id ? 'แก้ไขรายการเตรียมรับแล้ว' : 'เพิ่มรายการเตรียมรับแล้ว 💰');
+        }
+
+        function toggleReceivableReceived(id) {
+            const item = (state.receivables || []).find(r => r.id === id);
+            if (!item) return;
+            const txId = item.txId || ('tx_' + item.id);
+            if (!item.received) {
+                item.received = true; item.txId = txId; item.receivedDate = localDateKey();
+                const tx = { id: txId, date: item.receivedDate, title: 'รับคืนจาก ' + item.person + ' - ' + item.title, category: '💰 เงินที่ได้รับคืน', amount: Number(item.amount || 0), type: 'income' };
+                const existing = state.transactions.find(t => t.id === txId);
+                if (existing) Object.assign(existing, tx); else state.transactions.unshift(tx);
+            } else {
+                item.received = false;
+                state.transactions = state.transactions.filter(t => t.id !== txId);
+                delete item.txId; delete item.receivedDate;
+            }
+            saveData(); refreshUI();
+            showToast(item.received ? 'บันทึกรับเงินเป็นรายรับแล้ว 🎉' : 'ยกเลิกรับเงินแล้ว');
+        }
+
+        function deleteReceivable(id) {
+            const item = (state.receivables || []).find(r => r.id === id);
+            if (!item || !confirm('ต้องการลบรายการเตรียมรับนี้ใช่หรือไม่?')) return;
+            if (item.txId) state.transactions = state.transactions.filter(t => t.id !== item.txId);
+            state.receivables = state.receivables.filter(r => r.id !== id);
+            saveData(); refreshUI(); showToast('ลบรายการเตรียมรับแล้ว');
+        }
+
+        function renderReceivables() {
+            const items = state.receivables || [];
+            const pending = items.filter(r => !r.received);
+            const total = pending.reduce((sum, r) => sum + Number(r.amount || 0), 0);
+            $('receivablesSummary').innerText = 'ยอดเงินที่รอรับ: ฿ ' + money(total) + ' · ' + pending.length + ' รายการ';
+            $('receivablesGrid').innerHTML = items.length ? items.map(r => `
+                <div class="bg-white text-darkText p-3 rounded-xl border-2 border-darkText shadow-sm space-y-2 ${r.received ? 'opacity-70' : ''}">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0"><span class="text-[10px] font-bold text-gray-500 block">กำหนดรับคืน ${esc(r.date || 'ไม่ระบุวันที่')}</span><h4 class="font-extrabold text-sm break-words mt-1">${esc(r.person || 'ไม่ระบุชื่อ')}</h4><p class="text-xs text-gray-600 break-words">${esc(r.title || '')}</p></div>
+                        <div class="flex gap-1 shrink-0"><button type="button" onclick="openReceivableModal('${r.id}')" class="text-popBlue p-1" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" onclick="deleteReceivable('${r.id}')" class="text-gray-400 hover:text-hotPink p-1" title="ลบ"><i class="fa-solid fa-trash-can"></i></button></div>
+                    </div>
+                    ${r.note ? `<p class="text-[11px] text-gray-500 whitespace-pre-wrap break-words">${esc(r.note)}</p>` : ''}
+                    <div class="flex items-center justify-between gap-2"><strong class="text-base ${r.received ? 'text-green-700' : 'text-popBlue'}">฿ ${money(r.amount)}</strong><span class="text-[9px] font-bold px-2 py-1 rounded-full ${r.received ? 'bg-green-100 text-green-700' : 'bg-sunnyYellow text-darkText'}">${r.received ? 'ได้รับแล้ว' : 'รอรับเงิน'}</span></div>
+                    <button type="button" onclick="toggleReceivableReceived('${r.id}')" class="w-full ${r.received ? 'bg-gray-200' : 'bg-limeGreen'} text-darkText font-bold py-1.5 rounded-lg border border-darkText text-xs">${r.received ? '↩ ยกเลิกรับเงิน' : 'รับเงินแล้ว'}</button>
+                </div>`).join('') : '<div class="col-span-full text-center py-6 text-gray-400 text-xs">ยังไม่มีรายการเงินที่รอรับ 💚</div>';
+        }
+
         function openBillHistoryModal() { renderBillHistory(); openModal('billHistoryModal'); }
         
         function openBillCategoryModal(category) {
@@ -2876,6 +2976,7 @@
                     <span class="text-base font-extrabold text-hotPink block">฿ ${money(b.amount)}</span>
                     <button onclick="toggleBillPaid('${b.id}')" class="w-full py-1 bg-limeGreen text-darkText font-bold text-xs rounded border border-darkText">จ่าย</button>
                 </div>`).join('') : `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">เย้! ไม่มีบิลค้างจ่ายแล้ว 🎉</div>`;
+            renderReceivables();
         }
 
         function openTaskModal(editId = null) {

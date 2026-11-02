@@ -2,7 +2,7 @@
 <html lang="th" data-view="desktop">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Y2K Playful Life Planner</title>
 
     <!-- PWA -->
@@ -57,6 +57,10 @@
     </script>
 
     <style>
+        /* Keep the planner at a stable scale on touch screens; normal scrolling remains enabled. */
+        html, body { touch-action: pan-x pan-y; }
+        button, a, input, select, textarea, label { touch-action: manipulation; }
+
         /* ซ่อน Scrollbar แนวนอน */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -1838,6 +1842,12 @@
         </div>
     </div>
 
+    <script>
+        // Prevent mobile browser pinch/double-tap zoom while preserving one-finger page scrolling.
+        document.addEventListener('gesturestart', function (event) { event.preventDefault(); }, { passive: false });
+        document.addEventListener('gesturechange', function (event) { event.preventDefault(); }, { passive: false });
+        document.addEventListener('gestureend', function (event) { event.preventDefault(); }, { passive: false });
+    </script>
     <script>
         const $ = id => document.getElementById(id);
         const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];

@@ -2064,12 +2064,35 @@
 
         let auth = null, db = null, currentUser = null, isFirebaseActive = false, syncTimer = null;
         let googleLoginInProgress = false;
+        const ALLOWED_EMAIL = 'arisky.studio@gmail.com';
 
         function setSyncStatus(text) { $('syncStatus').innerText = text; }
+        function isAllowedUser(user) {
+            return !!user && (user.email || '').toLowerCase() === ALLOWED_EMAIL;
+        }
+        function showAccessLock(message) {
+            let panel = document.getElementById('accountAccessLock');
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.id = 'accountAccessLock';
+                panel.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(255,240,247,.99);font-family:inherit;';
+                panel.innerHTML = '<div style="width:min(440px,100%);padding:28px;border:2px solid #171717;border-radius:22px;background:#fff;box-shadow:0 8px 0 #171717;text-align:center;color:#171717"><div style="font-size:34px;margin-bottom:10px">🔐</div><h2 style="font-size:22px;font-weight:900;margin:0 0 10px">MY LITTLE OFFICE</h2><p id="accountAccessMessage" style="font-size:14px;line-height:1.6;margin:0 0 18px"></p><button id="accountAccessLogin" type="button" style="padding:12px 22px;border:2px solid #171717;border-radius:12px;background:#0055ff;color:#fff;font-weight:800;cursor:pointer">เข้าสู่ระบบด้วย Google</button><p style="font-size:11px;opacity:.65;margin:16px 0 0">ข้อมูลส่วนตัวจะแสดงหลังตรวจสอบบัญชีที่ได้รับอนุญาตเท่านั้น</p></div>';
+                document.body.appendChild(panel);
+                panel.querySelector('#accountAccessLogin').addEventListener('click', loginWithGoogle);
+            }
+            panel.querySelector('#accountAccessMessage').textContent = message || 'กรุณาเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต';
+            panel.style.display = 'flex';
+        }
+        function hideAccessLock() {
+            const panel = document.getElementById('accountAccessLock');
+            if (panel) panel.style.display = 'none';
+        }
 
         async function initFirebase() {
+            showAccessLock('กำลังตรวจสอบสิทธิ์การเข้าใช้งาน…');
             if (!IS_CONFIGURED) {
-                setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
+                setSyncStatus('ต้องเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต');
+                showAccessLock('แอปนี้ต้องเชื่อมต่อ Firebase และเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต');
                 return;
             }
             try {
@@ -2078,22 +2101,34 @@
                 db = firebase.firestore();
                 try { await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch {}
                 isFirebaseActive = true;
-
                 auth.onAuthStateChanged(async user => {
+                    if (user && !isAllowedUser(user)) {
+                        currentUser = null;
+                        renderAuthUI();
+                        showAccessLock('บัญชีนี้ไม่มีสิทธิ์ใช้งาน กรุณาเลือกบัญชีที่ได้รับอนุญาต');
+                        setSyncStatus('บัญชีนี้ไม่มีสิทธิ์ใช้งาน');
+                        try { await auth.signOut(); } catch {}
+                        alert('แอปนี้อนุญาตเฉพาะ ' + ALLOWED_EMAIL);
+                        return;
+                    }
                     if (user) {
                         const isNewUser = !currentUser || currentUser.uid !== user.uid;
                         currentUser = user;
                         renderAuthUI();
+                        hideAccessLock();
                         if (isNewUser) await pullFromCloud(user.uid);
                     } else {
                         currentUser = null;
                         renderAuthUI();
-                        setSyncStatus('ออกจากระบบแล้ว · ข้อมูลอยู่ในเครื่อง');
+                        showAccessLock('กรุณาเข้าสู่ระบบด้วย ' + ALLOWED_EMAIL + ' เพื่อดูข้อมูลส่วนตัว');
+                        setSyncStatus('ออกจากระบบแล้ว · ข้อมูลถูกล็อกไว้');
                     }
                 });
-                setSyncStatus('พร้อมเชื่อมต่อ Gmail');
+                setSyncStatus('กำลังตรวจสอบบัญชี Google…');
             } catch (error) {
                 isFirebaseActive = false;
+                currentUser = null;
+                showAccessLock('เชื่อมต่อ Firebase ไม่สำเร็จ จึงล็อกข้อมูลไว้เพื่อความเป็นส่วนตัว');
                 setSyncStatus('เชื่อมต่อ Firebase ไม่สำเร็จ ⚠️');
             }
         }
@@ -2118,19 +2153,34 @@
             try {
                 const result = await auth.signInWithPopup(provider);
                 if (result && result.user) {
+                    if (!isAllowedUser(result.user)) {
+                        currentUser = null;
+                        renderAuthUI();
+                        showAccessLock('บัญชีนี้ไม่มีสิทธิ์ใช้งาน กรุณาเลือกบัญชีที่ได้รับอนุญาต');
+                        await auth.signOut();
+                        alert('แอปนี้อนุญาตเฉพาะ ' + ALLOWED_EMAIL);
+                        return;
+                    }
                     currentUser = result.user;
                     renderAuthUI();
+                    hideAccessLock();
                     await pullFromCloud(result.user.uid);
                     showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
                 }
             } catch (error) {
+                showAccessLock('กรุณาเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต');
                 alert('ล็อกอินไม่สำเร็จ: ' + error.message);
             } finally { googleLoginInProgress = false; }
         }
 
         async function logoutGoogle() {
             if (!auth) return;
-            try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch {}
+            showAccessLock('กำลังออกจากระบบและล็อกข้อมูลส่วนตัว…');
+            currentUser = null;
+            renderAuthUI();
+            try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch {
+                showAccessLock('ข้อมูลถูกล็อกไว้ กรุณาตรวจสอบสถานะการเข้าสู่ระบบ');
+            }
         }
 
         function scheduleCloudSave() {
@@ -2756,7 +2806,7 @@
         }
 
         window.addEventListener('load', async () => {
-            initView(); setDefaultDates(); refreshUI(); initFirebase();
+            showAccessLock('กำลังตรวจสอบสิทธิ์การเข้าใช้งาน…'); initView(); setDefaultDates(); refreshUI(); initFirebase();
             setBottomNavActive('dashboard');
         });
 

@@ -1691,7 +1691,7 @@
                     <div>
                         <div class="flex justify-between items-center mb-0.5">
                             <label class="font-bold">หมวดหมู่</label>
-                            <button type="button" onclick="promptAddCategory()" class="text-[10px] text-popBlue font-bold underline">+ เพิ่มหมวด</button>
+                            <button type="button" onclick="promptAddCategory()" class="text-[10px] text-popBlue font-bold underline">+ เพิ่มหมวด</button><button type="button" onclick="manageCategories()" class="text-[10px] text-hotPink font-bold underline">จัดการ/ลบ</button>
                         </div>
                         <select id="txCategory" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium"></select>
                     </div>
@@ -1729,7 +1729,7 @@
                     <div>
                         <div class="flex justify-between items-center mb-0.5">
                             <label class="font-bold">หมวดหมู่</label>
-                            <button type="button" onclick="promptAddCategory()" class="text-[10px] text-popBlue font-bold underline">+ เพิ่มหมวด</button>
+                            <button type="button" onclick="promptAddCategory()" class="text-[10px] text-popBlue font-bold underline">+ เพิ่มหมวด</button><button type="button" onclick="manageCategories()" class="text-[10px] text-hotPink font-bold underline">จัดการ/ลบ</button>
                         </div>
                         <select id="billCategory" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium"></select>
                     </div>
@@ -1752,7 +1752,7 @@
                 <div><label class="block font-bold mb-0.5">ชื่อคนที่ยืม / ผู้จ่ายคืน</label><input type="text" id="receivablePerson" placeholder="เช่น พี่เอ, เพื่อน..." required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div><label class="block font-bold mb-0.5">รายการ / เหตุผล</label><input type="text" id="receivableTitle" placeholder="เช่น ยืมเงิน, ค่าแชร์..." required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div><label class="block font-bold mb-0.5">วันที่คาดว่าจะได้รับคืน <span class="text-gray-400 font-normal">(ไม่บังคับ)</span></label><input type="date" id="receivableDate" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"><p class="text-[10px] text-gray-400 mt-1">ยังไม่มีกำหนดคืนก็เว้นว่างได้</p></div>
-                <div class="grid grid-cols-2 gap-2"><div><div class="flex justify-between items-center mb-0.5"><label class="font-bold">หมวดหมู่</label><button type="button" onclick="promptAddReceivableCategory()" class="text-[10px] text-popBlue font-bold underline">+ เพิ่มหมวด</button></div><select id="receivableCategory" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium"></select></div><div><label class="block font-bold mb-0.5">จำนวนเงิน (฿)</label><input type="number" id="receivableAmount" step="0.01" min="0.01" placeholder="0.00" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div></div>
+                <div class="grid grid-cols-2 gap-2"><div><div class="flex justify-between items-center mb-0.5"><label class="font-bold">หมวดหมู่</label><button type="button" onclick="promptAddReceivableCategory()" class="text-[10px] text-popBlue font-bold underline">+ เพิ่มหมวด</button><button type="button" onclick="manageReceivableCategories()" class="text-[10px] text-hotPink font-bold underline">จัดการ/ลบ</button></div><select id="receivableCategory" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium"></select></div><div><label class="block font-bold mb-0.5">จำนวนเงิน (฿)</label><input type="number" id="receivableAmount" step="0.01" min="0.01" placeholder="0.00" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div></div>
                 <div><label class="block font-bold mb-0.5">หมายเหตุ (ไม่บังคับ)</label><textarea id="receivableNote" rows="2" placeholder="รายละเอียดเพิ่มเติม..." class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none resize-y"></textarea></div>
                 <div class="flex gap-2"><button type="button" onclick="closeModal('receivableModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button><button type="submit" class="flex-1 bg-limeGreen text-darkText font-bold py-2 rounded-lg border border-darkText">บันทึก</button></div>
             </form>
@@ -2886,9 +2886,23 @@
             const name = prompt('กรอกชื่อหมวดหมู่ใหม่ที่ต้องการเพิ่ม:');
             if (!name || !name.trim()) return;
             const clean = name.trim();
-            if (!state.categories) state.categories = [...DEFAULT_CATEGORIES];
+            if (!Array.isArray(state.categories)) state.categories = [...DEFAULT_CATEGORIES];
             if (state.categories.includes(clean)) return alert('หมวดหมู่นี้มีอยู่แล้ว!');
             state.categories.push(clean); saveData(); updateCategorySelects(clean); showToast('เพิ่มหมวดหมู่สำเร็จ! ✨');
+        }
+
+        function manageCategories() {
+            if (!Array.isArray(state.categories)) state.categories = [...DEFAULT_CATEGORIES];
+            const custom = state.categories.filter(c => !DEFAULT_CATEGORIES.includes(c));
+            if (!custom.length) return showToast('ยังไม่มีหมวดหมู่ที่สร้างเองให้ลบ');
+            const choice = prompt('เลือกหมวดหมู่ที่ต้องการลบ โดยพิมพ์ชื่อให้ตรงกัน:\n\n' + custom.map((c,i)=>`${i+1}. ${c}`).join('\n'));
+            if (!choice || !choice.trim()) return;
+            const target = custom.find((c,i)=>String(i+1)===choice.trim() || c===choice.trim());
+            if (!target) return showToast('ไม่พบหมวดหมู่นี้');
+            if (!confirm(`ลบหมวดหมู่ "${target}" ใช่หรือไม่?\\n\\nรายการเก่าที่เคยใช้หมวดนี้จะยังคงแสดงชื่อเดิม แต่จะไม่ปรากฏในตัวเลือกใหม่`)) return;
+            state.categories = state.categories.filter(c=>c!==target);
+            saveData(); updateCategorySelects();
+            showToast('ลบหมวดหมู่แล้ว');
         }
 
         function openTransactionModal(type, editId = null, presetAmount = null) {
@@ -3070,6 +3084,20 @@
             saveData();
             updateReceivableCategorySelects(clean);
             showToast('เพิ่มหมวดหมู่รายการเตรียมรับแล้ว ✨');
+        }
+
+        function manageReceivableCategories() {
+            if (!Array.isArray(state.receivableCategories)) state.receivableCategories = [...DEFAULT_RECEIVABLE_CATEGORIES];
+            const custom = state.receivableCategories.filter(c => !DEFAULT_RECEIVABLE_CATEGORIES.includes(c));
+            if (!custom.length) return showToast('ยังไม่มีหมวดหมู่ที่สร้างเองให้ลบ');
+            const choice = prompt('เลือกหมวดหมู่เตรียมรับที่ต้องการลบ โดยพิมพ์ชื่อให้ตรงกัน:\\n\\n' + custom.map((c,i)=>`${i+1}. ${c}`).join('\\n'));
+            if (!choice || !choice.trim()) return;
+            const target = custom.find((c,i)=>String(i+1)===choice.trim() || c===choice.trim());
+            if (!target) return showToast('ไม่พบหมวดหมู่นี้');
+            if (!confirm(`ลบหมวดหมู่ "${target}" ใช่หรือไม่?\\n\\nรายการเก่าจะยังคงแสดงชื่อหมวดเดิม`)) return;
+            state.receivableCategories = state.receivableCategories.filter(c=>c!==target);
+            saveData(); updateReceivableCategorySelects();
+            showToast('ลบหมวดหมู่เตรียมรับแล้ว');
         }
 
         function openReceivableModal(editId = null) {

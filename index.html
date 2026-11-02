@@ -2075,7 +2075,7 @@
             if (!panel) {
                 panel = document.createElement('div');
                 panel.id = 'accountAccessLock';
-                panel.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(255,240,247,.99);font-family:inherit;';
+                panel.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:24px;background:#fff0f7;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-family:inherit;';
                 panel.innerHTML = '<div style="width:min(440px,100%);padding:28px;border:2px solid #171717;border-radius:22px;background:#fff;box-shadow:0 8px 0 #171717;text-align:center;color:#171717"><div style="font-size:34px;margin-bottom:10px">🔐</div><h2 style="font-size:22px;font-weight:900;margin:0 0 10px">MY LITTLE OFFICE</h2><p id="accountAccessMessage" style="font-size:14px;line-height:1.6;margin:0 0 18px"></p><button id="accountAccessLogin" type="button" style="padding:12px 22px;border:2px solid #171717;border-radius:12px;background:#0055ff;color:#fff;font-weight:800;cursor:pointer">เข้าสู่ระบบด้วย Google</button><p style="font-size:11px;opacity:.65;margin:16px 0 0">ข้อมูลส่วนตัวจะแสดงหลังตรวจสอบบัญชีที่ได้รับอนุญาตเท่านั้น</p></div>';
                 document.body.appendChild(panel);
                 panel.querySelector('#accountAccessLogin').addEventListener('click', loginWithGoogle);

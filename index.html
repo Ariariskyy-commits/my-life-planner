@@ -395,6 +395,18 @@
         html[data-view="mobile"] .lg\:flex-row,
         html[data-view="mobile"] .md\:flex-row { flex-direction: column !important; }
 
+        /* Dashboard summary cards: keep tablet cards readable instead of forcing four narrow columns. */
+        html[data-view="tablet"] #tab-dashboard > .grid.grid-cols-2.lg\\:grid-cols-4 {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+        html[data-view="tablet"] #tab-dashboard,
+        html[data-view="tablet"] #tab-dashboard > * {
+            min-width: 0;
+            max-width: 100%;
+        }
+        html[data-view="tablet"] #tab-dashboard .grid > * {
+            min-width: 0;
+        }
         /* ===== เมนูการ์ดหน้าหลัก: 3 คอลัมน์ทุกมุมมอง ===== */
         #navGrid,
         html[data-view="mobile"] #navGrid,

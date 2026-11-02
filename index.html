@@ -747,6 +747,7 @@
             .glass-press { transition: none !important; }
         }
     </style>
+    <link rel="stylesheet" href="./office.css?v=pet-bubble-16">
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
@@ -879,6 +880,7 @@
             <button onclick="switchTab('calendar')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm text-pink-500 hover:scale-110 transition-all shrink-0" title="ปฏิทิน"><i class="fa-regular fa-calendar-check"></i></button>
             <button onclick="switchTab('calculator')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm text-gray-700 hover:scale-110 transition-all shrink-0" title="คำนวณ"><i class="fa-solid fa-calculator"></i></button>
             <button onclick="switchTab('pet')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm text-orange-500 hover:scale-110 transition-all shrink-0" title="สัตว์เลี้ยง"><i class="fa-solid fa-paw"></i></button>
+            <button onclick="switchTab('office')" class="w-9 h-9 bg-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm text-blue-600 hover:scale-110 transition-all shrink-0" title="ออฟฟิศ"><i class="fa-solid fa-building"></i></button>
             <button onclick="openModal('quickAddModal')" class="w-9 h-9 bg-hotPink text-white border-2 border-darkText rounded-full shadow-sm flex items-center justify-center text-sm font-extrabold hover:scale-110 transition-all shrink-0" title="เพิ่มด่วน"><i class="fa-solid fa-plus"></i></button>
         </div>
 
@@ -914,6 +916,11 @@
 
             <button onclick="switchTab('pet')" id="nav-pet" class="tab-btn w-full bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
                 <span class="flex items-center gap-1.5"><i class="fa-solid fa-paw text-hotPink text-xs"></i> สัตว์เลี้ยง</span>
+                <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
+            </button>
+
+            <button onclick="switchTab('office')" id="nav-office" class="tab-btn w-full bg-white text-darkText border-2 border-darkText p-2 rounded-xl font-extrabold text-xs shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-building text-popBlue text-xs"></i> ออฟฟิศ (MY LITTLE OFFICE)</span>
                 <i class="fa-solid fa-chevron-right text-[10px] opacity-70"></i>
             </button>
 
@@ -990,8 +997,7 @@
                 <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
                     <div><p class="text-xs font-bold text-gray-500">งานค้างอยู่</p><h3 id="dashPendingTasks" class="text-lg font-extrabold text-popBlue">0 รายการ</h3></div>
                     <div class="w-9 h-9 bg-popBlue/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-popBlue"><i class="fa-solid fa-list-check"></i></div>
-                </div>
-            </div>
+                </div>            </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
@@ -1072,6 +1078,7 @@
                 </div>
             </div>
             <p class="text-[11px] font-bold text-gray-500">กด "จ่าย" เพื่อบันทึกเป็นรายจ่ายอัตโนมัติ (กดจ่ายแล้วบิลจะซ่อนจากหน้านี้ สามารถดูประวัติได้ที่ปุ่มด้านบน)</p>
+            <div id="billsCategorySummary" class="space-y-2"></div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="billsGrid"></div>
         </section>
 
@@ -1384,6 +1391,49 @@
                 </div>
             </div>
         </section>
+
+        <!-- OFFICE : MY LITTLE OFFICE (ส่วนเสริม ใช้ office.js / office.css) -->
+        <section id="tab-office" class="tab-content hidden space-y-4">
+            <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-building text-popBlue"></i> MY LITTLE OFFICE</h2>
+                    <p id="officeModeBadge" class="text-[11px] font-bold text-gray-500 mt-0.5"></p>
+                </div>
+                <button id="officeMeetingBtn" type="button" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5 self-start sm:self-auto"><i class="fa-solid fa-bullhorn"></i> เรียกประชุม</button>
+            </div>
+
+            <div class="of-stage">
+                <canvas id="officeCanvas" width="400" height="270" aria-label="ออฟฟิศพิกเซลอาร์ต"></canvas>
+                <div id="officeLabels"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3">
+                    <h3 class="font-cute font-bold text-base border-b border-darkText pb-2">📋 สั่งงานพนักงาน</h3>
+                    <form id="officeForm" class="space-y-2 text-xs">
+                        <div>
+                            <label class="block font-bold mb-0.5" for="officeAgentSelect">มอบหมายให้</label>
+                            <select id="officeAgentSelect" class="w-full bg-offWhite border-2 border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium"></select>
+                            <p id="officeAgentRole" class="text-[10px] text-gray-500 mt-0.5"></p>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-0.5" for="officeTaskInput">งานที่ต้องการ</label>
+                            <textarea id="officeTaskInput" rows="3" maxlength="2000" placeholder="เช่น ช่วยร่างโพสต์เปิดตัวสินค้าใหม่ 3 แบบ" class="w-full bg-offWhite border-2 border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-hotPink text-white font-extrabold py-2 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-center gap-1.5"><i class="fa-solid fa-paper-plane"></i> สั่งงาน</button>
+                    </form>
+                    <p class="text-[10px] text-gray-500 text-center">🔒 ระบบ AI ส่วนตัว · เชื่อมต่อเมื่อเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต</p>
+                </div>
+
+                <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
+                    <div class="flex items-center justify-between border-b border-darkText pb-2">
+                        <h3 class="font-cute font-bold text-base">🗂️ สถานะงาน</h3>
+                        <button type="button" id="officeClearDone" class="text-[10px] font-bold text-hotPink underline">ล้างที่เสร็จแล้ว</button>
+                    </div>
+                    <div id="officeTaskList" class="space-y-2 overflow-y-auto max-h-[420px] pr-1"></div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer class="bg-darkText text-white py-4 px-3 mt-auto border-t-2 border-darkText text-center text-xs w-full shrink-0">
@@ -1624,6 +1674,7 @@
             <div id="viewEventPhotoContainer" class="hidden"><img id="viewEventPhoto" class="w-full max-h-56 object-cover rounded-xl border border-darkText"></div>
             <p id="viewEventPhotoNote" class="hidden text-[10px] text-gray-500"></p>
             <div class="pt-2 border-t border-darkText flex gap-2">
+                <button id="editEventBtn" class="flex-1 bg-sunnyYellow text-darkText font-bold py-2 rounded-lg border border-darkText text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-pen-to-square"></i> แก้ไข</button>
                 <button id="deleteEventBtn" class="flex-1 bg-hotPink text-white font-bold py-2 rounded-lg border border-darkText text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ลบโน้ตนี้</button>
             </div>
         </div>
@@ -1904,13 +1955,39 @@
             });
         }
 
+        function photoKey(id, uid = activeStorageUid) {
+            if (!uid) throw new Error('ยังไม่ได้ยืนยันบัญชีสำหรับเข้าถึงรูปภาพ');
+            return uid + '::' + id;
+        }
+
+        async function migrateLegacyPhotosForUser(uid) {
+            if (!uid || !isAllowedUser(currentUser) || currentUser.uid !== uid) return;
+            try {
+                const all = (await idbTx('readonly', s => s.getAll())) || [];
+                for (const rec of all) {
+                    if (rec.uid) continue;
+                    const eventId = rec.eventId || rec.id;
+                    const nextId = photoKey(eventId, uid);
+                    if (all.some(item => item.id === nextId)) continue;
+                    await idbTx('readwrite', store => store.put({ ...rec, id: nextId, eventId, uid }));
+                }
+            } catch (e) {
+                console.warn('Photo migration skipped; original photo records were preserved:', e);
+            }
+        }
+
         async function savePhotoLocal(id, data, synced) {
-            await idbTx('readwrite', s => s.put({ id, data, synced, createdAt: Date.now() }));
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid) throw new Error('ไม่มีสิทธิ์จัดเก็บรูปภาพ');
+            await idbTx('readwrite', store => store.put({
+                id: photoKey(id), eventId: id, uid: activeStorageUid, data, synced, createdAt: Date.now()
+            }));
         }
 
         async function markPhotoSynced(id) {
-            const rec = await idbTx('readonly', s => s.get(id));
-            if (rec) await idbTx('readwrite', s => s.put({ ...rec, synced: true }));
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid) return;
+            const key = photoKey(id);
+            const rec = await idbTx('readonly', store => store.get(key));
+            if (rec) await idbTx('readwrite', store => store.put({ ...rec, synced: true }));
         }
 
         function photosCol(uid) {
@@ -1918,6 +1995,7 @@
         }
 
         async function uploadPhoto(id, data) {
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid) throw new Error('ไม่มีสิทธิ์จัดเก็บรูปภาพ');
             await withTimeout(
                 photosCol(currentUser.uid).doc(id).set({
                     data, eventId: id, createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1927,40 +2005,46 @@
         }
 
         async function getPhotoData(eventId) {
-            const rec = await idbTx('readonly', s => s.get(eventId));
+            if (!dataReady || !isAllowedUser(currentUser) || !activeStorageUid || activeStorageUid !== currentUser.uid) return null;
+            const rec = await idbTx('readonly', store => store.get(photoKey(eventId)));
             if (rec && rec.data) return rec.data;
-            if (!currentUser || !isFirebaseActive) return null;
-            const snap = await withTimeout(photosCol(currentUser.uid).doc(eventId).get(), CLOUD_TIMEOUT_MS, 'โหลดรูปจากคลาวด์ไม่สำเร็จ');
-            if (!snap.exists) return null;
+            if (!isFirebaseActive) return null;
+            const uid = currentUser.uid;
+            const snap = await withTimeout(photosCol(uid).doc(eventId).get(), CLOUD_TIMEOUT_MS, 'โหลดรูปจากคลาวด์ไม่สำเร็จ');
+            if (!snap.exists || !currentUser || currentUser.uid !== uid || activeStorageUid !== uid) return null;
             const data = snap.data().data;
             await savePhotoLocal(eventId, data, true);
             return data;
         }
 
         async function deletePhotoEverywhere(id) {
-            try { await idbTx('readwrite', s => s.delete(id)); } catch (e) { console.warn(e); }
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid) return;
+            try { await idbTx('readwrite', store => store.delete(photoKey(id))); } catch (e) { console.warn(e); }
             if (currentUser && isFirebaseActive) {
                 try { await withTimeout(photosCol(currentUser.uid).doc(id).delete(), CLOUD_TIMEOUT_MS, 'ลบรูปบนคลาวด์ไม่สำเร็จ'); } catch (e) { console.warn(e); }
             }
         }
 
         async function syncPendingPhotos() {
-            if (!currentUser || !isFirebaseActive) return;
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid || !isFirebaseActive) return;
             try {
-                const all = (await idbTx('readonly', s => s.getAll())) || [];
+                const uid = currentUser.uid;
+                const all = (await idbTx('readonly', store => store.getAll())) || [];
                 for (const rec of all) {
-                    if (rec.synced) continue;
-                    const ev = state.events.find(e => e.id === rec.id);
+                    if (rec.uid !== uid || rec.synced) continue;
+                    const eventId = rec.eventId;
+                    const ev = state.events.find(e => e.id === eventId);
                     if (!ev || !ev.hasPhoto) continue;
                     try {
-                        await uploadPhoto(rec.id, rec.data);
-                        await markPhotoSynced(rec.id);
+                        await uploadPhoto(eventId, rec.data);
+                        await markPhotoSynced(eventId);
                     } catch (e) { console.warn('sync photo failed:', e); }
                 }
             } catch (e) { console.warn(e); }
         }
 
-        const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show', headerCollapsed:'y2k_header_collapsed' };
+        // Legacy keys are retained for a one-time, non-destructive migration.
+        const LEGACY_KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show', headerCollapsed:'y2k_header_collapsed' };
         const DEFAULT_CATEGORIES = [
             "🍔 อาหาร/เครื่องดื่ม", "🛍️ ช้อปปิ้ง", "🚗 เดินทาง",
             "🎮 บันเทิง/เกม", "💡 บิล/ค่าใช้จ่าย", "💰 เงินเดือน/รายรับ", "✨ อื่นๆ"
@@ -1970,54 +2054,143 @@
             speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭',
             speechHistory: [{ time: 'เริ่มต้น', text: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭' }]
         });
+        function makeDefaultState() {
+            return {
+                theme: 'y2k', transactions: [], bills: [], tasks: [], events: [],
+                calcHistory: [], categories: [...DEFAULT_CATEGORIES], pet: makeDefaultPet(),
+                quickNotes: [], quickNoteShow: true, headerCollapsed: false
+            };
+        }
         function readLS(key, fallback) {
             try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
         }
+        function scopedKeys(uid) {
+            const prefix = 'y2k_user_' + uid + '_';
+            return {
+                transactions: prefix+'transactions', bills: prefix+'bills', tasks: prefix+'tasks',
+                events: prefix+'events', calcHistory: prefix+'calchistory', pet: prefix+'pet',
+                theme: prefix+'theme', categories: prefix+'categories', quickNotes: prefix+'quicknotes',
+                quickNoteShow: prefix+'quicknote_show', headerCollapsed: prefix+'header_collapsed',
+                migrated: prefix+'legacy_migrated'
+            };
+        }
+        let state = makeDefaultState();
+        let activeStorageKeys = null, activeStorageUid = null, dataReady = false;
 
-        let state = {
-            theme: localStorage.getItem(KEYS.theme) || 'y2k',
-            transactions: readLS(KEYS.transactions, []),
-            bills: readLS(KEYS.bills, []),
-            tasks: readLS(KEYS.tasks, []),
-            events: readLS(KEYS.events, []),
-            calcHistory: readLS(KEYS.calcHistory, []),
-            categories: readLS(KEYS.categories, DEFAULT_CATEGORIES),
-            pet: Object.assign(makeDefaultPet(), readLS(KEYS.pet, {})),
-            quickNotes: readLS(KEYS.quickNotes, []),
-            quickNoteShow: localStorage.getItem(KEYS.quickNoteShow) !== 'false',
-            headerCollapsed: localStorage.getItem(KEYS.headerCollapsed) === 'true'
-        };
-        if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
+        function loadLocalForUser(uid) {
+            const keys = scopedKeys(uid);
+            try {
+                if (localStorage.getItem(keys.migrated) !== 'true') {
+                    // Copy old device data into the authorized account namespace; never delete the originals.
+                    for (const name of Object.keys(LEGACY_KEYS)) {
+                        const oldValue = localStorage.getItem(LEGACY_KEYS[name]);
+                        if (oldValue !== null && localStorage.getItem(keys[name]) === null) {
+                            localStorage.setItem(keys[name], oldValue);
+                        }
+                    }
+                    localStorage.setItem(keys.migrated, 'true');
+                }
+            } catch (e) { console.warn('Local data migration skipped:', e); }
+            activeStorageKeys = keys;
+            activeStorageUid = uid;
+            state = {
+                theme: localStorage.getItem(keys.theme) || 'y2k',
+                transactions: readLS(keys.transactions, []),
+                bills: readLS(keys.bills, []),
+                tasks: readLS(keys.tasks, []),
+                events: readLS(keys.events, []),
+                calcHistory: readLS(keys.calcHistory, []),
+                categories: readLS(keys.categories, [...DEFAULT_CATEGORIES]),
+                pet: Object.assign(makeDefaultPet(), readLS(keys.pet, {})),
+                quickNotes: readLS(keys.quickNotes, []),
+                quickNoteShow: localStorage.getItem(keys.quickNoteShow) !== 'false',
+                headerCollapsed: localStorage.getItem(keys.headerCollapsed) === 'true'
+            };
+            if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
+            dataReady = true;
+        }
 
         function saveLocal() {
+            if (!dataReady || !currentUser || !activeStorageKeys || activeStorageUid !== currentUser.uid ||
+                (currentUser.email || '').toLowerCase() !== ALLOWED_EMAIL) return;
             try {
-                localStorage.setItem(KEYS.transactions, JSON.stringify(state.transactions));
-                localStorage.setItem(KEYS.bills, JSON.stringify(state.bills));
-                localStorage.setItem(KEYS.tasks, JSON.stringify(state.tasks));
-                localStorage.setItem(KEYS.events, JSON.stringify(state.events));
-                localStorage.setItem(KEYS.calcHistory, JSON.stringify(state.calcHistory));
-                localStorage.setItem(KEYS.categories, JSON.stringify(state.categories));
-                localStorage.setItem(KEYS.pet, JSON.stringify(state.pet));
-                localStorage.setItem(KEYS.theme, state.theme);
-                localStorage.setItem(KEYS.quickNotes, JSON.stringify(state.quickNotes));
-                localStorage.setItem(KEYS.quickNoteShow, String(state.quickNoteShow));
-                localStorage.setItem(KEYS.headerCollapsed, String(state.headerCollapsed));
+                localStorage.setItem(activeStorageKeys.transactions, JSON.stringify(state.transactions));
+                localStorage.setItem(activeStorageKeys.bills, JSON.stringify(state.bills));
+                localStorage.setItem(activeStorageKeys.tasks, JSON.stringify(state.tasks));
+                localStorage.setItem(activeStorageKeys.events, JSON.stringify(state.events));
+                localStorage.setItem(activeStorageKeys.calcHistory, JSON.stringify(state.calcHistory));
+                localStorage.setItem(activeStorageKeys.categories, JSON.stringify(state.categories));
+                localStorage.setItem(activeStorageKeys.pet, JSON.stringify(state.pet));
+                localStorage.setItem(activeStorageKeys.theme, state.theme);
+                localStorage.setItem(activeStorageKeys.quickNotes, JSON.stringify(state.quickNotes));
+                localStorage.setItem(activeStorageKeys.quickNoteShow, String(state.quickNoteShow));
+                localStorage.setItem(activeStorageKeys.headerCollapsed, String(state.headerCollapsed));
             } catch (e) { console.error(e); }
         }
 
         function saveData() {
+            if (!dataReady || !currentUser || !activeStorageKeys || activeStorageUid !== currentUser.uid) return;
             saveLocal();
             scheduleCloudSave();
         }
 
         let auth = null, db = null, currentUser = null, isFirebaseActive = false, syncTimer = null;
         let googleLoginInProgress = false;
+        const ALLOWED_EMAIL = 'arisky.studio@gmail.com';
+        window.getOfficeFirebaseIdToken = async function () {
+            if (!dataReady || !currentUser || !currentUser.email || currentUser.email.toLowerCase() !== ALLOWED_EMAIL) return null;
+            return await currentUser.getIdToken();
+        };
 
         function setSyncStatus(text) { $('syncStatus').innerText = text; }
+        function isAllowedUser(user) {
+            return !!user && (user.email || '').toLowerCase() === ALLOWED_EMAIL;
+        }
+        function showAccessLock(message) {
+            let panel = document.getElementById('accountAccessLock');
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.id = 'accountAccessLock';
+                panel.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:24px;background:#fff0f7;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-family:inherit;';
+                panel.innerHTML = '<div style="width:min(440px,100%);padding:28px;border:2px solid #171717;border-radius:22px;background:#fff;box-shadow:0 8px 0 #171717;text-align:center;color:#171717"><div style="font-size:34px;margin-bottom:10px">🔐</div><h2 style="font-size:22px;font-weight:900;margin:0 0 10px">MY LITTLE OFFICE</h2><p id="accountAccessMessage" style="font-size:14px;line-height:1.6;margin:0 0 18px"></p><button id="accountAccessLogin" type="button" style="padding:12px 22px;border:2px solid #171717;border-radius:12px;background:#0055ff;color:#fff;font-weight:800;cursor:pointer">เข้าสู่ระบบด้วย Google</button><p style="font-size:11px;opacity:.65;margin:16px 0 0">ข้อมูลส่วนตัวจะแสดงหลังตรวจสอบบัญชีที่ได้รับอนุญาตเท่านั้น</p></div>';
+                document.body.appendChild(panel);
+                panel.querySelector('#accountAccessLogin').addEventListener('click', loginWithGoogle);
+            }
+            panel.querySelector('#accountAccessMessage').textContent = message || 'กรุณาเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต';
+            panel.style.display = 'flex';
+        }
+        function hideAccessLock() {
+            const panel = document.getElementById('accountAccessLock');
+            if (panel) panel.style.display = 'none';
+        }
+        function clearPrivateSession(message) {
+            clearTimeout(syncTimer);
+            currentUser = null;
+            activeStorageKeys = null;
+            activeStorageUid = null;
+            dataReady = false;
+            state = makeDefaultState();
+            renderAuthUI();
+            refreshUI();
+            showAccessLock(message || 'กรุณาเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต');
+        }
+        async function activateAllowedUser(user) {
+            if (!isAllowedUser(user)) return;
+            if (dataReady && activeStorageUid === user.uid && currentUser && currentUser.uid === user.uid) return;
+            currentUser = user;
+            loadLocalForUser(user.uid);
+            await migrateLegacyPhotosForUser(user.uid);
+            renderAuthUI();
+            refreshUI();
+            hideAccessLock();
+            await pullFromCloud(user.uid);
+        }
 
         async function initFirebase() {
+            showAccessLock('กำลังตรวจสอบสิทธิ์การเข้าใช้งาน…');
             if (!IS_CONFIGURED) {
-                setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
+                setSyncStatus('ต้องเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต');
+                showAccessLock('แอปนี้ต้องเชื่อมต่อ Firebase และเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต');
                 return;
             }
             try {
@@ -2028,20 +2201,24 @@
                 isFirebaseActive = true;
 
                 auth.onAuthStateChanged(async user => {
+                    if (user && !isAllowedUser(user)) {
+                        clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
+                        setSyncStatus('ไม่มีสิทธิ์เข้าใช้งานแอปนี้');
+                        try { await auth.signOut(); } catch {}
+                        alert('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
+                        return;
+                    }
                     if (user) {
-                        const isNewUser = !currentUser || currentUser.uid !== user.uid;
-                        currentUser = user;
-                        renderAuthUI();
-                        if (isNewUser) await pullFromCloud(user.uid);
+                        await activateAllowedUser(user);
                     } else {
-                        currentUser = null;
-                        renderAuthUI();
-                        setSyncStatus('ออกจากระบบแล้ว · ข้อมูลอยู่ในเครื่อง');
+                        clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
+                        setSyncStatus('ออกจากระบบแล้ว · ข้อมูลถูกล็อกไว้');
                     }
                 });
-                setSyncStatus('พร้อมเชื่อมต่อ Gmail');
+                setSyncStatus('กำลังตรวจสอบบัญชี Google…');
             } catch (error) {
                 isFirebaseActive = false;
+                clearPrivateSession('เชื่อมต่อ Firebase ไม่สำเร็จ จึงล็อกข้อมูลไว้เพื่อความเป็นส่วนตัว');
                 setSyncStatus('เชื่อมต่อ Firebase ไม่สำเร็จ ⚠️');
             }
         }
@@ -2066,9 +2243,13 @@
             try {
                 const result = await auth.signInWithPopup(provider);
                 if (result && result.user) {
-                    currentUser = result.user;
-                    renderAuthUI();
-                    await pullFromCloud(result.user.uid);
+                    if (!isAllowedUser(result.user)) {
+                        clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
+                        await auth.signOut();
+                        alert('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
+                        return;
+                    }
+                    await activateAllowedUser(result.user);
                     showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
                 }
             } catch (error) {
@@ -2078,11 +2259,14 @@
 
         async function logoutGoogle() {
             if (!auth) return;
-            try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch {}
+            clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
+            try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch {
+                showAccessLock('ข้อมูลถูกล็อกไว้ กรุณาตรวจสอบสถานะการเข้าสู่ระบบ');
+            }
         }
 
         function scheduleCloudSave() {
-            if (!currentUser || !db) return;
+            if (!dataReady || !isAllowedUser(currentUser) || !activeStorageUid || activeStorageUid !== currentUser.uid || !db) return;
             clearTimeout(syncTimer);
             setSyncStatus('กำลังซิงก์...');
             syncTimer = setTimeout(pushToCloud, 800);
@@ -2099,7 +2283,7 @@
         }
 
         async function pushToCloud() {
-            if (!currentUser || !db) return;
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid || !db) return;
             try {
                 await db.collection('users').doc(currentUser.uid).set(cloudPayload());
                 setSyncStatus('ซิงก์แล้ว ☁️');
@@ -2107,9 +2291,11 @@
         }
 
         async function pullFromCloud(uid) {
+            if (!dataReady || !isAllowedUser(currentUser) || currentUser.uid !== uid || activeStorageUid !== uid) return;
             setSyncStatus('กำลังโหลดข้อมูล...');
             try {
                 const snap = await db.collection('users').doc(uid).get();
+                if (!currentUser || currentUser.uid !== uid || activeStorageUid !== uid) return;
                 if (snap.exists) { applyRemote(snap.data()); setSyncStatus('โหลดจากคลาวด์แล้ว ☁️'); }
                 else { await pushToCloud(); }
                 refreshUI(); syncPendingPhotos();
@@ -2117,6 +2303,7 @@
         }
 
         function applyRemote(d) {
+            if (!dataReady || !isAllowedUser(currentUser) || !activeStorageUid || activeStorageUid !== currentUser.uid) return;
             state.transactions = d.transactions || [];
             state.bills = d.bills || [];
             state.tasks = d.tasks || [];
@@ -2517,6 +2704,33 @@
             $('dashPendingBills').innerText = activeBills.length + ' รายการ';
             let totalAmount = 0; activeBills.forEach(b => totalAmount += Number(b.amount || 0));
             $('billsTotalSummaryText').innerText = `ยอดรวมที่ต้องเตรียมจ่าย: ฿ ${money(totalAmount)}`;
+
+            // สรุปยอดบิลค้างจ่ายแยกตามหมวดที่ผู้ใช้เลือกตอนบันทึก
+            const categoryTotals = {};
+            activeBills.forEach(b => {
+                const category = (b.category || 'ไม่ระบุหมวด').trim() || 'ไม่ระบุหมวด';
+                if (!categoryTotals[category]) categoryTotals[category] = { amount: 0, count: 0 };
+                categoryTotals[category].amount += Number(b.amount || 0);
+                categoryTotals[category].count += 1;
+            });
+            const summaryEl = $('billsCategorySummary');
+            const categoryRows = Object.entries(categoryTotals).sort((a, b) => b[1].amount - a[1].amount);
+            summaryEl.innerHTML = categoryRows.length ? `
+                <div class="flex items-center justify-between gap-2">
+                    <h3 class="font-extrabold text-sm text-darkText">สรุปยอดตามหมวด</h3>
+                    <span class="text-[10px] font-bold text-gray-500">${categoryRows.length} หมวด · เฉพาะรายการที่ยังไม่จ่าย</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    ${categoryRows.map(([category, data]) => `
+                        <div class="bg-white text-darkText p-3 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="font-bold text-xs break-words">${esc(category)}</div>
+                                <div class="text-[10px] text-gray-500 mt-1">${data.count} รายการ</div>
+                            </div>
+                            <div class="font-extrabold text-base text-hotPink whitespace-nowrap">฿ ${money(data.amount)}</div>
+                        </div>
+                    `).join('')}
+                </div>` : '';
             $('billsGrid').innerHTML = activeBills.length ? activeBills.map(b => `
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2">
                     <div class="flex justify-between items-center">
@@ -2565,12 +2779,37 @@
 
         let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊';
         function selectMoodEmoji(emoji) { selectedMood = emoji; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('mood-btn-selected', b.id === 'mood-' + emoji)); }
-        function openEventModal(presetDate) { $('eventForm').reset(); setDefaultDates(); selectMoodEmoji('😊'); $('eventDate').value = presetDate || localDateKey(); openModal('eventModal'); }
+        let editingEventId = null;
+        function openEventModal(presetDate, editId = null) {
+            editingEventId = editId;
+            $('eventForm').reset(); setDefaultDates();
+            const existing = editId ? state.events.find(e => e.id === editId) : null;
+            selectMoodEmoji(existing?.mood || '😊');
+            $('eventDate').value = existing?.date || presetDate || localDateKey();
+            $('eventTitle').value = existing?.title || '';
+            const heading = $('eventModal').querySelector('h3');
+            if (heading) heading.innerText = existing ? '✏️ แก้ไขไดอารี่' : '📸 บันทึกไดอารี่';
+            $('eventSubmitBtn').innerText = existing ? 'บันทึกการแก้ไข' : 'บันทึก';
+            openModal('eventModal');
+        }
 
         async function handleSaveEvent(e) {
             e.preventDefault();
-            state.events.unshift({ id: 'ev_' + Date.now(), date: $('eventDate').value, mood: selectedMood, title: $('eventTitle').value.trim(), hasPhoto: false });
-            saveData(); closeModal('eventModal'); selectCalendarDate($('eventDate').value); showToast('บันทึกไดอารี่แล้ว!');
+            const date = $('eventDate').value;
+            const title = $('eventTitle').value.trim();
+            if (!date || !title) return;
+            if (editingEventId) {
+                const existing = state.events.find(item => item.id === editingEventId);
+                if (existing) {
+                    existing.date = date;
+                    existing.mood = selectedMood;
+                    existing.title = title;
+                }
+            } else {
+                state.events.unshift({ id: 'ev_' + Date.now(), date, mood: selectedMood, title, hasPhoto: false });
+            }
+            editingEventId = null;
+            saveData(); closeModal('eventModal'); selectCalendarDate(date); showToast('บันทึกไดอารี่แล้ว!');
         }
 
         function selectCalendarDate(dateKey) { selectedCalendarDate = dateKey; renderCalendar(); renderEventsList(); }
@@ -2578,7 +2817,16 @@
             const ev = state.events.find(e => e.id === eventId);
             if (!ev) return;
             $('viewEventMood').innerText = ev.mood || '😊'; $('viewEventDate').innerText = ev.date; $('viewEventTitle').innerText = ev.title;
-            $('deleteEventBtn').onclick = async () => { state.events = state.events.filter(x => x.id !== ev.id); saveData(); renderCalendar(); renderEventsList(); closeModal('viewEventModal'); updatepetCalendarMoodDisplay(); };
+            $('editEventBtn').onclick = () => {
+                closeModal('viewEventModal');
+                openEventModal(ev.date, ev.id);
+            };
+            $('deleteEventBtn').onclick = async () => {
+                state.events = state.events.filter(x => x.id !== ev.id);
+                if (ev.hasPhoto) await deletePhotoEverywhere(ev.id);
+                saveData(); renderCalendar(); renderEventsList(); closeModal('viewEventModal'); updatepetCalendarMoodDisplay();
+                showToast('ลบโน้ตแล้ว');
+            };
             openModal('viewEventModal');
         }
         function changeMonth(dir) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir); renderCalendar(); }
@@ -2704,7 +2952,7 @@
         }
 
         window.addEventListener('load', async () => {
-            initView(); setDefaultDates(); refreshUI(); initFirebase();
+            showAccessLock('กำลังตรวจสอบสิทธิ์การเข้าใช้งาน…'); initView(); setDefaultDates(); refreshUI(); initFirebase();
             setBottomNavActive('dashboard');
         });
 
@@ -2727,5 +2975,23 @@
             window.addEventListener('blur', release);
         })();
     </script>
+    <script>
+        window.addEventListener('error', function (e) {
+            var stage = document.querySelector('#tab-office .of-stage');
+            if (!stage) return;
+            if (e.target && e.target.tagName === 'SCRIPT') {
+                stage.textContent = 'โหลดไฟล์ออฟฟิศไม่สำเร็จ: ' + (e.target.src || 'unknown script');
+            } else if (e.message) {
+                stage.textContent = 'ข้อผิดพลาดในระบบออฟฟิศ: ' + e.message + ' (' + (e.filename || '') + ':' + (e.lineno || '') + ')';
+            }
+        }, true);
+        window.addEventListener('load', function () {
+            if (!document.documentElement.dataset.officeRenderer) {
+                var stage = document.querySelector('#tab-office .of-stage');
+                if (stage) stage.textContent = 'ไฟล์ออฟฟิศโหลดแล้ว แต่ระบบวาดภาพยังไม่เริ่มทำงาน';
+            }
+        });
+    </script>
+    <script src="./office-recovery.js?v=recovery-25"></script>
 </body>
 </html>

@@ -1,0 +1,114 @@
+/* ===== หน้าออฟฟิศจำลอง — สไตล์เฉพาะหน้านี้ (ไม่กระทบหน้าเดิม) ===== */
+#tab-office .of-stage {
+    position: relative;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    aspect-ratio: 400 / 270;
+    border: 3px solid #4A3226;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #FFB36B;
+    box-shadow: 4px 6px 0 #4A3226;
+}
+#tab-office .of-stage canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+#tab-office #officeLabels { position: absolute; inset: 0; pointer-events: none; }
+#tab-office .of-label {
+    pointer-events: auto;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -100%);
+    background: #FFFFFF;
+    color: #3B2A22;
+    border: 2px solid #4A3226;
+    border-radius: 10px;
+    padding: 1px 6px 2px;
+    font-size: 10px;
+    line-height: 1.25;
+    white-space: nowrap;
+    text-align: center;
+    box-shadow: 0 2px 0 rgba(74, 50, 38, .8);
+    cursor: pointer;
+    font-family: 'Prompt', sans-serif;
+}
+#tab-office .of-label b { display: block; font-weight: 700; }
+#tab-office .of-label::before {
+    content: attr(data-speech);
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 150px;
+    white-space: normal;
+    background: #FFFDF8;
+    color: #3B2A22;
+    border: 2px solid #4A3226;
+    border-radius: 10px;
+    padding: 5px 8px;
+    font-size: 10px;
+    line-height: 1.35;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 2px 3px 0 rgba(74, 50, 38, .28);
+    z-index: 9999;
+    pointer-events: none;
+}
+#tab-office .of-label[data-speech]:not([data-speech=""])::before { display: block; }
+#tab-office .of-label[data-speech]:not([data-speech=""])::after {
+    content: '';
+    position: absolute;
+    left: calc(50% - 5px);
+    bottom: calc(100% + 3px);
+    width: 8px;
+    height: 8px;
+    background: #FFFDF8;
+    border-right: 2px solid #4A3226;
+    border-bottom: 2px solid #4A3226;
+    transform: rotate(45deg);
+    z-index: 10000;
+}
+#tab-office .of-label small {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    font-size: 8px;
+    color: #6b5a50;
+}
+#tab-office .of-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #aaa;
+    display: inline-block;
+}
+#tab-office .of-label.sel { outline: 2px solid #FF007F; outline-offset: 1px; }
+#tab-office .of-task { border: 2px solid #4A3226; border-radius: 12px; padding: 8px 10px; }
+#tab-office .of-result {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 6px;
+}
+@media (max-width: 640px) {
+    #tab-office .of-label { font-size: 8px; padding: 0 4px 1px; border-radius: 8px; }
+    #tab-office .of-label small { font-size: 7px; }
+}
+@media (max-width: 480px) {
+    /* จอเล็ก: ซ่อนบรรทัดสถานะ ลดการทับกัน (ยังเห็นเมื่อกดเลือกพนักงาน) */
+    #tab-office .of-label small { display: none; }
+    #tab-office .of-label.sel small { display: flex; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #tab-office .of-stage canvas { image-rendering: auto; }
+}

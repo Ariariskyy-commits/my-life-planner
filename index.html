@@ -1967,6 +1967,7 @@
         }
 
         async function uploadPhoto(id, data) {
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid) throw new Error('ไม่มีสิทธิ์จัดเก็บรูปภาพ');
             await withTimeout(
                 photosCol(currentUser.uid).doc(id).set({
                     data, eventId: id, createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1976,6 +1977,7 @@
         }
 
         async function getPhotoData(eventId) {
+            if (!dataReady || !isAllowedUser(currentUser) || !activeStorageUid || activeStorageUid !== currentUser.uid) return null;
             const rec = await idbTx('readonly', s => s.get(eventId));
             if (rec && rec.data) return rec.data;
             if (!currentUser || !isFirebaseActive) return null;
@@ -1987,13 +1989,14 @@
         }
 
         async function deletePhotoEverywhere(id) {
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid) return;
             try { await idbTx('readwrite', s => s.delete(id)); } catch (e) { console.warn(e); }
             if (currentUser && isFirebaseActive) {
                 try { await withTimeout(photosCol(currentUser.uid).doc(id).delete(), CLOUD_TIMEOUT_MS, 'ลบรูปบนคลาวด์ไม่สำเร็จ'); } catch (e) { console.warn(e); }            }
         }
 
         async function syncPendingPhotos() {
-            if (!currentUser || !isFirebaseActive) return;
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid || !isFirebaseActive) return;
             try {
                 const all = (await idbTx('readonly', s => s.getAll())) || [];
                 for (const rec of all) {
@@ -2008,7 +2011,8 @@
             } catch (e) { console.warn(e); }
         }
 
-        const KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show', headerCollapsed:'y2k_header_collapsed' };
+        // Legacy keys are retained for a one-time, non-destructive migration.
+        const LEGACY_KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show', headerCollapsed:'y2k_header_collapsed' };
         const DEFAULT_CATEGORIES = [
             "🍔 อาหาร/เครื่องดื่ม", "🛍️ ช้อปปิ้ง", "🚗 เดินทาง",
             "🎮 บันเทิง/เกม", "💡 บิล/ค่าใช้จ่าย", "💰 เงินเดือน/รายรับ", "✨ อื่นๆ"
@@ -2018,42 +2022,82 @@
             speech: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭',
             speechHistory: [{ time: 'เริ่มต้น', text: 'เงินเป็น 0 เลยงับ ช่วยบันทึกรายรับให้เค้าที! 😭' }]
         });
+        function makeDefaultState() {
+            return {
+                theme: 'y2k', transactions: [], bills: [], tasks: [], events: [],
+                calcHistory: [], categories: [...DEFAULT_CATEGORIES], pet: makeDefaultPet(),
+                quickNotes: [], quickNoteShow: true, headerCollapsed: false
+            };
+        }
         function readLS(key, fallback) {
             try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
         }
+        function scopedKeys(uid) {
+            const prefix = 'y2k_user_' + uid + '_';
+            return {
+                transactions: prefix+'transactions', bills: prefix+'bills', tasks: prefix+'tasks',
+                events: prefix+'events', calcHistory: prefix+'calchistory', pet: prefix+'pet',
+                theme: prefix+'theme', categories: prefix+'categories', quickNotes: prefix+'quicknotes',
+                quickNoteShow: prefix+'quicknote_show', headerCollapsed: prefix+'header_collapsed',
+                migrated: prefix+'legacy_migrated'
+            };
+        }
+        let state = makeDefaultState();
+        let activeStorageKeys = null, activeStorageUid = null, dataReady = false;
 
-        let state = {
-            theme: localStorage.getItem(KEYS.theme) || 'y2k',
-            transactions: readLS(KEYS.transactions, []),
-            bills: readLS(KEYS.bills, []),
-            tasks: readLS(KEYS.tasks, []),
-            events: readLS(KEYS.events, []),
-            calcHistory: readLS(KEYS.calcHistory, []),
-            categories: readLS(KEYS.categories, DEFAULT_CATEGORIES),
-            pet: Object.assign(makeDefaultPet(), readLS(KEYS.pet, {})),
-            quickNotes: readLS(KEYS.quickNotes, []),
-            quickNoteShow: localStorage.getItem(KEYS.quickNoteShow) !== 'false',
-            headerCollapsed: localStorage.getItem(KEYS.headerCollapsed) === 'true'
-        };
-        if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
+        function loadLocalForUser(uid) {
+            const keys = scopedKeys(uid);
+            try {
+                if (localStorage.getItem(keys.migrated) !== 'true') {
+                    // Copy old device data into the authorized account namespace; never delete the originals.
+                    for (const name of Object.keys(LEGACY_KEYS)) {
+                        const oldValue = localStorage.getItem(LEGACY_KEYS[name]);
+                        if (oldValue !== null && localStorage.getItem(keys[name]) === null) {
+                            localStorage.setItem(keys[name], oldValue);
+                        }
+                    }
+                    localStorage.setItem(keys.migrated, 'true');
+                }
+            } catch (e) { console.warn('Local data migration skipped:', e); }
+            activeStorageKeys = keys;
+            activeStorageUid = uid;
+            state = {
+                theme: localStorage.getItem(keys.theme) || 'y2k',
+                transactions: readLS(keys.transactions, []),
+                bills: readLS(keys.bills, []),
+                tasks: readLS(keys.tasks, []),
+                events: readLS(keys.events, []),
+                calcHistory: readLS(keys.calcHistory, []),
+                categories: readLS(keys.categories, [...DEFAULT_CATEGORIES]),
+                pet: Object.assign(makeDefaultPet(), readLS(keys.pet, {})),
+                quickNotes: readLS(keys.quickNotes, []),
+                quickNoteShow: localStorage.getItem(keys.quickNoteShow) !== 'false',
+                headerCollapsed: localStorage.getItem(keys.headerCollapsed) === 'true'
+            };
+            if (!Array.isArray(state.pet.speechHistory)) state.pet.speechHistory = makeDefaultPet().speechHistory;
+            dataReady = true;
+        }
 
         function saveLocal() {
+            if (!dataReady || !currentUser || !activeStorageKeys || activeStorageUid !== currentUser.uid ||
+                (currentUser.email || '').toLowerCase() !== ALLOWED_EMAIL) return;
             try {
-                localStorage.setItem(KEYS.transactions, JSON.stringify(state.transactions));
-                localStorage.setItem(KEYS.bills, JSON.stringify(state.bills));
-                localStorage.setItem(KEYS.tasks, JSON.stringify(state.tasks));
-                localStorage.setItem(KEYS.events, JSON.stringify(state.events));
-                localStorage.setItem(KEYS.calcHistory, JSON.stringify(state.calcHistory));
-                localStorage.setItem(KEYS.categories, JSON.stringify(state.categories));
-                localStorage.setItem(KEYS.pet, JSON.stringify(state.pet));
-                localStorage.setItem(KEYS.theme, state.theme);
-                localStorage.setItem(KEYS.quickNotes, JSON.stringify(state.quickNotes));
-                localStorage.setItem(KEYS.quickNoteShow, String(state.quickNoteShow));
-                localStorage.setItem(KEYS.headerCollapsed, String(state.headerCollapsed));
+                localStorage.setItem(activeStorageKeys.transactions, JSON.stringify(state.transactions));
+                localStorage.setItem(activeStorageKeys.bills, JSON.stringify(state.bills));
+                localStorage.setItem(activeStorageKeys.tasks, JSON.stringify(state.tasks));
+                localStorage.setItem(activeStorageKeys.events, JSON.stringify(state.events));
+                localStorage.setItem(activeStorageKeys.calcHistory, JSON.stringify(state.calcHistory));
+                localStorage.setItem(activeStorageKeys.categories, JSON.stringify(state.categories));
+                localStorage.setItem(activeStorageKeys.pet, JSON.stringify(state.pet));
+                localStorage.setItem(activeStorageKeys.theme, state.theme);
+                localStorage.setItem(activeStorageKeys.quickNotes, JSON.stringify(state.quickNotes));
+                localStorage.setItem(activeStorageKeys.quickNoteShow, String(state.quickNoteShow));
+                localStorage.setItem(activeStorageKeys.headerCollapsed, String(state.headerCollapsed));
             } catch (e) { console.error(e); }
         }
 
         function saveData() {
+            if (!dataReady || !currentUser || !activeStorageKeys || activeStorageUid !== currentUser.uid) return;
             saveLocal();
             scheduleCloudSave();
         }
@@ -2062,15 +2106,58 @@
         let googleLoginInProgress = false;
         const ALLOWED_EMAIL = 'arisky.studio@gmail.com';
         window.getOfficeFirebaseIdToken = async function () {
-            if (!currentUser || !currentUser.email || currentUser.email.toLowerCase() !== ALLOWED_EMAIL) return null;
+            if (!dataReady || !currentUser || !currentUser.email || currentUser.email.toLowerCase() !== ALLOWED_EMAIL) return null;
             return await currentUser.getIdToken();
         };
 
         function setSyncStatus(text) { $('syncStatus').innerText = text; }
+        function isAllowedUser(user) {
+            return !!user && (user.email || '').toLowerCase() === ALLOWED_EMAIL;
+        }
+        function showAccessLock(message) {
+            let panel = document.getElementById('accountAccessLock');
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.id = 'accountAccessLock';
+                panel.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(255,240,247,.98);font-family:inherit;';
+                panel.innerHTML = '<div style="width:min(440px,100%);padding:28px;border:2px solid #171717;border-radius:22px;background:#fff;box-shadow:0 8px 0 #171717;text-align:center;color:#171717"><div style="font-size:34px;margin-bottom:10px">🔐</div><h2 style="font-size:22px;font-weight:900;margin:0 0 10px">MY LITTLE OFFICE</h2><p id="accountAccessMessage" style="font-size:14px;line-height:1.6;margin:0 0 18px"></p><button id="accountAccessLogin" type="button" style="padding:12px 22px;border:2px solid #171717;border-radius:12px;background:#0055ff;color:#fff;font-weight:800;cursor:pointer">เข้าสู่ระบบด้วย Google</button><p style="font-size:11px;opacity:.65;margin:16px 0 0">ข้อมูลส่วนตัวจะแสดงหลังตรวจสอบบัญชีที่ได้รับอนุญาตเท่านั้น</p></div>';
+                document.body.appendChild(panel);
+                panel.querySelector('#accountAccessLogin').addEventListener('click', loginWithGoogle);
+            }
+            panel.querySelector('#accountAccessMessage').textContent = message || 'กรุณาเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต';
+            panel.style.display = 'flex';
+        }
+        function hideAccessLock() {
+            const panel = document.getElementById('accountAccessLock');
+            if (panel) panel.style.display = 'none';
+        }
+        function clearPrivateSession(message) {
+            clearTimeout(syncTimer);
+            currentUser = null;
+            activeStorageKeys = null;
+            activeStorageUid = null;
+            dataReady = false;
+            state = makeDefaultState();
+            renderAuthUI();
+            refreshUI();
+            showAccessLock(message || 'กรุณาเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต');
+        }
+        async function activateAllowedUser(user) {
+            if (!isAllowedUser(user)) return;
+            if (dataReady && activeStorageUid === user.uid && currentUser && currentUser.uid === user.uid) return;
+            currentUser = user;
+            loadLocalForUser(user.uid);
+            renderAuthUI();
+            refreshUI();
+            hideAccessLock();
+            await pullFromCloud(user.uid);
+        }
 
         async function initFirebase() {
+            showAccessLock('กำลังตรวจสอบสิทธิ์การเข้าใช้งาน…');
             if (!IS_CONFIGURED) {
-                setSyncStatus('โหมดเครื่องเดียว (ยังไม่ได้ตั้งค่า Gmail)');
+                setSyncStatus('ต้องเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต');
+                showAccessLock('แอปนี้ต้องเชื่อมต่อ Firebase และเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต');
                 return;
             }
             try {
@@ -2081,28 +2168,24 @@
                 isFirebaseActive = true;
 
                 auth.onAuthStateChanged(async user => {
-                    if (user && (user.email || '').toLowerCase() !== ALLOWED_EMAIL) {
-                        currentUser = null;
-                        renderAuthUI();
+                    if (user && !isAllowedUser(user)) {
+                        clearPrivateSession('บัญชีนี้ไม่มีสิทธิ์ใช้งาน กรุณาเลือกบัญชีที่ได้รับอนุญาต');
                         setSyncStatus('บัญชีนี้ไม่มีสิทธิ์ใช้งาน');
                         try { await auth.signOut(); } catch {}
                         alert('แอปนี้อนุญาตเฉพาะ ' + ALLOWED_EMAIL);
                         return;
                     }
                     if (user) {
-                        const isNewUser = !currentUser || currentUser.uid !== user.uid;
-                        currentUser = user;
-                        renderAuthUI();
-                        if (isNewUser) await pullFromCloud(user.uid);
+                        await activateAllowedUser(user);
                     } else {
-                        currentUser = null;
-                        renderAuthUI();
-                        setSyncStatus('ออกจากระบบแล้ว · ข้อมูลอยู่ในเครื่อง');
+                        clearPrivateSession('กรุณาเข้าสู่ระบบด้วย ' + ALLOWED_EMAIL + ' เพื่อดูข้อมูลส่วนตัว');
+                        setSyncStatus('ออกจากระบบแล้ว · ข้อมูลถูกล็อกไว้');
                     }
                 });
-                setSyncStatus('พร้อมเชื่อมต่อ Gmail');
+                setSyncStatus('กำลังตรวจสอบบัญชี Google…');
             } catch (error) {
                 isFirebaseActive = false;
+                clearPrivateSession('เชื่อมต่อ Firebase ไม่สำเร็จ จึงล็อกข้อมูลไว้เพื่อความเป็นส่วนตัว');
                 setSyncStatus('เชื่อมต่อ Firebase ไม่สำเร็จ ⚠️');
             }
         }
@@ -2127,16 +2210,13 @@
             try {
                 const result = await auth.signInWithPopup(provider);
                 if (result && result.user) {
-                    if ((result.user.email || '').toLowerCase() !== ALLOWED_EMAIL) {
+                    if (!isAllowedUser(result.user)) {
+                        clearPrivateSession('บัญชีนี้ไม่มีสิทธิ์ใช้งาน กรุณาเลือกบัญชีที่ได้รับอนุญาต');
                         await auth.signOut();
-                        currentUser = null;
-                        renderAuthUI();
                         alert('แอปนี้อนุญาตเฉพาะ ' + ALLOWED_EMAIL);
                         return;
                     }
-                    currentUser = result.user;
-                    renderAuthUI();
-                    await pullFromCloud(result.user.uid);
+                    await activateAllowedUser(result.user);
                     showToast('ล็อกอิน Gmail สำเร็จ! 🌟');
                 }
             } catch (error) {
@@ -2167,7 +2247,7 @@
         }
 
         async function pushToCloud() {
-            if (!currentUser || !db) return;
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid || !db) return;
             try {
                 await db.collection('users').doc(currentUser.uid).set(cloudPayload());
                 setSyncStatus('ซิงก์แล้ว ☁️');
@@ -2175,9 +2255,11 @@
         }
 
         async function pullFromCloud(uid) {
+            if (!dataReady || !isAllowedUser(currentUser) || currentUser.uid !== uid || activeStorageUid !== uid) return;
             setSyncStatus('กำลังโหลดข้อมูล...');
             try {
                 const snap = await db.collection('users').doc(uid).get();
+                if (!currentUser || currentUser.uid !== uid || activeStorageUid !== uid) return;
                 if (snap.exists) { applyRemote(snap.data()); setSyncStatus('โหลดจากคลาวด์แล้ว ☁️'); }
                 else { await pushToCloud(); }
                 refreshUI(); syncPendingPhotos();
@@ -2185,6 +2267,7 @@
         }
 
         function applyRemote(d) {
+            if (!dataReady || !isAllowedUser(currentUser) || !activeStorageUid || activeStorageUid !== currentUser.uid) return;
             state.transactions = d.transactions || [];
             state.bills = d.bills || [];
             state.tasks = d.tasks || [];
@@ -2772,7 +2855,7 @@
         }
 
         window.addEventListener('load', async () => {
-            initView(); setDefaultDates(); refreshUI(); initFirebase();
+            showAccessLock('กำลังตรวจสอบสิทธิ์การเข้าใช้งาน…'); initView(); setDefaultDates(); refreshUI(); initFirebase();
             setBottomNavActive('dashboard');
         });
 

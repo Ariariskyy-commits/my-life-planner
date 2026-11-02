@@ -1078,6 +1078,7 @@
                 </div>
             </div>
             <p class="text-[11px] font-bold text-gray-500">กด "จ่าย" เพื่อบันทึกเป็นรายจ่ายอัตโนมัติ (กดจ่ายแล้วบิลจะซ่อนจากหน้านี้ สามารถดูประวัติได้ที่ปุ่มด้านบน)</p>
+            <div id="billsCategorySummary" class="space-y-2"></div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="billsGrid"></div>
         </section>
 
@@ -2702,6 +2703,33 @@
             $('dashPendingBills').innerText = activeBills.length + ' รายการ';
             let totalAmount = 0; activeBills.forEach(b => totalAmount += Number(b.amount || 0));
             $('billsTotalSummaryText').innerText = `ยอดรวมที่ต้องเตรียมจ่าย: ฿ ${money(totalAmount)}`;
+
+            // สรุปยอดบิลค้างจ่ายแยกตามหมวดที่ผู้ใช้เลือกตอนบันทึก
+            const categoryTotals = {};
+            activeBills.forEach(b => {
+                const category = (b.category || 'ไม่ระบุหมวด').trim() || 'ไม่ระบุหมวด';
+                if (!categoryTotals[category]) categoryTotals[category] = { amount: 0, count: 0 };
+                categoryTotals[category].amount += Number(b.amount || 0);
+                categoryTotals[category].count += 1;
+            });
+            const summaryEl = $('billsCategorySummary');
+            const categoryRows = Object.entries(categoryTotals).sort((a, b) => b[1].amount - a[1].amount);
+            summaryEl.innerHTML = categoryRows.length ? `
+                <div class="flex items-center justify-between gap-2">
+                    <h3 class="font-extrabold text-sm text-darkText">สรุปยอดตามหมวด</h3>
+                    <span class="text-[10px] font-bold text-gray-500">${categoryRows.length} หมวด · เฉพาะรายการที่ยังไม่จ่าย</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    ${categoryRows.map(([category, data]) => `
+                        <div class="bg-white text-darkText p-3 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="font-bold text-xs break-words">${esc(category)}</div>
+                                <div class="text-[10px] text-gray-500 mt-1">${data.count} รายการ</div>
+                            </div>
+                            <div class="font-extrabold text-base text-hotPink whitespace-nowrap">฿ ${money(data.amount)}</div>
+                        </div>
+                    `).join('')}
+                </div>` : '';
             $('billsGrid').innerHTML = activeBills.length ? activeBills.map(b => `
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-2">
                     <div class="flex justify-between items-center">

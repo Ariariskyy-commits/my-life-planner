@@ -1909,6 +1909,7 @@
         <div class="bg-limeGreen text-darkText font-bold px-4 py-2.5 rounded-xl border-2 border-darkText shadow-sm flex items-center gap-2 whitespace-nowrap">
             <i class="fa-solid fa-circle-check text-base"></i>
             <span id="toastMessage">สำเร็จ!</span>
+            <button id="toastUndoButton" type="button" onclick="undoLastDelete()" class="hidden ml-2 px-2.5 py-1 rounded-lg bg-white border-2 border-darkText font-extrabold text-popBlue">ย้อนคืน</button>
         </div>
     </div>
 
@@ -1967,13 +1968,41 @@
         const MAX_PHOTO_CHARS = 900000;
         const CLOUD_TIMEOUT_MS = 20000;
 
-        function showToast(message) {
+        let lastDeleteUndo = null;
+        function showToast(message, undoAvailable = false) {
             $('toastMessage').innerText = message;
             const t = $('toastNotification');
+            const undoBtn = $('toastUndoButton');
+            undoBtn.classList.toggle('hidden', !undoAvailable);
+            t.classList.toggle('pointer-events-auto', undoAvailable);
+            t.classList.toggle('pointer-events-none', !undoAvailable);
             t.classList.remove('opacity-0');
             t.classList.add('opacity-100');
             clearTimeout(showToast._timer);
-            showToast._timer = setTimeout(() => { t.classList.add('opacity-0'); t.classList.remove('opacity-100'); }, 2300);
+            showToast._timer = setTimeout(() => {
+                t.classList.add('opacity-0'); t.classList.remove('opacity-100');
+                t.classList.add('pointer-events-none'); t.classList.remove('pointer-events-auto');
+                undoBtn.classList.add('hidden');
+                lastDeleteUndo = null;
+            }, undoAvailable ? 8000 : 2300);
+        }
+        function undoLastDelete() {
+            if (!lastDeleteUndo) return;
+            const action = lastDeleteUndo;
+            lastDeleteUndo = null;
+            clearTimeout(showToast._timer);
+            if (action.bill) state.bills.unshift(action.bill);
+            if (action.receivable) {
+                if (!Array.isArray(state.receivables)) state.receivables = [];
+                state.receivables.unshift(action.receivable);
+            }
+            if (action.transaction) state.transactions.unshift(action.transaction);
+            saveData(); refreshUI();
+            const t = $('toastNotification');
+            t.classList.add('opacity-0', 'pointer-events-none');
+            t.classList.remove('opacity-100', 'pointer-events-auto');
+            $('toastUndoButton').classList.add('hidden');
+            showToast('กู้คืนรายการเรียบร้อยแล้ว 💗');
         }
         function openModal(id) { $(id).classList.remove('hidden'); $(id).classList.add('flex'); }
         function closeModal(id) { $(id).classList.add('hidden'); $(id).classList.remove('flex'); }
@@ -2985,9 +3014,11 @@
         function deleteBill(id) {
             const b = state.bills.find(x => x.id === id);
             if (!b) return;
+            const linkedTransaction = b.txId ? state.transactions.find(t => t.id === b.txId) : null;
+            lastDeleteUndo = { bill: JSON.parse(JSON.stringify(b)), transaction: linkedTransaction ? JSON.parse(JSON.stringify(linkedTransaction)) : null };
             if (b.txId) state.transactions = state.transactions.filter(t => t.id !== b.txId);
             state.bills = state.bills.filter(x => x.id !== id);
-            saveData(); refreshUI();
+            saveData(); refreshUI(); showToast('ลบบิลแล้ว สามารถย้อนคืนได้', true);
         }
 
         function updateReceivableCategorySelects(selectedVal = '') {
@@ -3059,9 +3090,11 @@
         function deleteReceivable(id) {
             const item = (state.receivables || []).find(r => r.id === id);
             if (!item || !confirm('ต้องการลบรายการเตรียมรับนี้ใช่หรือไม่?')) return;
+            const linkedTransaction = item.txId ? state.transactions.find(t => t.id === item.txId) : null;
+            lastDeleteUndo = { receivable: JSON.parse(JSON.stringify(item)), transaction: linkedTransaction ? JSON.parse(JSON.stringify(linkedTransaction)) : null };
             if (item.txId) state.transactions = state.transactions.filter(t => t.id !== item.txId);
             state.receivables = state.receivables.filter(r => r.id !== id);
-            saveData(); refreshUI(); showToast('ลบรายการเตรียมรับแล้ว');
+            saveData(); refreshUI(); showToast('ลบรายการแล้ว สามารถย้อนคืนได้', true);
         }
 
         function renderReceivables() {

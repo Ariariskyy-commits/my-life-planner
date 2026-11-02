@@ -1206,7 +1206,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 space-y-3">
                     <div class="flex items-center justify-between gap-2">
-                        <h3 id="calMonthYearLabel" class="font-cute font-extrabold text-xl">เดือน</h3>
+                        <div class="min-w-0"><h3 id="calMonthYearLabel" class="font-cute font-extrabold text-xl">เดือน</h3><label class="mt-1 inline-flex items-center gap-1.5 text-[10px] font-bold text-gray-600">สีดาววันหยุด <input id="calendarHolidayColorInput" type="color" value="#FF0000" onchange="setCalendarHolidayColor(this.value)" class="w-6 h-6 p-0.5 rounded-md border border-darkText bg-white cursor-pointer" aria-label="เลือกสีดาววันหยุด"></label></div>
                         <div class="flex gap-1.5 items-center">
                             <button onclick="openEventModal()" class="bg-retroPurple text-white font-bold px-2.5 py-1.5 rounded-lg border border-darkText text-[11px] flex items-center gap-1"><i class="fa-solid fa-plus"></i> ไดอารี่</button>
                             <button onclick="changeMonth(-1)" class="w-8 h-8 bg-offWhite border border-darkText rounded-lg font-bold flex items-center justify-center text-xs"><i class="fa-solid fa-chevron-left"></i></button>
@@ -1761,6 +1761,17 @@
                         <button type="button" data-dot-color="#FFDD00" onclick="selectEventDotColor('#FFDD00')" aria-label="สีเหลือง" class="event-dot-color w-8 h-8 rounded-full border-2 border-darkText" style="background:#FFDD00"></button>
                         <button type="button" data-dot-color="#16A34A" onclick="selectEventDotColor('#16A34A')" aria-label="สีเขียวเข้ม" class="event-dot-color w-8 h-8 rounded-full border-2 border-darkText" style="background:#16A34A"></button>
                         <button type="button" data-dot-color="#64748B" onclick="selectEventDotColor('#64748B')" aria-label="สีเทา" class="event-dot-color w-8 h-8 rounded-full border-2 border-darkText" style="background:#64748B"></button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">รูปทรงจุดบนปฏิทิน</label>
+                    <div id="eventMarkerShapePicker" class="flex flex-wrap gap-2">
+                        <button type="button" data-shape="circle" onclick="selectEventMarkerShape('circle')" class="event-marker-shape w-9 h-9 rounded-lg border border-darkText bg-offWhite text-lg">●</button>
+                        <button type="button" data-shape="star" onclick="selectEventMarkerShape('star')" class="event-marker-shape w-9 h-9 rounded-lg border border-darkText bg-offWhite text-lg">★</button>
+                        <button type="button" data-shape="square" onclick="selectEventMarkerShape('square')" class="event-marker-shape w-9 h-9 rounded-lg border border-darkText bg-offWhite text-lg">■</button>
+                        <button type="button" data-shape="diamond" onclick="selectEventMarkerShape('diamond')" class="event-marker-shape w-9 h-9 rounded-lg border border-darkText bg-offWhite text-lg">◆</button>
+                        <button type="button" data-shape="triangle" onclick="selectEventMarkerShape('triangle')" class="event-marker-shape w-9 h-9 rounded-lg border border-darkText bg-offWhite text-lg">▲</button>
+                        <button type="button" data-shape="heart" onclick="selectEventMarkerShape('heart')" class="event-marker-shape w-9 h-9 rounded-lg border border-darkText bg-offWhite text-lg">♥</button>
                     </div>
                 </div>
                 <div>
@@ -3184,8 +3195,27 @@
             }
         }
 
-        let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊', selectedEventDotColor = '#0055FF', selectedEventSticker = '';
+        let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊', selectedEventDotColor = '#0055FF', selectedEventSticker = '', selectedEventMarkerShape = 'circle', calendarHolidayMarkerColor = '#FF0000';
         function selectMoodEmoji(emoji) { selectedMood = emoji; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('mood-btn-selected', b.id === 'mood-' + emoji)); }
+        function selectEventMarkerShape(shape) {
+            selectedEventMarkerShape = shape;
+            document.querySelectorAll('.event-marker-shape').forEach(button => {
+                const active = button.dataset.shape === shape;
+                button.style.background = active ? '#CCFF00' : '#F8F8F8';
+                button.style.boxShadow = active ? '0 2px 0 #1A1A1A' : 'none';
+                button.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+        }
+        function setCalendarHolidayColor(color) {
+            if (!/^#[0-9A-Fa-f]{6}$/.test(color)) return;
+            calendarHolidayMarkerColor = color;
+            try { localStorage.setItem('y2k_calendar_holiday_marker_color', color); } catch (e) {}
+            renderCalendar();
+        }
+        function getCalendarMarkerGlyph(shape) {
+            return ({ circle:'●', star:'★', square:'■', diamond:'◆', triangle:'▲', heart:'♥' })[shape] || '●';
+        }
+
         function selectEventSticker(sticker) {
             selectedEventSticker = sticker;
             document.querySelectorAll('.event-sticker-btn').forEach(button => {
@@ -3283,6 +3313,7 @@
             selectMoodEmoji(existing?.mood || '😊');
             selectEventDotColor(existing?.dotColor || '#0055FF');
             selectEventSticker(existing?.sticker || '');
+            selectEventMarkerShape(existing?.markerShape || 'circle');
             $('eventDate').value = existing?.date || presetDate || localDateKey();
             $('eventTitle').value = existing?.title || '';
             const heading = $('eventModal').querySelector('h3');
@@ -3316,6 +3347,7 @@
             eventData.mood = selectedMood;
             eventData.dotColor = selectedEventDotColor;
             eventData.sticker = selectedEventSticker;
+            eventData.markerShape = selectedEventMarkerShape;
             eventData.title = title;
             try {
                 if (selectedEventPhotoData) {
@@ -3388,6 +3420,9 @@
             const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
             const label = `${THAI_MONTHS[month]} ${year + 543}`;
             $('calMonthYearLabel').innerText = label;
+            try { calendarHolidayMarkerColor = localStorage.getItem('y2k_calendar_holiday_marker_color') || '#FF0000'; } catch (e) { calendarHolidayMarkerColor = '#FF0000'; }
+            const holidayColorInput = $('calendarHolidayColorInput');
+            if (holidayColorInput) holidayColorInput.value = calendarHolidayMarkerColor;
             updatepetCalendarMoodDisplay();
 
             const firstDay = new Date(year, month, 1).getDay(), totalDays = new Date(year, month + 1, 0).getDate();
@@ -3402,10 +3437,10 @@
                     <div onclick="selectCalendarDate('${dateKey}')" class="${isSelected ? 'bg-sunnyYellow/20 border-limeGreen ring-2 ring-limeGreen' : 'bg-offWhite border-darkText'} p-1 rounded-xl border aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 relative">
                         <div class="flex justify-between items-center">
                             <span class="text-[10px] font-bold">${day}</span>
-                            ${holidayName ? `<span class="w-2 h-2 rounded-full bg-hotPink shrink-0" title="${esc(holidayName)}"></span>` : ''}
+                            ${holidayName ? `<span class="text-sm font-black leading-none shrink-0" style="color:${calendarHolidayMarkerColor}" title="${esc(holidayName)}" aria-label="วันหยุด ${esc(holidayName)}">★</span>` : ''}
                         </div>
                         <div class="flex-1 flex items-end justify-center pb-1 min-h-0">
-                            ${evs.length ? `<div class="flex flex-wrap justify-center items-center gap-1 max-w-full">${evs.slice(0,4).map(ev => ev.sticker ? `<span class="text-base leading-none drop-shadow-sm" title="${esc(ev.title)}">${esc(ev.sticker)}</span>` : `<span class="w-2.5 h-2.5 rounded-full border border-darkText/30 shrink-0" style="background:${/^#[0-9A-Fa-f]{6}$/.test(ev.dotColor || '') ? ev.dotColor : '#0055FF'}" title="${esc(ev.title)}"></span>`).join('')}${evs.length > 4 ? `<span class="text-[8px] font-bold text-gray-600">+${evs.length-4}</span>` : ''}</div>` : ''}
+                            ${evs.length ? `<div class="flex flex-wrap justify-center items-center gap-1 max-w-full">${evs.slice(0,4).map(ev => ev.sticker ? `<span class="text-base leading-none drop-shadow-sm" title="${esc(ev.title)}">${esc(ev.sticker)}</span>` : `<span class="text-[13px] leading-none shrink-0" style="color:${/^#[0-9A-Fa-f]{6}$/.test(ev.dotColor || '') ? ev.dotColor : '#0055FF'}" title="${esc(ev.title)}">${getCalendarMarkerGlyph(ev.markerShape || 'circle')}</span>`).join('')}${evs.length > 4 ? `<span class="text-[8px] font-bold text-gray-600">+${evs.length-4}</span>` : ''}</div>` : ''}
                         </div>
                     </div>`;
             }

@@ -3161,9 +3161,78 @@
         let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊';
         function selectMoodEmoji(emoji) { selectedMood = emoji; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('mood-btn-selected', b.id === 'mood-' + emoji)); }
         let editingEventId = null;
-        function openEventModal(presetDate, editId = null) {
+        let selectedEventPhotoData = null;
+        let removeExistingEventPhoto = false;
+
+        function showEventPhotoPreview(data) {
+            const area = $('photoPreviewArea');
+            const img = $('eventPhotoPreview');
+            const hint = $('photoHint');
+            if (data) {
+                img.src = data;
+                area.classList.remove('hidden');
+                hint.innerText = 'แนบรูปภาพแล้ว';
+            } else {
+                img.removeAttribute('src');
+                area.classList.add('hidden');
+                hint.innerText = 'รองรับ JPG, PNG และ WebP';
+            }
+        }
+
+        function readAndResizeEventPhoto(file) {
+            return new Promise((resolve, reject) => {
+                if (!file || !file.type.startsWith('image/')) return reject(new Error('กรุณาเลือกไฟล์รูปภาพ'));
+                if (file.size > 12 * 1024 * 1024) return reject(new Error('รูปมีขนาดใหญ่เกิน 12 MB'));
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('อ่านไฟล์รูปไม่สำเร็จ'));
+                reader.onload = () => {
+                    const image = new Image();
+                    image.onerror = () => reject(new Error('เปิดรูปภาพไม่สำเร็จ'));
+                    image.onload = () => {
+                        const maxSide = 1440;
+                        const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.max(1, Math.round(image.width * scale));
+                        canvas.height = Math.max(1, Math.round(image.height * scale));
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) return reject(new Error('เตรียมรูปภาพไม่สำเร็จ'));
+                        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.82));
+                    };
+                    image.src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handlePhotoSelection(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            try {
+                $('photoHint').innerText = 'กำลังเตรียมรูปภาพ…';
+                selectedEventPhotoData = await readAndResizeEventPhoto(file);
+                removeExistingEventPhoto = false;
+                showEventPhotoPreview(selectedEventPhotoData);
+            } catch (error) {
+                selectedEventPhotoData = null;
+                showEventPhotoPreview(null);
+                showToast(error.message || 'เพิ่มรูปภาพไม่สำเร็จ');
+            }
+            e.target.value = '';
+        }
+
+        function removeSelectedPhoto() {
+            selectedEventPhotoData = null;
+            removeExistingEventPhoto = true;
+            showEventPhotoPreview(null);
+        }
+
+        async function openEventModal(presetDate, editId = null) {
             editingEventId = editId;
+            selectedEventPhotoData = null;
+            removeExistingEventPhoto = false;
             $('eventForm').reset(); setDefaultDates();
+            showEventPhotoPreview(null);
             const existing = editId ? state.events.find(e => e.id === editId) : null;
             selectMoodEmoji(existing?.mood || '😊');
             $('eventDate').value = existing?.date || presetDate || localDateKey();
@@ -3172,6 +3241,19 @@
             if (heading) heading.innerText = existing ? '✏️ แก้ไขไดอารี่' : '📸 บันทึกไดอารี่';
             $('eventSubmitBtn').innerText = existing ? 'บันทึกการแก้ไข' : 'บันทึก';
             openModal('eventModal');
+            if (existing?.hasPhoto) {
+                try {
+                    const photo = await getPhotoData(existing.id);
+                    if (photo && editingEventId === existing.id) {
+                        selectedEventPhotoData = photo;
+                        removeExistingEventPhoto = false;
+                        showEventPhotoPreview(photo);
+                    }
+                } catch (error) {
+                    $('photoHint').innerText = 'โหลดรูปเดิมไม่สำเร็จ ลองเปิดใหม่อีกครั้ง';
+                    console.warn('Load diary photo failed:', error);
+                }
+            }
         }
 
         async function handleSaveEvent(e) {
@@ -3179,18 +3261,38 @@
             const date = $('eventDate').value;
             const title = $('eventTitle').value.trim();
             if (!date || !title) return;
-            if (editingEventId) {
-                const existing = state.events.find(item => item.id === editingEventId);
-                if (existing) {
-                    existing.date = date;
-                    existing.mood = selectedMood;
-                    existing.title = title;
+            const eventId = editingEventId || ('ev_' + Date.now());
+            const existing = state.events.find(item => item.id === eventId);
+            const eventData = existing || { id: eventId, date, mood: selectedMood, title, hasPhoto: false };
+            eventData.date = date;
+            eventData.mood = selectedMood;
+            eventData.title = title;
+            try {
+                if (selectedEventPhotoData) {
+                    await savePhotoLocal(eventId, selectedEventPhotoData, false);
+                    eventData.hasPhoto = true;
+                    if (isFirebaseActive) {
+                        try {
+                            await uploadPhoto(eventId, selectedEventPhotoData);
+                            await markPhotoSynced(eventId);
+                        } catch (cloudError) {
+                            console.warn('Diary photo saved locally; cloud sync pending:', cloudError);
+                        }
+                    }
+                } else if (removeExistingEventPhoto && eventData.hasPhoto) {
+                    await deletePhotoEverywhere(eventId);
+                    eventData.hasPhoto = false;
                 }
-            } else {
-                state.events.unshift({ id: 'ev_' + Date.now(), date, mood: selectedMood, title, hasPhoto: false });
+                if (!existing) state.events.unshift(eventData);
+                editingEventId = null;
+                selectedEventPhotoData = null;
+                removeExistingEventPhoto = false;
+                saveData(); closeModal('eventModal'); selectCalendarDate(date);
+                showToast(eventData.hasPhoto ? 'บันทึกไดอารี่พร้อมรูปแล้ว! 📸' : 'บันทึกไดอารี่แล้ว!');
+            } catch (error) {
+                console.error('Save diary photo failed:', error);
+                showToast(error.message || 'บันทึกรูปภาพไม่สำเร็จ');
             }
-            editingEventId = null;
-            saveData(); closeModal('eventModal'); selectCalendarDate(date); showToast('บันทึกไดอารี่แล้ว!');
         }
 
         function selectCalendarDate(dateKey) { selectedCalendarDate = dateKey; renderCalendar(); renderEventsList(); }
@@ -3198,6 +3300,26 @@
             const ev = state.events.find(e => e.id === eventId);
             if (!ev) return;
             $('viewEventMood').innerText = ev.mood || '😊'; $('viewEventDate').innerText = ev.date; $('viewEventTitle').innerText = ev.title;
+            $('viewEventPhotoContainer').classList.add('hidden');
+            $('viewEventPhotoNote').classList.add('hidden');
+            $('viewEventPhoto').removeAttribute('src');
+            if (ev.hasPhoto) {
+                $('viewEventPhotoNote').innerText = 'กำลังโหลดรูปภาพ…';
+                $('viewEventPhotoNote').classList.remove('hidden');
+                try {
+                    const photo = await getPhotoData(ev.id);
+                    if (photo) {
+                        $('viewEventPhoto').src = photo;
+                        $('viewEventPhotoContainer').classList.remove('hidden');
+                        $('viewEventPhotoNote').classList.add('hidden');
+                    } else {
+                        $('viewEventPhotoNote').innerText = 'ไม่พบรูปภาพในอุปกรณ์หรือคลาวด์';
+                    }
+                } catch (error) {
+                    $('viewEventPhotoNote').innerText = 'โหลดรูปภาพไม่สำเร็จ';
+                    console.warn('View diary photo failed:', error);
+                }
+            }
             $('editEventBtn').onclick = () => {
                 closeModal('viewEventModal');
                 openEventModal(ev.date, ev.id);

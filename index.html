@@ -1674,6 +1674,7 @@
             <div id="viewEventPhotoContainer" class="hidden"><img id="viewEventPhoto" class="w-full max-h-56 object-cover rounded-xl border border-darkText"></div>
             <p id="viewEventPhotoNote" class="hidden text-[10px] text-gray-500"></p>
             <div class="pt-2 border-t border-darkText flex gap-2">
+                <button id="editEventBtn" class="flex-1 bg-sunnyYellow text-darkText font-bold py-2 rounded-lg border border-darkText text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-pen-to-square"></i> แก้ไข</button>
                 <button id="deleteEventBtn" class="flex-1 bg-hotPink text-white font-bold py-2 rounded-lg border border-darkText text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ลบโน้ตนี้</button>
             </div>
         </div>
@@ -2778,12 +2779,37 @@
 
         let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊';
         function selectMoodEmoji(emoji) { selectedMood = emoji; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('mood-btn-selected', b.id === 'mood-' + emoji)); }
-        function openEventModal(presetDate) { $('eventForm').reset(); setDefaultDates(); selectMoodEmoji('😊'); $('eventDate').value = presetDate || localDateKey(); openModal('eventModal'); }
+        let editingEventId = null;
+        function openEventModal(presetDate, editId = null) {
+            editingEventId = editId;
+            $('eventForm').reset(); setDefaultDates();
+            const existing = editId ? state.events.find(e => e.id === editId) : null;
+            selectMoodEmoji(existing?.mood || '😊');
+            $('eventDate').value = existing?.date || presetDate || localDateKey();
+            $('eventTitle').value = existing?.title || '';
+            const heading = $('eventModal').querySelector('h3');
+            if (heading) heading.innerText = existing ? '✏️ แก้ไขไดอารี่' : '📸 บันทึกไดอารี่';
+            $('eventSubmitBtn').innerText = existing ? 'บันทึกการแก้ไข' : 'บันทึก';
+            openModal('eventModal');
+        }
 
         async function handleSaveEvent(e) {
             e.preventDefault();
-            state.events.unshift({ id: 'ev_' + Date.now(), date: $('eventDate').value, mood: selectedMood, title: $('eventTitle').value.trim(), hasPhoto: false });
-            saveData(); closeModal('eventModal'); selectCalendarDate($('eventDate').value); showToast('บันทึกไดอารี่แล้ว!');
+            const date = $('eventDate').value;
+            const title = $('eventTitle').value.trim();
+            if (!date || !title) return;
+            if (editingEventId) {
+                const existing = state.events.find(item => item.id === editingEventId);
+                if (existing) {
+                    existing.date = date;
+                    existing.mood = selectedMood;
+                    existing.title = title;
+                }
+            } else {
+                state.events.unshift({ id: 'ev_' + Date.now(), date, mood: selectedMood, title, hasPhoto: false });
+            }
+            editingEventId = null;
+            saveData(); closeModal('eventModal'); selectCalendarDate(date); showToast('บันทึกไดอารี่แล้ว!');
         }
 
         function selectCalendarDate(dateKey) { selectedCalendarDate = dateKey; renderCalendar(); renderEventsList(); }
@@ -2791,7 +2817,16 @@
             const ev = state.events.find(e => e.id === eventId);
             if (!ev) return;
             $('viewEventMood').innerText = ev.mood || '😊'; $('viewEventDate').innerText = ev.date; $('viewEventTitle').innerText = ev.title;
-            $('deleteEventBtn').onclick = async () => { state.events = state.events.filter(x => x.id !== ev.id); saveData(); renderCalendar(); renderEventsList(); closeModal('viewEventModal'); updatepetCalendarMoodDisplay(); };
+            $('editEventBtn').onclick = () => {
+                closeModal('viewEventModal');
+                openEventModal(ev.date, ev.id);
+            };
+            $('deleteEventBtn').onclick = async () => {
+                state.events = state.events.filter(x => x.id !== ev.id);
+                if (ev.hasPhoto) await deletePhotoEverywhere(ev.id);
+                saveData(); renderCalendar(); renderEventsList(); closeModal('viewEventModal'); updatepetCalendarMoodDisplay();
+                showToast('ลบโน้ตแล้ว');
+            };
             openModal('viewEventModal');
         }
         function changeMonth(dir) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir); renderCalendar(); }

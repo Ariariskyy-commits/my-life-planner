@@ -982,22 +982,22 @@
             </div>
 
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
+                <button type="button" onclick="switchTab('finance')" aria-label="ดูรายการรายรับ" title="ดูรายการรายรับ" class="w-full text-left bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between cursor-pointer hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-popBlue focus-visible:ring-offset-2">
                     <div><p class="text-xs font-bold text-gray-500">รายรับเดือนนี้</p><h3 id="dashTotalIncome" class="text-lg font-extrabold text-green-600">฿ 0.00</h3></div>
                     <div class="w-9 h-9 bg-limeGreen rounded-xl border-2 border-darkText flex items-center justify-center text-sm"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                </div>
-                <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
+                </button>
+                <button type="button" onclick="switchTab('finance')" aria-label="ดูรายการรายจ่าย" title="ดูรายการรายจ่าย" class="w-full text-left bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between cursor-pointer hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-popBlue focus-visible:ring-offset-2">
                     <div><p class="text-xs font-bold text-gray-500">รายจ่ายเดือนนี้</p><h3 id="dashTotalExpense" class="text-lg font-extrabold text-hotPink">฿ 0.00</h3></div>
                     <div class="w-9 h-9 bg-hotPink/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-hotPink"><i class="fa-solid fa-arrow-trend-down"></i></div>
-                </div>
-                <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
+                </button>
+                <button type="button" onclick="switchTab('bills')" aria-label="ดูบิลเตรียมจ่าย" title="ดูบิลเตรียมจ่าย" class="w-full text-left bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between cursor-pointer hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-popBlue focus-visible:ring-offset-2">
                     <div><p class="text-xs font-bold text-gray-500">บิลค้างจ่าย</p><h3 id="dashPendingBills" class="text-lg font-extrabold text-retroPurple">0 รายการ</h3></div>
                     <div class="w-9 h-9 bg-retroPurple/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-retroPurple"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-                </div>
-                <div class="bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between">
+                </button>
+                <button type="button" onclick="switchTab('planner')" aria-label="ดูงานที่ต้องทำ" title="ดูงานที่ต้องทำ" class="w-full text-left bg-white text-darkText p-3.5 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-between cursor-pointer hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-popBlue focus-visible:ring-offset-2">
                     <div><p class="text-xs font-bold text-gray-500">งานค้างอยู่</p><h3 id="dashPendingTasks" class="text-lg font-extrabold text-popBlue">0 รายการ</h3></div>
                     <div class="w-9 h-9 bg-popBlue/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-popBlue"><i class="fa-solid fa-list-check"></i></div>
-                </div>            </div>
+                </button>            </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">

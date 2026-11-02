@@ -1017,7 +1017,7 @@
                     <div class="w-9 h-9 bg-popBlue/20 rounded-xl border-2 border-darkText flex items-center justify-center text-sm text-popBlue"><i class="fa-solid fa-list-check"></i></div>
                 </button>            </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 items-stretch">
+            <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3 sm:gap-4 items-stretch">
                 <div class="min-w-0 bg-white text-darkText p-3 sm:p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col">
                     <h3 class="font-cute font-bold text-sm sm:text-base leading-snug mb-3 flex items-start gap-2 min-h-[2.5rem]"><i class="fa-solid fa-chart-pie text-popBlue mt-0.5 shrink-0"></i><span>สัดส่วนรายจ่ายตามหมวดหมู่</span></h3>
                     <div class="relative w-full h-[230px] sm:h-[260px]"><canvas id="expenseCategoryChart"></canvas></div>
@@ -3341,14 +3341,17 @@
                         borderColor: '#166534',
                         borderWidth: 1,
                         borderRadius: 6,
-                        barThickness: 'flex',
-                        maxBarThickness: 34
+                        barThickness: 22,
+                        maxBarThickness: 22,
+                        categoryPercentage: 0.55,
+                        barPercentage: 0.75
                     }]
                 },
                 options: {
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: { padding: { top: 8, right: 12, bottom: 8, left: 8 } },
                     interaction: { intersect: false, mode: 'index' },
                     plugins: {
                         legend: { display: false },
@@ -3361,7 +3364,7 @@
                             grid: { color: 'rgba(26,26,26,.08)' }
                         },
                         y: {
-                            ticks: { autoSkip: false, font: { family: 'Prompt', size: 11 }, color: '#1A1A1A' },
+                             ticks: { autoSkip: false, padding: 8, font: { family: 'Prompt', size: 10 }, color: '#1A1A1A' },
                             grid: { display: false }
                         }
                     }

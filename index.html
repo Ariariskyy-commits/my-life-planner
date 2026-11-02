@@ -810,6 +810,67 @@
   #billsGrid > div, #receivablesGrid > div { padding: 8px !important; }
 }
 </style>
+
+<style id="mobile-calendar-cell-tidy">
+@media (max-width: 640px) {
+  #calendarGrid {
+    gap: 6px !important;
+    align-items: stretch;
+  }
+  #calendarGrid > div:not(.aspect-square) {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 5px !important;
+    border-radius: 13px !important;
+    overflow: hidden !important;
+    aspect-ratio: 1 / 1;
+  }
+  #calendarGrid > div:not(.aspect-square) > div:first-child {
+    min-width: 0;
+    gap: 2px !important;
+    align-items: flex-start !important;
+  }
+  #calendarGrid > div:not(.aspect-square) > div:first-child > span:first-child {
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+  }
+  #calendarGrid > div:not(.aspect-square) button[aria-label="ตกแต่งวันนี้"] {
+    width: 17px !important;
+    height: 17px !important;
+    min-width: 17px !important;
+    padding: 0 !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    flex: 0 0 17px !important;
+  }
+  #calendarGrid > div:not(.aspect-square) > div:nth-child(2) {
+    min-width: 0;
+    overflow: hidden;
+    padding-bottom: 1px !important;
+    gap: 2px !important;
+  }
+  #calendarGrid > div:not(.aspect-square) > div:nth-child(2) > div {
+    max-width: 100%;
+    min-width: 0;
+    gap: 2px !important;
+    flex-wrap: wrap;
+    overflow: hidden;
+  }
+  #calendarGrid > div:not(.aspect-square) > div:nth-child(2) span {
+    font-size: 11px !important;
+    line-height: 1 !important;
+    max-width: 100%;
+  }
+}
+@media (max-width: 380px) {
+  #calendarGrid { gap: 4px !important; }
+  #calendarGrid > div:not(.aspect-square) { padding: 4px !important; border-radius: 11px !important; }
+  #calendarGrid > div:not(.aspect-square) button[aria-label="ตกแต่งวันนี้"] {
+    width: 15px !important; height: 15px !important; min-width: 15px !important; flex-basis: 15px !important;
+  }
+}
+</style>
+
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 

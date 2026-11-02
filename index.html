@@ -3396,6 +3396,18 @@
                 </div>`).join('') : `<div class="text-center py-6 text-gray-400 text-xs">ไม่มีประวัติคำนวณ</div>`;
         }
 
+        function updateGreeting() {
+            const el = $('greetingText');
+            if (!el) return;
+            const hour = new Date().getHours();
+            let greeting;
+            if (hour >= 5 && hour < 12) greeting = 'สวัสดีตอนเช้า ☀️';
+            else if (hour >= 12 && hour < 16) greeting = 'สวัสดีตอนบ่าย 🌤️';
+            else if (hour >= 16 && hour < 19) greeting = 'สวัสดีตอนเย็น 🌆';
+            else greeting = 'สวัสดีตอนค่ำ 🌙';
+            el.innerText = greeting;
+        }
+
         function renderDashboard() {
             const { inc, exp, net } = calcNetBalance();
             $('dashNetBalance').innerText = '฿ ' + money(net);
@@ -3481,6 +3493,9 @@
         }
 
         window.addEventListener('load', async () => {
+            updateGreeting();
+            document.addEventListener('visibilitychange', () => { if (!document.hidden) updateGreeting(); });
+            window.addEventListener('focus', updateGreeting);
             showAccessLock('กำลังตรวจสอบสิทธิ์การเข้าใช้งาน…'); initView(); setDefaultDates(); refreshUI(); initFirebase();
             appNavHistory = ['dashboard'];
             appNavHistoryIndex = 0;

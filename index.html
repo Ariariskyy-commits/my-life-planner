@@ -904,6 +904,32 @@
  .transaction-history-row td:nth-child(6)::before { margin-right:auto; }
 }
 </style>
+<style id="calendar-mobile-layout-fix">
+@media (max-width: 640px) {
+  #tab-calendar { padding-bottom: 34px !important; }
+  #tab-calendar > .grid { min-width: 0; grid-template-columns: minmax(0,1fr) !important; }
+  #tab-calendar > .grid > div { min-width: 0; width: 100%; }
+  #tab-calendar .calendar-toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(0,1fr) auto;
+    grid-template-areas: "month month" "trash actions";
+    align-items: center;
+    gap: 10px !important;
+  }
+  #tab-calendar .calendar-toolbar > button { grid-area: trash; justify-self: start; }
+  #tab-calendar .calendar-toolbar > div:nth-child(2) { grid-area: month; min-width: 0; }
+  #tab-calendar .calendar-toolbar > div:nth-child(3) { grid-area: actions; justify-self: end; flex-wrap: nowrap; }
+  #tab-calendar #calMonthYearLabel { font-size: 19px !important; line-height: 1.25; }
+  #tab-calendar .calendar-toolbar label { margin-top: 5px !important; }
+  #tab-calendar #eventsListSidebar { max-height: none !important; overflow: visible !important; }
+  #tab-calendar > .grid > div:last-child { min-height: 0; }
+}
+@media (max-width: 380px) {
+  #tab-calendar .calendar-toolbar { gap: 7px !important; }
+  #tab-calendar .calendar-toolbar > div:nth-child(3) { gap: 4px !important; }
+  #tab-calendar .calendar-toolbar > div:nth-child(3) > button:first-child { padding: 6px 8px !important; }
+}
+</style>
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
@@ -1305,7 +1331,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 space-y-3">
-                    <div class="flex items-center justify-between gap-2"><button id="trashCalendarButton" type="button" onclick="openTrashModal()" class="page-trash-button inline-flex items-center gap-1 rounded-lg border border-darkText/50 bg-white/80 px-2 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-hotPink/10" title="เปิดถังขยะ"><i class="fa-solid fa-trash-can text-hotPink"></i><span>ถังขยะ</span><span class="page-trash-count min-w-4 rounded-full bg-hotPink px-1 text-center text-[9px] text-white">0</span></button>
+                    <div class="calendar-toolbar flex items-center justify-between gap-2"><button id="trashCalendarButton" type="button" onclick="openTrashModal()" class="page-trash-button inline-flex items-center gap-1 rounded-lg border border-darkText/50 bg-white/80 px-2 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-hotPink/10" title="เปิดถังขยะ"><i class="fa-solid fa-trash-can text-hotPink"></i><span>ถังขยะ</span><span class="page-trash-count min-w-4 rounded-full bg-hotPink px-1 text-center text-[9px] text-white">0</span></button>
                         <div class="min-w-0"><h3 id="calMonthYearLabel" class="font-cute font-extrabold text-xl">เดือน</h3><label class="mt-1 inline-flex items-center gap-1.5 text-[10px] font-bold text-gray-600">สีดาววันหยุด <input id="calendarHolidayColorInput" type="color" value="#FF0000" onchange="setCalendarHolidayColor(this.value)" class="w-6 h-6 p-0.5 rounded-md border border-darkText bg-white cursor-pointer" aria-label="เลือกสีดาววันหยุด"></label></div>
                         <div class="flex gap-1.5 items-center">
                             <button onclick="openEventModal()" class="bg-retroPurple text-white font-bold px-2.5 py-1.5 rounded-lg border border-darkText text-[11px] flex items-center gap-1"><i class="fa-solid fa-plus"></i> ไดอารี่</button>

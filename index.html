@@ -2257,7 +2257,10 @@
 
         async function logoutGoogle() {
             if (!auth) return;
-            try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch {}
+            clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
+            try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch {
+                showAccessLock('ข้อมูลถูกล็อกไว้ กรุณาตรวจสอบสถานะการเข้าสู่ระบบ');
+            }
         }
 
         function scheduleCloudSave() {

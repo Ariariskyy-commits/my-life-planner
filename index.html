@@ -2606,7 +2606,7 @@
                 item.count += 1;
             });
             const categoryCards = [...categoryMap.entries()].map(([category, data]) => `
-                <button type="button" onclick="openBillCategoryModal('${esc(category).replace(/'/g, '&#39;')}')" class="text-left bg-white text-darkText p-3 rounded-xl border-2 border-darkText shadow-sm hover:-translate-y-0.5 transition-all">
+                <button type="button" data-bill-category="${esc(category)}" aria-label="ดูรายละเอียดหมวด ${esc(category)}" class="text-left bg-white text-darkText p-3 rounded-xl border-2 border-darkText shadow-sm hover:-translate-y-0.5 transition-all cursor-pointer">
                     <div class="font-bold text-xs break-words">${esc(category)}</div>
                     <div class="flex items-end justify-between gap-2 mt-1"><span class="text-[10px] text-gray-500">${data.count} รายการ</span><strong class="text-hotPink">฿ ${money(data.total)}</strong></div>
                 </button>`).join('');
@@ -2630,6 +2630,13 @@
                     </div>
                 </div>`).join('');
             $('billsGrid').innerHTML = categoryCards + billCards || '<div class="col-span-3 text-center py-8 text-gray-400 text-xs">ยังไม่มีบิลเตรียมจ่าย</div>';
+            // ใช้ event delegation เพื่อให้การ์ดหมวดกดได้แน่นอน แม้มีการ render รายการใหม่
+            $('billsGrid').onclick = function(event) {
+                const categoryCard = event.target.closest('[data-bill-category]');
+                if (!categoryCard || !this.contains(categoryCard)) return;
+                event.preventDefault();
+                openBillCategoryModal(categoryCard.dataset.billCategory);
+            };
         }
 
         function openTaskModal(editId = null) { $('taskForm').reset(); $('taskId').value = ''; setDefaultDates(); openModal('taskModal'); }

@@ -1421,14 +1421,7 @@
                         </div>
                         <button type="submit" class="w-full bg-hotPink text-white font-extrabold py-2 rounded-xl border-2 border-darkText shadow-sm flex items-center justify-center gap-1.5"><i class="fa-solid fa-paper-plane"></i> สั่งงาน</button>
                     </form>
-                    <details class="text-xs bg-offWhite border-2 border-darkText rounded-xl p-2.5">
-                        <summary class="font-bold cursor-pointer">⚙️ เชื่อม AI จริง (ตั้งค่าขั้นสูง)</summary>
-                        <p class="text-[10px] text-gray-500 mt-1.5">ใส่ URL ของ backend ของคุณ (ต้องเป็น https://) แอปจะส่ง {agentId, task} ไปและรอรับ {text} กลับมา — ไม่ต้องใส่ API key ในหน้านี้ ปล่อยว่างไว้ = โหมดจำลอง</p>
-                        <div class="flex gap-1.5 mt-1.5">
-                            <input type="url" id="officeApiUrl" placeholder="https://your-worker.example.workers.dev" class="flex-1 min-w-0 bg-white border border-darkText rounded-lg px-2 py-1 outline-none">
-                            <button type="button" id="officeApiSave" class="bg-limeGreen text-darkText font-bold px-2.5 rounded-lg border border-darkText">บันทึก</button>
-                        </div>
-                    </details>
+                    <p class="text-[10px] text-gray-500 text-center">🔒 ระบบ AI ส่วนตัว · เชื่อมต่อเมื่อเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต</p>
                 </div>
 
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm space-y-3 flex flex-col">
@@ -2067,6 +2060,11 @@
 
         let auth = null, db = null, currentUser = null, isFirebaseActive = false, syncTimer = null;
         let googleLoginInProgress = false;
+        const ALLOWED_EMAIL = 'arisky.studio@gmail.com';
+        window.getOfficeFirebaseIdToken = async function () {
+            if (!currentUser || !currentUser.email || currentUser.email.toLowerCase() !== ALLOWED_EMAIL) return null;
+            return await currentUser.getIdToken();
+        };
 
         function setSyncStatus(text) { $('syncStatus').innerText = text; }
 
@@ -2083,6 +2081,14 @@
                 isFirebaseActive = true;
 
                 auth.onAuthStateChanged(async user => {
+                    if (user && (user.email || '').toLowerCase() !== ALLOWED_EMAIL) {
+                        currentUser = null;
+                        renderAuthUI();
+                        setSyncStatus('บัญชีนี้ไม่มีสิทธิ์ใช้งาน');
+                        try { await auth.signOut(); } catch {}
+                        alert('แอปนี้อนุญาตเฉพาะ ' + ALLOWED_EMAIL);
+                        return;
+                    }
                     if (user) {
                         const isNewUser = !currentUser || currentUser.uid !== user.uid;
                         currentUser = user;
@@ -2121,6 +2127,13 @@
             try {
                 const result = await auth.signInWithPopup(provider);
                 if (result && result.user) {
+                    if ((result.user.email || '').toLowerCase() !== ALLOWED_EMAIL) {
+                        await auth.signOut();
+                        currentUser = null;
+                        renderAuthUI();
+                        alert('แอปนี้อนุญาตเฉพาะ ' + ALLOWED_EMAIL);
+                        return;
+                    }
                     currentUser = result.user;
                     renderAuthUI();
                     await pullFromCloud(result.user.uid);

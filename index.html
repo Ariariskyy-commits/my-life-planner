@@ -874,6 +874,10 @@
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
+    <button id="globalTrashButton" type="button" onclick="openTrashModal()" class="fixed right-3 bottom-24 z-[8500] flex items-center gap-1.5 rounded-full border-2 border-darkText bg-white px-3 py-2 text-xs font-extrabold text-darkText shadow-lg hover:scale-105 transition-all" title="เปิดถังขยะ">
+        <i class="fa-solid fa-trash-can text-hotPink"></i><span>ถังขยะ</span><span id="globalTrashCount" class="min-w-5 rounded-full bg-hotPink px-1.5 py-0.5 text-center text-[10px] text-white">0</span>
+    </button>
+
     <!-- FLOATING PET & QUICK NOTES WIDGET -->
     <div id="floatingPetWidget" class="fixed bottom-24 left-3 z-[8000] flex flex-col items-start gap-1.5 select-none max-w-[240px]">
         
@@ -1206,7 +1210,7 @@
                             <p class="text-xs font-bold text-retroPurple mt-0.5" id="billsTotalSummaryText">ยอดรวมที่ต้องเตรียมจ่าย: ฿ 0.00</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <button type="button" onclick="openTrashModal()" class="bg-offWhite text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ถังขยะ <span id="trashCountBills" class="bg-hotPink text-white rounded-full px-1.5">0</span></button>
+                            
                             <button type="button" onclick="openBillHistoryModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติจ่ายบิล</button>
                             <button type="button" onclick="openBillModal()" class="bg-retroPurple text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มบิล</button>
                         </div>
@@ -1224,7 +1228,7 @@
                             <p id="receivablesSummary" class="text-xs font-bold text-green-700 mt-0.5">ยอดเงินที่รอรับ: ฿ 0.00</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <button type="button" onclick="openTrashModal()" class="bg-offWhite text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ถังขยะ <span id="trashCountReceivables" class="bg-hotPink text-white rounded-full px-1.5">0</span></button>
+                            
                             <button type="button" onclick="openReceivableHistoryModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติรับเงิน</button>
                             <button type="button" onclick="openReceivableModal()" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มรายการเตรียมรับ</button>
                         </div>
@@ -3121,7 +3125,7 @@
 
         function renderTrashCounts() {
             const count = (state.trash || []).length;
-            ['trashCountBills', 'trashCountReceivables'].forEach(id => { const el = $(id); if (el) el.innerText = count; });
+            ['trashCountBills', 'trashCountReceivables', 'globalTrashCount'].forEach(id => { const el = $(id); if (el) el.innerText = count; });
         }
         function openTrashModal() {
             renderTrashItems();

@@ -2567,6 +2567,7 @@
 
             const uniqueDays = new Set(monthEvents.map(e => e.date).filter(Boolean)).size;
             const noteCount = monthEvents.length;
+            let avatar = state.pet.avatar || '🐱';
             const speechText = noteCount
                 ? `เดือนนี้มีบันทึก ${uniqueDays} วัน รวม ${noteCount} โน้ต`
                 : 'เดือนนี้ยังไม่มีบันทึกไดอารี่';

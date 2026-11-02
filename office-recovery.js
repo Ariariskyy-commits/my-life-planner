@@ -40,12 +40,12 @@
     let ctx = mainCtx; // ชั่วคราวชี้ไป canvas พื้นหลังตอนวาดฉากนิ่ง
 
     /* ---------- ข้อมูลที่เก็บถาวร ---------- */
-    const cfg = { apiUrl: '', tasks: [] };
+    const API_URL = 'https://throbbing-salad-5612.tippaporn977.workers.dev/';
+    const cfg = { apiUrl: API_URL, tasks: [] };
     function load() {
         try {
             const d = JSON.parse(localStorage.getItem(LS_KEY));
             if (d && typeof d === 'object') {
-                cfg.apiUrl = typeof d.apiUrl === 'string' ? d.apiUrl : '';
                 cfg.tasks = Array.isArray(d.tasks) ? d.tasks.filter(t => t && AGENTS.some(a => a.id === t.agentId)).slice(0, 60) : [];
             }
         } catch (e) { /* ใช้ค่าเริ่มต้น */ }
@@ -165,8 +165,13 @@
         const ctrl = new AbortController();
         const to = setTimeout(() => ctrl.abort(), 60000);
         try {
-            const r = await fetch(cfg.apiUrl, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
+            const tokenProvider = window.getOfficeFirebaseIdToken;
+            if (typeof tokenProvider !== 'function') throw new Error('ระบบล็อกอินยังไม่พร้อม');
+            const idToken = await tokenProvider();
+            if (!idToken) throw new Error('กรุณาเข้าสู่ระบบด้วย arisky.studio@gmail.com ก่อนใช้ AI');
+            const r = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
                 body: JSON.stringify({ agentId: def.id, task: t.text }), signal: ctrl.signal
             });
             if (!r.ok) throw new Error('เซิร์ฟเวอร์ตอบกลับ ' + r.status);
@@ -939,13 +944,6 @@
         });
     }
 
-    function isValidApiUrl(u) {
-        try {
-            const x = new URL(u);
-            return x.protocol === 'https:' || (x.protocol === 'http:' && (x.hostname === 'localhost' || x.hostname === '127.0.0.1'));
-        } catch (e) { return false; }
-    }
-
     function meeting() {
         let i = 0;
         rt.forEach(a => {
@@ -981,14 +979,8 @@
             save(); renderTasks();
         });
 
-        const apiInput = $('officeApiUrl');
-        apiInput.value = cfg.apiUrl;
-        $('officeApiSave').addEventListener('click', () => {
-            const v = apiInput.value.trim();
-            if (v && !isValidApiUrl(v)) { toast('URL ต้องขึ้นต้นด้วย https://'); return; }
-            cfg.apiUrl = v; save(); renderTasks();
-            toast(v ? 'เชื่อม AI แล้ว' : 'กลับเป็นโหมดจำลอง');
-        });
+        cfg.apiUrl = API_URL;
+        save();
 
         renderTasks();
         render(); // วาดเฟรมแรกให้เห็นทันที

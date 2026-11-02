@@ -2909,7 +2909,7 @@
             const categoryRows = Object.entries(categoryTotals).sort((a,b) => b[1].amount - a[1].amount);
             $('receivablesCategorySummary').innerHTML = categoryRows.length ? `
                 <div class="flex items-center justify-between gap-2"><h3 class="font-extrabold text-sm text-darkText">สรุปยอดตามหมวด</h3><span class="text-[10px] font-bold text-gray-500">${categoryRows.length} หมวด · เฉพาะรายการที่รอรับ</span></div>
-                <div class="grid grid-cols-2 sm:grid-cols-2 gap-2">
+                <div class="gap-2" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));">
                     ${categoryRows.map(([category,data]) => `
                         <div class="min-w-0 text-left bg-white text-darkText p-2 sm:p-3 rounded-xl border-2 border-darkText shadow-sm">
                             <div class="font-bold text-[11px] sm:text-xs leading-snug break-words line-clamp-2">${esc(category)}</div>
@@ -3017,7 +3017,7 @@
                     <h3 class="font-extrabold text-sm text-darkText">สรุปยอดตามหมวด</h3>
                     <span class="text-[10px] font-bold text-gray-500">${categoryRows.length} หมวด · เฉพาะรายการที่ยังไม่จ่าย</span>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                <div class="gap-2" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));">
                     ${categoryRows.map(([category, data]) => `
                         <button type="button" data-bill-category="${esc(category)}" onclick="openBillCategoryModal(this.getAttribute('data-bill-category'))" aria-label="ดูรายละเอียดหมวด ${esc(category)}" class="min-w-0 text-left bg-white text-darkText p-2 sm:p-3 rounded-xl border-2 border-darkText shadow-sm hover:-translate-y-0.5 transition-all cursor-pointer" style="position:relative;z-index:2;pointer-events:auto;">
                             <div class="min-w-0">

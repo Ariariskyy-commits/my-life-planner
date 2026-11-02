@@ -2892,7 +2892,29 @@
                         </div>
                     </div>`).join('') : `<div class="text-center py-6 text-gray-400 text-[11px]">ไม่มีรายการ</div>`;
             });
-            $('dashPendingTasks').innerText = state.tasks.filter(t => t.status !== 'done').length + ' รายการ';
+            const pendingTasks = state.tasks.filter(t => t.status !== 'done');
+            $('dashPendingTasks').innerText = pendingTasks.length + ' รายการ';
+
+            // แสดงงานที่ยังไม่เสร็จบน Dashboard ด้วยข้อมูลชุดเดียวกับหน้า Planner
+            const dashTodoList = $('dashTodoList');
+            if (dashTodoList) {
+                const statusLabels = { todo: 'ยังไม่เริ่ม', progress: 'กำลังทำ' };
+                const statusClasses = {
+                    todo: 'bg-sunnyYellow text-darkText',
+                    progress: 'bg-popBlue text-white'
+                };
+                const dashboardTasks = pendingTasks.slice(0, 3);
+                dashTodoList.innerHTML = dashboardTasks.length ? dashboardTasks.map(t => `
+                    <div class="bg-offWhite text-darkText p-3 rounded-xl border border-darkText flex flex-col gap-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[10px] text-gray-500 font-bold">${esc(t.date || 'ไม่กำหนดวันที่')}</span>
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${statusClasses[t.status] || 'bg-gray-200 text-darkText'}">${statusLabels[t.status] || 'รอดำเนินการ'}</span>
+                        </div>
+                        <p class="font-bold text-xs break-words">${esc(t.title || 'ไม่มีชื่องาน')}</p>
+                        ${t.desc ? `<p class="text-[11px] text-gray-600 whitespace-pre-wrap break-words">${esc(t.desc)}</p>` : ''}
+                        <button type="button" onclick="openTaskModal('${t.id}')" class="self-end text-[10px] font-bold text-popBlue hover:underline">แก้ไขงาน</button>
+                    </div>`).join('') : `<div class="col-span-full text-center py-6 text-gray-400 text-xs">✨ ไม่มีงานค้าง เยี่ยมมาก!</div>`;
+            }
         }
 
         let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊';

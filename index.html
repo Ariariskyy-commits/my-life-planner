@@ -1497,6 +1497,18 @@
                 </div>
             </div>
         </section>
+        <div id="calendarDecorModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 p-4">
+            <div class="w-full max-w-sm rounded-2xl border-2 border-darkText bg-white p-4 shadow-[0_5px_0_#1A1A1A]">
+                <div class="flex items-center justify-between mb-3"><h3 class="font-extrabold text-lg">ตกแต่งวันที่ <span id="calendarDecorDate"></span></h3><button type="button" onclick="closeModal('calendarDecorModal')" class="text-xl">×</button></div>
+                <p class="text-xs text-gray-500 mb-2">แตะอิโมจิหรือสติกเกอร์ได้เลย ไม่ต้องเขียนโน้ต</p>
+                <div id="calendarDecorEmojiPicker" class="grid grid-cols-6 gap-2 mb-3">
+                    <button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('⭐')">⭐</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('💖')">💖</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🌸')">🌸</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🎀')">🎀</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('✨')">✨</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🌈')">🌈</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('☁️')">☁️</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🍀')">🍀</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🧸')">🧸</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🐱')">🐱</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🐻')">🐻</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🎂')">🎂</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🎉')">🎉</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('📌')">📌</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('❤️')">❤️</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🔥')">🔥</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🌻')">🌻</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🦋')">🦋</button>
+                </div>
+                <div class="flex items-center gap-2 mb-3"><label class="text-sm font-bold">สีจุด</label><input id="calendarDecorColor" type="color" value="#FF007F" class="h-9 w-12 rounded border border-darkText"><button type="button" onclick="addCalendarDecoration('●')" class="rounded-lg border-2 border-darkText bg-limeGreen px-3 py-2 text-sm font-bold">เพิ่มจุดสี</button></div>
+                <div id="calendarDecorCurrent" class="flex flex-wrap gap-2 mb-3"></div>
+                <button type="button" onclick="closeModal('calendarDecorModal')" class="w-full rounded-xl border-2 border-darkText bg-gray-100 py-2 font-bold">เสร็จสิ้น</button>
+            </div>
+        </div>
     </main>
 
     <footer class="bg-darkText text-white py-4 px-3 mt-auto border-t-2 border-darkText text-center text-xs w-full shrink-0">
@@ -2196,7 +2208,7 @@
         });
         function makeDefaultState() {
             return {
-                theme: 'y2k', transactions: [], bills: [], receivables: [], tasks: [], events: [],
+                theme: 'y2k', transactions: [], bills: [], receivables: [], tasks: [], events: [], calendarDecorations: [],
                 calcHistory: [], categories: [...DEFAULT_CATEGORIES], receivableCategories: [...DEFAULT_RECEIVABLE_CATEGORIES], pet: makeDefaultPet(),
                 quickNotes: [], quickNoteShow: true, headerCollapsed: false
             };
@@ -2208,7 +2220,7 @@
             const prefix = 'y2k_user_' + uid + '_';
             return {
                 transactions: prefix+'transactions', bills: prefix+'bills', receivables: prefix+'receivables', tasks: prefix+'tasks',
-                events: prefix+'events', calcHistory: prefix+'calchistory', pet: prefix+'pet',
+                events: prefix+'events', calendarDecorations: prefix+'calendar_decorations', calcHistory: prefix+'calchistory', pet: prefix+'pet',
                 theme: prefix+'theme', categories: prefix+'categories', receivableCategories: prefix+'receivable_categories', quickNotes: prefix+'quicknotes',
                 quickNoteShow: prefix+'quicknote_show', headerCollapsed: prefix+'header_collapsed',
                 migrated: prefix+'legacy_migrated'
@@ -2240,6 +2252,7 @@
                 receivables: readLS(keys.receivables, []),
                 tasks: readLS(keys.tasks, []),
                 events: readLS(keys.events, []),
+                calendarDecorations: readLS(keys.calendarDecorations, []),
                 calcHistory: readLS(keys.calcHistory, []),
                 categories: readLS(keys.categories, [...DEFAULT_CATEGORIES]),
                 receivableCategories: readLS(keys.receivableCategories, [...DEFAULT_RECEIVABLE_CATEGORIES]),
@@ -2261,6 +2274,7 @@
                 localStorage.setItem(activeStorageKeys.receivables, JSON.stringify(state.receivables || []));
                 localStorage.setItem(activeStorageKeys.tasks, JSON.stringify(state.tasks));
                 localStorage.setItem(activeStorageKeys.events, JSON.stringify(state.events));
+                localStorage.setItem(activeStorageKeys.calendarDecorations, JSON.stringify(state.calendarDecorations || []));
                 localStorage.setItem(activeStorageKeys.calcHistory, JSON.stringify(state.calcHistory));
                 localStorage.setItem(activeStorageKeys.categories, JSON.stringify(state.categories));
                 localStorage.setItem(activeStorageKeys.receivableCategories, JSON.stringify(state.receivableCategories || DEFAULT_RECEIVABLE_CATEGORIES));
@@ -2419,7 +2433,7 @@
         function cloudPayload() {
             return {
                 transactions: state.transactions, bills: state.bills, receivables: state.receivables || [], tasks: state.tasks,
-                events: state.events, calcHistory: state.calcHistory, categories: state.categories,
+                events: state.events, calendarDecorations: state.calendarDecorations || [], calcHistory: state.calcHistory, categories: state.categories,
                 receivableCategories: state.receivableCategories || DEFAULT_RECEIVABLE_CATEGORIES,
                 pet: state.pet, theme: state.theme, quickNotes: state.quickNotes,
                 quickNoteShow: state.quickNoteShow, headerCollapsed: state.headerCollapsed,
@@ -2454,6 +2468,7 @@
             state.receivables = d.receivables || [];
             state.tasks = d.tasks || [];
             state.events = d.events || [];
+            state.calendarDecorations = d.calendarDecorations || [];
             state.calcHistory = d.calcHistory || [];
             state.categories = d.categories || DEFAULT_CATEGORIES;
             state.receivableCategories = d.receivableCategories || DEFAULT_RECEIVABLE_CATEGORIES;
@@ -3377,6 +3392,29 @@
             }
         }
 
+        let activeCalendarDecorDate = null;
+        function openCalendarDecor(dateKey) {
+            activeCalendarDecorDate = dateKey;
+            $('calendarDecorDate').innerText = dateKey;
+            $('calendarDecorColor').value = '#FF007F';
+            renderCalendarDecorCurrent();
+            openModal('calendarDecorModal');
+        }
+        function addCalendarDecoration(symbol) {
+            if (!activeCalendarDecorDate) return;
+            state.calendarDecorations = state.calendarDecorations || [];
+            state.calendarDecorations.push({ id:'cd_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), date:activeCalendarDecorDate, symbol, color:$('calendarDecorColor').value || '#FF007F' });
+            saveData(); renderCalendar(); renderCalendarDecorCurrent();
+        }
+        function removeCalendarDecoration(id) {
+            state.calendarDecorations = (state.calendarDecorations || []).filter(x => x.id !== id);
+            saveData(); renderCalendar(); renderCalendarDecorCurrent();
+        }
+        function renderCalendarDecorCurrent() {
+            const items = (state.calendarDecorations || []).filter(x => x.date === activeCalendarDecorDate);
+            $('calendarDecorCurrent').innerHTML = items.map(x => `<button type="button" onclick="removeCalendarDecoration('${x.id}')" class="rounded-lg border border-gray-300 px-2 py-1 text-lg" title="แตะเพื่อลบ">${x.symbol === '●' ? `<span style="color:${x.color}">●</span>` : x.symbol} <small class="text-xs text-gray-400">×</small></button>`).join('') || '<span class="text-xs text-gray-400">ยังไม่มีสติกเกอร์ในวันนี้</span>';
+        }
+
         function selectCalendarDate(dateKey) { selectedCalendarDate = dateKey; renderCalendar(); renderEventsList(); }
         async function viewEventDetails(eventId) {
             const ev = state.events.find(e => e.id === eventId);
@@ -3432,14 +3470,16 @@
                 const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const holidayName = getHolidayName(dateKey);
                 const evs = state.events.filter(e => e.date === dateKey);
+                const decorations = (state.calendarDecorations || []).filter(d => d.date === dateKey);
                 const isSelected = selectedCalendarDate === dateKey;
                 html += `
                     <div onclick="selectCalendarDate('${dateKey}')" class="${isSelected ? 'bg-sunnyYellow/20 border-limeGreen ring-2 ring-limeGreen' : 'bg-offWhite border-darkText'} p-1 rounded-xl border aspect-square flex flex-col justify-between cursor-pointer hover:bg-limeGreen/20 relative">
                         <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-bold">${day}</span>
+                            <span class="text-[10px] font-bold">${day}</span><button type="button" onclick="event.stopPropagation();openCalendarDecor('${dateKey}')" class="rounded-full bg-white/90 border border-gray-300 text-[10px] leading-none w-5 h-5 flex items-center justify-center" aria-label="ตกแต่งวันนี้">＋</button>
                             ${holidayName ? `<span class="text-sm font-black leading-none shrink-0" style="color:${calendarHolidayMarkerColor}" title="${esc(holidayName)}" aria-label="วันหยุด ${esc(holidayName)}">★</span>` : ''}
                         </div>
                         <div class="flex-1 flex items-end justify-center pb-1 min-h-0">
+${decorations.length ? `<div class="flex flex-wrap justify-center items-center gap-0.5">${decorations.slice(-4).map(d => d.symbol === '●' ? `<span class="text-[12px] leading-none" style="color:${d.color}">●</span>` : `<span class="text-sm leading-none">${esc(d.symbol)}</span>`).join('')}</div>` : ''}
                             ${evs.length ? `<div class="flex flex-wrap justify-center items-center gap-1 max-w-full">${evs.slice(0,4).map(ev => ev.sticker ? `<span class="text-base leading-none drop-shadow-sm" title="${esc(ev.title)}">${esc(ev.sticker)}</span>` : `<span class="text-[13px] leading-none shrink-0" style="color:${/^#[0-9A-Fa-f]{6}$/.test(ev.dotColor || '') ? ev.dotColor : '#0055FF'}" title="${esc(ev.title)}">${getCalendarMarkerGlyph(ev.markerShape || 'circle')}</span>`).join('')}${evs.length > 4 ? `<span class="text-[8px] font-bold text-gray-600">+${evs.length-4}</span>` : ''}</div>` : ''}
                         </div>
                     </div>`;

@@ -42,15 +42,44 @@ const AGENTS = {
   }
 };
 
+const ALLOWED_ORIGINS = new Set([
+  "https://ariariskyy-commits.github.io",
+  "https://raw.githack.com"
+]);
+const FIREBASE_API_KEY = "AIzaSyAXBrkRElXiLTfeEB5iWDiiZlV-07wfXlc";
+const ALLOWED_EMAIL = "arisky.studio@gmail.com";
+
 function corsHeaders(origin) {
-  // No cookies or credentials are used. The API key remains on the Worker.
+  const allowedOrigin = ALLOWED_ORIGINS.has(origin) ? origin : "https://ariariskyy-commits.github.io";
   return {
-    "Access-Control-Allow-Origin": origin || "*",
+    "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin"
   };
+}
+
+async function verifyFirebaseToken(request) {
+  const header = request.headers.get("Authorization") || "";
+  const match = header.match(/^Bearer\\s+(.+)$/i);
+  if (!match) return false;
+  try {
+    const response = await fetch("https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=" + FIREBASE_API_KEY, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken: match[1] })
+    });
+    if (!response.ok) return false;
+    const data = await response.json();
+    const user = data && data.users && data.users[0];
+    return !!user &&
+      String(user.email || "").toLowerCase() === ALLOWED_EMAIL &&
+      user.emailVerified === true &&
+      user.disabled !== true;
+  } catch {
+    return false;
+  }
 }
 
 function json(data, status, origin) {
@@ -66,14 +95,23 @@ function json(data, status, origin) {
 
 export default {
   async fetch(request, env) {
-    const origin = request.headers.get("Origin") || "*";
+    const origin = request.headers.get("Origin") || "";
 
     if (request.method === "OPTIONS") {
+      if (!ALLOWED_ORIGINS.has(origin)) return new Response(null, { status: 403 });
       return new Response(null, { status: 204, headers: corsHeaders(origin) });
     }
 
     if (request.method !== "POST") {
       return json({ error: "Method not allowed" }, 405, origin);
+    }
+
+    if (!ALLOWED_ORIGINS.has(origin)) {
+      return json({ error: "Origin not allowed" }, 403, "https://ariariskyy-commits.github.io");
+    }
+
+    if (!await verifyFirebaseToken(request)) {
+      return json({ error: "ต้องเข้าสู่ระบบด้วย arisky.studio@gmail.com ก่อนใช้งาน AI" }, 401, origin);
     }
 
     if (!env.GEMINI_API_KEY) {

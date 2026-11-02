@@ -2893,6 +2893,7 @@
         function openBillModal(editId = null, presetAmount = null) {
             $('billForm').reset(); $('billId').value = ''; setDefaultDates();
             $('billUseInstallment').checked = false; $('installmentInputs').classList.add('hidden');
+            $('billInstallmentCurrent').value = '1'; $('billInstallmentTotal').value = '3';
             updateCategorySelects('💡 บิล/ค่าใช้จ่าย');
             if (presetAmount !== null) $('billAmount').value = presetAmount;
             if (editId) {
@@ -2900,6 +2901,12 @@
                 if (b) {
                     $('billId').value = b.id; $('billTitle').value = b.title; $('billDate').value = b.date;
                     updateCategorySelects(b.category); $('billAmount').value = b.amount;
+                    if (b.installmentCurrent && b.installmentTotal) {
+                        $('billUseInstallment').checked = true;
+                        $('installmentInputs').classList.remove('hidden');
+                        $('billInstallmentCurrent').value = b.installmentCurrent;
+                        $('billInstallmentTotal').value = b.installmentTotal;
+                    }
                 }
             }
             openModal('billModal');
@@ -2912,27 +2919,34 @@
             const date = $('billDate').value;
             const category = $('billCategory').value;
             const amount = parseFloat($('billAmount').value);
+            const useInstallment = $('billUseInstallment').checked;
+            const installmentCurrent = useInstallment ? parseInt($('billInstallmentCurrent').value, 10) : null;
+            const installmentTotal = useInstallment ? parseInt($('billInstallmentTotal').value, 10) : null;
             if (!(amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
+            if (useInstallment && (!Number.isInteger(installmentCurrent) || !Number.isInteger(installmentTotal) || installmentCurrent < 1 || installmentTotal < 1 || installmentCurrent > installmentTotal)) {
+                return showToast('กรุณาระบุจำนวนงวดให้ถูกต้อง');
+            }
 
             if (id) {
                 const b = state.bills.find(x => x.id === id);
                 if (b) {
                     b.title = title; b.date = date; b.category = category; b.amount = amount;
+                    if (useInstallment) {
+                        b.installmentCurrent = installmentCurrent;
+                        b.installmentTotal = installmentTotal;
+                    } else {
+                        delete b.installmentCurrent;
+                        delete b.installmentTotal;
+                    }
                     if (b.paid && b.txId) {
                         const linkedTx = state.transactions.find(t => t.id === b.txId);
                         if (linkedTx) Object.assign(linkedTx, { title: 'จ่าย: ' + b.title, category: b.category || 'ไม่ระบุหมวด', amount: Number(b.amount || 0) });
                     }
                 }
             } else {
-                let finalTitle = title;
-                if ($('billUseInstallment').checked) {
-                    const cur = $('billInstallmentCurrent').value || '1';
-                    const tot = $('billInstallmentTotal').value || '3';
-                    finalTitle += ` ${cur}/${tot}`;
-                }
                 state.bills.unshift({
-                    id: 'bill_' + Date.now(), title: finalTitle, date,
-                    category, amount, paid: false
+                    id: 'bill_' + Date.now(), title, date, category, amount, paid: false,
+                    ...(useInstallment ? { installmentCurrent, installmentTotal } : {})
                 });
             }
             saveData(); closeModal('billModal'); refreshUI(); showToast('บันทึกบิลสำเร็จ!');
@@ -3197,6 +3211,7 @@
                         <h4 class="font-bold text-sm min-w-0 break-words">${esc(b.title)}</h4>
                         <span class="shrink-0 text-[10px] font-extrabold bg-limeGreen text-darkText px-2 py-0.5 rounded-full border-2 border-darkText whitespace-nowrap max-w-[45%] truncate" title="${esc(b.category || 'ไม่ระบุหมวด')}">${esc(b.category || 'ไม่ระบุหมวด')}</span>
                     </div>
+                    ${b.installmentCurrent && b.installmentTotal ? `<span class="inline-flex items-center bg-sunnyYellow text-darkText border border-darkText rounded-full px-2 py-0.5 text-[10px] font-bold">งวดที่ ${b.installmentCurrent}/${b.installmentTotal}</span>` : ''}
                     <span class="text-base font-extrabold text-hotPink block">฿ ${money(b.amount)}</span>
                     <button onclick="toggleBillPaid('${b.id}')" class="w-full py-1 bg-limeGreen text-darkText font-bold text-xs rounded border border-darkText">จ่าย</button>
                 </div>`).join('') : `<div class="col-span-3 text-center py-8 text-gray-400 text-xs">เย้! ไม่มีบิลค้างจ่ายแล้ว 🎉</div>`;

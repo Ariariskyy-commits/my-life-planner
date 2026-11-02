@@ -2630,13 +2630,18 @@
                     </div>
                 </div>`).join('');
             $('billsGrid').innerHTML = categoryCards + billCards || '<div class="col-span-3 text-center py-8 text-gray-400 text-xs">ยังไม่มีบิลเตรียมจ่าย</div>';
-            // ใช้ event delegation เพื่อให้การ์ดหมวดกดได้แน่นอน แม้มีการ render รายการใหม่
-            $('billsGrid').onclick = function(event) {
-                const categoryCard = event.target.closest('[data-bill-category]');
-                if (!categoryCard || !this.contains(categoryCard)) return;
-                event.preventDefault();
-                openBillCategoryModal(categoryCard.dataset.billCategory);
-            };
+            // ผูกการเปิดรายละเอียดไว้ที่ document ใน capture phase เพื่อไม่ให้ parent element กลืน click
+            if (!window._billCategoryClickHandlerBound) {
+                document.addEventListener('click', function(event) {
+                    const target = event.target instanceof Element ? event.target : event.target.parentElement;
+                    const categoryCard = target && target.closest('#billsGrid [data-bill-category]');
+                    if (!categoryCard) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    openBillCategoryModal(categoryCard.dataset.billCategory);
+                }, true);
+                window._billCategoryClickHandlerBound = true;
+            }
         }
 
         function openTaskModal(editId = null) { $('taskForm').reset(); $('taskId').value = ''; setDefaultDates(); openModal('taskModal'); }

@@ -1956,13 +1956,39 @@
             });
         }
 
+        function photoKey(id, uid = activeStorageUid) {
+            if (!uid) throw new Error('ยังไม่ได้ยืนยันบัญชีสำหรับเข้าถึงรูปภาพ');
+            return uid + '::' + id;
+        }
+
+        async function migrateLegacyPhotosForUser(uid) {
+            if (!uid || !isAllowedUser(currentUser) || currentUser.uid !== uid) return;
+            try {
+                const all = (await idbTx('readonly', s => s.getAll())) || [];
+                for (const rec of all) {
+                    if (rec.uid) continue;
+                    const eventId = rec.eventId || rec.id;
+                    const nextId = photoKey(eventId, uid);
+                    if (all.some(item => item.id === nextId)) continue;
+                    await idbTx('readwrite', store => store.put({ ...rec, id: nextId, eventId, uid }));
+                }
+            } catch (e) {
+                console.warn('Photo migration skipped; original photo records were preserved:', e);
+            }
+        }
+
         async function savePhotoLocal(id, data, synced) {
-            await idbTx('readwrite', s => s.put({ id, data, synced, createdAt: Date.now() }));
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid) throw new Error('ไม่มีสิทธิ์จัดเก็บรูปภาพ');
+            await idbTx('readwrite', store => store.put({
+                id: photoKey(id), eventId: id, uid: activeStorageUid, data, synced, createdAt: Date.now()
+            }));
         }
 
         async function markPhotoSynced(id) {
-            const rec = await idbTx('readonly', s => s.get(id));
-            if (rec) await idbTx('readwrite', s => s.put({ ...rec, synced: true }));
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid) return;
+            const key = photoKey(id);
+            const rec = await idbTx('readonly', store => store.get(key));
+            if (rec) await idbTx('readwrite', store => store.put({ ...rec, synced: true }));
         }
 
         function photosCol(uid) {
@@ -1970,6 +1996,7 @@
         }
 
         async function uploadPhoto(id, data) {
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid) throw new Error('ไม่มีสิทธิ์จัดเก็บรูปภาพ');
             await withTimeout(
                 photosCol(currentUser.uid).doc(id).set({
                     data, eventId: id, createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1979,34 +2006,39 @@
         }
 
         async function getPhotoData(eventId) {
-            const rec = await idbTx('readonly', s => s.get(eventId));
+            if (!dataReady || !isAllowedUser(currentUser) || !activeStorageUid || activeStorageUid !== currentUser.uid) return null;
+            const rec = await idbTx('readonly', store => store.get(photoKey(eventId)));
             if (rec && rec.data) return rec.data;
-            if (!currentUser || !isFirebaseActive) return null;
-            const snap = await withTimeout(photosCol(currentUser.uid).doc(eventId).get(), CLOUD_TIMEOUT_MS, 'โหลดรูปจากคลาวด์ไม่สำเร็จ');
-            if (!snap.exists) return null;
+            if (!isFirebaseActive) return null;
+            const uid = currentUser.uid;
+            const snap = await withTimeout(photosCol(uid).doc(eventId).get(), CLOUD_TIMEOUT_MS, 'โหลดรูปจากคลาวด์ไม่สำเร็จ');
+            if (!snap.exists || !currentUser || currentUser.uid !== uid || activeStorageUid !== uid) return null;
             const data = snap.data().data;
             await savePhotoLocal(eventId, data, true);
             return data;
         }
 
         async function deletePhotoEverywhere(id) {
-            try { await idbTx('readwrite', s => s.delete(id)); } catch (e) { console.warn(e); }
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid) return;
+            try { await idbTx('readwrite', store => store.delete(photoKey(id))); } catch (e) { console.warn(e); }
             if (currentUser && isFirebaseActive) {
                 try { await withTimeout(photosCol(currentUser.uid).doc(id).delete(), CLOUD_TIMEOUT_MS, 'ลบรูปบนคลาวด์ไม่สำเร็จ'); } catch (e) { console.warn(e); }
             }
         }
 
         async function syncPendingPhotos() {
-            if (!currentUser || !isFirebaseActive) return;
+            if (!dataReady || !isAllowedUser(currentUser) || activeStorageUid !== currentUser.uid || !isFirebaseActive) return;
             try {
-                const all = (await idbTx('readonly', s => s.getAll())) || [];
+                const uid = currentUser.uid;
+                const all = (await idbTx('readonly', store => store.getAll())) || [];
                 for (const rec of all) {
-                    if (rec.synced) continue;
-                    const ev = state.events.find(e => e.id === rec.id);
+                    if (rec.uid !== uid || rec.synced) continue;
+                    const eventId = rec.eventId;
+                    const ev = state.events.find(e => e.id === eventId);
                     if (!ev || !ev.hasPhoto) continue;
                     try {
-                        await uploadPhoto(rec.id, rec.data);
-                        await markPhotoSynced(rec.id);
+                        await uploadPhoto(eventId, rec.data);
+                        await markPhotoSynced(eventId);
                     } catch (e) { console.warn('sync photo failed:', e); }
                 }
             } catch (e) { console.warn(e); }
@@ -2148,6 +2180,7 @@
             if (dataReady && activeStorageUid === user.uid && currentUser && currentUser.uid === user.uid) return;
             currentUser = user;
             loadLocalForUser(user.uid);
+            await migrateLegacyPhotosForUser(user.uid);
             renderAuthUI();
             refreshUI();
             hideAccessLock();

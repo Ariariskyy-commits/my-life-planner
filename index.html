@@ -930,6 +930,14 @@
   #tab-calendar .calendar-toolbar > div:nth-child(3) > button:first-child { padding: 6px 8px !important; }
 }
 </style>
+<style id="mobile-bottom-nav-clearance">
+@media (max-width: 640px) {
+  main { padding-bottom: 165px !important; }
+  #tab-calendar { padding-bottom: 24px !important; }
+  #tab-calendar > .grid > div:last-child { margin-bottom: 8px; }
+  #tab-calendar #eventsListSidebar > div { overflow-wrap:anywhere; }
+}
+</style>
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
@@ -1649,7 +1657,7 @@
         <button class="bn-item" id="bn-dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-house"></i><span>หน้าแรก</span></button>
         <button class="bn-item" id="bn-planner" onclick="switchTab('planner')"><i class="fa-solid fa-calendar-check"></i><span>แพลนเนอร์</span></button>
         <button class="bn-add" onclick="openModal('quickAddModal')" aria-label="เพิ่มด่วน"><i class="fa-solid fa-plus"></i></button>
-        <button class="bn-item" id="bn-calendar" onclick="switchTab('calendar')"><i class="fa-regular fa-image"></i><span>แกลเลอรี</span></button>
+        <button class="bn-item" id="bn-calendar" onclick="switchTab('calendar')"><i class="fa-regular fa-calendar"></i><span>ปฏิทิน</span></button>
         <button class="bn-item" onclick="openSettingsModal()"><i class="fa-solid fa-gear"></i><span>ตั้งค่า</span></button>
         <button type="button" id="appNavForward" onclick="navigateAppHistory(1)" disabled class="bn-history" title="ไปข้างหน้า" aria-label="ไปข้างหน้า"><i class="fa-solid fa-arrow-right"></i></button>
     </nav>

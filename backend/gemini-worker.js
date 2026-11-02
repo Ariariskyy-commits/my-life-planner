@@ -62,7 +62,7 @@ function corsHeaders(origin) {
 
 async function verifyFirebaseToken(request) {
   const header = request.headers.get("Authorization") || "";
-  const match = header.match(/^Bearer\\s+(.+)$/i);
+  const match = header.match(/^Bearer\s+(.+)$/i);
   if (!match) return false;
   try {
     const response = await fetch("https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=" + FIREBASE_API_KEY, {

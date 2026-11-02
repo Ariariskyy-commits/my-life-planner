@@ -1116,6 +1116,7 @@
                         </div>
                     </div>
                     <p class="text-[11px] text-gray-500 px-1">บันทึกเงินที่มีคนยืม หรือเงินที่กำลังจะได้รับ กด “รับเงินแล้ว” เพื่อบันทึกเป็นรายรับอัตโนมัติ</p>
+                                        <div id="receivablesCategorySummary" class="space-y-2"></div>
                     <div id="receivablesGrid" class="grid grid-cols-1 gap-3"></div>
                 </div>
             </div>
@@ -1637,7 +1638,7 @@
                 <div><label class="block font-bold mb-0.5">ชื่อคนที่ยืม / ผู้จ่ายคืน</label><input type="text" id="receivablePerson" placeholder="เช่น พี่เอ, เพื่อน..." required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div><label class="block font-bold mb-0.5">รายการ / เหตุผล</label><input type="text" id="receivableTitle" placeholder="เช่น ยืมเงิน, ค่าแชร์..." required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div><label class="block font-bold mb-0.5">วันที่คาดว่าจะได้รับคืน</label><input type="date" id="receivableDate" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
-                <div><label class="block font-bold mb-0.5">จำนวนเงินที่ต้องได้รับ (฿)</label><input type="number" id="receivableAmount" step="0.01" min="0.01" placeholder="0.00" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
+                <div class="grid grid-cols-2 gap-2"><div><div class="flex justify-between items-center mb-0.5"><label class="font-bold">หมวดหมู่</label><button type="button" onclick="promptAddReceivableCategory()" class="text-[10px] text-popBlue font-bold underline">+ เพิ่มหมวด</button></div><select id="receivableCategory" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none font-medium"></select></div><div><label class="block font-bold mb-0.5">จำนวนเงิน (฿)</label><input type="number" id="receivableAmount" step="0.01" min="0.01" placeholder="0.00" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div></div>
                 <div><label class="block font-bold mb-0.5">หมายเหตุ (ไม่บังคับ)</label><textarea id="receivableNote" rows="2" placeholder="รายละเอียดเพิ่มเติม..." class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none resize-y"></textarea></div>
                 <div class="flex gap-2"><button type="button" onclick="closeModal('receivableModal')" class="flex-1 bg-gray-200 text-darkText font-bold py-2 rounded-lg border border-darkText">ยกเลิก</button><button type="submit" class="flex-1 bg-limeGreen text-darkText font-bold py-2 rounded-lg border border-darkText">บันทึก</button></div>
             </form>
@@ -2130,6 +2131,7 @@
 
         // Legacy keys are retained for a one-time, non-destructive migration.
         const LEGACY_KEYS = { transactions:'y2k_transactions', bills:'y2k_bills', tasks:'y2k_tasks', events:'y2k_events', calcHistory:'y2k_calchistory', pet:'y2k_pet', theme:'y2k_theme', categories:'y2k_categories', quickNotes:'y2k_quicknotes', quickNoteShow:'y2k_quicknote_show', headerCollapsed:'y2k_header_collapsed' };
+        const DEFAULT_RECEIVABLE_CATEGORIES = ["💸 ยืมเงิน", "🤝 ค่าแชร์", "💼 เงินค้างรับ", "✨ อื่นๆ"];
         const DEFAULT_CATEGORIES = [
             "🍔 อาหาร/เครื่องดื่ม", "🛍️ ช้อปปิ้ง", "🚗 เดินทาง",
             "🎮 บันเทิง/เกม", "💡 บิล/ค่าใช้จ่าย", "💰 เงินเดือน/รายรับ", "✨ อื่นๆ"
@@ -2142,7 +2144,7 @@
         function makeDefaultState() {
             return {
                 theme: 'y2k', transactions: [], bills: [], receivables: [], tasks: [], events: [],
-                calcHistory: [], categories: [...DEFAULT_CATEGORIES], pet: makeDefaultPet(),
+                calcHistory: [], categories: [...DEFAULT_CATEGORIES], receivableCategories: [...DEFAULT_RECEIVABLE_CATEGORIES], pet: makeDefaultPet(),
                 quickNotes: [], quickNoteShow: true, headerCollapsed: false
             };
         }
@@ -2154,7 +2156,7 @@
             return {
                 transactions: prefix+'transactions', bills: prefix+'bills', receivables: prefix+'receivables', tasks: prefix+'tasks',
                 events: prefix+'events', calcHistory: prefix+'calchistory', pet: prefix+'pet',
-                theme: prefix+'theme', categories: prefix+'categories', quickNotes: prefix+'quicknotes',
+                theme: prefix+'theme', categories: prefix+'categories', receivableCategories: prefix+'receivable_categories', quickNotes: prefix+'quicknotes',
                 quickNoteShow: prefix+'quicknote_show', headerCollapsed: prefix+'header_collapsed',
                 migrated: prefix+'legacy_migrated'
             };
@@ -2187,6 +2189,7 @@
                 events: readLS(keys.events, []),
                 calcHistory: readLS(keys.calcHistory, []),
                 categories: readLS(keys.categories, [...DEFAULT_CATEGORIES]),
+                receivableCategories: readLS(keys.receivableCategories, [...DEFAULT_RECEIVABLE_CATEGORIES]),
                 pet: Object.assign(makeDefaultPet(), readLS(keys.pet, {})),
                 quickNotes: readLS(keys.quickNotes, []),
                 quickNoteShow: localStorage.getItem(keys.quickNoteShow) !== 'false',
@@ -2207,6 +2210,7 @@
                 localStorage.setItem(activeStorageKeys.events, JSON.stringify(state.events));
                 localStorage.setItem(activeStorageKeys.calcHistory, JSON.stringify(state.calcHistory));
                 localStorage.setItem(activeStorageKeys.categories, JSON.stringify(state.categories));
+                localStorage.setItem(activeStorageKeys.receivableCategories, JSON.stringify(state.receivableCategories || DEFAULT_RECEIVABLE_CATEGORIES));
                 localStorage.setItem(activeStorageKeys.pet, JSON.stringify(state.pet));
                 localStorage.setItem(activeStorageKeys.theme, state.theme);
                 localStorage.setItem(activeStorageKeys.quickNotes, JSON.stringify(state.quickNotes));
@@ -2363,6 +2367,7 @@
             return {
                 transactions: state.transactions, bills: state.bills, receivables: state.receivables || [], tasks: state.tasks,
                 events: state.events, calcHistory: state.calcHistory, categories: state.categories,
+                receivableCategories: state.receivableCategories || DEFAULT_RECEIVABLE_CATEGORIES,
                 pet: state.pet, theme: state.theme, quickNotes: state.quickNotes,
                 quickNoteShow: state.quickNoteShow, headerCollapsed: state.headerCollapsed,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -2398,6 +2403,7 @@
             state.events = d.events || [];
             state.calcHistory = d.calcHistory || [];
             state.categories = d.categories || DEFAULT_CATEGORIES;
+            state.receivableCategories = d.receivableCategories || DEFAULT_RECEIVABLE_CATEGORIES;
             state.pet = Object.assign(makeDefaultPet(), d.pet || {});
             if (d.theme) state.theme = d.theme;
             if (d.quickNotes !== undefined) state.quickNotes = d.quickNotes;
@@ -2833,6 +2839,24 @@
             saveData(); refreshUI();
         }
 
+        function updateReceivableCategorySelects(selectedVal = '') {
+            const categories = state.receivableCategories || DEFAULT_RECEIVABLE_CATEGORIES;
+            $('receivableCategory').innerHTML = categories.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+            if (selectedVal) $('receivableCategory').value = selectedVal;
+        }
+
+        function promptAddReceivableCategory() {
+            const name = prompt('กรอกชื่อหมวดหมู่รายการเตรียมรับ:');
+            if (!name || !name.trim()) return;
+            const clean = name.trim();
+            if (!Array.isArray(state.receivableCategories)) state.receivableCategories = [...DEFAULT_RECEIVABLE_CATEGORIES];
+            if (state.receivableCategories.includes(clean)) return alert('หมวดหมู่นี้มีอยู่แล้ว!');
+            state.receivableCategories.push(clean);
+            saveData();
+            updateReceivableCategorySelects(clean);
+            showToast('เพิ่มหมวดหมู่รายการเตรียมรับแล้ว ✨');
+        }
+
         function openReceivableModal(editId = null) {
             $('receivableForm').reset();
             $('receivableId').value = '';
@@ -2843,6 +2867,7 @@
             $('receivablePerson').value = item?.person || '';
             $('receivableTitle').value = item?.title || '';
             $('receivableDate').value = item?.date || localDateKey();
+            updateReceivableCategorySelects(item?.category || '💸 ยืมเงิน');
             $('receivableAmount').value = item?.amount ?? '';
             $('receivableNote').value = item?.note || '';
             openModal('receivableModal');
@@ -2852,7 +2877,7 @@
             e.preventDefault();
             if (!Array.isArray(state.receivables)) state.receivables = [];
             const id = $('receivableId').value;
-            const data = { person: $('receivablePerson').value.trim(), title: $('receivableTitle').value.trim(), date: $('receivableDate').value, amount: Number($('receivableAmount').value), note: $('receivableNote').value.trim() };
+            const data = { person: $('receivablePerson').value.trim(), title: $('receivableTitle').value.trim(), date: $('receivableDate').value, category: $('receivableCategory').value, amount: Number($('receivableAmount').value), note: $('receivableNote').value.trim() };
             if (!(data.amount > 0)) return showToast('กรุณาใส่จำนวนเงินให้ถูกต้อง');
             if (id) {
                 const item = state.receivables.find(r => r.id === id);
@@ -2893,10 +2918,28 @@
             const pending = items.filter(r => !r.received);
             const total = pending.reduce((sum, r) => sum + Number(r.amount || 0), 0);
             $('receivablesSummary').innerText = 'ยอดเงินที่รอรับ: ฿ ' + money(total) + ' · ' + pending.length + ' รายการ';
+            const categoryTotals = {};
+            pending.forEach(r => {
+                const category = (r.category || '💸 ยืมเงิน').trim();
+                if (!categoryTotals[category]) categoryTotals[category] = { amount: 0, count: 0 };
+                categoryTotals[category].amount += Number(r.amount || 0);
+                categoryTotals[category].count += 1;
+            });
+            const categoryRows = Object.entries(categoryTotals).sort((a,b) => b[1].amount - a[1].amount);
+            $('receivablesCategorySummary').innerHTML = categoryRows.length ? `
+                <div class="flex items-center justify-between gap-2"><h3 class="font-extrabold text-sm text-darkText">สรุปยอดตามหมวด</h3><span class="text-[10px] font-bold text-gray-500">${categoryRows.length} หมวด · เฉพาะรายการที่รอรับ</span></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    ${categoryRows.map(([category,data]) => `
+                        <div class="text-left bg-white text-darkText p-3 rounded-xl border-2 border-darkText shadow-sm">
+                            <div class="font-bold text-xs break-words">${esc(category)}</div>
+                            <div class="text-[10px] text-gray-500 mt-1">${data.count} รายการ</div>
+                            <div class="font-extrabold text-base text-green-700">฿ ${money(data.amount)}</div>
+                        </div>`).join('')}
+                </div>` : '<div class="text-[11px] text-gray-400">ยังไม่มีรายการแยกตามหมวด</div>';
             $('receivablesGrid').innerHTML = pending.length ? pending.map(r => `
                 <div class="bg-white text-darkText p-3 rounded-xl border-2 border-darkText shadow-sm space-y-2">
                     <div class="flex items-start justify-between gap-2">
-                        <div class="min-w-0"><span class="text-[10px] font-bold text-gray-500 block">กำหนดรับคืน ${esc(r.date || 'ไม่ระบุวันที่')}</span><h4 class="font-extrabold text-sm break-words mt-1">${esc(r.person || 'ไม่ระบุชื่อ')}</h4><p class="text-xs text-gray-600 break-words">${esc(r.title || '')}</p></div>
+                        <div class="min-w-0"><span class="text-[10px] font-bold text-gray-500 block">กำหนดรับคืน ${esc(r.date || 'ไม่ระบุวันที่')}</span><h4 class="font-extrabold text-sm break-words mt-1">${esc(r.person || 'ไม่ระบุชื่อ')}</h4><p class="text-xs text-gray-600 break-words">${esc(r.title || '')}</p><span class="inline-flex mt-1 text-[10px] font-extrabold bg-limeGreen text-darkText px-2 py-0.5 rounded-full border border-darkText">${esc(r.category || '💸 ยืมเงิน')}</span></div>
                         <div class="flex gap-1 shrink-0"><button type="button" onclick="openReceivableModal('${r.id}')" class="text-popBlue p-1" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" onclick="deleteReceivable('${r.id}')" class="text-gray-400 hover:text-hotPink p-1" title="ลบ"><i class="fa-solid fa-trash-can"></i></button></div>
                     </div>
                     ${r.note ? `<p class="text-[11px] text-gray-500 whitespace-pre-wrap break-words">${esc(r.note)}</p>` : ''}

@@ -874,15 +874,6 @@
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
-    <div id="globalTrashWidget" class="fixed right-3 bottom-24 z-[8500] flex items-center gap-1 rounded-full border-2 border-darkText bg-white p-1 shadow-lg select-none">
-        <button id="trashDragHandle" type="button" aria-label="ลากย้ายปุ่มถังขยะ" class="h-8 w-7 rounded-full text-gray-400 cursor-grab active:cursor-grabbing" style="touch-action:none"><i class="fa-solid fa-grip-vertical"></i></button>
-        <button id="globalTrashButton" type="button" class="flex items-center gap-1.5 rounded-full px-1.5 py-1 text-xs font-extrabold text-darkText" title="เปิดถังขยะ">
-            <i class="fa-solid fa-trash-can text-hotPink"></i><span>ถังขยะ</span><span id="globalTrashCount" class="min-w-5 rounded-full bg-hotPink px-1.5 py-0.5 text-center text-[10px] text-white">0</span>
-        </button>
-        <button id="hideTrashButton" type="button" aria-label="ซ่อนปุ่มถังขยะ" class="h-8 w-7 rounded-full bg-gray-100 text-gray-500 font-bold">×</button>
-    </div>
-    <button id="showTrashButton" type="button" class="hidden fixed right-2 bottom-24 z-[8500] h-10 w-10 rounded-full border-2 border-darkText bg-white text-hotPink shadow-lg" title="แสดงปุ่มถังขยะ"><i class="fa-solid fa-trash-can"></i></button>
-
     <!-- FLOATING PET & QUICK NOTES WIDGET -->
     <div id="floatingPetWidget" class="fixed bottom-24 left-3 z-[8000] flex flex-col items-start gap-1.5 select-none max-w-[240px]">
         
@@ -1163,7 +1154,7 @@
         <!-- FINANCE -->
         <section id="tab-finance" class="tab-content hidden space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-wallet text-popBlue"></i> บันทึกรายรับ - รายจ่าย</h2>
+                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-wallet text-popBlue"></i> บันทึกรายรับ - รายจ่าย</h2><button id="trashFinanceButton" type="button" onclick="openTrashModal()" class="page-trash-button inline-flex items-center gap-1 rounded-lg border border-darkText/50 bg-white/80 px-2 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-hotPink/10" title="เปิดถังขยะ"><i class="fa-solid fa-trash-can text-hotPink"></i><span>ถังขยะ</span><span class="page-trash-count min-w-4 rounded-full bg-hotPink px-1 text-center text-[9px] text-white">0</span></button>
                 <div class="flex gap-2">
                     <button onclick="openTransactionModal('income')" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus-circle"></i> เพิ่มรายรับ</button>
                     <button onclick="openTransactionModal('expense')" class="bg-hotPink text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-minus-circle"></i> เพิ่มรายจ่าย</button>
@@ -1211,7 +1202,7 @@
                 <div class="min-w-0 space-y-3">
                     <div class="flex flex-col gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
                         <div>
-                            <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย</h2>
+                            <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-popBlue"></i> รายการเตรียมจ่าย</h2><button id="trashBillsButton" type="button" onclick="openTrashModal()" class="page-trash-button inline-flex items-center gap-1 rounded-lg border border-darkText/50 bg-white/80 px-2 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-hotPink/10" title="เปิดถังขยะ"><i class="fa-solid fa-trash-can text-hotPink"></i><span>ถังขยะ</span><span class="page-trash-count min-w-4 rounded-full bg-hotPink px-1 text-center text-[9px] text-white">0</span></button>
                             <p class="text-xs font-bold text-retroPurple mt-0.5" id="billsTotalSummaryText">ยอดรวมที่ต้องเตรียมจ่าย: ฿ 0.00</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
@@ -1229,7 +1220,7 @@
                 <div class="min-w-0 space-y-3">
                     <div class="flex flex-col gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
                         <div>
-                            <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-hand-holding-dollar text-green-600"></i> รายการเตรียมรับ</h2>
+                            <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-hand-holding-dollar text-green-600"></i> รายการเตรียมรับ</h2><button id="trashReceivablesButton" type="button" onclick="openTrashModal()" class="page-trash-button inline-flex items-center gap-1 rounded-lg border border-darkText/50 bg-white/80 px-2 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-hotPink/10" title="เปิดถังขยะ"><i class="fa-solid fa-trash-can text-hotPink"></i><span>ถังขยะ</span><span class="page-trash-count min-w-4 rounded-full bg-hotPink px-1 text-center text-[9px] text-white">0</span></button>
                             <p id="receivablesSummary" class="text-xs font-bold text-green-700 mt-0.5">ยอดเงินที่รอรับ: ฿ 0.00</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
@@ -1248,7 +1239,7 @@
         <!-- PLANNER -->
         <section id="tab-planner" class="tab-content hidden space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-list-check text-popBlue"></i> แพลนเนอร์</h2>
+                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-list-check text-popBlue"></i> แพลนเนอร์</h2><button id="trashPlannerButton" type="button" onclick="openTrashModal()" class="page-trash-button inline-flex items-center gap-1 rounded-lg border border-darkText/50 bg-white/80 px-2 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-hotPink/10" title="เปิดถังขยะ"><i class="fa-solid fa-trash-can text-hotPink"></i><span>ถังขยะ</span><span class="page-trash-count min-w-4 rounded-full bg-hotPink px-1 text-center text-[9px] text-white">0</span></button>
                 <button onclick="openTaskModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มงาน</button>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -1281,7 +1272,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm lg:col-span-2 space-y-3">
-                    <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center justify-between gap-2"><button id="trashCalendarButton" type="button" onclick="openTrashModal()" class="page-trash-button inline-flex items-center gap-1 rounded-lg border border-darkText/50 bg-white/80 px-2 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-hotPink/10" title="เปิดถังขยะ"><i class="fa-solid fa-trash-can text-hotPink"></i><span>ถังขยะ</span><span class="page-trash-count min-w-4 rounded-full bg-hotPink px-1 text-center text-[9px] text-white">0</span></button>
                         <div class="min-w-0"><h3 id="calMonthYearLabel" class="font-cute font-extrabold text-xl">เดือน</h3><label class="mt-1 inline-flex items-center gap-1.5 text-[10px] font-bold text-gray-600">สีดาววันหยุด <input id="calendarHolidayColorInput" type="color" value="#FF0000" onchange="setCalendarHolidayColor(this.value)" class="w-6 h-6 p-0.5 rounded-md border border-darkText bg-white cursor-pointer" aria-label="เลือกสีดาววันหยุด"></label></div>
                         <div class="flex gap-1.5 items-center">
                             <button onclick="openEventModal()" class="bg-retroPurple text-white font-bold px-2.5 py-1.5 rounded-lg border border-darkText text-[11px] flex items-center gap-1"><i class="fa-solid fa-plus"></i> ไดอารี่</button>
@@ -1307,7 +1298,7 @@
         <!-- CALCULATOR -->
         <section id="tab-calculator" class="tab-content hidden space-y-4">
             <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm">
-                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-calculator text-popBlue"></i> เครื่องคิดเลขการเงิน</h2>
+                <h2 class="text-xl font-extrabold font-cute flex items-center gap-2"><i class="fa-solid fa-calculator text-popBlue"></i> เครื่องคิดเลขการเงิน</h2><button id="trashCalculatorButton" type="button" onclick="openTrashModal()" class="page-trash-button inline-flex items-center gap-1 rounded-lg border border-darkText/50 bg-white/80 px-2 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-hotPink/10" title="เปิดถังขยะ"><i class="fa-solid fa-trash-can text-hotPink"></i><span>ถังขยะ</span><span class="page-trash-count min-w-4 rounded-full bg-hotPink px-1 text-center text-[9px] text-white">0</span></button>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-col items-center">
@@ -3130,7 +3121,7 @@
 
         function renderTrashCounts() {
             const count = (state.trash || []).length;
-            ['trashCountBills', 'trashCountReceivables', 'globalTrashCount'].forEach(id => { const el = $(id); if (el) el.innerText = count; });
+            document.querySelectorAll('.page-trash-count').forEach(el => { el.innerText = count; });
         }
         function openTrashModal() {
             renderTrashItems();
@@ -3913,57 +3904,6 @@ ${decorations.length ? `<div class="flex flex-wrap justify-center items-center g
         });
     </script>
     <script src="./office-recovery.js?v=recovery-25"></script>
-<script>
-(function initMovableTrashButton(){
-    const widget=document.getElementById('globalTrashWidget');
-    const dragHandle=document.getElementById('trashDragHandle');
-    const trashButton=document.getElementById('globalTrashButton');
-    const hideButton=document.getElementById('hideTrashButton');
-    const showButton=document.getElementById('showTrashButton');
-    if(!widget||!dragHandle||!trashButton||!hideButton||!showButton)return;
-    const positionKey='y2k_trash_button_position';
-    let pointerId=null,startX=0,startY=0,originX=0,originY=0,dragged=false;
-    function place(x,y,save=true){
-        const maxX=Math.max(0,window.innerWidth-widget.offsetWidth);
-        const maxY=Math.max(0,window.innerHeight-widget.offsetHeight);
-        x=Math.max(0,Math.min(x,maxX));y=Math.max(0,Math.min(y,maxY));
-        widget.style.left=x+'px';widget.style.top=y+'px';
-        widget.style.right='auto';widget.style.bottom='auto';
-        if(save){try{localStorage.setItem(positionKey,JSON.stringify({x,y}));}catch(e){}}
-    }
-    try{
-        const saved=JSON.parse(localStorage.getItem(positionKey)||'null');
-        if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.y))place(saved.x,saved.y,false);
-    }catch(e){}
-    dragHandle.addEventListener('pointerdown',e=>{
-        e.preventDefault();pointerId=e.pointerId;dragged=false;
-        startX=e.clientX;startY=e.clientY;
-        const rect=widget.getBoundingClientRect();originX=rect.left;originY=rect.top;
-        dragHandle.setPointerCapture(pointerId);
-    });
-    dragHandle.addEventListener('pointermove',e=>{
-        if(pointerId!==e.pointerId)return;
-        const dx=e.clientX-startX,dy=e.clientY-startY;
-        if(Math.hypot(dx,dy)>3)dragged=true;
-        if(dragged)place(originX+dx,originY+dy);
-    });
-    function endDrag(e){if(pointerId!==e.pointerId)return;pointerId=null;}
-    dragHandle.addEventListener('pointerup',endDrag);
-    dragHandle.addEventListener('pointercancel',endDrag);
-    trashButton.addEventListener('click',()=>openTrashModal());
-    hideButton.addEventListener('click',e=>{
-        e.preventDefault();e.stopPropagation();
-        widget.classList.add('hidden');showButton.classList.remove('hidden');
-    });
-    showButton.addEventListener('click',()=>{
-        showButton.classList.add('hidden');widget.classList.remove('hidden');
-    });
-    window.addEventListener('resize',()=>{
-        if(widget.classList.contains('hidden'))return;
-        const rect=widget.getBoundingClientRect();
-        place(Math.min(rect.left,window.innerWidth-widget.offsetWidth),Math.min(rect.top,window.innerHeight-widget.offsetHeight));
-    });
-})();
-</script>
+
 </body>
 </html>

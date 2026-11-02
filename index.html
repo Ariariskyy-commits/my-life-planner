@@ -2169,10 +2169,10 @@
 
                 auth.onAuthStateChanged(async user => {
                     if (user && !isAllowedUser(user)) {
-                        clearPrivateSession('บัญชีนี้ไม่มีสิทธิ์ใช้งาน กรุณาเลือกบัญชีที่ได้รับอนุญาต');
-                        setSyncStatus('บัญชีนี้ไม่มีสิทธิ์ใช้งาน');
+                        clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
+                        setSyncStatus('ไม่มีสิทธิ์เข้าใช้งานแอปนี้');
                         try { await auth.signOut(); } catch {}
-                        alert('แอปนี้อนุญาตเฉพาะ ' + ALLOWED_EMAIL);
+                        alert('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
                         return;
                     }
                     if (user) {
@@ -2211,9 +2211,9 @@
                 const result = await auth.signInWithPopup(provider);
                 if (result && result.user) {
                     if (!isAllowedUser(result.user)) {
-                        clearPrivateSession('บัญชีนี้ไม่มีสิทธิ์ใช้งาน กรุณาเลือกบัญชีที่ได้รับอนุญาต');
+                        clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
                         await auth.signOut();
-                        alert('แอปนี้อนุญาตเฉพาะ ' + ALLOWED_EMAIL);
+                        alert('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
                         return;
                     }
                     await activateAllowedUser(result.user);

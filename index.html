@@ -1152,37 +1152,13 @@
         <!-- CALENDAR -->
         <section id="tab-calendar" class="tab-content hidden space-y-4">
             
-            <!-- การ์ดอารมณ์เดือนนี้ (ดีไซน์สไตล์หน้าสัตว์เลี้ยง พร้อมตัวน้องและกล่องคำพูด) -->
-            <div class="pet-wrap">
-                <div class="pet-title-card flex items-center justify-between">
-                    <div>
-                        <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border-2 border-darkText">🗓️ อารมณ์ประจำเดือน</div>
-                        <h2 id="calendarMonthMoodTitle" class="text-xl font-extrabold font-cute mt-1">อารมณ์ประจำเดือนนี้</h2>
-                    </div>
-                    <button onclick="selectCalendarDate(null)" id="resetDateFilterBtnCalendar" class="hidden text-xs bg-gray-200 border-2 border-darkText px-3 py-1 rounded-xl font-bold">แสดงทั้งหมด</button>
+            <div class="bg-white text-darkText p-4 rounded-2xl border-2 border-darkText shadow-sm flex flex-wrap items-center justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                    <div class="inline-block bg-hotPink text-white font-bold text-[10px] px-2.5 py-1 rounded-full border-2 border-darkText">🗓️ อารมณ์ประจำเดือน</div>
+                    <h2 id="calendarMonthMoodTitle" class="text-lg font-extrabold font-cute mt-1">อารมณ์ประจำเดือนนี้</h2>
+                    <p id="calendarMonthMoodSummary" class="text-xs text-gray-600 mt-1 leading-relaxed">สรุปความทรงจำของเดือนนี้</p>
                 </div>
-
-                <div class="pet-scene" style="aspect-ratio: 16 / 7;">
-                    <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-                        <defs>
-                            <pattern id="calCheck" width="24" height="24" patternUnits="userSpaceOnUse">
-                                <rect width="24" height="24" fill="#FFFFFF"/>
-                                <rect width="12" height="24" fill="#FFD1DC" opacity=".6"/>
-                                <rect width="24" height="12" fill="#FFD1DC" opacity=".6"/>
-                            </pattern>
-                        </defs>
-                        <rect x="0" y="0" width="400" height="180" fill="#E0F7FA"/>
-                        <rect x="0" y="120" width="400" height="60" fill="#FFE0B2"/>
-                        <line x1="0" y1="120" x2="400" y2="120" stroke="#FFCC80" stroke-width="3"/>
-                        <ellipse cx="200" cy="150" rx="130" ry="18" fill="#FFCDD2" stroke="#1A1A1A" stroke-width="3"/>
-                    </svg>
-
-                    <!-- กล่องคำพูดอารมณ์ประจำเดือน (ปรับขนาดเล็กลงแล้ว) -->
-                    <div id="calendarMonthMoodSpeech" class="pet-speech">กำลังประมวลผลอารมณ์เดือนนี้... ✨</div>
-
-                    <!-- ตัวสัตว์เลี้ยงประจำหน้าปฏิทิน -->
-                    <div id="calendarMonthPetAvatar" class="pet-character" style="bottom: 22%;">🐱</div>
-                </div>
+                <button onclick="selectCalendarDate(null)" id="resetDateFilterBtnCalendar" class="hidden shrink-0 text-xs bg-gray-200 border-2 border-darkText px-3 py-2 rounded-xl font-bold">แสดงทั้งหมด</button>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">

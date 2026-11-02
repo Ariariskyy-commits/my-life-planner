@@ -2635,7 +2635,7 @@
             state.quickNoteShow = true;
             saveData(); renderQuickNotesWidget(); showToast('เพิ่มโน้ตด่วนแล้ว! 📌');
         }
-        function deleteQuickNote(id) { state.quickNotes = state.quickNotes.filter(n => n.id !== id); saveData(); renderQuickNotesWidget(); }
+        function deleteQuickNote(id) { const item=state.quickNotes.find(n=>n.id===id); if(!item)return; state.trash.unshift({id:'trash_'+Date.now(),type:'quickNote',item:JSON.parse(JSON.stringify(item)),deletedAt:new Date().toISOString()}); state.quickNotes=state.quickNotes.filter(n=>n.id!==id); saveData(); renderQuickNotesWidget(); renderTrashCounts(); showToast('ย้ายโน้ตไปถังขยะแล้ว'); }
         function toggleQuickNoteListVisibility() { state.quickNoteShow = !state.quickNoteShow; saveData(); renderQuickNotesWidget(); }
 
         function renderQuickNotesWidget() {
@@ -2909,7 +2909,11 @@
             saveData(); closeModal('transactionModal'); refreshUI();
         }
 
-        function deleteTransaction(id) { state.transactions = state.transactions.filter(t => t.id !== id); saveData(); refreshUI(); }
+        function deleteTransaction(id) {
+            const item = state.transactions.find(t => t.id === id); if (!item) return;
+            state.trash.unshift({ id:'trash_'+Date.now(), type:'transaction', item:JSON.parse(JSON.stringify(item)), deletedAt:new Date().toISOString() });
+            state.transactions = state.transactions.filter(t => t.id !== id); saveData(); refreshUI(); renderTrashCounts(); showToast('ย้ายรายการไปถังขยะแล้ว');
+        }
 
         function renderTransactions() {
             const filterType = $('finFilterType').value, search = $('finSearch').value.toLowerCase();
@@ -3124,17 +3128,17 @@
             openModal('trashModal');
         }
         function renderTrashItems() {
-            const items = state.trash || [];
-            $('trashItems').innerHTML = items.length ? items.map(entry => {
-                const isBill = entry.type === 'bill';
-                const item = entry.item || {};
-                const title = isBill ? item.title : (item.title || 'รายการเตรียมรับ');
-                const detail = isBill ? ('฿ ' + money(item.amount)) : ((item.person ? item.person + ' · ' : '') + '฿ ' + money(item.amount));
+            const labels={bill:'เตรียมจ่าย',receivable:'เตรียมรับ',transaction:'รายรับ–รายจ่าย',task:'แพลนงาน',quickNote:'โน้ตด่วน',decoration:'สติกเกอร์ปฏิทิน',calc:'ประวัติเครื่องคิดเลข'};
+            const items=state.trash||[];
+            $('trashItems').innerHTML=items.length?items.map(entry=>{
+                const item=entry.item||{};
+                const title=item.title||item.text||item.expr||item.person||item.symbol||'รายการที่ลบ';
+                const detail=(entry.type==='transaction'||entry.type==='bill'||entry.type==='receivable')?'฿ '+money(item.amount):((item.date||'')+(item.category?' · '+item.category:''));
                 return `<div class="border-2 border-darkText rounded-xl p-3 bg-offWhite flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div class="min-w-0"><div class="font-bold text-sm break-words">${esc(title)}</div><div class="text-xs text-gray-600">${isBill ? 'รายการเตรียมจ่าย' : 'รายการเตรียมรับ'} · ${esc(detail)}</div><div class="text-[10px] text-gray-400">ลบเมื่อ ${new Date(entry.deletedAt).toLocaleString('th-TH')}</div></div>
+                    <div class="min-w-0"><div class="font-bold text-sm break-words">${esc(title)}</div><div class="text-xs text-gray-600">${labels[entry.type]||'รายการ'} · ${esc(detail)}</div><div class="text-[10px] text-gray-400">ลบเมื่อ ${new Date(entry.deletedAt).toLocaleString('th-TH')}</div></div>
                     <div class="flex gap-2 shrink-0"><button type="button" onclick="restoreTrashItem('${entry.id}')" class="bg-limeGreen border-2 border-darkText rounded-lg px-3 py-1.5 text-xs font-bold">↶ กู้คืน</button><button type="button" onclick="permanentlyDeleteTrashItem('${entry.id}')" class="bg-hotPink text-white border-2 border-darkText rounded-lg px-3 py-1.5 text-xs font-bold">ลบทิ้งถาวร</button></div>
                 </div>`;
-            }).join('') : '<div class="text-center text-gray-400 py-10 text-sm">ถังขยะว่างเปล่า ✨</div>';
+            }).join(''):'<div class="text-center text-gray-400 py-10 text-sm">ถังขยะว่างเปล่า ✨</div>';
             renderTrashCounts();
         }
         function restoreTrashItem(id) {
@@ -3143,6 +3147,11 @@
             const entry = state.trash[index];
             if (entry.type === 'bill') state.bills.unshift(entry.item);
             else if (entry.type === 'receivable') { if (!Array.isArray(state.receivables)) state.receivables = []; state.receivables.unshift(entry.item); }
+            else if (entry.type === 'transaction') state.transactions.unshift(entry.item);
+            else if (entry.type === 'task') state.tasks.unshift(entry.item);
+            else if (entry.type === 'quickNote') state.quickNotes.unshift(entry.item);
+            else if (entry.type === 'decoration') { if (!Array.isArray(state.calendarDecorations)) state.calendarDecorations=[]; state.calendarDecorations.unshift(entry.item); }
+            else if (entry.type === 'calc') state.calcHistory.unshift(entry.item);
             if (entry.transaction) state.transactions.unshift(entry.transaction);
             state.trash.splice(index, 1);
             saveData(); refreshUI(); renderTrashItems(); showToast('กู้คืนรายการแล้ว 💗');
@@ -3342,9 +3351,10 @@
         }
         function updateTaskStatus(id, st) { const t = state.tasks.find(x => x.id === id); if (t) { t.status = st; saveData(); refreshUI(); } }
         function deleteTask(id) {
-            if (!confirm('ต้องการลบแพลนงานนี้ใช่หรือไม่?')) return;
+            const item = state.tasks.find(x => x.id === id); if (!item) return;
+            state.trash.unshift({ id:'trash_'+Date.now(), type:'task', item:JSON.parse(JSON.stringify(item)), deletedAt:new Date().toISOString() });
             state.tasks = state.tasks.filter(x => x.id !== id);
-            saveData(); refreshUI(); showToast('ลบแพลนงานแล้ว');
+            saveData(); refreshUI(); renderTrashCounts(); showToast('ย้ายแพลนงานไปถังขยะแล้ว');
         }
 
         function renderTasks() {
@@ -3611,8 +3621,10 @@
             saveData(); renderCalendar(); renderCalendarDecorCurrent();
         }
         function removeCalendarDecoration(id) {
-            state.calendarDecorations = (state.calendarDecorations || []).filter(x => x.id !== id);
-            saveData(); renderCalendar(); renderCalendarDecorCurrent();
+            const item=(state.calendarDecorations||[]).find(x=>x.id===id); if(!item)return;
+            state.trash.unshift({id:'trash_'+Date.now(),type:'decoration',item:JSON.parse(JSON.stringify(item)),deletedAt:new Date().toISOString()});
+            state.calendarDecorations=(state.calendarDecorations||[]).filter(x=>x.id!==id);
+            saveData(); renderCalendar(); renderCalendarDecorCurrent(); renderTrashCounts(); showToast('ย้ายสติกเกอร์ไปถังขยะแล้ว');
         }
         function renderCalendarDecorCurrent() {
             const items = (state.calendarDecorations || []).filter(x => x.date === activeCalendarDecorDate);
@@ -3722,7 +3734,7 @@ ${decorations.length ? `<div class="flex flex-wrap justify-center items-center g
             calcRender();
         }
         function clearCalcHistory() { state.calcHistory = []; saveData(); renderCalcHistory(); }
-        function deleteCalcHistory(id) { state.calcHistory = state.calcHistory.filter(h => h.id !== id); saveData(); renderCalcHistory(); }
+        function deleteCalcHistory(id) { const item=state.calcHistory.find(h=>h.id===id); if(!item)return; state.trash.unshift({id:'trash_'+Date.now(),type:'calc',item:JSON.parse(JSON.stringify(item)),deletedAt:new Date().toISOString()}); state.calcHistory=state.calcHistory.filter(h=>h.id!==id); saveData(); renderCalcHistory(); renderTrashCounts(); showToast('ย้ายประวัติไปถังขยะแล้ว'); }
 
         function saveCalcToTx(id, type) {
             const h = state.calcHistory.find(x => x.id === id);

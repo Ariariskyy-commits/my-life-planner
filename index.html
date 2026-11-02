@@ -1206,6 +1206,7 @@
                             <p class="text-xs font-bold text-retroPurple mt-0.5" id="billsTotalSummaryText">ยอดรวมที่ต้องเตรียมจ่าย: ฿ 0.00</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" onclick="openTrashModal()" class="bg-offWhite text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ถังขยะ <span id="trashCountBills" class="bg-hotPink text-white rounded-full px-1.5">0</span></button>
                             <button type="button" onclick="openBillHistoryModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติจ่ายบิล</button>
                             <button type="button" onclick="openBillModal()" class="bg-retroPurple text-white font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มบิล</button>
                         </div>
@@ -1223,6 +1224,7 @@
                             <p id="receivablesSummary" class="text-xs font-bold text-green-700 mt-0.5">ยอดเงินที่รอรับ: ฿ 0.00</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" onclick="openTrashModal()" class="bg-offWhite text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-trash-can"></i> ถังขยะ <span id="trashCountReceivables" class="bg-hotPink text-white rounded-full px-1.5">0</span></button>
                             <button type="button" onclick="openReceivableHistoryModal()" class="bg-sunnyYellow text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติรับเงิน</button>
                             <button type="button" onclick="openReceivableModal()" class="bg-limeGreen text-darkText font-bold px-3 py-1.5 rounded-xl border-2 border-darkText text-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> เพิ่มรายการเตรียมรับ</button>
                         </div>
@@ -1905,6 +1907,16 @@
         </div>
     </div>
 
+    <div id="trashModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-3">
+        <div class="bg-white text-darkText w-full max-w-2xl max-h-[85vh] overflow-hidden p-4 sm:p-5 rounded-2xl border-2 border-darkText shadow-xl flex flex-col gap-3">
+            <div class="flex items-center justify-between border-b border-darkText pb-2">
+                <div><h3 class="font-cute font-extrabold text-lg">🗑️ ถังขยะ</h3><p class="text-[10px] text-gray-500">รายการที่ลบจะพักไว้ที่นี่ จนกว่าจะกู้คืนหรือลบทิ้งถาวร</p></div>
+                <button type="button" onclick="closeModal('trashModal')" class="w-8 h-8 border border-darkText rounded-lg">✕</button>
+            </div>
+            <div id="trashItems" class="overflow-y-auto min-h-0 space-y-2"></div>
+        </div>
+    </div>
+
     <div id="toastNotification" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[10001] transition-all duration-300 opacity-0 pointer-events-none text-xs">
         <div class="bg-limeGreen text-darkText font-bold px-4 py-2.5 rounded-xl border-2 border-darkText shadow-sm flex items-center gap-2 whitespace-nowrap">
             <i class="fa-solid fa-circle-check text-base"></i>
@@ -2317,7 +2329,7 @@
         });
         function makeDefaultState() {
             return {
-                theme: 'y2k', transactions: [], bills: [], receivables: [], tasks: [], events: [], calendarDecorations: [],
+                theme: 'y2k', transactions: [], bills: [], receivables: [], trash: [], tasks: [], events: [], calendarDecorations: [],
                 calcHistory: [], categories: [...DEFAULT_CATEGORIES], receivableCategories: [...DEFAULT_RECEIVABLE_CATEGORIES], pet: makeDefaultPet(),
                 quickNotes: [], quickNoteShow: true, headerCollapsed: false
             };
@@ -2328,7 +2340,7 @@
         function scopedKeys(uid) {
             const prefix = 'y2k_user_' + uid + '_';
             return {
-                transactions: prefix+'transactions', bills: prefix+'bills', receivables: prefix+'receivables', tasks: prefix+'tasks',
+                transactions: prefix+'transactions', bills: prefix+'bills', receivables: prefix+'receivables', trash: prefix+'trash', tasks: prefix+'tasks',
                 events: prefix+'events', calendarDecorations: prefix+'calendar_decorations', calcHistory: prefix+'calchistory', pet: prefix+'pet',
                 theme: prefix+'theme', categories: prefix+'categories', receivableCategories: prefix+'receivable_categories', quickNotes: prefix+'quicknotes',
                 quickNoteShow: prefix+'quicknote_show', headerCollapsed: prefix+'header_collapsed',
@@ -2359,6 +2371,7 @@
                 transactions: readLS(keys.transactions, []),
                 bills: readLS(keys.bills, []),
                 receivables: readLS(keys.receivables, []),
+                trash: readLS(keys.trash, []),
                 tasks: readLS(keys.tasks, []),
                 events: readLS(keys.events, []),
                 calendarDecorations: readLS(keys.calendarDecorations, []),
@@ -2381,6 +2394,7 @@
                 localStorage.setItem(activeStorageKeys.transactions, JSON.stringify(state.transactions));
                 localStorage.setItem(activeStorageKeys.bills, JSON.stringify(state.bills));
                 localStorage.setItem(activeStorageKeys.receivables, JSON.stringify(state.receivables || []));
+                localStorage.setItem(activeStorageKeys.trash, JSON.stringify(state.trash || []));
                 localStorage.setItem(activeStorageKeys.tasks, JSON.stringify(state.tasks));
                 localStorage.setItem(activeStorageKeys.events, JSON.stringify(state.events));
                 localStorage.setItem(activeStorageKeys.calendarDecorations, JSON.stringify(state.calendarDecorations || []));
@@ -2541,7 +2555,7 @@
 
         function cloudPayload() {
             return {
-                transactions: state.transactions, bills: state.bills, receivables: state.receivables || [], tasks: state.tasks,
+                transactions: state.transactions, bills: state.bills, receivables: state.receivables || [], trash: state.trash || [], tasks: state.tasks,
                 events: state.events, calendarDecorations: state.calendarDecorations || [], calcHistory: state.calcHistory, categories: state.categories,
                 receivableCategories: state.receivableCategories || DEFAULT_RECEIVABLE_CATEGORIES,
                 pet: state.pet, theme: state.theme, quickNotes: state.quickNotes,
@@ -2575,6 +2589,7 @@
             state.transactions = d.transactions || [];
             state.bills = d.bills || [];
             state.receivables = d.receivables || [];
+            state.trash = d.trash || [];
             state.tasks = d.tasks || [];
             state.events = d.events || [];
             state.calendarDecorations = d.calendarDecorations || [];
@@ -2838,6 +2853,7 @@
         }
 
         function refreshUI() {
+            renderTrashCounts();
             setTheme(state.theme, false);
             $('petNameInput').value = state.pet.name;
             $('petAvatarSelect').value = state.pet.avatar;
@@ -3015,10 +3031,11 @@
             const b = state.bills.find(x => x.id === id);
             if (!b) return;
             const linkedTransaction = b.txId ? state.transactions.find(t => t.id === b.txId) : null;
-            lastDeleteUndo = { bill: JSON.parse(JSON.stringify(b)), transaction: linkedTransaction ? JSON.parse(JSON.stringify(linkedTransaction)) : null };
+            if (!Array.isArray(state.trash)) state.trash = [];
+            state.trash.unshift({ id: 'trash_' + Date.now(), type: 'bill', item: JSON.parse(JSON.stringify(b)), transaction: linkedTransaction ? JSON.parse(JSON.stringify(linkedTransaction)) : null, deletedAt: new Date().toISOString() });
             if (b.txId) state.transactions = state.transactions.filter(t => t.id !== b.txId);
             state.bills = state.bills.filter(x => x.id !== id);
-            saveData(); refreshUI(); showToast('ลบบิลแล้ว สามารถย้อนคืนได้', true);
+            saveData(); refreshUI(); renderTrashCounts(); showToast('ย้ายบิลไปถังขยะแล้ว');
         }
 
         function updateReceivableCategorySelects(selectedVal = '') {
@@ -3089,12 +3106,52 @@
 
         function deleteReceivable(id) {
             const item = (state.receivables || []).find(r => r.id === id);
-            if (!item || !confirm('ต้องการลบรายการเตรียมรับนี้ใช่หรือไม่?')) return;
+            if (!item) return;
             const linkedTransaction = item.txId ? state.transactions.find(t => t.id === item.txId) : null;
-            lastDeleteUndo = { receivable: JSON.parse(JSON.stringify(item)), transaction: linkedTransaction ? JSON.parse(JSON.stringify(linkedTransaction)) : null };
+            if (!Array.isArray(state.trash)) state.trash = [];
+            state.trash.unshift({ id: 'trash_' + Date.now(), type: 'receivable', item: JSON.parse(JSON.stringify(item)), transaction: linkedTransaction ? JSON.parse(JSON.stringify(linkedTransaction)) : null, deletedAt: new Date().toISOString() });
             if (item.txId) state.transactions = state.transactions.filter(t => t.id !== item.txId);
             state.receivables = state.receivables.filter(r => r.id !== id);
-            saveData(); refreshUI(); showToast('ลบรายการแล้ว สามารถย้อนคืนได้', true);
+            saveData(); refreshUI(); renderTrashCounts(); showToast('ย้ายรายการเตรียมรับไปถังขยะแล้ว');
+        }
+
+        function renderTrashCounts() {
+            const count = (state.trash || []).length;
+            ['trashCountBills', 'trashCountReceivables'].forEach(id => { const el = $(id); if (el) el.innerText = count; });
+        }
+        function openTrashModal() {
+            renderTrashItems();
+            openModal('trashModal');
+        }
+        function renderTrashItems() {
+            const items = state.trash || [];
+            $('trashItems').innerHTML = items.length ? items.map(entry => {
+                const isBill = entry.type === 'bill';
+                const item = entry.item || {};
+                const title = isBill ? item.title : (item.title || 'รายการเตรียมรับ');
+                const detail = isBill ? ('฿ ' + money(item.amount)) : ((item.person ? item.person + ' · ' : '') + '฿ ' + money(item.amount));
+                return `<div class="border-2 border-darkText rounded-xl p-3 bg-offWhite flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div class="min-w-0"><div class="font-bold text-sm break-words">${esc(title)}</div><div class="text-xs text-gray-600">${isBill ? 'รายการเตรียมจ่าย' : 'รายการเตรียมรับ'} · ${esc(detail)}</div><div class="text-[10px] text-gray-400">ลบเมื่อ ${new Date(entry.deletedAt).toLocaleString('th-TH')}</div></div>
+                    <div class="flex gap-2 shrink-0"><button type="button" onclick="restoreTrashItem('${entry.id}')" class="bg-limeGreen border-2 border-darkText rounded-lg px-3 py-1.5 text-xs font-bold">↶ กู้คืน</button><button type="button" onclick="permanentlyDeleteTrashItem('${entry.id}')" class="bg-hotPink text-white border-2 border-darkText rounded-lg px-3 py-1.5 text-xs font-bold">ลบทิ้งถาวร</button></div>
+                </div>`;
+            }).join('') : '<div class="text-center text-gray-400 py-10 text-sm">ถังขยะว่างเปล่า ✨</div>';
+            renderTrashCounts();
+        }
+        function restoreTrashItem(id) {
+            const index = (state.trash || []).findIndex(x => x.id === id);
+            if (index < 0) return;
+            const entry = state.trash[index];
+            if (entry.type === 'bill') state.bills.unshift(entry.item);
+            else if (entry.type === 'receivable') { if (!Array.isArray(state.receivables)) state.receivables = []; state.receivables.unshift(entry.item); }
+            if (entry.transaction) state.transactions.unshift(entry.transaction);
+            state.trash.splice(index, 1);
+            saveData(); refreshUI(); renderTrashItems(); showToast('กู้คืนรายการแล้ว 💗');
+        }
+        function permanentlyDeleteTrashItem(id) {
+            const entry = (state.trash || []).find(x => x.id === id);
+            if (!entry || !confirm('ลบรายการนี้ออกจากถังขยะถาวร? ไม่สามารถกู้คืนได้')) return;
+            state.trash = state.trash.filter(x => x.id !== id);
+            saveData(); renderTrashItems(); showToast('ลบทิ้งถาวรแล้ว');
         }
 
         function renderReceivables() {

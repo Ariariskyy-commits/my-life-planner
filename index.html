@@ -1223,6 +1223,27 @@ html body:not(.theme-dark) {
 }
 </style>
 
+<style id="calendar-cell-no-overflow-fix">
+#calendarGrid .calendar-day-cell { min-width:0 !important; overflow:hidden !important; }
+#calendarGrid .calendar-day-top { min-width:0 !important; width:100%; }
+#calendarGrid .calendar-day-stickers {
+  display:flex !important; flex-wrap:nowrap !important; align-items:center !important;
+  justify-content:flex-start !important; gap:2px !important; width:100% !important;
+  min-width:0 !important; max-width:100% !important; height:13px !important;
+  overflow:hidden !important; white-space:nowrap !important;
+}
+#calendarGrid .calendar-tiny-sticker {
+  display:inline-flex !important; flex:0 0 11px !important;
+  width:11px !important; height:11px !important; max-width:11px !important;
+  align-items:center !important; justify-content:center !important;
+  font-size:9px !important; line-height:1 !important; overflow:hidden !important;
+  white-space:nowrap !important; word-break:normal !important;
+}
+@media(max-width:640px) {
+ #calendarGrid .calendar-day-stickers { height:11px !important; }
+ #calendarGrid .calendar-tiny-sticker { flex-basis:9px !important; width:9px !important; max-width:9px !important; height:9px !important; font-size:8px !important; }
+}
+</style>
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
@@ -4102,6 +4123,16 @@ html body:not(.theme-dark) {
         }
         function changeMonth(dir) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir); renderCalendar(); }
 
+        function calendarCompactSticker(value) {
+            const raw = String(value || '').trim();
+            if (!raw) return '';
+            // Text and multi-character keyboard stickers are represented by a tiny icon
+            // in the date cell; the complete sticker remains saved and visible in its editor.
+            if (/[\p{L}\p{N}]/u.test(raw)) return '✎';
+            const units = Array.from(raw);
+            if (units.length > 4) return '✦';
+            return raw;
+        }
         function renderCalendar() {
             const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
             const englishMonth = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(year, month, 1));
@@ -4131,8 +4162,8 @@ html body:not(.theme-dark) {
                             </div>
                         </div>
                         <div class="calendar-day-stickers">
-                            ${decorations.slice(-4).map(d => d.symbol === '●' ? `<span class="calendar-tiny-mark" style="color:${d.color}">●</span>` : `<span class="calendar-tiny-sticker">${esc(d.symbol)}</span>`).join('')}
-                            ${evs.slice(0,4).map(ev => ev.sticker ? `<span class="calendar-tiny-sticker" title="${esc(ev.title)}">${esc(ev.sticker)}</span>` : `<span class="calendar-tiny-mark" style="color:${/^#[0-9A-Fa-f]{6}$/.test(ev.dotColor || '') ? ev.dotColor : '#0055FF'}" title="${esc(ev.title)}">${getCalendarMarkerGlyph(ev.markerShape || 'circle')}</span>`).join('')}
+                            ${decorations.slice(-2).map(d => d.symbol === '●' ? `<span class="calendar-tiny-mark" style="color:${d.color}">●</span>` : `<span class="calendar-tiny-sticker" title="${esc(d.symbol)}">${esc(calendarCompactSticker(d.symbol))}</span>`).join('')}
+                            ${evs.slice(0,2).map(ev => ev.sticker ? `<span class="calendar-tiny-sticker" title="${esc(ev.title)}">${esc(calendarCompactSticker(ev.sticker))}</span>` : `<span class="calendar-tiny-mark" style="color:${/^#[0-9A-Fa-f]{6}$/.test(ev.dotColor || '') ? ev.dotColor : '#0055FF'}" title="${esc(ev.title)}">${getCalendarMarkerGlyph(ev.markerShape || 'circle')}</span>`).join('')}
                             ${(decorations.length + evs.length) > 4 ? `<span class="calendar-tiny-more">+${decorations.length+evs.length-4}</span>` : ''}
                         </div>
                     </div>`;

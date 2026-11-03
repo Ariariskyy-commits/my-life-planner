@@ -4381,5 +4381,16 @@ html body:not(.theme-dark) {
     </script>
     <script src="./office-recovery.js?v=recovery-25"></script>
 
+
+    <script>
+      // Install offline app shell for previously opened devices.
+      if ('serviceWorker' in navigator && location.protocol === 'https:') {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./service-worker.js')
+            .then(reg => console.info('MY LIFE PLANNER offline support ready', reg.scope))
+            .catch(err => console.warn('Offline support registration failed:', err));
+        });
+      }
+    </script>
 </body>
 </html>

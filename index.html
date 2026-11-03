@@ -1149,7 +1149,23 @@ button:not(.tb-btn):not(.mood-btn):not(.vs-btn):not(.bn-item):not(.bn-add):activ
     -webkit-backdrop-filter: blur(12px);
 }
 
-</style></head>
+</style>
+<style id="soft-clean-background-final">
+/* Remove the old halftone dots and checkerboard texture completely. */
+html body:not(.theme-dark) {
+    background-color: #F7F4FC !important;
+    background-image:
+        radial-gradient(ellipse at 8% 0%, rgba(255,211,235,.48) 0, transparent 42%),
+        radial-gradient(ellipse at 100% 35%, rgba(207,194,255,.38) 0, transparent 46%),
+        radial-gradient(ellipse at 30% 100%, rgba(190,218,255,.30) 0, transparent 44%),
+        linear-gradient(145deg, #FBF8FF 0%, #F6F2FC 52%, #FDF7FB 100%) !important;
+    background-size: auto !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+}
+</style>
+
+</head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
     <!-- FLOATING PET & QUICK NOTES WIDGET -->

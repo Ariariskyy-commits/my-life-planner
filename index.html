@@ -1870,6 +1870,14 @@ html body:not(.theme-dark) {
                     </div>
                     <p class="mt-1 text-[10px] text-gray-500">พิมพ์สัญลักษณ์หรือเปิดแป้นอีโมจิบนมือถือ แล้วกดเพิ่ม</p>
                 </div>
+                <div class="mb-3 rounded-xl border-2 border-purple-200 bg-purple-50 p-3">
+                    <label for="calendarDecorCustomStickerInput" class="block font-bold mb-1">＋ เพิ่มสติกเกอร์จากแป้นพิมพ์</label>
+                    <div class="flex gap-2">
+                        <input id="calendarDecorCustomStickerInput" type="text" maxlength="12" placeholder="พิมพ์หรือเลือกอีโมจิ เช่น 🪄 ♡ ☕" class="min-w-0 flex-1 rounded-lg border border-purple-200 bg-white px-3 py-2 text-center text-xl" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomCalendarDecorationFromModal()}">
+                        <button type="button" onclick="addCustomCalendarDecorationFromModal()" class="shrink-0 rounded-lg bg-limeGreen px-4 py-2 font-extrabold text-darkText">＋ เพิ่ม</button>
+                    </div>
+                    <p class="mt-1 text-[10px] text-gray-500">แตะช่องเพื่อเปิดคีย์บอร์ดอีโมจิ แล้วกดเพิ่ม</p>
+                </div>
                 <div id="calendarDecorEmojiPicker" class="grid grid-cols-6 gap-2 mb-3">
                     <button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('⭐')">⭐</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('💖')">💖</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🌸')">🌸</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🎀')">🎀</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('✨')">✨</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🌈')">🌈</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('☁️')">☁️</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🍀')">🍀</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🧸')">🧸</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🐱')">🐱</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🐻')">🐻</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🎂')">🎂</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🎉')">🎉</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('📌')">📌</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('❤️')">❤️</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🔥')">🔥</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🌻')">🌻</button><button type="button" class="calendar-decor-emoji rounded-xl border border-darkText bg-offWhite p-2 text-2xl" onclick="addCalendarDecoration('🦋')">🦋</button>
                 </div>
@@ -3957,6 +3965,14 @@ html body:not(.theme-dark) {
         }
         function addCustomCalendarDecoration() {
             const input = $('calendarCustomStickerInput');
+            const symbol = (input?.value || '').trim();
+            if (!symbol) { showToast('พิมพ์หรือเลือกอีโมจิก่อนนะ'); input?.focus(); return; }
+            addCalendarDecoration(symbol);
+            input.value = '';
+            showToast('เพิ่มสติกเกอร์ลงปฏิทินแล้ว ✨');
+        }
+        function addCustomCalendarDecorationFromModal() {
+            const input = $('calendarDecorCustomStickerInput');
             const symbol = (input?.value || '').trim();
             if (!symbol) { showToast('พิมพ์หรือเลือกอีโมจิก่อนนะ'); input?.focus(); return; }
             addCalendarDecoration(symbol);

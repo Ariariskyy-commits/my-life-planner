@@ -1199,6 +1199,28 @@ html body:not(.theme-dark) {
         line-height: 9px !important;
     }
 }
+
+/* Compact label for custom typed symbols in the selected-day sticker list. */
+#calendarDecorCurrent { display:flex; flex-wrap:wrap; align-items:center; gap:5px; min-width:0; }
+#calendarDecorCurrent button {
+    display:inline-flex !important;
+    align-items:center;
+    justify-content:center;
+    max-width:110px !important;
+    min-width:0 !important;
+    max-height:32px !important;
+    overflow:hidden !important;
+    white-space:nowrap !important;
+    text-overflow:ellipsis !important;
+    font-size:13px !important;
+    line-height:16px !important;
+    padding:4px 7px !important;
+}
+#calendarDecorCurrent button small { font-size:9px !important; line-height:1 !important; }
+#calendarDecorCustomStickerInput, #calendarCustomStickerInput {
+    font-size:16px !important;
+    line-height:1.35 !important;
+}
 </style>
 
 </head>

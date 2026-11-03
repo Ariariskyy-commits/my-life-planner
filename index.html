@@ -2189,14 +2189,19 @@ html body:not(.theme-dark) {
             <form id="eventForm" onsubmit="handleSaveEvent(event)" class="space-y-3">
                 <div><label class="block font-bold mb-0.5">วันที่</label><input type="date" id="eventDate" required onchange="syncDiaryMoodForDate()" class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
                 <div id="eventMoodSection">
+                    <label class="flex items-center gap-2 font-bold mb-2 cursor-pointer">
+                        <input id="eventIncludeMood" type="checkbox" class="w-4 h-4 accent-pink-500" onchange="toggleDiaryMoodPicker()">
+                        <span>เพิ่มอารมณ์ให้โน้ตนี้ (เลือกได้ ไม่บังคับ)</span>
+                    </label>
+                    <div id="eventMoodPicker" class="hidden">
                     <label class="block font-bold mb-0.5">อารมณ์วันนี้</label>
-                    <p id="eventMoodReuseHint" class="hidden mb-1 text-[11px] text-gray-500">วันนี้เลือกอารมณ์ไว้แล้ว โน้ตนี้จะใช้อารมณ์เดิมให้อัตโนมัติ 💗</p>
                     <div class="flex justify-between gap-1 bg-offWhite p-1.5 rounded-xl border border-darkText text-base">
                         <button type="button" onclick="selectMoodEmoji('😊')" class="mood-btn p-1.5 rounded-lg border border-transparent" id="mood-😊">😊</button>
                         <button type="button" onclick="selectMoodEmoji('🥰')" class="mood-btn p-1.5 rounded-lg border border-transparent" id="mood-🥰">🥰</button>
                         <button type="button" onclick="selectMoodEmoji('😴')" class="mood-btn p-1.5 rounded-lg border border-transparent" id="mood-😴">😴</button>
                         <button type="button" onclick="selectMoodEmoji('😭')" class="mood-btn p-1.5 rounded-lg border border-transparent" id="mood-😭">😭</button>
                         <button type="button" onclick="selectMoodEmoji('😡')" class="mood-btn p-1.5 rounded-lg border border-transparent" id="mood-😡">😡</button>
+                    </div>
                     </div>
                 </div>
                 <div>
@@ -3806,23 +3811,11 @@ html body:not(.theme-dark) {
 
         let currentCalendarDate = new Date(), selectedCalendarDate = null, selectedMood = '😊', selectedEventDotColor = '#0055FF', selectedEventSticker = '', selectedEventMarkerShape = 'circle', calendarHolidayMarkerColor = '#FF0000', selectedEventPhotoBadge = '📗';
         function selectMoodEmoji(emoji) { selectedMood = emoji; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('mood-btn-selected', b.id === 'mood-' + emoji)); }
-        function syncDiaryMoodForDate() {
-            const date = $('eventDate')?.value;
-            const moodSection = $('eventMoodSection');
-            const hint = $('eventMoodReuseHint');
-            if (!date || !moodSection) return;
-            const sameDayEntry = state.events.find(item => item.date === date && item.id !== editingEventId);
-            if (!editingEventId && sameDayEntry) {
-                selectedMood = sameDayEntry.mood || '😊';
-                moodSection.classList.add('hidden');
-                hint?.classList.remove('hidden');
-            } else {
-                moodSection.classList.remove('hidden');
-                hint?.classList.add('hidden');
-                if (!editingEventId) selectedMood = '😊';
-            }
-            document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('mood-btn-selected', b.id === 'mood-' + selectedMood));
+        function toggleDiaryMoodPicker() {
+            const enabled = $('eventIncludeMood')?.checked === true;
+            $('eventMoodPicker')?.classList.toggle('hidden', !enabled);
         }
+
         function selectEventPhotoBadge(badge) {
             selectedEventPhotoBadge = ['📗','📘','📙'].includes(badge) ? badge : '📗';
             document.querySelectorAll('.event-photo-badge').forEach(button => {
@@ -3953,7 +3946,8 @@ html body:not(.theme-dark) {
             showEventPhotoPreview(null);
             const existing = editId ? state.events.find(e => e.id === editId) : null;
             selectMoodEmoji(existing?.mood || '😊');
-            syncDiaryMoodForDate();
+            $('eventIncludeMood').checked = !!existing?.mood;
+            toggleDiaryMoodPicker();
             selectEventDotColor(existing?.dotColor || '#0055FF');
             selectEventSticker(existing?.sticker || '');
             selectEventMarkerShape(existing?.markerShape || 'circle');
@@ -3991,7 +3985,7 @@ html body:not(.theme-dark) {
             const existing = state.events.find(item => item.id === eventId);
             const eventData = existing || { id: eventId, date, mood: selectedMood, title, hasPhoto: false };
             eventData.date = date;
-            eventData.mood = selectedMood;
+            eventData.mood = $('eventIncludeMood').checked ? selectedMood : '';
             eventData.dotColor = selectedEventDotColor;
             eventData.sticker = selectedEventSticker;
             eventData.markerShape = selectedEventMarkerShape;

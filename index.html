@@ -2815,8 +2815,9 @@ html body:not(.theme-dark) {
         let auth = null, db = null, currentUser = null, isFirebaseActive = false, syncTimer = null;
         let googleLoginInProgress = false;
         const ALLOWED_EMAIL = 'arisky.studio@gmail.com';
+        const OFFLINE_SESSION_KEY = 'my_life_planner_verified_offline_session_v1';
         window.getOfficeFirebaseIdToken = async function () {
-            if (!dataReady || !currentUser || !currentUser.email || currentUser.email.toLowerCase() !== ALLOWED_EMAIL) return null;
+            if (!dataReady || !currentUser || currentUser.isOfflineSession || !currentUser.email || currentUser.email.toLowerCase() !== ALLOWED_EMAIL || !navigator.onLine) return null;
             return await currentUser.getIdToken();
         };
 
@@ -2854,14 +2855,30 @@ html body:not(.theme-dark) {
         }
         async function activateAllowedUser(user) {
             if (!isAllowedUser(user)) return;
-            if (dataReady && activeStorageUid === user.uid && currentUser && currentUser.uid === user.uid) return;
+            if (dataReady && activeStorageUid === user.uid && currentUser && currentUser.uid === user.uid && !currentUser.isOfflineSession) return;
             currentUser = user;
+            try { localStorage.setItem(OFFLINE_SESSION_KEY, JSON.stringify({ uid: user.uid, email: ALLOWED_EMAIL, verifiedAt: Date.now() })); } catch (e) { console.warn('Offline session marker could not be saved:', e); }
             loadLocalForUser(user.uid);
             await migrateLegacyPhotosForUser(user.uid);
             renderAuthUI();
             refreshUI();
             hideAccessLock();
-            await pullFromCloud(user.uid);
+            if (navigator.onLine) await pullFromCloud(user.uid);
+            else setSyncStatus('โหมดออฟไลน์ · บันทึกข้อมูลไว้ในเครื่อง');
+        }
+
+        function restoreVerifiedOfflineSession() {
+            if (navigator.onLine) return false;
+            let saved = null;
+            try { saved = JSON.parse(localStorage.getItem(OFFLINE_SESSION_KEY) || 'null'); } catch {}
+            if (!saved || saved.email !== ALLOWED_EMAIL || typeof saved.uid !== 'string' || !saved.uid) return false;
+            currentUser = { uid: saved.uid, email: ALLOWED_EMAIL, displayName: 'บัญชีที่เคยอนุญาต', isOfflineSession: true };
+            loadLocalForUser(saved.uid);
+            renderAuthUI();
+            refreshUI();
+            hideAccessLock();
+            setSyncStatus('โหมดออฟไลน์ · ข้อมูลส่วนตัวอยู่ในเครื่อง');
+            return true;
         }
 
         async function initFirebase() {
@@ -2880,6 +2897,7 @@ html body:not(.theme-dark) {
 
                 auth.onAuthStateChanged(async user => {
                     if (user && !isAllowedUser(user)) {
+                        try { localStorage.removeItem(OFFLINE_SESSION_KEY); } catch {}
                         clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
                         setSyncStatus('ไม่มีสิทธิ์เข้าใช้งานแอปนี้');
                         try { await auth.signOut(); } catch {}
@@ -2889,8 +2907,11 @@ html body:not(.theme-dark) {
                     if (user) {
                         await activateAllowedUser(user);
                     } else {
-                        clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
-                        setSyncStatus('ออกจากระบบแล้ว · ข้อมูลถูกล็อกไว้');
+                        if (!restoreVerifiedOfflineSession()) {
+                            try { localStorage.removeItem(OFFLINE_SESSION_KEY); } catch {}
+                            clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
+                            setSyncStatus(navigator.onLine ? 'ออกจากระบบแล้ว · ข้อมูลถูกล็อกไว้' : 'ออฟไลน์ · ยังไม่พบบัญชีที่เคยอนุญาตบนอุปกรณ์นี้');
+                        }
                     }
                 });
                 setSyncStatus('กำลังตรวจสอบบัญชี Google…');
@@ -2937,6 +2958,7 @@ html body:not(.theme-dark) {
 
         async function logoutGoogle() {
             if (!auth) return;
+            try { localStorage.removeItem(OFFLINE_SESSION_KEY); } catch {}
             clearPrivateSession('แอปนี้สงวนสิทธิ์สำหรับบัญชีที่ได้รับอนุญาตเท่านั้น หากใช้อีเมลอื่นจะไม่สามารถเข้าใช้งานหรือดูข้อมูลส่วนตัวได้');
             try { await auth.signOut(); showToast('ออกจากระบบแล้ว'); } catch {
                 showAccessLock('ข้อมูลถูกล็อกไว้ กรุณาตรวจสอบสถานะการเข้าสู่ระบบ');
@@ -2945,6 +2967,7 @@ html body:not(.theme-dark) {
 
         function scheduleCloudSave() {
             if (!dataReady || !isAllowedUser(currentUser) || !activeStorageUid || activeStorageUid !== currentUser.uid || !db) return;
+            if (!navigator.onLine || currentUser.isOfflineSession) { setSyncStatus('บันทึกในเครื่องแล้ว · รอเชื่อมต่ออินเทอร์เน็ตเพื่อซิงก์'); return; }
             clearTimeout(syncTimer);
             setSyncStatus('กำลังซิงก์...');
             syncTimer = setTimeout(pushToCloud, 800);

@@ -2152,9 +2152,18 @@ html body:not(.theme-dark) {
                     <div id="eventStickerPicker" class="grid grid-cols-7 gap-1.5">
                         <button type="button" data-sticker="" onclick="selectEventSticker('')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">ไม่มี</button><button type="button" data-sticker="🌸" onclick="selectEventSticker('🌸')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🌸</button><button type="button" data-sticker="⭐" onclick="selectEventSticker('⭐')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">⭐</button><button type="button" data-sticker="💖" onclick="selectEventSticker('💖')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">💖</button><button type="button" data-sticker="✨" onclick="selectEventSticker('✨')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">✨</button><button type="button" data-sticker="🌈" onclick="selectEventSticker('🌈')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🌈</button><button type="button" data-sticker="☁️" onclick="selectEventSticker('☁️')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">☁️</button><button type="button" data-sticker="🍀" onclick="selectEventSticker('🍀')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🍀</button><button type="button" data-sticker="🎀" onclick="selectEventSticker('🎀')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🎀</button><button type="button" data-sticker="🧸" onclick="selectEventSticker('🧸')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🧸</button><button type="button" data-sticker="🐻" onclick="selectEventSticker('🐻')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🐻</button><button type="button" data-sticker="🐱" onclick="selectEventSticker('🐱')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🐱</button><button type="button" data-sticker="🐰" onclick="selectEventSticker('🐰')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🐰</button><button type="button" data-sticker="🍓" onclick="selectEventSticker('🍓')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🍓</button><button type="button" data-sticker="🍒" onclick="selectEventSticker('🍒')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🍒</button><button type="button" data-sticker="🌷" onclick="selectEventSticker('🌷')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🌷</button><button type="button" data-sticker="🦋" onclick="selectEventSticker('🦋')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🦋</button><button type="button" data-sticker="🎧" onclick="selectEventSticker('🎧')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🎧</button><button type="button" data-sticker="☀️" onclick="selectEventSticker('☀️')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">☀️</button><button type="button" data-sticker="🌙" onclick="selectEventSticker('🌙')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🌙</button><button type="button" data-sticker="🔥" onclick="selectEventSticker('🔥')" class="event-sticker-btn min-w-0 aspect-square rounded-lg border border-darkText bg-offWhite text-lg flex items-center justify-center">🔥</button>
                     </div>
-                    <p class="text-[10px] text-gray-500 mt-1">เลือกสติกเกอร์ให้แต่ละโน้ตได้ ปฏิทินจะแสดงสติกเกอร์แทนจุดสี</p>
+                    <div class="mt-3 rounded-xl border border-purple-200 bg-purple-50 p-2.5">
+                        <label for="calendarCustomStickerInput" class="block font-bold mb-1">เพิ่มสติกเกอร์จากแป้นพิมพ์</label>
+                        <div class="flex gap-2">
+                            <input id="calendarCustomStickerInput" type="text" maxlength="12" placeholder="พิมพ์อีโมจิหรือสัญลักษณ์ เช่น 🪄 ♡ ☕" class="min-w-0 flex-1 rounded-lg border border-purple-200 bg-white px-3 py-2 text-center text-xl" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomCalendarDecoration()}">
+                            <button type="button" onclick="addCustomCalendarDecoration()" class="shrink-0 rounded-lg bg-limeGreen px-4 py-2 font-extrabold text-darkText">＋ เพิ่ม</button>
+                        </div>
+                        <p class="mt-1 text-[10px] text-gray-500">กดช่องแล้วเลือกอีโมจิจากคีย์บอร์ดมือถือได้เลย</p>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-1">เลือกสติกเกอร์ได้หลายชิ้น และแตะสติกเกอร์ด้านล่างเพื่อลบ</p>
                 </div>
                 <div><label class="block font-bold mb-0.5">หัวข้อโน้ต</label><input type="text" id="eventTitle" placeholder="เช่น วันนี้มีความสุข 🌸" required class="w-full bg-offWhite border border-darkText rounded-lg px-2.5 py-1.5 outline-none"></div>
+                <div><label class="block font-bold mb-0.5">ข้อความบันทึก</label><textarea id="eventContent" rows="4" placeholder="เขียนรายละเอียด ความทรงจำ หรือสิ่งที่อยากจดจำในวันนี้..." class="w-full resize-y bg-offWhite border border-darkText rounded-lg px-3 py-2 outline-none"></textarea></div>
                 <div>
                     <label class="block font-bold mb-0.5">แนบรูป</label>
                     <label class="flex flex-col items-center justify-center w-full p-3 bg-offWhite border border-dashed border-darkText rounded-xl cursor-pointer text-center">
@@ -2192,6 +2201,7 @@ html body:not(.theme-dark) {
                 <button onclick="closeModal('viewEventModal')" class="w-7 h-7 bg-offWhite border border-darkText rounded-lg font-bold">✕</button>
             </div>
             <h3 id="viewEventTitle" class="font-cute font-extrabold text-lg text-popBlue"></h3>
+            <div id="viewEventContent" class="hidden whitespace-pre-wrap break-words rounded-xl bg-offWhite p-3 text-sm leading-relaxed"></div>
             <div id="viewEventPhotoContainer" class="hidden"><img id="viewEventPhoto" class="w-full max-h-56 object-cover rounded-xl border border-darkText"></div>
             <p id="viewEventPhotoNote" class="hidden text-[10px] text-gray-500"></p>
             <div class="pt-2 border-t border-darkText flex gap-2">
@@ -3865,6 +3875,7 @@ html body:not(.theme-dark) {
             selectEventPhotoBadge(existing?.photoBadge || '📗');
             $('eventDate').value = existing?.date || presetDate || localDateKey();
             $('eventTitle').value = existing?.title || '';
+            $('eventContent').value = existing?.content || '';
             const heading = $('eventModal').querySelector('h3');
             if (heading) heading.innerText = existing ? '✏️ แก้ไขไดอารี่' : '📸 บันทึกไดอารี่';
             $('eventSubmitBtn').innerText = existing ? 'บันทึกการแก้ไข' : 'บันทึก';
@@ -3889,6 +3900,7 @@ html body:not(.theme-dark) {
             e.preventDefault();
             const date = $('eventDate').value;
             const title = $('eventTitle').value.trim();
+            const content = $('eventContent').value.trim();
             if (!date || !title) return;
             const eventId = editingEventId || ('ev_' + Date.now());
             const existing = state.events.find(item => item.id === eventId);
@@ -3900,6 +3912,7 @@ html body:not(.theme-dark) {
             eventData.markerShape = selectedEventMarkerShape;
             eventData.photoBadge = selectedEventPhotoBadge || '📗';
             eventData.title = title;
+            eventData.content = content;
             try {
                 if (selectedEventPhotoData) {
                     await savePhotoLocal(eventId, selectedEventPhotoData, false);
@@ -3937,10 +3950,18 @@ html body:not(.theme-dark) {
             openModal('calendarDecorModal');
         }
         function addCalendarDecoration(symbol) {
-            if (!activeCalendarDecorDate) return;
+            if (!activeCalendarDecorDate || !symbol) return;
             state.calendarDecorations = state.calendarDecorations || [];
             state.calendarDecorations.push({ id:'cd_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), date:activeCalendarDecorDate, symbol, color:$('calendarDecorColor').value || '#FF007F' });
             saveData(); renderCalendar(); renderCalendarDecorCurrent();
+        }
+        function addCustomCalendarDecoration() {
+            const input = $('calendarCustomStickerInput');
+            const symbol = (input?.value || '').trim();
+            if (!symbol) { showToast('พิมพ์หรือเลือกอีโมจิก่อนนะ'); input?.focus(); return; }
+            addCalendarDecoration(symbol);
+            input.value = '';
+            showToast('เพิ่มสติกเกอร์ลงปฏิทินแล้ว ✨');
         }
         function removeCalendarDecoration(id) {
             const item=(state.calendarDecorations||[]).find(x=>x.id===id); if(!item)return;
@@ -3958,6 +3979,8 @@ html body:not(.theme-dark) {
             const ev = state.events.find(e => e.id === eventId);
             if (!ev) return;
             $('viewEventMood').innerText = ev.mood || '😊'; $('viewEventDate').innerText = ev.date; $('viewEventTitle').innerText = ev.title;
+            $('viewEventContent').textContent = ev.content || '';
+            $('viewEventContent').classList.toggle('hidden', !ev.content);
             $('viewEventPhotoContainer').classList.add('hidden');
             $('viewEventPhotoNote').classList.add('hidden');
             $('viewEventPhoto').removeAttribute('src');

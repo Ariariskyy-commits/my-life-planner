@@ -1165,6 +1165,42 @@ html body:not(.theme-dark) {
 }
 </style>
 
+
+<style id="calendar-custom-sticker-size-fix">
+/* Keep user-entered keyboard stickers compact inside small calendar cells. */
+#calendarGrid .calendar-day-stickers {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    max-height: 14px !important;
+    overflow: hidden !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+}
+#calendarGrid .calendar-tiny-sticker {
+    display: inline-block !important;
+    flex: 0 1 auto !important;
+    max-width: 22px !important;
+    max-height: 12px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: clip !important;
+    overflow-wrap: normal !important;
+    word-break: keep-all !important;
+    font-size: 9px !important;
+    line-height: 10px !important;
+    vertical-align: middle !important;
+}
+@media (max-width: 640px) {
+    #calendarGrid .calendar-day-stickers { max-height: 12px !important; }
+    #calendarGrid .calendar-tiny-sticker {
+        max-width: 17px !important;
+        max-height: 10px !important;
+        font-size: 8px !important;
+        line-height: 9px !important;
+    }
+}
+</style>
+
 </head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 

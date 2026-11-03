@@ -778,7 +778,130 @@
         @media (prefers-reduced-motion: reduce) {
             .glass-press { transition: none !important; }
         }
-    </style>
+    
+
+    /* Calculator visual refresh */
+    /* Scoped exclusively to the calculator keypad; existing calculator logic is untouched. */
+        #tab-calculator > .grid > div:first-child > div {
+            background: linear-gradient(145deg, #fff 0%, #faf7ff 52%, #f2ebff 100%) !important;
+            border: 1px solid #e7dcff !important;
+            border-radius: 22px !important;
+            padding: 16px !important;
+            box-shadow:
+                0 12px 26px rgba(128, 92, 190, .13),
+                0 3px 8px rgba(128, 92, 190, .07),
+                inset 0 1px 0 rgba(255, 255, 255, .95) !important;
+        }
+
+        #tab-calculator #calcScreen {
+            min-height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            background: linear-gradient(145deg, #242229 0%, #17161c 100%) !important;
+            color: #CCFF00 !important;
+            border: 1px solid rgba(255, 255, 255, .12) !important;
+            border-radius: 15px !important;
+            padding: 12px 16px !important;
+            box-shadow:
+                inset 0 3px 8px rgba(0, 0, 0, .28),
+                0 3px 8px rgba(50, 35, 75, .10) !important;
+            letter-spacing: .02em;
+        }
+
+        #tab-calculator #calcScreen + .grid button {
+            min-height: 42px;
+            border: 1px solid rgba(215, 202, 239, .9) !important;
+            border-radius: 14px !important;
+            padding: 10px 8px !important;
+            background: linear-gradient(180deg, #fff 0%, #fbf9ff 100%) !important;
+            color: #292536 !important;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow:
+                0 4px 0 rgba(204, 190, 230, .58),
+                0 7px 13px rgba(119, 89, 163, .10),
+                inset 0 1px 0 rgba(255, 255, 255, .98) !important;
+            transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+        }
+
+        #tab-calculator #calcScreen + .grid button[onclick^="calcClear"] {
+            background: linear-gradient(180deg, #ff58b2 0%, #f00083 100%) !important;
+            color: #fff !important;
+            border-color: #f7a2d0 !important;
+            box-shadow:
+                0 4px 0 #c90069,
+                0 8px 14px rgba(240, 0, 131, .20),
+                inset 0 1px 0 rgba(255, 255, 255, .42) !important;
+        }
+
+        #tab-calculator #calcScreen + .grid button[onclick="calcAppend('%')"] {
+            background: linear-gradient(180deg, #f4f2f8 0%, #e5e1ed 100%) !important;
+            color: #484354 !important;
+            border-color: #d8d2e4 !important;
+            box-shadow:
+                0 4px 0 #cbc5d7,
+                0 7px 12px rgba(80, 70, 105, .09),
+                inset 0 1px 0 rgba(255, 255, 255, .95) !important;
+        }
+
+        #tab-calculator #calcScreen + .grid button[onclick="calcAppend('/')"],
+        #tab-calculator #calcScreen + .grid button[onclick="calcAppend('*')"],
+        #tab-calculator #calcScreen + .grid button[onclick="calcAppend('-')"],
+        #tab-calculator #calcScreen + .grid button[onclick="calcAppend('+')"] {
+            background: linear-gradient(180deg, #fff06a 0%, #ffd500 100%) !important;
+            color: #302900 !important;
+            border-color: #f4d44c !important;
+            box-shadow:
+                0 4px 0 #d5ae00,
+                0 8px 13px rgba(224, 183, 0, .17),
+                inset 0 1px 0 rgba(255, 255, 255, .72) !important;
+        }
+
+        #tab-calculator #calcScreen + .grid button[onclick="calcCalculate()"] {
+            background: linear-gradient(160deg, #5d9bff 0%, #1763f5 58%, #0750df 100%) !important;
+            color: #fff !important;
+            border-color: #8db7ff !important;
+            border-radius: 15px !important;
+            font-size: 20px !important;
+            box-shadow:
+                0 4px 0 #0644bf,
+                0 9px 16px rgba(0, 85, 255, .22),
+                inset 0 1px 0 rgba(255, 255, 255, .48) !important;
+        }
+
+        #tab-calculator #calcScreen + .grid button:hover {
+            filter: brightness(1.025);
+            transform: translateY(-2px);
+        }
+
+        #tab-calculator #calcScreen + .grid button:active {
+            transform: translateY(2px) scale(.985);
+            box-shadow: 0 1px 0 rgba(150, 130, 180, .45), inset 0 2px 5px rgba(70, 50, 100, .08) !important;
+        }
+
+        @media (max-width: 480px) {
+            #tab-calculator > .grid > div:first-child > div {
+                padding: 12px !important;
+                border-radius: 19px !important;
+            }
+            #tab-calculator #calcScreen + .grid {
+                gap: 7px;
+            }
+            #tab-calculator #calcScreen + .grid button {
+                min-height: 40px;
+                padding: 9px 5px !important;
+                border-radius: 12px !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #tab-calculator #calcScreen + .grid button {
+                transition: none;
+            }
+        }
+
+</style>
     <link rel="stylesheet" href="./office.css?v=pet-bubble-16">
 
 <style id="mobile-compact-finance-cards">

@@ -4133,6 +4133,14 @@ html body:not(.theme-dark) {
             if (units.length > 4) return '✦';
             return raw;
         }
+        // Keep long typed labels out of tiny calendar cells; full text remains saved.
+        function calendarStickerPreview(value) {
+            const str = String(value || '').trim();
+            if (!str) return '';
+            const chars = Array.from(str);
+            const emojiOnly = /^[\p{Extended_Pictographic}\uFE0F\u200D]+$/u.test(str);
+            return (!emojiOnly && chars.length > 2) || chars.length > 4 ? '✎' : str;
+        }
         function renderCalendar() {
             const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
             const englishMonth = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(year, month, 1));

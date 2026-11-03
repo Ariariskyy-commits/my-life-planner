@@ -1102,6 +1102,53 @@
  .calendar-weekdays span { min-height:39px; padding:4px 1px; font-size:12px; border-radius:6px 6px 0 0; }
  .calendar-weekdays small { font-size:7px; }
 }
+
+
+/* ===== Soft pastel background + soft 3D buttons (visual only) ===== */
+body:not(.theme-dark) {
+    --bg-color: #F7F2FF;
+    --check-a: rgba(255,255,255,.18);
+    --check-b: #F7F2FF;
+    --dot-color: rgba(157,0,255,.035);
+    --glow-1: rgba(255,190,224,.30);
+    --glow-2: rgba(177,194,255,.34);
+    background-color: #F7F2FF !important;
+    background-image:
+        radial-gradient(ellipse at 8% 0%, rgba(255,211,235,.72) 0, transparent 38%),
+        radial-gradient(ellipse at 100% 35%, rgba(207,194,255,.55) 0, transparent 42%),
+        radial-gradient(ellipse at 30% 100%, rgba(190,218,255,.42) 0, transparent 40%),
+        linear-gradient(145deg, #FBF7FF 0%, #F5F0FF 48%, #FDF4FA 100%) !important;
+    background-attachment: fixed !important;
+}
+body.theme-dark {
+    background-image: none !important;
+}
+
+/* General buttons: soften the hard black edges and heavy drop shadows,
+   while preserving each button's existing accent/background color and handlers. */
+button:not(.tb-btn):not(.mood-btn):not(.vs-btn):not(.bn-item):not(.bn-add) {
+    border-color: rgba(151,132,190,.42) !important;
+    border-radius: 16px;
+    box-shadow:
+        0 3px 0 rgba(151,132,190,.20),
+        0 7px 16px rgba(106,91,145,.10),
+        inset 0 1px 0 rgba(255,255,255,.48) !important;
+    transition: transform .16s ease, box-shadow .18s ease, filter .18s ease;
+}
+button:not(.tb-btn):not(.mood-btn):not(.vs-btn):not(.bn-item):not(.bn-add):active {
+    transform: translateY(2px) scale(.985);
+    box-shadow: 0 1px 2px rgba(106,91,145,.12), inset 0 2px 5px rgba(80,65,120,.08) !important;
+}
+
+/* Bottom navigation: soft blue-lilac gradient like the visual reference. */
+.bottom-nav {
+    background: linear-gradient(110deg, #A9C8FF 0%, #B9B5FF 48%, #D9B7F4 100%) !important;
+    border: 2px solid rgba(255,255,255,.68) !important;
+    box-shadow: 0 9px 24px rgba(111,119,190,.22), inset 0 1px 0 rgba(255,255,255,.75) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
 </style></head>
 <body class="theme-y2k min-h-screen flex flex-col relative">
 
